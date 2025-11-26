@@ -1,0 +1,20 @@
+{
+  "register_vote": "Regístrate para votar",
+  "register_text1": "El registro de votantes toma alrededor de dos minutos o menos.",
+  "register_text2": "Estamos aquí para ayudarte con todos los pasos hasta el Día de las Elecciones",
+  "email": "Correo electrónico",
+  "zip": "Código ZIP",
+  "register": "Registrarse",
+  "accept": "Al continuar, aceptas la Política de Privacidad de Rock the Vote y aceptas recibir correos electrónicos ocasionales con recordatorios electorales. Puedes darte de baja en cualquier momento.",
+  "registered": "¿Ya estás registrado? Continúa para configurar todo y ayudarte en cada paso del proceso de votación.",
+  "continue": "Continuar",
+  "note": "Nota: Algunos estados ofrecen registro de votantes en línea. ",
+  "learn_more": "Aprende más.",
+  "living_abroad": "¿Ciudadano estadounidense viviendo en el extranjero o miembro de las fuerzas armadas? Solicita tu boleta con ",
+  "overseas": "Overseas Vote.",
+  "return": "Regresar",
+  "home": "Inicio",
+  "terms": "Términos",
+  "policy": "Política de Privacidad",
+  "shortcode": "Código corto"
+}

@@ -1,0 +1,20 @@
+{
+  "register_vote": "Register to Vote",
+  "register_text1": "Voter registration takes about two minutes or less.",
+  "register_text2": "We’re here to help you through all the steps from there to Election Day",
+  "email": "Email address",
+  "zip": "ZIP Code",
+  "register": "Register",
+  "accept": "By continuing, you accept Rock the Vote’s Privacy Policy, and agree to receive occasional election reminder emails from Rock the Vote. You can opt out from emails at any time.",
+  "registered": "Already registered? Continue to get set up for us to help you through all steps to voting.",
+  "continue": "Continue",
+  "note": "Note: Some states offer online voter registration. ",
+  "learn_more": "Learn more.",
+  "living_abroad": "U.S. citizen living abroad or uniformed services member? Request your ballot with ",
+  "overseas": "Overseas Vote",
+  "return": "Return",
+  "home": "Home",
+  "terms": "Terms",
+  "policy": "Privacy Policy",
+  "shortcode": "Shortcode"
+}
