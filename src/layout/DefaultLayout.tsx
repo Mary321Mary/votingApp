@@ -1,29 +1,49 @@
-import React, { ReactNode } from "react";
-import { View, Text } from "react-native";
+import React, { ReactNode, useContext } from "react";
+import { View, ScrollView } from "react-native";
 import { StyleSheet } from "react-native";
-import { COLORS } from "@/styles/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Footer from "@/components/modules/Footer";
+import Spinner from "@/components/modules/Spinner";
+import { ThemeContext } from "@/styles/ThemeProvider";
 
-const DefaultLayout = ({ children }: { children: ReactNode }) => (
-  <React.Suspense
-    fallback={
-      <View style={styles.container}>
-        <Text style={styles.text}>Loading…</Text>
-      </View>
-    }
-  >
-    {children}
-  </React.Suspense>
-);
+const DefaultLayout = ({ children }: { children: ReactNode }) => {
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  text: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
-  },
-});
+  return (
+    <React.Suspense
+      fallback={
+        <View style={styles.container}>
+          <Spinner />
+        </View>
+      }
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {children}
+          <Footer />
+        </ScrollView>
+      </SafeAreaView>
+    </React.Suspense>
+  )
+};
+
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      fontWeight: "regular",
+    },
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.white,
+    },
+    scrollContent: {
+      alignItems: "center",
+      paddingBottom: 40,
+    },
+  });
 
 export default DefaultLayout;

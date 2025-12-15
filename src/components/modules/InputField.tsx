@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, TextInput, Text } from "react-native";
 import { StyleSheet } from "react-native";
-import { COLORS } from "@/styles/colors";
+import HelpTooltip from "./HelpTooltip";
+import { ThemeContext } from "@/styles/ThemeProvider";
 
 interface InputFieldProp {
   label: string;
@@ -11,6 +12,7 @@ interface InputFieldProp {
   disabled?: boolean;
   numeric?: boolean;
   errorMessage?: string;
+  helpText?: string;
   onChangeText: (text: string) => void;
 }
 
@@ -22,57 +24,65 @@ const InputField = ({
   disabled = false,
   errorMessage = "",
   numeric = false,
+  helpText = "",
   onChangeText,
-}: InputFieldProp) => (
-  <View style={styles.inputContainer}>
-    <Text style={styles.inputLabel}>
-      {label}
-      {required && <Text style={styles.requiredStar}> *</Text>}
-    </Text>
-    {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
-    <TextInput
-      style={[styles.textInput, errorMessage && styles.inputError]}
-      placeholder={placeholder}
-      placeholderTextColor={COLORS.textSecondary}
-      secureTextEntry={secureTextEntry}
-      disableFullscreenUI={disabled}
-      keyboardType={numeric ? "number-pad" : "default"}
-      onChangeText={onChangeText}
-    />
-  </View>
-);
+}: InputFieldProp) => {
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
 
-const styles = StyleSheet.create({
-  inputContainer: {
-    marginTop: 10,
-    flex: 1,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.textSecondary,
-    marginBottom: 5,
-  },
-  requiredStar: {
-    color: COLORS.secondary,
-  },
-  textInput: {
-    height: 45,
-    borderColor: COLORS.borderColor,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    fontSize: 16,
-    backgroundColor: COLORS.white,
-  },
-  inputError: {
-    borderColor: COLORS.secondary,
-  },
-  errorText: {
-    color: COLORS.secondary,
-    fontSize: 12,
-    marginTop: 5,
-  },
-});
+  return (
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>
+        {label}
+        {required && <Text style={styles.requiredStar}> *</Text>} {helpText && <HelpTooltip text={helpText} />}
+      </Text>
+      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+      <TextInput
+        style={[styles.textInput, errorMessage && styles.inputError]}
+        placeholder={placeholder}
+        secureTextEntry={secureTextEntry}
+        disableFullscreenUI={disabled}
+        keyboardType={numeric ? "number-pad" : "default"}
+        onChangeText={onChangeText}
+      />
+    </View>
+  )
+};
+
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    inputContainer: {
+      marginTop: 10,
+      flex: 1,
+    },
+    inputLabel: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      marginBottom: 5,
+      color: theme.textPrimary,
+    },
+    requiredStar: {
+      color: theme.secondary,
+    },
+    textInput: {
+      height: 45,
+      borderColor: theme.borderColor,
+      borderWidth: 1,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      backgroundColor: theme.white,
+    },
+    inputError: {
+      borderColor: theme.secondary,
+    },
+    errorText: {
+      color: theme.secondary,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 12,
+      marginTop: 5,
+    },
+  });
 
 export default InputField;

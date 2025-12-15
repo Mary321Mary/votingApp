@@ -5,4 +5,4 @@ export const AUTH_REFRESH = '/auth/refresh';
 export const AUTH_UPDATE_ME = '/auth/me/update';
 
 export const EMAIL_ZIP = '/submit_email_zip';
-export const UI_CONFIG = 'fetch_ui_configuration';
+export const UI_CONFIG = '/fetch_ui_configuration?partner_id=1';

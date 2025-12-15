@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import Header from "@/components/modules/Header";
-import { COLORS } from "@/styles/colors";
+import { ThemeContext } from "@/styles/ThemeProvider";
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -19,6 +18,8 @@ type RegisterScreenNavigation = NativeStackNavigationProp<
 >;
 
 export default function RegisterScreen() {
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
   const { t } = useTranslation();
   const navigation = useNavigation<RegisterScreenNavigation>();
   const route = useRoute<any>();
@@ -44,7 +45,7 @@ export default function RegisterScreen() {
   }, [state]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <>
       <Header text={title} />
       <View style={styles.box}>
         {isSuccess ? (
@@ -76,45 +77,47 @@ export default function RegisterScreen() {
       >
         <Text style={styles.buttonText}>{t("return")}</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    flexGrow: 1,
-    backgroundColor: COLORS.white,
-  },
-  box: {
-    marginVertical: 20,
-    padding: 15,
-    backgroundColor: COLORS.background,
-    borderRadius: 10,
-  },
-  text: {
-    fontSize: 16,
-    marginBottom: 6,
-    color: COLORS.textPrimary,
-  },
-  bold: {
-    fontWeight: "700",
-  },
-  errorText: {
-    color: COLORS.secondary,
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: COLORS.primary,
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-});
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    box: {
+      marginVertical: 20,
+      padding: 15,
+      backgroundColor: theme.background,
+      borderRadius: 10,
+    },
+    text: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      marginBottom: 6,
+      color: theme.textPrimary,
+    },
+    bold: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontWeight: "700",
+    },
+    errorText: {
+      color: theme.secondary,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 12,
+      marginBottom: 6,
+    },
+    button: {
+      backgroundColor: theme.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 15,
+      borderRadius: 5,
+      marginLeft: 10,
+      height: 45,
+      justifyContent: "center",
+    },
+    buttonText: {
+      color: theme.white,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      fontWeight: "600",
+    },
+  });

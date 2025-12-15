@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Inter/Inter-VariableFont_opsz_wght.ttf",
+      "sha1": "ee5c2e22ffeddefc433c9aa4c76779bb73a5c682"
+    },
+    {
+      "path": "src/assets/fonts/Times/times.ttf",
+      "sha1": "b2e16b63f0047f4096ed5bbc3b691c44be7b3fc7"
+    }
+  ]
+}

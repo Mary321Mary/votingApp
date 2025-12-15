@@ -37,12 +37,12 @@ export function register(
 }
 
 export function refreshToken(
-  refreshToken: string,
+  refreshTokenValue: string,
   headers: Record<string, string> = {},
 ) {
   return HttpClient.Client.post<{ refresh_token: string }, AuthData>(
     ENDPOINTS.AUTH_REFRESH,
-    { refresh_token: refreshToken },
+    { refresh_token: refreshTokenValue },
     headers,
   );
 }
@@ -76,7 +76,19 @@ export function submitEmailZip(
 }
 
 export function fetchUIConfiguration(headers: Record<string, string> = {}) {
-  return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
+  // return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
+  return {
+    data: {
+      "display_locale_switcher": "true",
+      "supported_locales": ["EN- US", "ES"],
+      "urls": {
+        "homepage": "https://register.rockthevote.org/",
+        "terms": "https://www.rockthevote.org/terms",
+        "privacy": "https://www.rockthevote.org/privacy-policy/",
+        "shortcode": "https://bitly.com/1234567"
+      }
+    }
+  };
 }
 
 export async function submitEmailZipFake(

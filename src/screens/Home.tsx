@@ -1,31 +1,33 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Dimensions,
   StyleSheet,
-  ScrollView,
   Linking,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { COLORS } from "@/styles/colors";
 import InputField from "@/components/modules/InputField";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { submitEmailZipFake } from "@/utils/api";
 import { SubmitEmailZipResponse } from "@/utils/types";
 import Header from "@/components/modules/Header";
-import Footer from "@/components/modules/Footer";
 import Config from "react-native-config";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import { ThemeContext } from "@/styles/ThemeProvider";
 
 const { width } = Dimensions.get("window");
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
 const HomeScreen = ({ navigation }: HomeScreenProps) => {
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
   const { t } = useTranslation();
+  const { config } = useUIConfig();
+  const policyUrl = config?.urls?.privacy || '';
 
   const [email, setEmail] = useState("");
   const [zipCode, setZipCode] = useState("");
@@ -80,179 +82,171 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Header text={t("register_vote")} />
-        <View style={styles.card}>
-          <Text style={styles.instructionText}>{t("register_text1")}</Text>
-          <Text style={[styles.instructionText, styles.mbLarge]}>
-            {t("register_text2")}
-          </Text>
+    <>
+      <Header text={t("register_vote")} />
+      <View style={styles.card}>
+        <Text style={styles.instructionText}>{t("register_text1")}</Text>
+        <Text style={[styles.instructionText, styles.mbLarge]}>
+          {t("register_text2")}
+        </Text>
+        <InputField
+          label={t("email")}
+          placeholder="you@example.com"
+          required
+          disabled={isLoading}
+          errorMessage={errors.email}
+          helpText="We will email you a copy of your voter registration form"
+          onChangeText={handleEmailChange}
+        />
+        <View style={styles.zipCodeRow}>
           <InputField
-            label={t("email")}
-            placeholder="you@example.com"
+            label={t("zip")}
+            placeholder="12345"
             required
+            numeric
             disabled={isLoading}
-            errorMessage={errors.email}
-            onChangeText={handleEmailChange}
+            errorMessage={errors.zip}
+            helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
+            onChangeText={handleZipCode}
           />
-          <View style={styles.zipCodeRow}>
-            <InputField
-              label={t("zip")}
-              placeholder="12345"
-              required
-              numeric
-              disabled={isLoading}
-              errorMessage={errors.zip}
-              onChangeText={handleZipCode}
-            />
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={handleSubmit}
-            >
-              <Text style={styles.buttonText}>{t("register_vote")}</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.privacyNote}>{t("accept")}</Text>
-          <View style={styles.registeredSection}>
-            <View style={styles.textColumn}>
-              <Text style={styles.sectionTitle}>{t("registered")}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.continueButton}
-              onPress={() => console.log("Continue pressed")}
-            >
-              <Text style={styles.buttonText}>{t("continue")}</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.noteSmall}>
-            {t("note")}{" "}
-            <Text
-              style={styles.linkText}
-              onPress={() =>
-                Linking.openURL(Config.REACT_APP_LEARN_MORE || "*")
-              }
-            >
-              {t("learn_more")}
-            </Text>
-          </Text>
-          <Text style={styles.extraLink}>
-            {t("living_abroad")}{" "}
-            <Text
-              style={styles.linkText}
-              onPress={() => Linking.openURL(Config.REACT_APP_OVERSEAS || "*")}
-            >
-              {t("overseas")}
-            </Text>
-          </Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit}
+          >
+            <Text style={styles.buttonText}>{t("register")}</Text>
+          </TouchableOpacity>
         </View>
-        <Footer />
-      </ScrollView>
-    </SafeAreaView>
+        <Text style={styles.privacyNote}>{t("accept1")}{" "}
+          <Text style={styles.linkText} onPress={() =>
+            Linking.openURL(policyUrl)}>
+            {t("policy")}
+          </Text>
+          {t("accept2")}</Text>
+        <View style={styles.registeredSection}>
+          <View style={styles.textColumn}>
+            <Text style={styles.sectionTitle}>{t("registered")}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => console.log("Continue pressed")}
+          >
+            <Text style={styles.buttonText}>{t("continue")}</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.noteSmall}>
+          <Text style={styles.noteBold}>{t('note')}</Text>{t('note_text')}{" "}
+          <Text
+            style={styles.linkText}
+            onPress={() =>
+              Linking.openURL(Config.REACT_APP_LEARN_MORE || "*")
+            }
+          >
+            {t("learn_more")}
+          </Text>
+        </Text>
+        <Text style={styles.extraLink}>
+          {t("living_abroad")}{" "}
+          <Text
+            style={styles.linkText}
+            onPress={() => Linking.openURL(Config.REACT_APP_OVERSEAS || "*")}
+          >
+            {t("overseas")}
+          </Text>
+        </Text>
+      </View>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.white,
-  },
-  scrollContent: {
-    alignItems: "center",
-    paddingBottom: 40,
-  },
-  // --- CARD STYLES ---
-  card: {
-    width: width > 600 ? 500 : "90%",
-    paddingTop: 30,
-  },
-  instructionText: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  mbLarge: {
-    marginBottom: 30,
-  },
-  // --- ROW STYLES ---
-  zipCodeRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginBottom: 20,
-  },
-  registerButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    marginLeft: 10,
-    height: 45,
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  privacyNote: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  // --- REGISTERED SECTION STYLES ---
-  registeredSection: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderColor,
-    paddingTop: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  textColumn: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    marginBottom: 5,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-    marginBottom: 10,
-  },
-  noteSmall: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginBottom: 10,
-  },
-  linkText: {
-    fontSize: 12,
-    color: COLORS.primary,
-    textDecorationLine: "underline",
-    fontWeight: "bold",
-    lineHeight: 18,
-  },
-  bold: {
-    fontWeight: "700",
-  },
-  continueButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 5,
-    minHeight: 45,
-    justifyContent: "center",
-  },
-  extraLink: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginBottom: 40,
-  },
-});
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    // --- CARD STYLES ---
+    card: {
+      width: width > 600 ? 500 : "90%",
+      paddingTop: 30,
+    },
+    instructionText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      textAlign: "center",
+      marginBottom: 10,
+      color: theme.textPrimary,
+    },
+    mbLarge: {
+      marginBottom: 30,
+    },
+    // --- ROW STYLES ---
+    zipCodeRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      marginBottom: 20,
+    },
+    button: {
+      backgroundColor: theme.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 15,
+      borderRadius: 5,
+      marginLeft: 10,
+      height: 45,
+      justifyContent: "center",
+    },
+    buttonText: {
+      color: theme.white,
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      fontWeight: "semibold",
+    },
+    privacyNote: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      textAlign: "center",
+      marginBottom: 30,
+      color: theme.textPrimary,
+    },
+    // --- REGISTERED SECTION STYLES ---
+    registeredSection: {
+      borderTopWidth: 1,
+      borderTopColor: theme.borderColor,
+      paddingTop: 30,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 30,
+    },
+    textColumn: {
+      flex: 1,
+      paddingRight: 10,
+    },
+    sectionTitle: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      marginBottom: 5,
+      color: theme.textPrimary,
+    },
+    noteSmall: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 12,
+      marginBottom: 10,
+      color: theme.textPrimary,
+    },
+    noteBold: {
+      fontWeight: "bold",
+    },
+    linkText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.link,
+      textDecorationLine: "underline",
+      fontWeight: "medium",
+    },
+    bold: {
+      fontWeight: "700",
+    },
+    extraLink: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.textPrimary,
+    },
+  });
 
 export default HomeScreen;

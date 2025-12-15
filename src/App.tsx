@@ -9,6 +9,8 @@ import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { AuthProvider } from "./contexts/AuthContext";
+import { UIConfigProvider } from "./contexts/UIConfigContext";
+import { ThemeProvider } from "./styles/ThemeProvider";
 import Navigation from "./components/organisms/Navigation";
 
 function App() {
@@ -25,9 +27,13 @@ function App() {
 function AppContent() {
   return (
     // <AuthProvider>
-    <NavigationContainer>
-      <Navigation />
-    </NavigationContainer>
+    <UIConfigProvider>
+      <ThemeProvider>
+        <NavigationContainer>
+          <Navigation />
+        </NavigationContainer>
+      </ThemeProvider>
+    </UIConfigProvider>
     // </AuthProvider>
   );
 }
