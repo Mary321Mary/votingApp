@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -22,10 +22,30 @@ const LanguageSelector: React.FC = () => {
     i18n.changeLanguage(lang);
   };
 
+  const getOptionStyle = (langCode: string) => [
+    styles.option,
+    i18n.language === langCode ? styles.activeOption : styles.inactiveOption
+  ];
+
   return (
-    <View style={styles.container}>
-      <View style={styles.pickerWrapper}>
-        <Picker
+    // <View style={styles.container}>
+    <View style={styles.block}>
+      <TouchableOpacity onPress={() => changeLanguage("en")}>
+        <Text style={getOptionStyle("en")}>
+          English
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => changeLanguage("es")}>
+        <Text style={getOptionStyle("es")}>
+          Español
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => changeLanguage("ph")}>
+        <Text style={getOptionStyle("ph")}>
+          Tagalog
+        </Text>
+      </TouchableOpacity>
+      {/* <Picker
           selectedValue={i18n.language}
           style={styles.picker}
           onValueChange={itemValue => changeLanguage(itemValue)}
@@ -40,9 +60,9 @@ const LanguageSelector: React.FC = () => {
             // Для Android стилизация текста внутри Item ограничена.
             />
           ))}
-        </Picker>
-      </View>
+        </Picker> */}
     </View>
+    // </View>
   );
 };
 
@@ -54,9 +74,26 @@ const getStyles = (theme: any) =>
       borderRadius: 8,
       borderWidth: 1,
       borderColor: theme.borderColor,
-      marginTop: 20,
+      marginBottom: 20,
       width: 300,
       alignSelf: "center",
+    },
+    block: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+    },
+    option: {
+      color: theme.textPrimary,
+    },
+    activeOption: {
+      fontWeight: "bold",
+      textDecorationLine: "none",
+    },
+    inactiveOption: {
+      fontWeight: "normal",
+      textDecorationLine: "underline",
     },
     pickerWrapper: {
       backgroundColor: theme.white,

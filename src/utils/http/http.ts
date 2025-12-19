@@ -29,7 +29,7 @@ export class HttpClient {
   }> = [];
 
   private constructor() {
-    const BASE_URL = Config.BASE_URL;
+    const BASE_URL = Config.REACT_APP_BASE_URL;
 
     this.client = axios.create({
       baseURL: BASE_URL,

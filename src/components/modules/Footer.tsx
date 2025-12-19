@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableOpacity, Image, Linking } from "react-native";
 import { StyleSheet } from "react-native";
-import { COLORS } from "@/styles/colors";
 import LanguageSelector from "@/components/modules/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUIConfig } from "@/contexts/UIConfigContext";
@@ -48,11 +47,11 @@ const Footer = () => {
       </View>
       {isLoading && <Spinner />}
       <View style={styles.rightBlock}>
+        <LanguageSelector />
         <View style={styles.awsBlock}>
           <Text style={styles.poweredText}>Powered By</Text>
           <Image source={logo} style={styles.awsLogo} resizeMode="contain" />
         </View>
-        <LanguageSelector />
       </View>
     </View>
   );
@@ -98,7 +97,8 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
     },
     rightBlock: {
-      alignItems: "center"
+      alignItems: "center",
+      gap: 10,
     },
     awsBlock: {
       flexDirection: "row",

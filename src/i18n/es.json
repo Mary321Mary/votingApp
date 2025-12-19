@@ -5,6 +5,7 @@
   "email": "CORREO ELECTRÓNICO",
   "zip": "CÓDIGO ZIP",
   "register": "Siguiente paso",
+  "back": "< Página Anterior",
   "accept1": "Al continuar, aceptas la ",
   "accept2": " de Rock the Vote y aceptas recibir correos electrónicos ocasionales con recordatorios electorales. Puedes darte de baja en cualquier momento.",
   "registered": "¿Ya estás registrado? Continúa para configurar todo y ayudarte en cada paso del proceso de votación.",
@@ -15,6 +16,31 @@
   "living_abroad": "¿Ciudadano estadounidense viviendo en el extranjero o miembro de las fuerzas armadas? Solicita tu boleta con ",
   "overseas": "Overseas Vote.",
   "return": "Regresar",
+  "register_page": {
+    "eligibility": {
+      "citizen": "Soy ciudadano de los Estados Unidos.",
+      "age": "Tengo al menos 16 años y solo votaré después de cumplir los 18.",
+      "residency": "Soy residente de {{state}} y solo votaré después de haber vivido en mi ciudad o municipio por al menos 30 días.",
+      "cancelPrevious": "Autorizo la cancelación de cualquier registro previo.",
+      "digitalSignature": "Autorizo al Secretario de Estado a usar mi firma digital almacenada para el registro de votantes."
+    },
+    "questions": {
+      "licenseUpdate": "¿Ha actualizado la dirección de su licencia de conducir o identificación estatal con el Secretario de Estado en los últimos 10 días?",
+      "duplicateLicense": "¿Ha solicitado hoy un duplicado de su licencia de conducir o identificación estatal?"
+    },
+    "actions": {
+      "registerOnline": "Registrarse para votar en {{state}}",
+      "continueOnline": "Continuar con el registro en línea de {{state}}",
+      "checkStatus": "Verificar el estado de su registro",
+      "visitElectionSite": "Visitar el sitio web electoral del estado"
+    },
+    "info": {
+      "paperRegistration": "Puede registrarse para votar en {{state}} usando un formulario de registro en papel.",
+      "finishOnline": "Puede completar su registro para votar en línea en {{state}}.",
+      "whereToSend": "Dónde enviar su formulario",
+      "phone": "Teléfono: "
+    }
+  },
   "home": "Inicio",
   "terms": "Términos",
   "policy": "Política de Privacidad",

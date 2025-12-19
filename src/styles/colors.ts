@@ -4,6 +4,7 @@ export const COLORS = {
   background: "#F8F8F8",
   textPrimary: "#000",
   borderColor: "#CCC",
+  gray: "gray",
   link: "rgb(178, 36, 39)",
   white: "#fff",
 };
@@ -14,6 +15,7 @@ export const DARK_COLORS = {
   background: "#121212",
   textPrimary: "#FFFFFF",
   borderColor: "#444444",
+  gray: "gray",
   link: "#FF7678",
   white: "#1E1E1E",
 };

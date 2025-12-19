@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,11 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import Header from "@/components/modules/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { RegisterResult } from "@/components/organisms/RegisterResult";
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,57 +28,39 @@ export default function RegisterScreen() {
 
   const state = route?.params ?? null;
 
-  const [title, setTitle] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
+  if (!state) {
+    navigation.navigate('Home');
+    return null;
+  }
 
-  useEffect(() => {
-    if (state !== null) {
-      setTitle(
-        state.status.success
-          ? `Register in ${state.state.name}`
-          : "Zip Code Error",
-      );
-      setIsSuccess(state.status.success);
-      setErrors(state.status.errors);
-    } else {
-      setErrors([]);
-    }
-  }, [state]);
+  const { status, state: regState } = state;
+
+  const title =
+    status.success && regState
+      ? `Register in ${regState.name}`
+      : 'Zip Code Error';
 
   return (
     <>
       <Header text={title} />
-      <View style={styles.box}>
-        {isSuccess ? (
-          <View>
-            <Text style={styles.text}>{state.state.ovr_type}</Text>
-            <Text style={styles.text}>
-              {state.state.not_participating_text}
+      {status.success && regState ? (
+        <RegisterResult state={regState} />
+      ) : (
+        <View>
+          {status.errors?.map((error: string, index: number) => (
+            <Text key={index} style={styles.errorText}>
+              {error}
             </Text>
+          ))}
 
-            <Text style={[styles.text, styles.bold]}>User:</Text>
-            <Text style={styles.text}>
-              {state.user.first_name} {state.user.last_name}
-            </Text>
-          </View>
-        ) : (
-          <View>
-            {errors.map((err: string, index: number) => (
-              <Text key={index} style={styles.errorText}>
-                {err}
-              </Text>
-            ))}
-          </View>
-        )}
-      </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Home")}
-      >
-        <Text style={styles.buttonText}>{t("return")}</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("Home")}
+          >
+            <Text style={styles.buttonText}>{t("return")}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </>
   );
 }

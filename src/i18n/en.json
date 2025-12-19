@@ -5,6 +5,7 @@
   "email": "EMAIL ADDRESS",
   "zip": "ZIP CODE",
   "register": "Next Step",
+  "back": "< Previous Page",
   "accept1": "By continuing, you accept Rock the Vote’s",
   "accept2": ", and agree to receive occasional election reminder emails from Rock the Vote. You can opt out from emails at any time.",
   "registered": "Already registered? Continue to get set up for us to help you through all steps to voting.",
@@ -15,6 +16,31 @@
   "living_abroad": "U.S. citizen living abroad or uniformed services member? Request your ballot with ",
   "overseas": "Overseas Vote",
   "return": "Return",
+  "register_page": {
+    "eligibility": {
+      "citizen": "I am a United States citizen.",
+      "age": "I am at least 16 years old and will vote only after I am 18.",
+      "residency": "I am a {{state}} resident and will vote only after I have lived in my city or township for at least 30 days.",
+      "cancelPrevious": "I authorize the cancellation of any previous registration.",
+      "digitalSignature": "I authorize the Secretary of State to use my stored digital signature for voter registration."
+    },
+    "questions": {
+      "licenseUpdate": "Have you updated your driver’s license or state ID address with the Secretary of State within the last 10 days?",
+      "duplicateLicense": "Have you applied for a duplicate driver’s license or state ID today?"
+    },
+    "actions": {
+      "registerOnline": "Register to Vote in {{state}}",
+      "continueOnline": "Continue to {{state}} online registration",
+      "checkStatus": "Check your voter status",
+      "visitElectionSite": "Visit State Election Website"
+    },
+    "info": {
+      "paperRegistration": "You can register to vote in {{state}} using a paper registration form.",
+      "finishOnline": "You can finish registering to vote online in {{state}}.",
+      "whereToSend": "Where to send your form",
+      "phone": "Phone: "
+    }
+  },
   "home": "Home",
   "terms": "Terms",
   "policy": "Privacy Policy",

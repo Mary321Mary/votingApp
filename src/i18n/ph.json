@@ -5,6 +5,7 @@
   "email": "EMAIL ADDRESS",
   "zip": "ZIP CODE",
   "register": "Susunod na hakbang",
+  "back": "< Nakaraang Pahina",
   "accept1": "Sa pagpapatuloy, tinatanggap mo ang ",
   "accept2": " ng Rock the Vote at pumapayag kang tumanggap ng paminsang email na paalala tungkol sa halalan. Maaari kang mag-unsubscribe anumang oras.",
   "registered": "Nakarehistro ka na ba? Magpatuloy upang ma-set up namin ang lahat para matulungan ka sa bawat hakbang ng pagboto.",
@@ -15,6 +16,31 @@
   "living_abroad": "U.S. citizen na nakatira sa ibang bansa o miyembro ng uniformed services? Humiling ng iyong balota sa",
   "overseas": "Overseas Vote",
   "return": "Bumalik",
+  "register_page": {
+    "eligibility": {
+      "citizen": "Ako ay isang mamamayan ng Estados Unidos.",
+      "age": "Ako ay hindi bababa sa 16 taong gulang at boboto lamang kapag ako ay 18 na.",
+      "residency": "Ako ay residente ng {{state}} at boboto lamang pagkatapos kong manirahan sa aking lungsod o bayan nang hindi bababa sa 30 araw.",
+      "cancelPrevious": "Pinapahintulutan ko ang pagkansela ng anumang dating rehistro.",
+      "digitalSignature": "Pinapahintulutan ko ang Secretary of State na gamitin ang aking nakaimbak na digital na lagda para sa pagpaparehistro ng botante."
+    },
+    "questions": {
+      "licenseUpdate": "Na-update mo ba ang address ng iyong driver’s license o state ID sa Secretary of State sa loob ng nakaraang 10 araw?",
+      "duplicateLicense": "Nag-apply ka ba ngayon para sa duplicate na driver’s license o state ID?"
+    },
+    "actions": {
+      "registerOnline": "Magparehistro upang bumoto sa {{state}}",
+      "continueOnline": "Ipagpatuloy ang online na pagpaparehistro sa {{state}}",
+      "checkStatus": "Suriin ang status ng iyong rehistro bilang botante",
+      "visitElectionSite": "Bisitahin ang website ng halalan ng estado"
+    },
+    "info": {
+      "paperRegistration": "Maaari kang magparehistro upang bumoto sa {{state}} gamit ang papel na form ng pagpaparehistro.",
+      "finishOnline": "Maaari mong tapusin ang iyong pagpaparehistro upang bumoto online sa {{state}}.",
+      "whereToSend": "Kung saan ipapadala ang iyong form",
+      "phone": "Telepono: "
+    }
+  },
   "home": "Home",
   "terms": "Mga Tuntunin",
   "policy": "Patakaran sa Privacy",

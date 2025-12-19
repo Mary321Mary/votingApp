@@ -14,9 +14,10 @@ const Header = ({ text }: HeaderProp) => {
 
   return (
     <View style={styles.header}>
-      {/* <View style={styles.logoContainer}></View> */}
       <Image source={logo} style={styles.logo} />
-      <Text style={styles.title}>{text}</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{text}</Text>
+      </View>
     </View>
   )
 };
@@ -33,9 +34,10 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.white,
       paddingHorizontal: 15,
     },
-    logoContainer: {
-      flexDirection: "row",
-      marginBottom: 15,
+    titleContainer: {
+      flex: 1,
+      alignItems: "center",
+      paddingHorizontal: 10,
     },
     logo: {
       width: 50,
@@ -46,7 +48,7 @@ const getStyles = (theme: any) =>
       fontSize: 28,
       fontWeight: "semibold",
       fontFamily: "Inter-VariableFont_opsz_wght",
-      marginLeft: "15%",
+      marginLeft: "10%",
       color: theme.textPrimary,
     },
   });

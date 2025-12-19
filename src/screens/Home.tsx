@@ -11,12 +11,12 @@ import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import InputField from "@/components/modules/InputField";
 import { RootStackParamList } from "@/components/organisms/Navigation";
-import { submitEmailZipFake } from "@/utils/api";
-import { SubmitEmailZipResponse } from "@/utils/types";
+import { submitEmailZipFake, submitEmailZip } from "@/utils/api";
 import Header from "@/components/modules/Header";
 import Config from "react-native-config";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import i18n from "i18n";
 
 const { width } = Dimensions.get("window");
 
@@ -71,10 +71,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     if (Object.keys(validationErrors).length === 0) {
       setIsLoading(true);
       try {
-        const response = await submitEmailZipFake({ email, zip: zipCode });
-        navigation.navigate("Register", response as SubmitEmailZipResponse);
+        console.log("Submitting email and zip:", email, zipCode, i18n.language)
+        const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
+        console.log("API response:", response);
+        navigation.navigate("Register", response.data);
       } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Register failed:", error);
       } finally {
         setIsLoading(false);
       }

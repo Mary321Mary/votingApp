@@ -21,6 +21,28 @@ export interface AuthState {
   error: string | null;
 }
 
+export const OVR_TYPE_MAP: Record<string, string> = {
+  paper_only: 'paper',
+  paper_or_finish_with_state: 'ovr_state',
+  connected_ovr: 'connected_ovr',
+  not_participating: 'not_participating',
+};
+
+export interface StateData {
+  name: string;
+  abbreviation: string;
+  ovr_type: string;
+  ovr_locales?: string[];
+  not_participating_text?: string | null;
+  online_registration_system_name?: string,
+  online_registration_system_url?: string,
+  online_status_check_url?: string,
+  registration_deadline?: string | null,
+  sos_address?: string,
+  sos_phone?: string,
+  sos_url?: string
+}
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -86,15 +108,11 @@ export interface UIConfig {
 export interface SubmitEmailZipRequest {
   email: string;
   zip: string;
+  locale: string;
 }
 
 export interface SubmitEmailZipResponse {
-  status: { success: boolean; errors: string[] };
-  state: {
-    name: string;
-    abbreviation: string;
-    ovr_type: string;
-    not_participating_text?: string;
-  };
-  user: Record<string, unknown>;
+  status: { success: boolean; errors: string[] | null };
+  state?: StateData;
+  user?: Record<string, unknown>;
 }
