@@ -4,10 +4,12 @@ import DefaultLayout from "@/layout/DefaultLayout";
 import { SubmitEmailZipResponse } from "@/utils/types";
 import HomeScreen from "@/screens/Home";
 import RegisterScreen from "@/screens/Register";
+import SuccessScreen from "@/screens/Success";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
   Register: SubmitEmailZipResponse; // or { id: string }
+  Success: undefined; // or { id: string }
 };
 
 const withDefaultLayout = (Component: React.ComponentType<any>) => {
@@ -20,7 +22,7 @@ const withDefaultLayout = (Component: React.ComponentType<any>) => {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function Navigation({}) {
+function Navigation({ }) {
   return (
     <Stack.Navigator
       initialRouteName="Home"
@@ -30,6 +32,10 @@ function Navigation({}) {
       <Stack.Screen
         name="Register"
         component={withDefaultLayout(RegisterScreen)}
+      />
+      <Stack.Screen
+        name="Success"
+        component={withDefaultLayout(SuccessScreen)}
       />
     </Stack.Navigator>
   );

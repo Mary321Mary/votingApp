@@ -6,7 +6,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 
 interface InputFieldProp {
   label: string;
-  placeholder: string;
+  placeholder?: string;
   required?: boolean;
   secureTextEntry?: boolean;
   disabled?: boolean;

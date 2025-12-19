@@ -1,64 +1,76 @@
-import React, { useContext } from 'react';
-import { View, Text, TouchableOpacity, Linking, StyleSheet } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { StateData } from '@/utils/types';
 import { ThemeContext } from '@/styles/ThemeProvider';
 import { useTranslation } from 'react-i18next';
+import { Checkbox } from '../modules/Checkbox';
+import { Radio } from '../modules/Radio';
 
-type Props = {
-  state: StateData;
-};
-
-export const ConnectedOVR = ({ state }: Props) => {
+export const ConnectedOVR = ({ state }: { state: StateData; }) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
+  const [licenseUpdate, setLicenseUpdate] = useState<null | boolean>(null);
+  const [duplicateLicense, setDuplicateLicense] = useState<null | boolean>(null);
+
   return (
     <View style={styles.block}>
-      <Text style={styles.text}>{t("register_page.eligibility.citizen")}</Text>
-      <Text style={styles.text}>{t("register_page.eligibility.age")}</Text>
-      <Text style={styles.text}>{t("register_page.eligibility.residency", { state: state.name })}</Text>
-      <Text style={styles.text}>{t("register_page.eligibility.cancelPrevious")}</Text>
-      <Text style={styles.text}>{t("register_page.eligibility.digitalSignature")}</Text>
-      <Text style={styles.gray}>{t("register_page.eligibility.licenseUpdate")}</Text>
-      <Text style={styles.gray}>{t("register_page.eligibility.duplicateLicense")}</Text>
+      <Checkbox
+        label={t("register_page.eligibility.citizen")}
+        required
+      />
+      <Checkbox
+        label={t("register_page.eligibility.age")}
+        required
+      />
+      <Checkbox
+        label={t("register_page.eligibility.residency", {
+          state: state.name,
+        })}
+      />
+      <Checkbox
+        label={t("register_page.eligibility.cancelPrevious")}
+        required
+      />
+      <Checkbox
+        label={t("register_page.eligibility.digitalSignature")}
+        required
+      />
 
-      {state.online_registration_system_url && (
-        <TouchableOpacity
-          onPress={() =>
-            Linking.openURL(state.online_registration_system_url || "")
-          }
-        >
-          <Text style={styles.link}>
-            {t("register_page.actions.registerOnline", { state: state.name })}
-          </Text>
-        </TouchableOpacity>
-      )}
+      {/* LICENSE UPDATE */}
+      <Text style={styles.gray}>
+        {t("register_page.questions.licenseUpdate")}
+        <Text style={styles.required}> *</Text>
+      </Text>
 
-      {state.sos_address && (
-        <View style={styles.block}>
-          <Text style={styles.text}>{t("register_page.info.whereToSend")}</Text>
-          <Text style={styles.text}>
-            {state.sos_address.replace(/<br\s*\/?>/gi, '\n')}
-          </Text>
-        </View>
-      )}
+      <Radio
+        label="No"
+        selected={licenseUpdate === false}
+        onPress={() => setLicenseUpdate(false)}
+      />
+      <Radio
+        label="Yes"
+        selected={licenseUpdate === true}
+        onPress={() => setLicenseUpdate(true)}
+      />
 
-      {state.sos_phone && (
-        <Text style={styles.text}>
-          <Text style={styles.bold}>{t("register_page.info.phone")}</Text>
-          {state.sos_phone}
-        </Text>
-      )}
+      {/* DUPLICATE LICENSE */}
+      <Text style={styles.gray}>
+        {t("register_page.questions.duplicateLicense")}
+        <Text style={styles.required}> *</Text>
+      </Text>
 
-      {state.sos_url && (
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL(state.sos_url || "")}
-        >
-          {t("register_page.actions.visitElectionSite")}
-        </Text>
-      )}
+      <Radio
+        label="No"
+        selected={duplicateLicense === false}
+        onPress={() => setDuplicateLicense(false)}
+      />
+      <Radio
+        label="Yes"
+        selected={duplicateLicense === true}
+        onPress={() => setDuplicateLicense(true)}
+      />
     </View>
   );
 };
@@ -66,7 +78,8 @@ export const ConnectedOVR = ({ state }: Props) => {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     block: {
-      minWidth: "100%"
+      maxWidth: "90%",
+      minWidth: "80%"
     },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
@@ -77,7 +90,9 @@ const getStyles = (theme: any) =>
       color: theme.gray,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
-      fontWeight: "regular"
+      fontWeight: "regular",
+      marginTop: 12,
+      marginBottom: 4,
     },
     bold: {
       fontWeight: "bold"
@@ -87,5 +102,17 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       fontWeight: "regular"
+    },
+    checkbox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    checkboxText: {
+      fontSize: 14,
+      flex: 1,
+    },
+    required: {
+      color: "red",
     }
   })

@@ -1,15 +1,16 @@
 import React, { useContext } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { OVR_TYPE_MAP, StateData } from "@/utils/types";
 import { PaperOVR } from "./PaperOVR";
 import { OvrState } from "./OvrState";
 import { ConnectedOVR } from "./ConnectedOVR";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./Navigation";
-import { useTranslation } from "react-i18next";
+import ConnectedOVRStep2Screen from "./ConnectedOVRStep2";
 
 function getFlowType(ovrType: string) {
   return OVR_TYPE_MAP[ovrType] ?? 'paper';
@@ -23,17 +24,20 @@ type RegisterScreenNavigation = NativeStackNavigationProp<
 export const RegisterResult = ({ state }: { state: StateData; }) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const flowType = getFlowType(state.ovr_type);
+  const [step, setStep] = React.useState<1 | 2>(1);
+  const flowType = getFlowType(state?.ovr_type || '');
   const navigation = useNavigation<RegisterScreenNavigation>();
   const { t } = useTranslation();
 
-  const renderComponent = () => {
+  const renderContent = () => {
+    if (flowType === 'connected_ovr') {
+      return step === 1
+        ? <ConnectedOVR state={state} />
+        : <ConnectedOVRStep2Screen state={state} />;
+    }
     switch (flowType) {
       case 'ovr_state':
         return <OvrState state={state} />;
-
-      case 'connected_ovr':
-        return <ConnectedOVR state={state} />;
 
       case 'paper':
       default:
@@ -41,15 +45,27 @@ export const RegisterResult = ({ state }: { state: StateData; }) => {
     }
   };
 
+  const handleMainButtonClick = () => {
+    if (flowType === 'connected_ovr') {
+      if (step === 1) {
+        setStep(2);
+      } else {
+        navigation.navigate("Success");
+      }
+    } else {
+      navigation.navigate("Success");
+    }
+  };
+
   return (
     <View style={styles.box}>
-      {renderComponent()}
+      {renderContent()}
       <View style={styles.buttonBox}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Home")}
+          onPress={handleMainButtonClick}
         >
-          <Text style={styles.buttonText}>{t("register")}</Text>
+          <Text style={styles.buttonText}>{t("register_page.prepare_form")}</Text>
         </TouchableOpacity>
         <Text style={styles.link} onPress={() => navigation.goBack()}>
           {t("back")}
@@ -87,7 +103,7 @@ const getStyles = (theme: any) =>
       color: theme.white,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: "semibold",
     },
     link: {
       color: theme.link,

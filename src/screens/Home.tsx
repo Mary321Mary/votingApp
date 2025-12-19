@@ -65,22 +65,22 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const validationErrors = validate();
-    setErrors(validationErrors);
+    // const validationErrors = validate();
+    // setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length === 0) {
-      setIsLoading(true);
-      try {
-        console.log("Submitting email and zip:", email, zipCode, i18n.language)
-        const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
-        console.log("API response:", response);
-        navigation.navigate("Register", response.data);
-      } catch (error) {
-        console.error("Register failed:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    // if (Object.keys(validationErrors).length === 0) {
+    setIsLoading(true);
+    try {
+      console.log("Submitting email and zip:", email, zipCode, i18n.language)
+      const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
+      console.log("API response:", response);
+      navigation.navigate("Register", response.data);
+    } catch (error) {
+      console.error("Register failed:", error);
+    } finally {
+      setIsLoading(false);
     }
+    // }
   };
 
   return (
@@ -242,7 +242,7 @@ const getStyles = (theme: any) =>
       fontWeight: "medium",
     },
     bold: {
-      fontWeight: "700",
+      fontWeight: "bold",
     },
     extraLink: {
       fontFamily: "Inter-VariableFont_opsz_wght",

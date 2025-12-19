@@ -24,7 +24,7 @@ export interface AuthState {
 export const OVR_TYPE_MAP: Record<string, string> = {
   paper_only: 'paper',
   paper_or_finish_with_state: 'ovr_state',
-  connected_ovr: 'connected_ovr',
+  connected_MI: 'connected_ovr',
   not_participating: 'not_participating',
 };
 
