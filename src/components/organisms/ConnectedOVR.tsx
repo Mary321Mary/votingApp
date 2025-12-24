@@ -1,18 +1,28 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { StateData } from '@/utils/types';
+import { FormProps, RegisterFormState } from '@/utils/types';
 import { ThemeContext } from '@/styles/ThemeProvider';
 import { useTranslation } from 'react-i18next';
-import { Checkbox } from '../modules/Checkbox';
-import { Radio } from '../modules/Radio';
+import { Radio } from '../atoms/Radio';
+import { Checkbox } from '../atoms/Checkbox';
 
-export const ConnectedOVR = ({ state }: { state: StateData; }) => {
+export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const [licenseUpdate, setLicenseUpdate] = useState<null | boolean>(null);
   const [duplicateLicense, setDuplicateLicense] = useState<null | boolean>(null);
+
+  const updateField = <K extends keyof RegisterFormState>(
+    key: K,
+    fieldValue: RegisterFormState[K]
+  ) => {
+    onChange({
+      ...value,
+      [key]: fieldValue,
+    });
+  };
 
   return (
     <View style={styles.block}>
@@ -45,12 +55,12 @@ export const ConnectedOVR = ({ state }: { state: StateData; }) => {
       </Text>
 
       <Radio
-        label="No"
+        label={t("register_page.no")}
         selected={licenseUpdate === false}
         onPress={() => setLicenseUpdate(false)}
       />
       <Radio
-        label="Yes"
+        label={t("register_page.yes")}
         selected={licenseUpdate === true}
         onPress={() => setLicenseUpdate(true)}
       />
@@ -62,12 +72,12 @@ export const ConnectedOVR = ({ state }: { state: StateData; }) => {
       </Text>
 
       <Radio
-        label="No"
+        label={t("register_page.no")}
         selected={duplicateLicense === false}
         onPress={() => setDuplicateLicense(false)}
       />
       <Radio
-        label="Yes"
+        label={t("register_page.yes")}
         selected={duplicateLicense === true}
         onPress={() => setDuplicateLicense(true)}
       />

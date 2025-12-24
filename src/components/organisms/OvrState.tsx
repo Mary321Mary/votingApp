@@ -1,29 +1,46 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { StateData } from '@/utils/types';
-import { ThemeContext } from '@/styles/ThemeProvider';
 import { useTranslation } from 'react-i18next';
-import { Checkbox } from '../modules/Checkbox';
-import InputField from '../modules/InputField';
-import { Radio } from '../modules/Radio';
-import { Picker } from '@react-native-picker/picker';
-import HelpTooltip from '../modules/HelpTooltip';
 
-export const OvrState = ({ state }: { state: StateData; }) => {
+import { FormProps, RegisterFormState } from '@/utils/types';
+import { ThemeContext } from '@/styles/ThemeProvider';
+import InputField from '../atoms/InputField';
+import { Radio } from '../atoms/Radio';
+import { Picker } from '@react-native-picker/picker';
+import HelpTooltip from '../atoms/HelpTooltip';
+import { Checkbox } from '../atoms/Checkbox';
+
+export const OvrState = ({ state, value, onChange }: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+
   const [hasLicense, setHasLicense] = useState<null | boolean>(null);
+  const [showChangeName, setShowChangeName] = React.useState(false);
+  const [showDifferentMailAddress, setShowDifferentMailAddress] = React.useState(false);
+  const [showChangedAddress, setShowChangedAddress] = React.useState(false);
+  const [showIsAdultBlock, setShowIsAdultBlock] = React.useState(false);
+
+  const updateField = <K extends keyof RegisterFormState>(
+    key: K,
+    fieldValue: RegisterFormState[K]
+  ) => {
+    onChange({
+      ...value,
+      [key]: fieldValue,
+    });
+  };
 
   return (
     <View style={styles.block}>
+      {/* NAME */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Name</Text>
+        <Text style={styles.sectionTitle}>{t("register_page.section_name")}
+          <HelpTooltip text={t('register_page.name_help')} />
+        </Text>
         <View style={styles.row}>
           <View >
-            <Text style={styles.inputLabel}>
-              {t('register_page.title')}
-            </Text>
+            <Text style={styles.inputLabel}>={t('register_page.title')}*</Text>
             <View style={styles.pickerWrapper}>
               <Picker
                 style={styles.picker}
@@ -37,13 +54,22 @@ export const OvrState = ({ state }: { state: StateData; }) => {
               </Picker>
             </View>
           </View>
-          <InputField label={t("FIRST NAME")} required onChangeText={() => { }} />
-          <InputField label={t("MIDDLE")} onChangeText={() => { }} />
-          <InputField label={t("LAST NAME")} required onChangeText={() => { }} />
-          <View >
-            <Text style={styles.inputLabel}>
-              {t('register_page.suffix')}
-            </Text>
+          <InputField
+            label={t("register_page.first_name")}
+            required
+            onChangeText={(text: string) => updateField("firstName", text)}
+          />
+          {!showIsAdultBlock && <InputField
+            label={t("register_page.middle_name")}
+            onChangeText={(text: string) => updateField("middleName", text)}
+          />}
+          <InputField
+            label={t("register_page.last_name")}
+            required
+            onChangeText={(text: string) => updateField("lastName", text)}
+          />
+          <View>
+            <Text style={styles.inputLabel}>{t('register_page.suffix')}*</Text>
             <View style={styles.pickerWrapper}>
               <Picker
                 style={styles.picker}
@@ -65,10 +91,78 @@ export const OvrState = ({ state }: { state: StateData; }) => {
           </View>
         </View>
 
-        <Checkbox label="I have changed my name." />
-        <Checkbox label="I am a U.S. citizen" required defaultValue />
+        {!showIsAdultBlock && <Checkbox
+          label={t("register_page.changed_name")}
+          helpText={t('register_page.changed_name_help')}
+        />}
+        {showChangeName && (
+          <>
+            <Text>Previous Name</Text>
+            <View style={styles.row}>
+              <View>
+                <Text style={styles.inputLabel}>
+                  {t('register_page.title')}*
+                </Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    style={styles.picker}
+                    itemStyle={styles.pickerItem}
+                  >
+                    <Picker.Item label="" value="" />
+                    <Picker.Item label="Mr." value="Mr." />
+                    <Picker.Item label="Mrs." value="Mrs." />
+                    <Picker.Item label="Miss" value="Miss" />
+                    <Picker.Item label="Ms." value="Ms." />
+                  </Picker>
+                </View>
+              </View>
+              <InputField
+                label={t("register_page.first_name")}
+                required
+                onChangeText={(text: string) => updateField("changedFirstName", text)}
+              />
+              {!showIsAdultBlock && <InputField
+                label={t("register_page.middle_name")}
+                onChangeText={(text: string) => updateField("changedMiddleName", text)}
+              />}
+              <InputField
+                label={t("register_page.last_name")}
+                required
+                onChangeText={(text: string) => updateField("changedLastName", text)}
+              />
+              <View >
+                <Text style={styles.inputLabel}>
+                  {t('register_page.suffix')}*
+                </Text>
+                <View style={styles.pickerWrapper}>
+                  <Picker
+                    style={styles.picker}
+                    itemStyle={styles.pickerItem}
+                    selectedValue={t('register_page.suffix')}
+                  >
+                    <Picker.Item label="" value="" />
+                    <Picker.Item label="Jr." value="Jr." />
+                    <Picker.Item label="Sr." value="Sr." />
+                    <Picker.Item label="I" value="I" />
+                    <Picker.Item label="II" value="II" />
+                    <Picker.Item label="III" value="III" />
+                    <Picker.Item label="IV" value="IV" />
+                    <Picker.Item label="V" value="V" />
+                    <Picker.Item label="VI" value="VI" />
+                    <Picker.Item label="VII" value="VII" />
+                  </Picker>
+                </View>
+              </View>
+            </View>
+          </>
+        )}
         <Checkbox
-          label="I will be 18 or older by the next election."
+          label={t("register_page.eligibility.citizen")}
+          required
+          defaultValue
+        />
+        <Checkbox
+          label={t("register_page.age_eligibility")}
           required
           defaultValue
         />
@@ -76,30 +170,232 @@ export const OvrState = ({ state }: { state: StateData; }) => {
 
       {/* ADDRESS */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Home Address
-          <HelpTooltip text="Put your home address in these boxes. Do not put your mailing address here if it is different from your home address. Do not use a post office box or rural route without a box number. If you live in a rural area but do not have a street address, or if you have no address, please show where you live using the map on the printed form." />
+        <Text style={styles.sectionTitle}>{t("register_page.section_home_address")}
+          <HelpTooltip text={t('register_page.address_help')} />
         </Text>
         <View style={styles.row}>
-          <InputField label={t("ADDRESS")} required onChangeText={() => { }} />
-          <InputField label={t("UNIT/LOT #")} onChangeText={() => { }} />
+          <InputField
+            label={t("register_page.address")}
+            required
+            onChangeText={(text: string) => updateField("address", text)}
+          />
+          <InputField
+            label={t("register_page.unit_lot")}
+            onChangeText={(text: string) => updateField("unit", text)}
+          />
         </View>
 
         <View style={styles.row}>
-          <InputField label={t("CITY")} required onChangeText={() => { }} />
-          <InputField label={t("STATE")} required onChangeText={() => { }} />
-          <InputField label={t("ZIP CODE")} required onChangeText={() => { }} />
+          <InputField
+            label={t("register_page.city")}
+            required
+            onChangeText={(text: string) => updateField("city", text)}
+          />
+          <InputField
+            label={t("register_page.state")}
+            required
+            onChangeText={() => { }}
+          />
+          <InputField
+            label={t("zip")}
+            required
+            onChangeText={() => { }}
+          />
         </View>
 
-        <Checkbox label="I get my mail at a different address" />
-        <Checkbox label="I have changed my address since the last time I registered to vote" />
+        <Checkbox label={t("register_page.different_mail_address")} />
+        {showDifferentMailAddress && <>
+          <Text>Mailing Address
+            <HelpTooltip text="Put your mailing address in this box if you get your mail at an address that is different from your home address. If you do not receive mail at your home address you must fill out this section to indicate where you can be reached by mail." />
+          </Text>
+          <View style={styles.row}>
+            <InputField
+              label={t("register_page.address")}
+              required
+              onChangeText={(text: string) => updateField("differentAddress", text)}
+            />
+            <InputField
+              label={t("register_page.unit_lot")}
+              onChangeText={(text: string) => updateField("differentUnit", text)}
+            />
+          </View>
+          <View style={styles.row}>
+            <InputField
+              label={t("register_page.city")}
+              required
+              onChangeText={(text: string) => updateField("differentCity", text)}
+            />
+            <View >
+              <Text style={styles.inputLabel}>
+                {t('register_page.state')}*
+              </Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                  selectedValue={t('register_page.state')}
+                >
+                  <Picker.Item label="AL" value="Alabama" />
+                  <Picker.Item label="AK" value="Alaska" />
+                  <Picker.Item label="AZ" value="Arizona" />
+                  <Picker.Item label="AR" value="Arkansas" />
+                  <Picker.Item label="CA" value="California" />
+                  <Picker.Item label="CO" value="Colorado" />
+                  <Picker.Item label="CT" value="Connecticut" />
+                  <Picker.Item label="DE" value="Delaware" />
+                  <Picker.Item label="DC" value="District of Columbia" />
+                  <Picker.Item label="FL" value="Florida" />
+                  <Picker.Item label="GA" value="Georgia" />
+                  <Picker.Item label="HI" value="Hawaii" />
+                  <Picker.Item label="ID" value="Idaho" />
+                  <Picker.Item label="IL" value="Illinois" />
+                  <Picker.Item label="IN" value="Indiana" />
+                  <Picker.Item label="IA" value="Iowa" />
+                  <Picker.Item label="KS" value="Kansas" />
+                  <Picker.Item label="KY" value="Kentucky" />
+                  <Picker.Item label="LA" value="Louisiana" />
+                  <Picker.Item label="ME" value="Maine" />
+                  <Picker.Item label="MD" value="Maryland" />
+                  <Picker.Item label="MA" value="Massachusetts" />
+                  <Picker.Item label="MI" value="Michigan" />
+                  <Picker.Item label="MN" value="Minnesota" />
+                  <Picker.Item label="MS" value="Mississippi" />
+                  <Picker.Item label="MO" value="Missouri" />
+                  <Picker.Item label="MT" value="Montana" />
+                  <Picker.Item label="NE" value="Nebraska" />
+                  <Picker.Item label="NV" value="Nevada" />
+                  <Picker.Item label="NH" value="New Hampshire" />
+                  <Picker.Item label="NJ" value="New Jersey" />
+                  <Picker.Item label="NM" value="New Mexico" />
+                  <Picker.Item label="NY" value="New York" />
+                  <Picker.Item label="NC" value="North Carolina" />
+                  <Picker.Item label="ND" value="North Dakota" />
+                  <Picker.Item label="OH" value="Ohio" />
+                  <Picker.Item label="OK" value="Oklahoma" />
+                  <Picker.Item label="OR" value="Oregon" />
+                  <Picker.Item label="PA" value="Pennsylvania" />
+                  <Picker.Item label="RI" value="Rhode Island" />
+                  <Picker.Item label="SC" value="South Carolina" />
+                  <Picker.Item label="SD" value="South Dakota" />
+                  <Picker.Item label="TN" value="Tennessee" />
+                  <Picker.Item label="TX" value="Texas" />
+                  <Picker.Item label="UT" value="Utah" />
+                  <Picker.Item label="VT" value="Vermont" />
+                  <Picker.Item label="VA" value="Virginia" />
+                  <Picker.Item label="WA" value="Washington" />
+                  <Picker.Item label="WV" value="West Virginia" />
+                  <Picker.Item label="WI" value="Wisconsin" />
+                  <Picker.Item label="WY" value="Wyoming" />
+                </Picker>
+              </View>
+            </View>
+            <InputField
+              label={t("zip")}
+              required
+              onChangeText={(text: string) => updateField("differentZip", text)}
+            />
+          </View>
+        </>}
+        <Checkbox label={t("register_page.changed_address")} />
+        {showChangedAddress && <>
+          <Text>Previous Address</Text>
+          <View style={styles.row}>
+            <InputField
+              label={t("register_page.address")}
+              required
+              onChangeText={(text: string) => updateField("changedAddress", text)}
+            />
+            <InputField
+              label={t("register_page.unit_lot")}
+              onChangeText={(text: string) => updateField("changedUnit", text)}
+            />
+          </View>
+          <View style={styles.row}>
+            <InputField
+              label={t("register_page.city")}
+              required
+              onChangeText={(text: string) => updateField("changedCity", text)}
+            />
+            <View >
+              <Text style={styles.inputLabel}>
+                {t('register_page.state')}*
+              </Text>
+              <View style={styles.pickerWrapper}>
+                <Picker
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                  selectedValue={t('register_page.state')}
+                >
+                  <Picker.Item label="" value="" />
+                  <Picker.Item label="AL" value="Alabama" />
+                  <Picker.Item label="AK" value="Alaska" />
+                  <Picker.Item label="AZ" value="Arizona" />
+                  <Picker.Item label="AR" value="Arkansas" />
+                  <Picker.Item label="CA" value="California" />
+                  <Picker.Item label="CO" value="Colorado" />
+                  <Picker.Item label="CT" value="Connecticut" />
+                  <Picker.Item label="DE" value="Delaware" />
+                  <Picker.Item label="DC" value="District of Columbia" />
+                  <Picker.Item label="FL" value="Florida" />
+                  <Picker.Item label="GA" value="Georgia" />
+                  <Picker.Item label="HI" value="Hawaii" />
+                  <Picker.Item label="ID" value="Idaho" />
+                  <Picker.Item label="IL" value="Illinois" />
+                  <Picker.Item label="IN" value="Indiana" />
+                  <Picker.Item label="IA" value="Iowa" />
+                  <Picker.Item label="KS" value="Kansas" />
+                  <Picker.Item label="KY" value="Kentucky" />
+                  <Picker.Item label="LA" value="Louisiana" />
+                  <Picker.Item label="ME" value="Maine" />
+                  <Picker.Item label="MD" value="Maryland" />
+                  <Picker.Item label="MA" value="Massachusetts" />
+                  <Picker.Item label="MI" value="Michigan" />
+                  <Picker.Item label="MN" value="Minnesota" />
+                  <Picker.Item label="MS" value="Mississippi" />
+                  <Picker.Item label="MO" value="Missouri" />
+                  <Picker.Item label="MT" value="Montana" />
+                  <Picker.Item label="NE" value="Nebraska" />
+                  <Picker.Item label="NV" value="Nevada" />
+                  <Picker.Item label="NH" value="New Hampshire" />
+                  <Picker.Item label="NJ" value="New Jersey" />
+                  <Picker.Item label="NM" value="New Mexico" />
+                  <Picker.Item label="NY" value="New York" />
+                  <Picker.Item label="NC" value="North Carolina" />
+                  <Picker.Item label="ND" value="North Dakota" />
+                  <Picker.Item label="OH" value="Ohio" />
+                  <Picker.Item label="OK" value="Oklahoma" />
+                  <Picker.Item label="OR" value="Oregon" />
+                  <Picker.Item label="PA" value="Pennsylvania" />
+                  <Picker.Item label="RI" value="Rhode Island" />
+                  <Picker.Item label="SC" value="South Carolina" />
+                  <Picker.Item label="SD" value="South Dakota" />
+                  <Picker.Item label="TN" value="Tennessee" />
+                  <Picker.Item label="TX" value="Texas" />
+                  <Picker.Item label="UT" value="Utah" />
+                  <Picker.Item label="VT" value="Vermont" />
+                  <Picker.Item label="VA" value="Virginia" />
+                  <Picker.Item label="WA" value="Washington" />
+                  <Picker.Item label="WV" value="West Virginia" />
+                  <Picker.Item label="WI" value="Wisconsin" />
+                  <Picker.Item label="WY" value="Wyoming" />
+                </Picker>
+              </View>
+            </View>
+            <InputField
+              label={t("zip")}
+              required
+              onChangeText={(text: string) => updateField("changedZip", text)}
+            />
+          </View>
+        </>}
 
         <Radio
-          label={`I have a ${state.abbreviation} state ID or driver's license`}
+          label={t("register_page.has_id", { abbreviation: state.abbreviation })}
           selected={hasLicense === true}
           onPress={() => setHasLicense(true)}
         />
         <Radio
-          label={`I do not have a ${state.abbreviation} state ID or driver's license`}
+          label={t("register_page.no_id", { abbreviation: state.abbreviation })}
           selected={hasLicense === false}
           onPress={() => setHasLicense(false)}
         />
@@ -107,18 +403,20 @@ export const OvrState = ({ state }: { state: StateData; }) => {
 
       {/* ID */}
       <View style={{ width: "100%" }}>
-        <InputField label="ID Number" required onChangeText={() => { }} />
-
-        <Text style={styles.hint}>
-          You must provide your full Social Security number.
-        </Text>
+        <InputField
+          label={t('register_page.id_number')}
+          required
+          onChangeText={(text: string) => updateField("idNumber", text)}
+        />
+        <Text style={styles.hint}>{t("register_page.driver_license", { name: state.name })}</Text>
       </View>
 
       {/* ADDITIONAL */}
       <View style={styles.section}>
         <View >
           <Text style={styles.inputLabel}>
-            {t('Race')}
+            {t('register_page.race.title')}
+            <HelpTooltip text={t("register_page.race_help", { name: state.name })} />
           </Text>
           <View style={styles.pickerWrapper}>
             <Picker
@@ -126,15 +424,15 @@ export const OvrState = ({ state }: { state: StateData; }) => {
               itemStyle={styles.pickerItem}
             >
               <Picker.Item label="" value="" />
-              <Picker.Item label="Asian" value="Asian" />
-              <Picker.Item label="Black or African American" value="Black or African American" />
-              <Picker.Item label="Hispanic or Latino" value="Hispanic or Latino" />
-              <Picker.Item label="Native American or Alaskan Native" value="Native American or Alaskan Native" />
-              <Picker.Item label="Native Hawaiian or Other Pacific Islander" value="Native Hawaiian or Other Pacific Islander" />
-              <Picker.Item label="Other" value="Other" />
-              <Picker.Item label="Two or More Races" value="Two or More Races" />
-              <Picker.Item label="White" value="White" />
-              <Picker.Item label="Decline to State" value="Decline to State" />
+              <Picker.Item label={t('register_page.race.asian')} value="Asian" />
+              <Picker.Item label={t('register_page.race.black')} value="Black or African American" />
+              <Picker.Item label={t('register_page.race.hispanic')} value="Hispanic or Latino" />
+              <Picker.Item label={t('register_page.race.native_american')} value="Native American or Alaskan Native" />
+              <Picker.Item label={t('register_page.race.pacific')} value="Native Hawaiian or Other Pacific Islander" />
+              <Picker.Item label={t('register_page.race.other')} value="Other" />
+              <Picker.Item label={t('register_page.race.multiple')} value="Two or More Races" />
+              <Picker.Item label={t('register_page.race.white')} value="White" />
+              <Picker.Item label={t('register_page.race.decline')} value="Decline to State" />
             </Picker>
           </View>
         </View>
@@ -142,23 +440,32 @@ export const OvrState = ({ state }: { state: StateData; }) => {
 
       {/* CONTACT */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Contact</Text>
+        <Text style={styles.sectionTitle}>{t('register_page.section_contact')}</Text>
         <View style={styles.row}>
-          <InputField label={t("Date of Birth")} placeholder="MM / DD / YYYY" onChangeText={() => { }} />
-          <InputField label={t("Phone")} placeholder="###-###-####" onChangeText={() => { }} />
-          <View >
-            <Text style={styles.inputLabel}>
-              {t('Type')}
-            </Text>
+          <InputField
+            label={t('register_page.dob')}
+            helpText={t('register_page.dob_help')}
+            required
+            placeholder="MM / DD / YYYY"
+            onChangeText={(text: string) => updateField("birth", text)}
+          />
+          <InputField
+            label={t('register_page.phone')}
+            helpText={t('register_page.phone_help')}
+            placeholder="###-###-####"
+            onChangeText={(text: string) => updateField("phone", text)}
+          />
+          <View>
+            <Text style={styles.inputLabel}>{t('register_page.phone_type')}</Text>
             <View style={styles.pickerWrapper}>
               <Picker
                 style={styles.picker}
                 itemStyle={styles.pickerItem}
               >
-                <Picker.Item label="Mobile" value="Mobile" />
-                <Picker.Item label="Home" value="Home" />
-                <Picker.Item label="Work" value="Work" />
-                <Picker.Item label="Other" value="Other" />
+                <Picker.Item label={t('register_page.phone_types.mobile')} value="Mobile" />
+                <Picker.Item label={t('register_page.phone_types.home')} value="Home" />
+                <Picker.Item label={t('register_page.phone_types.work')} value="Work" />
+                <Picker.Item label={t('register_page.phone_types.other')} value="Other" />
               </Picker>
             </View>
           </View>
@@ -167,20 +474,14 @@ export const OvrState = ({ state }: { state: StateData; }) => {
 
       {/* CONSENTS */}
       <View style={styles.section}>
-        <Checkbox label="Send me text messages from Rock the Vote" />
-
-        <Text style={styles.hint}>
-          By signing up, you consent to receive periodic text messages from Rock the Vote (788683).
-          Message and data rates may apply. Text HELP for info or STOP to stop receiving messages.
-          No purchase necessary. See terms and conditions and privacy policy.
-        </Text>
-
+        <Checkbox label={t('register_page.sms_opt_in')} />
+        <Text style={styles.hint}>{t('register_page.sms_disclaimer')}</Text>
         <Checkbox
-          label="Receive action alerts and other email updates from Rock the Vote"
+          label={t('register_page.email_opt_in')}
           defaultValue
         />
-        <Checkbox label="I would like to volunteer with Rock the Vote" />
-        <Checkbox label="Please mail me my form, I can't print it right now" />
+        <Checkbox label={t('register_page.volunteer')} />
+        <Checkbox label={t('register_page.mail_form')} />
       </View>
     </View>
   );

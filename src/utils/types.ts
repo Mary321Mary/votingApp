@@ -43,6 +43,77 @@ export interface StateData {
   sos_url?: string
 }
 
+export type RegisterFormState = {
+  // NAME
+  title: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  suffix: string;
+  changedTitle: string;
+  changedFirstName: string;
+  changedMiddleName: string;
+  changedLastName: string;
+  changedSuffix: string;
+  isCitizen: boolean;
+  isAdult: boolean;
+
+  // ADDRESS
+  address: string;
+  unit: string;
+  city: string;
+  state: string;
+  zip: string;
+  differentAddress: string;
+  differentUnit: string;
+  differentCity: string;
+  differentState: string;
+  differentZip: string;
+  changedAddress: string;
+  changedUnit: string;
+  changedCity: string;
+  changedState: string;
+  changedZip: string;
+  hasStateId: boolean | null;
+
+  // ID
+  idNumber: string;
+
+  // ADDITIONAL
+  race: string;
+  party: string;
+
+  // CONTACT
+  birth: string;
+  phone: string;
+  phoneType: string;
+
+  // CONSENTS
+  smsConsent: boolean;
+  emailConsent: boolean;
+  volunteer: boolean;
+  mailForm: boolean;
+
+  // Personal
+  fullName: string;
+  licenseNumber: string;
+  eyeColor: string;
+  ssnLast4: string;
+
+  // Eligibility
+  residency: boolean;
+  cancelPrevious: boolean;
+  digitalSignature: boolean;
+  licenseUpdated: "yes" | "no" | null;
+  duplicateLicense: "yes" | "no" | null;
+};
+
+export type FormProps = {
+  state: StateData;
+  value: RegisterFormState;
+  onChange: (value: RegisterFormState) => void;
+};
+
 export interface LoginCredentials {
   email: string;
   password: string;

@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { ThemeContext } from '@/styles/ThemeProvider';
+import HelpTooltip from './HelpTooltip';
 
 export const Checkbox = ({
   label,
+  helpText,
   defaultValue = false,
   required,
 }: any) => {
@@ -17,6 +19,7 @@ export const Checkbox = ({
         <Switch value={value} onValueChange={setValue} />
         <Text style={styles.checkboxText}>
           {label} {required && <Text style={styles.required}>*</Text>}
+          {helpText && <HelpTooltip text={helpText} />}
         </Text>
       </View>
     </>

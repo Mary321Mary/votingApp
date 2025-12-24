@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import InputField from "@/components/modules/InputField";
+import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { submitEmailZipFake, submitEmailZip } from "@/utils/api";
 import Header from "@/components/modules/Header";
@@ -65,22 +65,20 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // const validationErrors = validate();
-    // setErrors(validationErrors);
+    const validationErrors = validate();
+    setErrors(validationErrors);
 
-    // if (Object.keys(validationErrors).length === 0) {
-    setIsLoading(true);
-    try {
-      console.log("Submitting email and zip:", email, zipCode, i18n.language)
-      const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
-      console.log("API response:", response);
-      navigation.navigate("Register", response.data);
-    } catch (error) {
-      console.error("Register failed:", error);
-    } finally {
-      setIsLoading(false);
+    if (Object.keys(validationErrors).length === 0) {
+      setIsLoading(true);
+      try {
+        const response = await submitEmailZipFake({ email, zip: zipCode, locale: i18n.language });
+        navigation.navigate("Register", response.data);
+      } catch (error) {
+        console.error("Register failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    // }
   };
 
   return (

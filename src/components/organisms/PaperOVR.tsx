@@ -1,200 +1,241 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { StateData } from '@/utils/types';
-import { ThemeContext } from '@/styles/ThemeProvider';
-import { useTranslation } from 'react-i18next';
-import InputField from '../modules/InputField';
-import { Checkbox } from '../modules/Checkbox';
-import HelpTooltip from '../modules/HelpTooltip';
-import { Picker } from '@react-native-picker/picker';
+import React from 'react';
+import { FormProps } from '@/utils/types';
+import { NameSection } from '../modules/NameSection';
+import { AddressSection } from '../modules/AddressSection';
+import { IDSection } from '../modules/IDSection';
+import { ContactSection } from '../modules/ContactSection';
 
-export const PaperOVR = ({ state }: { state: StateData; }) => {
-  const theme = useContext(ThemeContext);
-  const styles = getStyles(theme);
-  const { t } = useTranslation();
+export const PaperOVR = ({ state, value, onChange }: FormProps) => {
+  const [showChangeName, setShowChangeName] = React.useState(false);
+  const [showDifferentMailAddress, setShowDifferentMailAddress] = React.useState(false);
 
   return (
     <>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t("register_page.section_name")}
-          <HelpTooltip text="Put your full name and in these boxes. Please do not use nicknames or initials. If this application is for a change of name you will be asked for your previous name in a later section. And don't forget to include your title (Mr., Mrs., Miss, Ms.). The pre-determined options for the Title field are dictated by the National Mail Voter Registration Form, and this field is required by some states. They are not reflective of Rock the Vote's views or values on gender inclusivity." />
-        </Text>
-        <View style={styles.row}>
-          <View >
-            <Text style={styles.inputLabel}>
-              {t('register_page.title')}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="Mr." value="Mr." />
-                <Picker.Item label="Mrs." value="Mrs." />
-                <Picker.Item label="Miss" value="Miss" />
-                <Picker.Item label="Ms." value="Ms." />
-              </Picker>
-            </View>
-          </View>
-          <InputField label={t("register_page.first_name")} required onChangeText={() => { }} />
-          <InputField label={t("register_page.middle_name")} onChangeText={() => { }} />
-          <InputField label={t("register_page.last_name")} required onChangeText={() => { }} />
-          <View >
-            <Text style={styles.inputLabel}>
-              {t('register_page.suffix')}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={t('register_page.suffix')}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="Jr." value="Jr." />
-                <Picker.Item label="Sr." value="Sr." />
-                <Picker.Item label="I" value="I" />
-                <Picker.Item label="II" value="II" />
-                <Picker.Item label="III" value="III" />
-                <Picker.Item label="IV" value="IV" />
-                <Picker.Item label="V" value="V" />
-                <Picker.Item label="VI" value="VI" />
-                <Picker.Item label="VII" value="VII" />
-              </Picker>
-            </View>
-          </View>
-        </View>
+      <NameSection
+        value={value}
+        onChange={onChange}
+        showChangeName={showChangeName}
+        onChangeNameToggle={setShowChangeName}
+      />
 
-        <Checkbox label={t("register_page.changed_name")} />
-        <Checkbox
-          label={t("register_page.eligibility.citizen")}
-          required
-          defaultValue
-        />
-      </View>
+      <AddressSection
+        value={value}
+        onChange={onChange}
+        showDifferentMailAddress={showDifferentMailAddress}
+        onDifferentMailToggle={setShowDifferentMailAddress}
+      />
 
-      {/* ADDRESS */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t("register_page.section_home_address")}
-          <HelpTooltip text="Put your home address in these boxes. Do not put your mailing address here if it is different from your home address. Do not use a post office box or rural route without a box number. If you live in a rural area but do not have a street address, or if you have no address, please show where you live using the map on the printed form." />
-        </Text>
-        <View style={styles.row}>
-          <InputField label={t("register_page.address")} required onChangeText={() => { }} />
-          <InputField label={t("register_page.unit_lot")} onChangeText={() => { }} />
-        </View>
+      <IDSection
+        value={value}
+        onChange={onChange}
+        state={state}
+      />
 
-        <View style={styles.row}>
-          <InputField label={t("register_page.city")} required onChangeText={() => { }} />
-          <InputField label={t("register_page.state")} required onChangeText={() => { }} />
-          <InputField label={t("ZIP CODE")} required onChangeText={() => { }} />
-        </View>
-
-        <Checkbox label={t("register_page.different_mail_address")} />
-        <Checkbox label={t("register_page.changed_address")} />
-      </View>
-
-      {/* ID */}
-      <View style={{ width: "100%" }}>
-        <InputField label="ID Number" required onChangeText={() => { }} />
-
-        <Text style={styles.hint}>
-          You must provide your valid {state.name} driver license number or a {state.name} nondriver identification number.
-          If you do not have a valid {state.name} driver license or a {state.name} nondriver identification number,
-          provide the last four digits of your social security number. If you do not have any of these, you may only
-          register at the county auditor's office.
-        </Text>
-      </View>
-
-      {/* ADDITIONAL */}
-      <View style={styles.section}>
-        <View >
-          <Text style={styles.inputLabel}>
-            {t('Race')}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-            >
-              <Picker.Item label="" value="" />
-              <Picker.Item label="Asian" value="Asian" />
-              <Picker.Item label="Black or African American" value="Black or African American" />
-              <Picker.Item label="Hispanic or Latino" value="Hispanic or Latino" />
-              <Picker.Item label="Native American or Alaskan Native" value="Native American or Alaskan Native" />
-              <Picker.Item label="Native Hawaiian or Other Pacific Islander" value="Native Hawaiian or Other Pacific Islander" />
-              <Picker.Item label="Other" value="Other" />
-              <Picker.Item label="Two or More Races" value="Two or More Races" />
-              <Picker.Item label="White" value="White" />
-              <Picker.Item label="Decline to State" value="Decline to State" />
-            </Picker>
-          </View>
-        </View>
-        <View >
-          <Text style={styles.inputLabel}>
-            {t('Party')}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-            >
-              <Picker.Item label="" value="" />
-              <Picker.Item label="Democratic" value="Democratic" />
-              <Picker.Item label="Independent" value="Independent" />
-              <Picker.Item label="Hispanic or Latino" value="Hispanic or Latino" />
-              <Picker.Item label="Republican" value="Republican" />
-              <Picker.Item label="Libertarian" value="Libertarian" />
-              <Picker.Item label="None (No Affiliation)" value="None (No Affiliation)" />
-            </Picker>
-          </View>
-        </View>
-      </View>
-
-      {/* CONTACT */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t("register_page.section_contact")}</Text>
-        <View style={styles.row}>
-          <InputField label={t("Date of Birth")} placeholder="MM / DD / YYYY" onChangeText={() => { }} />
-          <InputField label={t("Phone")} placeholder="###-###-####" onChangeText={() => { }} />
-          <View >
-            <Text style={styles.inputLabel}>
-              {t('Type')}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-              >
-                <Picker.Item label="Mobile" value="Mobile" />
-                <Picker.Item label="Home" value="Home" />
-                <Picker.Item label="Work" value="Work" />
-                <Picker.Item label="Other" value="Other" />
-              </Picker>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* CONSENTS */}
-      <View style={styles.section}>
-        <Checkbox label="Send me text messages from Rock the Vote" />
-
-        <Text style={styles.hint}>
-          By signing up, you consent to receive periodic text messages from Rock the Vote (788683).
-          Message and data rates may apply. Text HELP for info or STOP to stop receiving messages.
-          No purchase necessary. See terms and conditions and privacy policy.
-        </Text>
-
-        <Checkbox
-          label="Receive action alerts and other email updates"
-          defaultValue
-        />
-        <Checkbox label="I would like to volunteer with Rock the Vote" />
-        <Checkbox label="Please mail me my form, I can't print it right now" />
-      </View>
+      <ContactSection
+        value={value}
+        onChange={onChange}
+      />
     </>
   );
 };
+//         <Checkbox label={t("register_page.changed_address")} />
+//         {showChangedAddress && <>
+//           <Text>Previous Address</Text>
+//           <View style={styles.row}>
+//             <InputField
+//               label={t("register_page.address")}
+//               required
+//               onChangeText={(text: string) => updateField("changedAddress", text)}
+//             />
+//             <InputField
+//               label={t("register_page.unit_lot")}
+//               onChangeText={(text: string) => updateField("changedUnit", text)}
+//             />
+//           </View>
+//           <View style={styles.row}>
+//             <InputField
+//               label={t("register_page.city")}
+//               required
+//               onChangeText={(text: string) => updateField("changedCity", text)}
+//             />
+//             <View >
+//               <Text style={styles.inputLabel}>
+//                 {t('register_page.state')}*
+//               </Text>
+//               <View style={styles.pickerWrapper}>
+//                 <Picker
+//                   style={styles.picker}
+//                   itemStyle={styles.pickerItem}
+//                   selectedValue={t('register_page.state')}
+//                 >
+//                   <Picker.Item label="" value="" />
+//                   <Picker.Item label="AL" value="Alabama" />
+//                   <Picker.Item label="AK" value="Alaska" />
+//                   <Picker.Item label="AZ" value="Arizona" />
+//                   <Picker.Item label="AR" value="Arkansas" />
+//                   <Picker.Item label="CA" value="California" />
+//                   <Picker.Item label="CO" value="Colorado" />
+//                   <Picker.Item label="CT" value="Connecticut" />
+//                   <Picker.Item label="DE" value="Delaware" />
+//                   <Picker.Item label="DC" value="District of Columbia" />
+//                   <Picker.Item label="FL" value="Florida" />
+//                   <Picker.Item label="GA" value="Georgia" />
+//                   <Picker.Item label="HI" value="Hawaii" />
+//                   <Picker.Item label="ID" value="Idaho" />
+//                   <Picker.Item label="IL" value="Illinois" />
+//                   <Picker.Item label="IN" value="Indiana" />
+//                   <Picker.Item label="IA" value="Iowa" />
+//                   <Picker.Item label="KS" value="Kansas" />
+//                   <Picker.Item label="KY" value="Kentucky" />
+//                   <Picker.Item label="LA" value="Louisiana" />
+//                   <Picker.Item label="ME" value="Maine" />
+//                   <Picker.Item label="MD" value="Maryland" />
+//                   <Picker.Item label="MA" value="Massachusetts" />
+//                   <Picker.Item label="MI" value="Michigan" />
+//                   <Picker.Item label="MN" value="Minnesota" />
+//                   <Picker.Item label="MS" value="Mississippi" />
+//                   <Picker.Item label="MO" value="Missouri" />
+//                   <Picker.Item label="MT" value="Montana" />
+//                   <Picker.Item label="NE" value="Nebraska" />
+//                   <Picker.Item label="NV" value="Nevada" />
+//                   <Picker.Item label="NH" value="New Hampshire" />
+//                   <Picker.Item label="NJ" value="New Jersey" />
+//                   <Picker.Item label="NM" value="New Mexico" />
+//                   <Picker.Item label="NY" value="New York" />
+//                   <Picker.Item label="NC" value="North Carolina" />
+//                   <Picker.Item label="ND" value="North Dakota" />
+//                   <Picker.Item label="OH" value="Ohio" />
+//                   <Picker.Item label="OK" value="Oklahoma" />
+//                   <Picker.Item label="OR" value="Oregon" />
+//                   <Picker.Item label="PA" value="Pennsylvania" />
+//                   <Picker.Item label="RI" value="Rhode Island" />
+//                   <Picker.Item label="SC" value="South Carolina" />
+//                   <Picker.Item label="SD" value="South Dakota" />
+//                   <Picker.Item label="TN" value="Tennessee" />
+//                   <Picker.Item label="TX" value="Texas" />
+//                   <Picker.Item label="UT" value="Utah" />
+//                   <Picker.Item label="VT" value="Vermont" />
+//                   <Picker.Item label="VA" value="Virginia" />
+//                   <Picker.Item label="WA" value="Washington" />
+//                   <Picker.Item label="WV" value="West Virginia" />
+//                   <Picker.Item label="WI" value="Wisconsin" />
+//                   <Picker.Item label="WY" value="Wyoming" />
+//                 </Picker>
+//               </View>
+//             </View>
+//             <InputField
+//               label={t("zip")}
+//               required
+//               onChangeText={(text: string) => updateField("changedZip", text)}
+//             />
+//           </View>
+//         </>}
+//       </View >
+
+//       {/* ID */}
+//       <View style={{ width: "100%" }}>
+//         <InputField
+//           label={t('register_page.id_number')}
+//           required
+//           onChangeText={(text: string) => updateField("idNumber", text)}
+//         />
+//         <Text style={styles.hint}>{t("register_page.driver_license", { name: state.name })}</Text>
+//       </View>
+
+//       {/* ADDITIONAL */}
+//       <View style={styles.section}>
+//         <View>
+//           <Text style={styles.inputLabel}>
+//             {t('register_page.race.title')}
+//             <HelpTooltip text={t("register_page.race_help", { name: state.name })} />
+//           </Text>
+//           <View style={styles.pickerWrapper}>
+//             <Picker
+//               style={styles.picker}
+//               itemStyle={styles.pickerItem}
+//             >
+//               <Picker.Item label="" value="" />
+//               <Picker.Item label={t('register_page.race.asian')} value="Asian" />
+//               <Picker.Item label={t('register_page.race.black')} value="Black or African American" />
+//               <Picker.Item label={t('register_page.race.hispanic')} value="Hispanic or Latino" />
+//               <Picker.Item label={t('register_page.race.native_american')} value="Native American or Alaskan Native" />
+//               <Picker.Item label={t('register_page.race.pacific')} value="Native Hawaiian or Other Pacific Islander" />
+//               <Picker.Item label={t('register_page.race.other')} value="Other" />
+//               <Picker.Item label={t('register_page.race.multiple')} value="Two or More Races" />
+//               <Picker.Item label={t('register_page.race.white')} value="White" />
+//               <Picker.Item label={t('register_page.race.decline')} value="Decline to State" />
+//             </Picker>
+//           </View>
+//         </View>
+//         <View >
+//           <Text style={styles.inputLabel}>
+//             {t('register_page.party.title')}*
+//             <HelpTooltip text={"You do not have to register with a political party to register to vote."} />
+//           </Text>
+//           <View style={styles.pickerWrapper}>
+//             <Picker
+//               style={styles.picker}
+//               itemStyle={styles.pickerItem}
+//             >
+//               <Picker.Item label="" value="" />
+//               <Picker.Item label={t('register_page.party.democratic')} value="Democratic" />
+//               <Picker.Item label={t('register_page.party.independent')} value="Independent" />
+//               <Picker.Item label={t('register_page.party.republican')} value="Republican" />
+//               <Picker.Item label={t('register_page.party.libertarian')} value="Libertarian" />
+//               <Picker.Item label={t('register_page.party.none')} value="None (No Affiliation)" />
+//             </Picker>
+//           </View>
+//         </View>
+//       </View >
+
+//       {/* CONTACT */}
+//       < View style={styles.section} >
+//         <Text style={styles.sectionTitle}>{t("register_page.section_contact")}</Text>
+//         <View style={styles.row}>
+//           <InputField
+//             label={t('register_page.dob')}
+//             helpText={t('register_page.dob_help')}
+//             required
+//             placeholder="MM / DD / YYYY"
+//             onChangeText={(text: string) => updateField("birth", text)}
+//           />
+//           <InputField
+//             label={t('register_page.phone')}
+//             helpText={t('register_page.phone_help')}
+//             placeholder="###-###-####"
+//             onChangeText={(text: string) => updateField("phone", text)}
+//           />
+//           <View >
+//             <Text style={styles.inputLabel}>{t('register_page.phone_type')}</Text>
+//             <View style={styles.pickerWrapper}>
+//               <Picker
+//                 style={styles.picker}
+//                 itemStyle={styles.pickerItem}
+//               >
+//                 <Picker.Item label={t('register_page.phone_types.mobile')} value="Mobile" />
+//                 <Picker.Item label={t('register_page.phone_types.home')} value="Home" />
+//                 <Picker.Item label={t('register_page.phone_types.work')} value="Work" />
+//                 <Picker.Item label={t('register_page.phone_types.other')} value="Other" />
+//               </Picker>
+//             </View>
+//           </View>
+//         </View>
+//       </View >
+
+//       {/* CONSENTS */}
+//       < View style={styles.section} >
+//         <Checkbox label={t('register_page.sms_opt_in')} />
+//         <Text style={styles.hint}>{t('register_page.sms_disclaimer')}</Text>
+//         <Checkbox
+//           label={t('register_page.email_opt_in')}
+//           defaultValue
+//         />
+//         <Checkbox label={t('register_page.volunteer')} />
+//         <Checkbox label={t('register_page.mail_form')} />
+//       </View >
+//     </>
+//   );
+// };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
