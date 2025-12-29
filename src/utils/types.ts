@@ -84,7 +84,9 @@ export type RegisterFormState = {
   party: string;
 
   // CONTACT
-  birth: string;
+  birthMonth: string;
+  birthDay: string;
+  birthYear: string;
   phone: string;
   phoneType: string;
 

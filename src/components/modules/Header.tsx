@@ -48,7 +48,6 @@ const getStyles = (theme: any) =>
       fontSize: 28,
       fontWeight: "semibold",
       fontFamily: "Inter-VariableFont_opsz_wght",
-      marginLeft: "10%",
       color: theme.textPrimary,
     },
   });

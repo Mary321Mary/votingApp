@@ -71,7 +71,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     if (Object.keys(validationErrors).length === 0) {
       setIsLoading(true);
       try {
-        const response = await submitEmailZipFake({ email, zip: zipCode, locale: i18n.language });
+        const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
         navigation.navigate("Register", response.data);
       } catch (error) {
         console.error("Register failed:", error);
@@ -99,16 +99,18 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           onChangeText={handleEmailChange}
         />
         <View style={styles.zipCodeRow}>
-          <InputField
-            label={t("zip")}
-            placeholder="12345"
-            required
-            numeric
-            disabled={isLoading}
-            errorMessage={errors.zip}
-            helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
-            onChangeText={handleZipCode}
-          />
+          <View style={{ flex: 1 }}>
+            <InputField
+              label={t("zip")}
+              placeholder="12345"
+              required
+              numeric
+              disabled={isLoading}
+              errorMessage={errors.zip}
+              helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
+              onChangeText={handleZipCode}
+            />
+          </View>
           <TouchableOpacity
             style={styles.button}
             onPress={handleSubmit}

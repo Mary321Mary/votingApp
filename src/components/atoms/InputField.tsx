@@ -5,12 +5,14 @@ import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
 interface InputFieldProp {
-  label: string;
+  label?: string;
+  value?: string;
   placeholder?: string;
   required?: boolean;
   secureTextEntry?: boolean;
   disabled?: boolean;
   numeric?: boolean;
+  maxLength?: number;
   errorMessage?: string;
   helpText?: string;
   onChangeText: (text: string) => void;
@@ -18,6 +20,7 @@ interface InputFieldProp {
 
 const InputField = ({
   label,
+  value,
   placeholder,
   required = false,
   secureTextEntry = false,
@@ -38,11 +41,13 @@ const InputField = ({
       </Text>
       {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TextInput
+        value={value ?? ""}
         style={[styles.textInput, errorMessage && styles.inputError]}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
         disableFullscreenUI={disabled}
         keyboardType={numeric ? "number-pad" : "default"}
+        maxLength={numeric ? 5 : undefined}
         onChangeText={onChangeText}
       />
     </View>
@@ -53,7 +58,7 @@ const getStyles = (theme: any) =>
   StyleSheet.create({
     inputContainer: {
       marginTop: 10,
-      flex: 1,
+      width: "100%"
     },
     inputLabel: {
       fontFamily: "Inter-VariableFont_opsz_wght",

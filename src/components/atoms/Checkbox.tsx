@@ -6,18 +6,18 @@ import HelpTooltip from './HelpTooltip';
 export const Checkbox = ({
   label,
   helpText,
-  defaultValue = false,
+  value = false,
   required,
+  onValueChange
 }: any) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const [value, setValue] = React.useState(defaultValue);
 
   return (
     <>
-      <View style={styles.checkbox}>
-        <Switch value={value} onValueChange={setValue} />
-        <Text style={styles.checkboxText}>
+      <View style={styles.checkbox} >
+        <Switch value={value} onValueChange={onValueChange} />
+        <Text style={styles.checkboxText} onPress={onValueChange}>
           {label} {required && <Text style={styles.required}>*</Text>}
           {helpText && <HelpTooltip text={helpText} />}
         </Text>

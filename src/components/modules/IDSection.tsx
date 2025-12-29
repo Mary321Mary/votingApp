@@ -3,14 +3,17 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import { ThemeContext } from '@/styles/ThemeProvider';
-import InputField from '../atoms/InputField';
 import { FormProps, StateData } from '@/utils/types';
+
+import InputField from '../atoms/InputField';
+import HelpTooltip from '../atoms/HelpTooltip';
 
 interface IDSectionProps extends Pick<FormProps, 'value' | 'onChange'> {
   state: StateData;
+  showParty?: boolean;
 }
 
-export const IDSection = ({ value, onChange, state }: IDSectionProps) => {
+export const IDSection = ({ value, onChange, state, showParty = false }: IDSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -25,49 +28,58 @@ export const IDSection = ({ value, onChange, state }: IDSectionProps) => {
   return (
     <View style={styles.section}>
       <InputField
-        label="ID Number"
+        label={t('register_page.id_number')}
         required
+        value={value.idNumber}
         onChangeText={(text: string) => updateField("idNumber", text)}
       />
 
-      <Text style={styles.hint}>
-        You must provide your valid {state.name} driver license number or a {state.name} nondriver identification number.
-        If you do not have a valid {state.name} driver license or a {state.name} nondriver identification number,
-        provide the last four digits of your social security number. If you do not have any of these, you may only
-        register at the county auditor's office.
+      <Text style={styles.hint}>{t("register_page.driver_license", { name: state.name })}</Text>
+      <Text style={styles.inputLabel}>
+        {t('register_page.race.title')}
+        <HelpTooltip text={t("register_page.race_help", { name: state.name })} />
       </Text>
-
-      <View>
-        <Text style={styles.inputLabel}>{t('Race')}</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker style={styles.picker} itemStyle={styles.pickerItem}>
-            <Picker.Item label="" value="" />
-            <Picker.Item label="Asian" value="Asian" />
-            <Picker.Item label="Black or African American" value="Black or African American" />
-            <Picker.Item label="Hispanic or Latino" value="Hispanic or Latino" />
-            <Picker.Item label="Native American or Alaskan Native" value="Native American or Alaskan Native" />
-            <Picker.Item label="Native Hawaiian or Other Pacific Islander" value="Native Hawaiian or Other Pacific Islander" />
-            <Picker.Item label="Other" value="Other" />
-            <Picker.Item label="Two or More Races" value="Two or More Races" />
-            <Picker.Item label="White" value="White" />
-            <Picker.Item label="Decline to State" value="Decline to State" />
-          </Picker>
-        </View>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          selectedValue={value.race}
+          onValueChange={(itemValue) => updateField("race", itemValue)}
+        >
+          <Picker.Item label="" value="" />
+          <Picker.Item label={t('register_page.race.asian')} value="Asian" />
+          <Picker.Item label={t('register_page.race.black')} value="Black or African American" />
+          <Picker.Item label={t('register_page.race.hispanic')} value="Hispanic or Latino" />
+          <Picker.Item label={t('register_page.race.native_american')} value="Native American or Alaskan Native" />
+          <Picker.Item label={t('register_page.race.pacific')} value="Native Hawaiian or Other Pacific Islander" />
+          <Picker.Item label={t('register_page.race.other')} value="Other" />
+          <Picker.Item label={t('register_page.race.multiple')} value="Two or More Races" />
+          <Picker.Item label={t('register_page.race.white')} value="White" />
+          <Picker.Item label={t('register_page.race.decline')} value="Decline to State" />
+        </Picker>
       </View>
 
-      <View>
-        <Text style={styles.inputLabel}>{t('Party')}</Text>
+      {showParty && <>
+        <Text style={styles.inputLabel}>
+          {t('register_page.party.title')}
+          <HelpTooltip text={"You do not have to register with a political party to register to vote."} />
+        </Text>
         <View style={styles.pickerWrapper}>
-          <Picker style={styles.picker} itemStyle={styles.pickerItem}>
+          <Picker
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+            selectedValue={value.party}
+            onValueChange={(itemValue) => updateField("party", itemValue)}
+          >
             <Picker.Item label="" value="" />
-            <Picker.Item label="Democratic" value="Democratic" />
-            <Picker.Item label="Independent" value="Independent" />
-            <Picker.Item label="Republican" value="Republican" />
-            <Picker.Item label="Libertarian" value="Libertarian" />
-            <Picker.Item label="None (No Affiliation)" value="None (No Affiliation)" />
+            <Picker.Item label={t('register_page.party.democratic')} value="Democratic" />
+            <Picker.Item label={t('register_page.party.independent')} value="Independent" />
+            <Picker.Item label={t('register_page.party.republican')} value="Republican" />
+            <Picker.Item label={t('register_page.party.libertarian')} value="Libertarian" />
+            <Picker.Item label={t('register_page.party.none')} value="None (No Affiliation)" />
           </Picker>
         </View>
-      </View>
+      </>}
     </View>
   );
 };
@@ -75,9 +87,11 @@ export const IDSection = ({ value, onChange, state }: IDSectionProps) => {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     section: {
-      marginBottom: 24,
+      paddingHorizontal: 5,
+      marginBottom: 10,
     },
     inputLabel: {
+      marginVertical: 5,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       color: theme.textPrimary,
@@ -87,13 +101,13 @@ const getStyles = (theme: any) =>
       minWidth: 70,
       height: 48,
       borderWidth: 1,
-      borderColor: "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       justifyContent: "center",
-      backgroundColor: "#fff",
+      backgroundColor: theme.white,
     },
     picker: {
-      height: 48,
+      // height: 48,
       width: "100%",
     },
     pickerItem: {
@@ -104,6 +118,7 @@ const getStyles = (theme: any) =>
       fontSize: 13,
       color: theme.gray,
       marginTop: 8,
+      marginBottom: 8,
       lineHeight: 18,
     },
   });
