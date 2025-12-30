@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { FormProps, RegisterFormState } from '@/utils/types';
 import { ThemeContext } from '@/styles/ThemeProvider';
@@ -11,41 +11,45 @@ export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
-  const [licenseUpdate, setLicenseUpdate] = useState<null | boolean>(null);
-  const [duplicateLicense, setDuplicateLicense] = useState<null | boolean>(null);
-
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K]
   ) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue, });
   };
 
   return (
     <View style={styles.block}>
       <Checkbox
+        value={value.isCitizen}
         label={t("register_page.eligibility.citizen")}
         required
+        onValueChange={() => updateField("isCitizen", value.isCitizen)}
       />
       <Checkbox
+        value={value.isAdult}
         label={t("register_page.eligibility.age")}
         required
+        onValueChange={() => updateField("isAdult", value.isAdult)}
       />
       <Checkbox
+        value={value.residency}
         label={t("register_page.eligibility.residency", {
           state: state.name,
         })}
+        onValueChange={() => updateField("residency", value.isAdult)}
       />
       <Checkbox
+        value={value.cancelPrevious}
         label={t("register_page.eligibility.cancelPrevious")}
         required
+        onValueChange={() => updateField("cancelPrevious", value.cancelPrevious)}
       />
       <Checkbox
+        value={value.digitalSignature}
         label={t("register_page.eligibility.digitalSignature")}
         required
+        onValueChange={() => updateField("digitalSignature", value.digitalSignature)}
       />
 
       {/* LICENSE UPDATE */}
@@ -56,13 +60,13 @@ export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
 
       <Radio
         label={t("register_page.no")}
-        selected={licenseUpdate === false}
-        onPress={() => setLicenseUpdate(false)}
+        selected={value.licenseUpdated === "no"}
+        onPress={() => updateField("licenseUpdated", "no")}
       />
       <Radio
         label={t("register_page.yes")}
-        selected={licenseUpdate === true}
-        onPress={() => setLicenseUpdate(true)}
+        selected={value.licenseUpdated === "yes"}
+        onPress={() => updateField("licenseUpdated", "yes")}
       />
 
       {/* DUPLICATE LICENSE */}
@@ -73,13 +77,13 @@ export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
 
       <Radio
         label={t("register_page.no")}
-        selected={duplicateLicense === false}
-        onPress={() => setDuplicateLicense(false)}
+        selected={value.duplicateLicense === "no"}
+        onPress={() => updateField("duplicateLicense", "no")}
       />
       <Radio
         label={t("register_page.yes")}
-        selected={duplicateLicense === true}
-        onPress={() => setDuplicateLicense(true)}
+        selected={value.duplicateLicense === "yes"}
+        onPress={() => updateField("duplicateLicense", "yes")}
       />
     </View>
   );

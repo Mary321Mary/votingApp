@@ -16,10 +16,7 @@ export const ContactSection = ({ value, onChange }: ContactSectionProps) => {
   const { t } = useTranslation();
 
   const updateField = (key: string, fieldValue: any) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue });
   };
 
   return (
@@ -140,17 +137,17 @@ const getStyles = (theme: any) =>
     },
     pickerWrapper: {
       flexBasis: "18%",
-      minWidth: 70,
+      minWidth: 120,
       height: 48,
       borderWidth: 1,
-      borderColor: "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       justifyContent: "center",
-      backgroundColor: "#fff",
+      backgroundColor: theme.white,
     },
     picker: {
-      height: 48,
       width: "100%",
+      color: theme.textPrimary,
     },
     pickerItem: {
       fontSize: 14,
@@ -194,5 +191,10 @@ const getStyles = (theme: any) =>
       borderRadius: 6,
       padding: 10,
       textAlign: "center",
+    },
+    selectedValue: {
+      fontSize: 12,
+      color: theme.gray,
+      marginTop: 4,
     },
   });

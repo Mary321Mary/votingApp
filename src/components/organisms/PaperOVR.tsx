@@ -6,15 +6,12 @@ import { IDSection } from '../modules/IDSection';
 import { ContactSection } from '../modules/ContactSection';
 
 export const PaperOVR = ({ state, value, onChange }: FormProps) => {
-  const [showChangeName, setShowChangeName] = React.useState(false);
 
   return (
     <>
       <NameSection
         value={value}
         onChange={onChange}
-        showChangeName={showChangeName}
-        onChangeNameToggle={setShowChangeName}
       />
 
       <AddressSection

@@ -19,10 +19,7 @@ export const IDSection = ({ value, onChange, state, showParty = false }: IDSecti
   const { t } = useTranslation();
 
   const updateField = (key: string, fieldValue: any) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue });
   };
 
   return (

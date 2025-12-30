@@ -3,13 +3,21 @@ import { StyleSheet, Switch, Text, View } from 'react-native';
 import { ThemeContext } from '@/styles/ThemeProvider';
 import HelpTooltip from './HelpTooltip';
 
+interface CheckboxProps {
+  label: string;
+  helpText?: string;
+  value?: boolean;
+  required?: boolean;
+  onValueChange: (value: boolean) => void;
+}
+
 export const Checkbox = ({
   label,
   helpText,
   value = false,
   required,
   onValueChange
-}: any) => {
+}: CheckboxProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
@@ -17,7 +25,7 @@ export const Checkbox = ({
     <>
       <View style={styles.checkbox} >
         <Switch value={value} onValueChange={onValueChange} />
-        <Text style={styles.checkboxText} onPress={onValueChange}>
+        <Text style={styles.checkboxText} onPress={() => onValueChange(!value)}>
           {label} {required && <Text style={styles.required}>*</Text>}
           {helpText && <HelpTooltip text={helpText} />}
         </Text>

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -16,19 +16,11 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
-  const [eyeColor, setEyeColor] = useState("");
-  const [birthMM, setBirthMM] = useState("");
-  const [birthDD, setBirthDD] = useState("");
-  const [birthYYYY, setBirthYYYY] = useState("");
-
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K]
   ) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue });
   };
 
   return (
@@ -44,11 +36,13 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
       <View style={styles.fieldset}>
         <Text style={styles.legend}>{t("register_page.section_name")}</Text>
         <InputField
+          value={value.fullName}
           label={t("register_page.full_name_label", { state: state.name })}
           required
           onChangeText={(text: string) => updateField("fullName", text)}
         />
         <InputField
+          value={value.licenseNumber}
           label={t("register_page.license_number_label", { state: state.name })}
           required
           onChangeText={(text: string) => updateField("licenseNumber", text)}
@@ -67,24 +61,24 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
               placeholder="MM"
               keyboardType="number-pad"
               maxLength={2}
-              value={birthMM}
-              onChangeText={setBirthMM}
+              value={value.birthMonth}
+              onChangeText={(text: string) => updateField("birthMonth", text)}
             />
             <TextInput
               style={styles.dateInput}
               placeholder="DD"
               keyboardType="number-pad"
               maxLength={2}
-              value={birthDD}
-              onChangeText={setBirthDD}
+              value={value.birthDay}
+              onChangeText={(text: string) => updateField("birthDay", text)}
             />
             <TextInput
               style={styles.dateInput}
               placeholder="YYYY"
               keyboardType="number-pad"
               maxLength={4}
-              value={birthYYYY}
-              onChangeText={setBirthYYYY}
+              value={value.birthYear}
+              onChangeText={(text: string) => updateField("birthYear", text)}
             />
           </View>
         </View>
@@ -92,12 +86,12 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
         {/* EYE COLOR */}
         <View style={styles.inputBlock}>
           <Text style={styles.label}>
-            Eye color (as printed on your license or state ID)
-            <Text style={styles.required}> *</Text>
+            {t("register_page.eye_color.label")}
+            <Text style={styles.required}>*</Text>
           </Text>
 
           <View style={styles.pickerWrapper}>
-            <Picker selectedValue={eyeColor} onValueChange={setEyeColor}>
+            <Picker selectedValue={value.eyeColor} onValueChange={(text: string) => updateField("eyeColor", text)}>
               <Picker.Item label="" value="" />
               <Picker.Item label={t("register_page.eye_color.none")} value="UNK" />
               <Picker.Item label={t("register_page.eye_color.black")} value="BLK" />
@@ -114,8 +108,10 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
 
         {/* SSN */}
         <InputField
+          value={value.ssnLast4}
           label={t("register_page.ssn_last4_label")}
           required
+          numeric
           onChangeText={(text: string) => updateField("ssnLast4", text)}
         />
       </View>
@@ -166,6 +162,7 @@ const getStyles = (theme: any) =>
       gap: 8,
     },
     dateInput: {
+      backgroundColor: theme.white,
       flex: 1,
       borderWidth: 1,
       borderColor: theme.borderColor,
@@ -174,6 +171,7 @@ const getStyles = (theme: any) =>
       textAlign: "center",
     },
     pickerWrapper: {
+      backgroundColor: theme.white,
       borderWidth: 1,
       borderColor: theme.borderColor,
       borderRadius: 6,

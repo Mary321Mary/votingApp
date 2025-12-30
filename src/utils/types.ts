@@ -189,3 +189,7 @@ export interface SubmitEmailZipResponse {
   state?: StateData;
   user?: Record<string, unknown>;
 }
+
+export interface SubmitEmailZipResponseProps extends SubmitEmailZipResponse {
+  zip: string;
+}

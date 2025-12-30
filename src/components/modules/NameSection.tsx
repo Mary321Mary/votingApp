@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
@@ -9,22 +9,18 @@ import { FormProps } from '@/utils/types';
 import { Checkbox } from '../atoms/Checkbox';
 
 interface NameSectionProps extends Pick<FormProps, 'value' | 'onChange'> {
-  showChangeName?: boolean;
   showAgeEligibility?: boolean;
-  onChangeNameToggle?: (show: boolean) => void;
 }
 
-export const NameSection = ({ value, onChange, showChangeName, onChangeNameToggle, showAgeEligibility = false }: NameSectionProps) => {
+export const NameSection = ({ value, onChange, showAgeEligibility = false }: NameSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  const [showIsAdultBlock, setShowIsAdultBlock] = React.useState(false);
+  const [showIsAdultBlock, setShowIsAdultBlock] = useState(false);
+  const [showChangeName, setShowChangeName] = useState(false);
 
   const updateField = (key: string, fieldValue: any) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue });
   };
 
   return (
@@ -96,12 +92,13 @@ export const NameSection = ({ value, onChange, showChangeName, onChangeNameToggl
       </View>
 
       {!showIsAdultBlock && <Checkbox
+        value={showChangeName}
         label={t("register_page.changed_name")}
         helpText={t('register_page.changed_name_help')}
-        onValueChange={onChangeNameToggle}
+        onValueChange={setShowChangeName}
       />}
 
-      {showChangeName && (
+      {showChangeName && !showIsAdultBlock && (
         <>
           <Text>Previous Name</Text>
           <View style={styles.row}>
@@ -124,31 +121,25 @@ export const NameSection = ({ value, onChange, showChangeName, onChangeNameToggl
                 </Picker>
               </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <InputField
-                label={t("register_page.first_name")}
-                required
-                value={value.changedFirstName}
-                onChangeText={(text: string) => updateField("changedFirstName", text)}
-              />
-            </View>
+            <InputField
+              label={t("register_page.first_name")}
+              required
+              value={value.changedFirstName}
+              onChangeText={(text: string) => updateField("changedFirstName", text)}
+            />
             {!showIsAdultBlock &&
-              <View style={{ flex: 1 }}>
-                <InputField
-                  label={t("register_page.middle_name")}
-                  value={value.changedMiddleName}
-                  onChangeText={(text: string) => updateField("changedMiddleName", text)}
-                />
-              </View>
-            }
-            <View style={{ flex: 1 }}>
               <InputField
-                label={t("register_page.last_name")}
-                required
-                value={value.changedLastName}
-                onChangeText={(text: string) => updateField("changedLastName", text)}
+                label={t("register_page.middle_name")}
+                value={value.changedMiddleName}
+                onChangeText={(text: string) => updateField("changedMiddleName", text)}
               />
-            </View>
+            }
+            <InputField
+              label={t("register_page.last_name")}
+              required
+              value={value.changedLastName}
+              onChangeText={(text: string) => updateField("changedLastName", text)}
+            />
             <View >
               <Text style={styles.inputLabel}>
                 {t('register_page.suffix')}
@@ -180,12 +171,12 @@ export const NameSection = ({ value, onChange, showChangeName, onChangeNameToggl
         label={t("register_page.eligibility.citizen")}
         required
         value={value.isCitizen}
-        onValueChange={() => updateField("isCitizen", value.isCitizen)}
+        onValueChange={() => updateField("isCitizen", !value.isCitizen)}
       />
       {showAgeEligibility && <Checkbox
         label={t("register_page.age_eligibility")}
         required
-        value
+        value={showIsAdultBlock}
         onValueChange={() => setShowIsAdultBlock(!showIsAdultBlock)}
       />}
     </View>
@@ -220,10 +211,10 @@ const getStyles = (theme: any) =>
       minWidth: "100%",
       height: 48,
       borderWidth: 1,
-      borderColor: "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       justifyContent: "center",
-      backgroundColor: "#fff",
+      backgroundColor: theme.white,
     },
     picker: {
       width: "100%",

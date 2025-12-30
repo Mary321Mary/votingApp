@@ -15,7 +15,7 @@ interface InputFieldProp {
   maxLength?: number;
   errorMessage?: string;
   helpText?: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
 }
 
 const InputField = ({

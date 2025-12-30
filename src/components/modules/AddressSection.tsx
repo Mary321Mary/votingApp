@@ -9,6 +9,7 @@ import InputField from '../atoms/InputField';
 import HelpTooltip from '../atoms/HelpTooltip';
 import { Checkbox } from '../atoms/Checkbox';
 import { Radio } from '../atoms/Radio';
+import { STATES } from '@/utils/constants';
 
 interface AddressSectionProps extends Pick<FormProps, 'value' | 'onChange'> {
   state: StateData;
@@ -28,10 +29,7 @@ export const AddressSection = ({
   const [showDifferentMailAddress, setShowDifferentMailAddress] = React.useState(false);
 
   const updateField = (key: string, fieldValue: any) => {
-    onChange({
-      ...value,
-      [key]: fieldValue,
-    });
+    onChange({ ...value, [key]: fieldValue });
   };
 
   return (
@@ -42,48 +40,38 @@ export const AddressSection = ({
       </Text>
 
       <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-          <InputField
-            label={t("register_page.address")}
-            required
-            value={value.address}
-            onChangeText={(text: string) => updateField("address", text)}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <InputField
-            label={t("register_page.unit_lot")}
-            value={value.unit}
-            onChangeText={(text: string) => updateField("unit", text)}
-          />
-        </View>
+        <InputField
+          label={t("register_page.address")}
+          required
+          value={value.address}
+          onChangeText={(text: string) => updateField("address", text)}
+        />
+        <InputField
+          label={t("register_page.unit_lot")}
+          value={value.unit}
+          onChangeText={(text: string) => updateField("unit", text)}
+        />
       </View>
 
       <View style={styles.row}>
-        <View style={{ flex: 1 }}>
-          <InputField
-            label={t("register_page.city")}
-            required
-            value={value.city}
-            onChangeText={(text: string) => updateField("city", text)}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <InputField
-            label={t("register_page.state")}
-            required
-            value={state.abbreviation}
-            onChangeText={() => { }}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <InputField
-            label={t("zip")}
-            required
-            value={value.zip}
-            onChangeText={() => { }}
-          />
-        </View>
+        <InputField
+          label={t("register_page.city")}
+          required
+          value={value.city}
+          onChangeText={(text: string) => updateField("city", text)}
+        />
+        <InputField
+          label={t("register_page.state")}
+          required
+          disabled
+          value={state.abbreviation}
+        />
+        <InputField
+          label={t("zip")}
+          required
+          disabled
+          value={value.zip}
+        />
       </View>
 
       <Checkbox
@@ -126,63 +114,16 @@ export const AddressSection = ({
                 selectedValue={value.differentState}
                 onValueChange={(itemValue) => updateField("differentState", itemValue)}
               >
-                <Picker.Item label="AL" value="Alabama" />
-                <Picker.Item label="AK" value="Alaska" />
-                <Picker.Item label="AZ" value="Arizona" />
-                <Picker.Item label="AR" value="Arkansas" />
-                <Picker.Item label="CA" value="California" />
-                <Picker.Item label="CO" value="Colorado" />
-                <Picker.Item label="CT" value="Connecticut" />
-                <Picker.Item label="DE" value="Delaware" />
-                <Picker.Item label="DC" value="District of Columbia" />
-                <Picker.Item label="FL" value="Florida" />
-                <Picker.Item label="GA" value="Georgia" />
-                <Picker.Item label="HI" value="Hawaii" />
-                <Picker.Item label="ID" value="Idaho" />
-                <Picker.Item label="IL" value="Illinois" />
-                <Picker.Item label="IN" value="Indiana" />
-                <Picker.Item label="IA" value="Iowa" />
-                <Picker.Item label="KS" value="Kansas" />
-                <Picker.Item label="KY" value="Kentucky" />
-                <Picker.Item label="LA" value="Louisiana" />
-                <Picker.Item label="ME" value="Maine" />
-                <Picker.Item label="MD" value="Maryland" />
-                <Picker.Item label="MA" value="Massachusetts" />
-                <Picker.Item label="MI" value="Michigan" />
-                <Picker.Item label="MN" value="Minnesota" />
-                <Picker.Item label="MS" value="Mississippi" />
-                <Picker.Item label="MO" value="Missouri" />
-                <Picker.Item label="MT" value="Montana" />
-                <Picker.Item label="NE" value="Nebraska" />
-                <Picker.Item label="NV" value="Nevada" />
-                <Picker.Item label="NH" value="New Hampshire" />
-                <Picker.Item label="NJ" value="New Jersey" />
-                <Picker.Item label="NM" value="New Mexico" />
-                <Picker.Item label="NY" value="New York" />
-                <Picker.Item label="NC" value="North Carolina" />
-                <Picker.Item label="ND" value="North Dakota" />
-                <Picker.Item label="OH" value="Ohio" />
-                <Picker.Item label="OK" value="Oklahoma" />
-                <Picker.Item label="OR" value="Oregon" />
-                <Picker.Item label="PA" value="Pennsylvania" />
-                <Picker.Item label="RI" value="Rhode Island" />
-                <Picker.Item label="SC" value="South Carolina" />
-                <Picker.Item label="SD" value="South Dakota" />
-                <Picker.Item label="TN" value="Tennessee" />
-                <Picker.Item label="TX" value="Texas" />
-                <Picker.Item label="UT" value="Utah" />
-                <Picker.Item label="VT" value="Vermont" />
-                <Picker.Item label="VA" value="Virginia" />
-                <Picker.Item label="WA" value="Washington" />
-                <Picker.Item label="WV" value="West Virginia" />
-                <Picker.Item label="WI" value="Wisconsin" />
-                <Picker.Item label="WY" value="Wyoming" />
+                {STATES.map((state_value: { value: string, name: string }) => (
+                  <Picker.Item key={state_value.name} label={state_value.name} value={state_value.value} />
+                ))}
               </Picker>
             </View>
           </View>
           <InputField
             label={t("zip")}
             required
+            numeric
             value={value.differentZip}
             onChangeText={(text: string) => updateField("differentZip", text)}
           />
@@ -226,64 +167,16 @@ export const AddressSection = ({
                 selectedValue={value.changedState}
                 onValueChange={(itemValue) => updateField("changedState", itemValue)}
               >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="AL" value="Alabama" />
-                <Picker.Item label="AK" value="Alaska" />
-                <Picker.Item label="AZ" value="Arizona" />
-                <Picker.Item label="AR" value="Arkansas" />
-                <Picker.Item label="CA" value="California" />
-                <Picker.Item label="CO" value="Colorado" />
-                <Picker.Item label="CT" value="Connecticut" />
-                <Picker.Item label="DE" value="Delaware" />
-                <Picker.Item label="DC" value="District of Columbia" />
-                <Picker.Item label="FL" value="Florida" />
-                <Picker.Item label="GA" value="Georgia" />
-                <Picker.Item label="HI" value="Hawaii" />
-                <Picker.Item label="ID" value="Idaho" />
-                <Picker.Item label="IL" value="Illinois" />
-                <Picker.Item label="IN" value="Indiana" />
-                <Picker.Item label="IA" value="Iowa" />
-                <Picker.Item label="KS" value="Kansas" />
-                <Picker.Item label="KY" value="Kentucky" />
-                <Picker.Item label="LA" value="Louisiana" />
-                <Picker.Item label="ME" value="Maine" />
-                <Picker.Item label="MD" value="Maryland" />
-                <Picker.Item label="MA" value="Massachusetts" />
-                <Picker.Item label="MI" value="Michigan" />
-                <Picker.Item label="MN" value="Minnesota" />
-                <Picker.Item label="MS" value="Mississippi" />
-                <Picker.Item label="MO" value="Missouri" />
-                <Picker.Item label="MT" value="Montana" />
-                <Picker.Item label="NE" value="Nebraska" />
-                <Picker.Item label="NV" value="Nevada" />
-                <Picker.Item label="NH" value="New Hampshire" />
-                <Picker.Item label="NJ" value="New Jersey" />
-                <Picker.Item label="NM" value="New Mexico" />
-                <Picker.Item label="NY" value="New York" />
-                <Picker.Item label="NC" value="North Carolina" />
-                <Picker.Item label="ND" value="North Dakota" />
-                <Picker.Item label="OH" value="Ohio" />
-                <Picker.Item label="OK" value="Oklahoma" />
-                <Picker.Item label="OR" value="Oregon" />
-                <Picker.Item label="PA" value="Pennsylvania" />
-                <Picker.Item label="RI" value="Rhode Island" />
-                <Picker.Item label="SC" value="South Carolina" />
-                <Picker.Item label="SD" value="South Dakota" />
-                <Picker.Item label="TN" value="Tennessee" />
-                <Picker.Item label="TX" value="Texas" />
-                <Picker.Item label="UT" value="Utah" />
-                <Picker.Item label="VT" value="Vermont" />
-                <Picker.Item label="VA" value="Virginia" />
-                <Picker.Item label="WA" value="Washington" />
-                <Picker.Item label="WV" value="West Virginia" />
-                <Picker.Item label="WI" value="Wisconsin" />
-                <Picker.Item label="WY" value="Wyoming" />
+                {STATES.map((state_value: { value: string, name: string }) => (
+                  <Picker.Item key={state_value.name} label={state_value.name} value={state_value.value} />
+                ))}
               </Picker>
             </View>
           </View>
           <InputField
             label={t("zip")}
             required
+            numeric
             value={value.changedZip}
             onChangeText={(text: string) => updateField("changedZip", text)}
           />
@@ -334,14 +227,14 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
     },
     pickerWrapper: {
-      flexBasis: "18%", // Title
-      minWidth: 70,
+      flexBasis: "18%",
+      minWidth: "100%",
       height: 48,
       borderWidth: 1,
-      borderColor: "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       justifyContent: "center",
-      backgroundColor: "#fff",
+      backgroundColor: theme.white,
     },
     picker: {
       width: "100%",
