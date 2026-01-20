@@ -5,6 +5,7 @@
  * @format
  */
 
+import React, { useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
@@ -12,9 +13,15 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { UIConfigProvider } from "./contexts/UIConfigContext";
 import { ThemeProvider } from "./styles/ThemeProvider";
 import Navigation from "./components/organisms/Navigation";
+import { loadRemoteTranslations } from "./i18n/loader";
+import i18n from "./i18n";
 
 function App() {
   const isDarkMode = useColorScheme() === "dark";
+
+  useEffect(() => {
+    loadRemoteTranslations(i18n.language);
+  }, []);
 
   return (
     <SafeAreaProvider>

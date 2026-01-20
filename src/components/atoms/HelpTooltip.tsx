@@ -38,6 +38,7 @@ const getStyles = (theme: any) =>
       position: "relative",
     },
     questionMarkContainer: {
+      marginLeft: 5,
       width: 18,
       height: 18,
       borderRadius: 9,

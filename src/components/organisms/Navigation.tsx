@@ -1,14 +1,14 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultLayout from "@/layout/DefaultLayout";
-import { SubmitEmailZipResponse } from "@/utils/types";
+import { SubmitEmailZipResponseProps } from "@/utils/types";
 import HomeScreen from "@/screens/Home";
 import RegisterScreen from "@/screens/Register";
 import SuccessScreen from "@/screens/Success";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
-  Register: SubmitEmailZipResponse; // or { id: string }
+  Register: SubmitEmailZipResponseProps; // or { id: string }
   Success: undefined; // or { id: string }
 };
 

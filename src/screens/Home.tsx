@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import InputField from "@/components/modules/InputField";
+import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { submitEmailZipFake, submitEmailZip } from "@/utils/api";
 import Header from "@/components/modules/Header";
@@ -31,12 +31,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const [email, setEmail] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; zip?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; zip?: string; general?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
 
   // Validation logic
   const validate = () => {
-    const newErrors: { email?: string; zip?: string } = {};
+    const newErrors: { email?: string; zip?: string; general?: string } = {};
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -65,22 +65,50 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // const validationErrors = validate();
-    // setErrors(validationErrors);
+    const validationErrors = validate();
+    setErrors(validationErrors);
 
-    // if (Object.keys(validationErrors).length === 0) {
-    setIsLoading(true);
-    try {
-      console.log("Submitting email and zip:", email, zipCode, i18n.language)
-      const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
-      console.log("API response:", response);
-      navigation.navigate("Register", response.data);
-    } catch (error) {
-      console.error("Register failed:", error);
-    } finally {
-      setIsLoading(false);
+    if (Object.keys(validationErrors).length === 0) {
+      setIsLoading(true);
+      try {
+        const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
+        // navigation.navigate("Register", response.data);
+        navigation.navigate("Register", { ...response.data, zip: zipCode });
+      } catch (error: any) {
+        console.log('Данные об ошибке от сервера:', error.response?.data);
+        console.log('Статус:', error.response?.status);
+        console.error("Register failed:", error);
+        if (error.response && error.response.status === 422) {
+          const serverData = error.response.data;
+
+          if (serverData.status && Array.isArray(serverData.status.errors)) {
+            const serverErrors = serverData.status.errors;
+            let newErrors: any = {};
+
+            serverErrors.forEach((msg: string) => {
+              const lowerMsg = msg.toLowerCase();
+              if (lowerMsg.includes('email')) {
+                newErrors.email = msg;
+              } else if (lowerMsg.includes('zip')) {
+                newErrors.zip = msg;
+              } else {
+                newErrors.general = newErrors.general
+                  ? `${newErrors.general}\n${msg}`
+                  : msg;
+              }
+            });
+
+            setErrors(newErrors);
+          }
+        } else {
+          setErrors({ general: "An error occurred. Please try again later." });
+          console.error("Ошибка запроса:", error);
+        }
+
+      } finally {
+        setIsLoading(false);
+      }
     }
-    // }
   };
 
   return (
@@ -91,7 +119,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         <Text style={[styles.instructionText, styles.mbLarge]}>
           {t("register_text2")}
         </Text>
+        {errors.general && (
+          <Text style={styles.errorText}>{errors.general}</Text>
+        )}
         <InputField
+          value={email}
           label={t("email")}
           placeholder="you@example.com"
           required
@@ -101,16 +133,19 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           onChangeText={handleEmailChange}
         />
         <View style={styles.zipCodeRow}>
-          <InputField
-            label={t("zip")}
-            placeholder="12345"
-            required
-            numeric
-            disabled={isLoading}
-            errorMessage={errors.zip}
-            helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
-            onChangeText={handleZipCode}
-          />
+          <View style={{ flex: 1 }}>
+            <InputField
+              value={zipCode}
+              label={t("zip")}
+              placeholder="12345"
+              required
+              numeric
+              disabled={isLoading}
+              errorMessage={errors.zip}
+              helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
+              onChangeText={handleZipCode}
+            />
+          </View>
           <TouchableOpacity
             style={styles.button}
             onPress={handleSubmit}
@@ -248,6 +283,13 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       color: theme.textPrimary,
+    },
+    errorText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.secondary,
+      textAlign: "center",
+      marginBottom: 15,
     },
   });
 

@@ -19,7 +19,6 @@ const getStyles = (theme: any) =>
   StyleSheet.create({
     radio: {
       flexDirection: "row",
-      alignItems: "center",
       marginBottom: 8,
     },
     radioDot: {
@@ -28,15 +27,17 @@ const getStyles = (theme: any) =>
       borderRadius: 8,
       borderWidth: 2,
       borderColor: theme.borderColor,
-      marginRight: 8,
+      marginRight: 6,
     },
     radioDotActive: {
       backgroundColor: theme.primary,
       borderColor: theme.primary,
     },
     radioText: {
+      flexShrink: 1,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       fontWeight: "regular",
+      color: theme.textPrimary,
     }
   })

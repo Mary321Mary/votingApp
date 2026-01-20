@@ -1,22 +1,33 @@
 import React, { useContext } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import { ThemeContext } from '@/styles/ThemeProvider';
+import HelpTooltip from './HelpTooltip';
+
+interface CheckboxProps {
+  label: string;
+  helpText?: string;
+  value?: boolean;
+  required?: boolean;
+  onValueChange: (value: boolean) => void;
+}
 
 export const Checkbox = ({
   label,
-  defaultValue = false,
+  helpText,
+  value = false,
   required,
-}: any) => {
+  onValueChange
+}: CheckboxProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const [value, setValue] = React.useState(defaultValue);
 
   return (
     <>
-      <View style={styles.checkbox}>
-        <Switch value={value} onValueChange={setValue} />
-        <Text style={styles.checkboxText}>
+      <View style={styles.checkbox} >
+        <Switch value={value} onValueChange={onValueChange} />
+        <Text style={styles.checkboxText} onPress={() => onValueChange(!value)}>
           {label} {required && <Text style={styles.required}>*</Text>}
+          {helpText && <HelpTooltip text={helpText} />}
         </Text>
       </View>
     </>

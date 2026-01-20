@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { loadRemoteTranslations } from "@/i18n/loader";
 
 interface LanguageOption {
   code: string;
@@ -20,6 +21,7 @@ const LanguageSelector: React.FC = () => {
   const styles = getStyles(theme);
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
+    loadRemoteTranslations(i18n.language);
   };
 
   const getOptionStyle = (langCode: string) => [

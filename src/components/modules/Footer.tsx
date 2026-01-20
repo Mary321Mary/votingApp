@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableOpacity, Image, Linking } from "react-native";
 import { StyleSheet } from "react-native";
-import LanguageSelector from "@/components/modules/LanguageSelector";
+import LanguageSelector from "@/components/atoms/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import Spinner from "./Spinner";
+import Spinner from "../atoms/Spinner";
 import logo from "@/assets/images/AWS logo.png";
 import { ThemeContext } from "@/styles/ThemeProvider";
 

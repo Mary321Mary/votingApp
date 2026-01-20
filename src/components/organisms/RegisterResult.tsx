@@ -1,16 +1,16 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { OVR_TYPE_MAP, StateData } from "@/utils/types";
+import { OVR_TYPE_MAP, RegisterFormState, StateData } from "@/utils/types";
 import { PaperOVR } from "./PaperOVR";
 import { OvrState } from "./OvrState";
 import { ConnectedOVR } from "./ConnectedOVR";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "./Navigation";
-import ConnectedOVRStep2Screen from "./ConnectedOVRStep2";
+import ConnectedOVRStep2 from "./ConnectedOVRStep2";
 
 function getFlowType(ovrType: string) {
   return OVR_TYPE_MAP[ovrType] ?? 'paper';
@@ -21,27 +21,91 @@ type RegisterScreenNavigation = NativeStackNavigationProp<
   "Register"
 >;
 
-export const RegisterResult = ({ state }: { state: StateData; }) => {
+interface RegisterResultProps {
+  state: StateData;
+  zip: string;
+}
+
+export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const [step, setStep] = React.useState<1 | 2>(1);
-  const flowType = getFlowType(state?.ovr_type || '');
-  const navigation = useNavigation<RegisterScreenNavigation>();
   const { t } = useTranslation();
+  const navigation = useNavigation<RegisterScreenNavigation>();
+
+  const [step, setStep] = useState<1 | 2>(1);
+  const flowType = getFlowType(state?.ovr_type || '');
+  const [form, setForm] = useState<RegisterFormState>({
+    title: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    suffix: "",
+    changedTitle: "",
+    changedFirstName: "",
+    changedMiddleName: "",
+    changedLastName: "",
+    changedSuffix: "",
+    isCitizen: true,
+    isAdult: true,
+
+    address: "",
+    unit: "",
+    city: "",
+    state: state.abbreviation,
+    zip,
+    differentAddress: "",
+    differentUnit: "",
+    differentCity: "",
+    differentState: state.abbreviation,
+    differentZip: "",
+    changedAddress: "",
+    changedUnit: "",
+    changedCity: "",
+    changedState: "",
+    changedZip: "",
+    hasStateId: true,
+
+    idNumber: "",
+
+    race: "",
+    party: "",
+
+    birthMonth: "",
+    birthDay: "",
+    birthYear: "",
+    phone: "",
+    phoneType: "Mobile",
+
+    smsConsent: false,
+    emailConsent: true,
+    volunteer: false,
+    mailForm: false,
+
+    residency: false,
+    cancelPrevious: false,
+    digitalSignature: false,
+    licenseUpdated: null,
+    duplicateLicense: null,
+
+    fullName: "",
+    licenseNumber: "",
+    eyeColor: "",
+    ssnLast4: "",
+  });
 
   const renderContent = () => {
     if (flowType === 'connected_ovr') {
       return step === 1
-        ? <ConnectedOVR state={state} />
-        : <ConnectedOVRStep2Screen state={state} />;
+        ? <ConnectedOVR state={state} value={form} onChange={setForm} />
+        : <ConnectedOVRStep2 state={state} value={form} onChange={setForm} />;
     }
+
     switch (flowType) {
       case 'ovr_state':
-        return <OvrState state={state} />;
-
+        return <OvrState state={state} value={form} onChange={setForm} />;
       case 'paper':
       default:
-        return <PaperOVR state={state} />;
+        return <PaperOVR state={state} value={form} onChange={setForm} />;
     }
   };
 
@@ -65,7 +129,7 @@ export const RegisterResult = ({ state }: { state: StateData; }) => {
           style={styles.button}
           onPress={handleMainButtonClick}
         >
-          <Text style={styles.buttonText}>{t("register_page.prepare_form")}</Text>
+          <Text style={styles.buttonText}>{t("register")}</Text>
         </TouchableOpacity>
         <Text style={styles.link} onPress={() => navigation.goBack()}>
           {t("back")}

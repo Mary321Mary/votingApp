@@ -3,7 +3,7 @@ import { View, ScrollView } from "react-native";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Footer from "@/components/modules/Footer";
-import Spinner from "@/components/modules/Spinner";
+import Spinner from "@/components/atoms/Spinner";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
 const DefaultLayout = ({ children }: { children: ReactNode }) => {
