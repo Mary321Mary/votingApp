@@ -40,8 +40,8 @@ const getStyles = (theme: any) =>
       paddingHorizontal: 10,
     },
     logo: {
-      width: 50,
-      height: 50,
+      width: 60,
+      height: 60,
       resizeMode: "contain",
     },
     title: {

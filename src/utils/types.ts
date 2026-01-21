@@ -76,6 +76,39 @@ export type RegisterFormState = {
   changedZip: string;
   hasStateId: boolean | null;
 
+  email: string;
+  streetName: string;
+  streetNumber: string;
+  streetType: string;
+  streetDirection: string;
+
+  mailingStreetName: string;
+  mailingStreetNumber: string;
+  mailingStreetType: string;
+  mailingUnit: string;
+  mailingCity: string;
+  mailingState: string;
+  mailingZip: string;
+  mailingAddressType: string;
+
+  poNumber: string;
+  poCity: string;
+  poState: string;
+  poZip: string;
+
+  militaryType: string;
+  militaryGroupNumber: string;
+  militaryNumber: string;
+  militaryPostOffice: string;
+  militaryPostState: string;
+  militaryZip: string;
+
+  internationalAddress1: string;
+  internationalAddress2: string;
+  internationalAddress3: string;
+  internationalCountry: string;
+  internationalZip: string;
+
   // ID
   idNumber: string;
 
@@ -110,9 +143,96 @@ export type RegisterFormState = {
   duplicateLicense: "yes" | "no" | null;
 };
 
+export type RegisterFormStateError = {
+  // NAME
+  title: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  suffix: string;
+  changedTitle: string;
+  changedFirstName: string;
+  changedMiddleName: string;
+  changedLastName: string;
+  changedSuffix: string;
+  isCitizen: string;
+  isAdult: string;
+  email: string;
+
+  // ADDRESS
+  address: string;
+  unit: string;
+  city: string;
+  state: string;
+  zip: string;
+  differentAddress: string;
+  differentUnit: string;
+  differentCity: string;
+  differentState: string;
+  differentZip: string;
+  changedAddress: string;
+  changedUnit: string;
+  changedCity: string;
+  changedState: string;
+  changedZip: string;
+  hasStateId: string;
+  streetName: string;
+  streetNumber: string;
+  streetType: string;
+  streetDirection: string;
+  mailingStreetName: string;
+  mailingStreetNumber: string;
+  mailingStreetType: string;
+  mailingUnit: string;
+  mailingCity: string;
+  mailingState: string;
+  mailingZip: string;
+  mailingAddressType: string;
+
+  poNumber: string;
+  poCity: string;
+  poState: string;
+  poZip: string;
+
+  // ID
+  idNumber: string;
+
+  // ADDITIONAL
+  race: string;
+  party: string;
+
+  // CONTACT
+  birthMonth: string;
+  birthDay: string;
+  birthYear: string;
+  phone: string;
+  phoneType: string;
+
+  // CONSENTS
+  smsConsent: string;
+  emailConsent: string;
+  volunteer: string;
+  mailForm: string;
+
+  // Personal
+  fullName: string;
+  licenseNumber: string;
+  eyeColor: string;
+  ssnLast4: string;
+
+  // Eligibility
+  residency: string;
+  cancelPrevious: string;
+  digitalSignature: string;
+  licenseUpdated: string;
+  duplicateLicense: string;
+  isAdultBlock: string;
+};
+
 export type FormProps = {
   state: StateData;
   value: RegisterFormState;
+  errorMessages: Partial<Record<keyof RegisterFormState, string>>;
   onChange: (value: RegisterFormState) => void;
 };
 
@@ -192,4 +312,5 @@ export interface SubmitEmailZipResponse {
 
 export interface SubmitEmailZipResponseProps extends SubmitEmailZipResponse {
   zip: string;
+  email: string;
 }

@@ -10,6 +10,7 @@ import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
+import { RegisterStepHeader } from "../modules/RegisterStepHeader";
 
 export default function ConnectedOVRStep2({ state, value, onChange }: FormProps) {
   const theme = useContext(ThemeContext);
@@ -27,7 +28,11 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
     <>
       {/* PERSONAL INFO */}
       <View style={styles.fieldset}>
-        <Text style={styles.legend}>{t("register_page.personal_information")}</Text>
+        <RegisterStepHeader
+          titleKey="register_page.personal_information"
+          completedSteps={2}
+          currentStep={3}
+        />
         <Text style={styles.text}>{t("register_page.personal_info_match", { state: state.name })}</Text>
         <Text style={styles.text}>{t("register_page.no_license_paper_form", { state: state.name })}</Text>
       </View>
@@ -112,6 +117,7 @@ export default function ConnectedOVRStep2({ state, value, onChange }: FormProps)
           label={t("register_page.ssn_last4_label")}
           required
           numeric
+          maxLength={4}
           onChangeText={(text: string) => updateField("ssnLast4", text)}
         />
       </View>

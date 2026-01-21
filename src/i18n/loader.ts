@@ -4,7 +4,6 @@ import { loadTranslationsFromCache, saveTranslationsToCache } from "./cache";
 
 export async function loadRemoteTranslations(locale: string) {
   console.log("Loading remote translations", locale);
-  // 1️⃣ Пробуем кеш
   const cached = await loadTranslationsFromCache(locale);
   console.log("Cached translations", cached);
 

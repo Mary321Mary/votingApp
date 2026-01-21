@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/organisms/Navigation";
-import { submitEmailZipFake, submitEmailZip } from "@/utils/api";
+import { submitEmailZip } from "@/utils/api";
 import Header from "@/components/modules/Header";
 import Config from "react-native-config";
 import { useUIConfig } from "@/contexts/UIConfigContext";
@@ -72,39 +72,21 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       setIsLoading(true);
       try {
         const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
-        // navigation.navigate("Register", response.data);
-        navigation.navigate("Register", { ...response.data, zip: zipCode });
+        navigation.navigate("Register", { ...response.data, zip: zipCode, email });
       } catch (error: any) {
-        console.log('Данные об ошибке от сервера:', error.response?.data);
-        console.log('Статус:', error.response?.status);
         console.error("Register failed:", error);
-        if (error.response && error.response.status === 422) {
-          const serverData = error.response.data;
-
-          if (serverData.status && Array.isArray(serverData.status.errors)) {
-            const serverErrors = serverData.status.errors;
-            let newErrors: any = {};
-
-            serverErrors.forEach((msg: string) => {
-              const lowerMsg = msg.toLowerCase();
-              if (lowerMsg.includes('email')) {
-                newErrors.email = msg;
-              } else if (lowerMsg.includes('zip')) {
-                newErrors.zip = msg;
-              } else {
-                newErrors.general = newErrors.general
-                  ? `${newErrors.general}\n${msg}`
-                  : msg;
-              }
-            });
-
-            setErrors(newErrors);
-          }
-        } else {
-          setErrors({ general: "An error occurred. Please try again later." });
-          console.error("Ошибка запроса:", error);
-        }
-
+        const newErrors: { email?: string; zip?: string; general?: string } = {};
+        if (error?.response?.status === 422 && Array.isArray(error?.response?.data?.status?.errors)) {
+          error.response.data.status.errors.forEach((msg: string) => {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes('email')) {
+              newErrors.email = msg;
+            } else if (lowerMsg.includes('zip')) {
+              newErrors.zip = msg;
+            } else newErrors.general = newErrors.general ? `${newErrors.general}\n${msg}` : msg;
+          });
+        } else newErrors.general = "An error occurred. Please try again later.";
+        setErrors(newErrors);
       } finally {
         setIsLoading(false);
       }
@@ -129,7 +111,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           required
           disabled={isLoading}
           errorMessage={errors.email}
-          helpText="We will email you a copy of your voter registration form"
+          helpText={t("email_help")}
           onChangeText={handleEmailChange}
         />
         <View style={styles.zipCodeRow}>
@@ -142,7 +124,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               numeric
               disabled={isLoading}
               errorMessage={errors.zip}
-              helpText="Enter ZIP code for the address where you live, even if you don't receive mail there"
+              helpText={t("zip_help")}
               onChangeText={handleZipCode}
             />
           </View>
@@ -153,6 +135,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             <Text style={styles.buttonText}>{t("register")}</Text>
           </TouchableOpacity>
         </View>
+
         <Text style={styles.privacyNote}>{t("accept1")}{" "}
           <Text style={styles.linkText} onPress={() =>
             Linking.openURL(policyUrl)}>
@@ -205,7 +188,7 @@ const getStyles = (theme: any) =>
     instructionText: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
-      textAlign: "center",
+      // textAlign: "center",
       marginBottom: 10,
       color: theme.textPrimary,
     },
@@ -235,8 +218,8 @@ const getStyles = (theme: any) =>
     },
     privacyNote: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      textAlign: "center",
+      fontSize: 10,
+      // textAlign: "center",
       marginBottom: 30,
       color: theme.textPrimary,
     },
@@ -262,7 +245,7 @@ const getStyles = (theme: any) =>
     },
     noteSmall: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 12,
+      fontSize: 10,
       marginBottom: 10,
       color: theme.textPrimary,
     },

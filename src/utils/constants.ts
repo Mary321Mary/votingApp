@@ -52,3 +52,25 @@ export const STATES = [
   { name: "Wisconsin", value: "WI" },
   { name: "Wyoming", value: "WY" },
 ];
+
+export const DIRECTIONS = [
+  { name: "", value: "" },
+  { name: "E", value: "E" },
+  { name: "N", value: "N" },
+  { name: "NE", value: "NE" },
+  { name: "NW", value: "NW" },
+  { name: "S", value: "S" },
+  { name: "SE", value: "SE" },
+  { name: "SW", value: "SW" },
+  { name: "W", value: "W" },
+];
+
+export const MAILING_TYPE = [
+  { name: "register_page.mailing_address_type.standard", value: "STANDARD" },
+  { name: "register_page.mailing_address_type.po_box", value: "PO_BOX" },
+  { name: "register_page.mailing_address_type.military", value: "MILITARY" },
+  {
+    name: "register_page.mailing_address_type.international",
+    value: "INTERNATIONAL",
+  },
+];

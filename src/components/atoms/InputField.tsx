@@ -27,6 +27,7 @@ const InputField = ({
   disabled = false,
   errorMessage = "",
   numeric = false,
+  maxLength = undefined,
   helpText = "",
   onChangeText,
 }: InputFieldProp) => {
@@ -47,7 +48,7 @@ const InputField = ({
         secureTextEntry={secureTextEntry}
         disableFullscreenUI={disabled}
         keyboardType={numeric ? "number-pad" : "default"}
-        maxLength={numeric ? 5 : undefined}
+        maxLength={maxLength}
         onChangeText={onChangeText}
       />
     </View>
