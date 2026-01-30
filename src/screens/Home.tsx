@@ -27,11 +27,15 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const styles = getStyles(theme);
   const { t } = useTranslation();
   const { config } = useUIConfig();
-  const policyUrl = config?.urls?.privacy || '';
+  const policyUrl = config?.urls?.privacy || "";
 
   const [email, setEmail] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; zip?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{
+    email?: string;
+    zip?: string;
+    general?: string;
+  }>({});
   const [isLoading, setIsLoading] = useState(false);
 
   // Validation logic
@@ -71,26 +75,46 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     if (Object.keys(validationErrors).length === 0) {
       setIsLoading(true);
       try {
-        const response = await submitEmailZip({ email, zip: zipCode, locale: i18n.language });
-        navigation.navigate("Register", { ...response.data, zip: zipCode, email });
+        const response = await submitEmailZip({
+          email,
+          zip: zipCode,
+          locale: i18n.language,
+        });
+        navigation.navigate("Register", {
+          ...response.data,
+          zip: zipCode,
+          email,
+        });
       } catch (error: any) {
         console.error("Register failed:", error);
-        const newErrors: { email?: string; zip?: string; general?: string } = {};
-        if (error?.response?.status === 422 && Array.isArray(error?.response?.data?.status?.errors)) {
-          error.response.data.status.errors.forEach((msg: string) => {
-            const lowerMsg = msg.toLowerCase();
-            if (lowerMsg.includes('email')) {
-              newErrors.email = msg;
-            } else if (lowerMsg.includes('zip')) {
-              newErrors.zip = msg;
-            } else newErrors.general = newErrors.general ? `${newErrors.general}\n${msg}` : msg;
-          });
-        } else newErrors.general = "An error occurred. Please try again later.";
-        setErrors(newErrors);
+        navigation.navigate("ZipError", {
+          text:
+            zipCode === "00000" ? t("zip_error_text1") : t("zip_error_text2"),
+        });
+        // const newErrors: { email?: string; zip?: string; general?: string } = {};
+        // if (error?.response?.status === 422 && Array.isArray(error?.response?.data?.status?.errors)) {
+        //   error.response.data.status.errors.forEach((msg: string) => {
+        //     const lowerMsg = msg.toLowerCase();
+        //     if (lowerMsg.includes('email')) {
+        //       newErrors.email = msg;
+        //     } else if (lowerMsg.includes('zip')) {
+        //       newErrors.zip = msg;
+        //     } else newErrors.general = newErrors.general ? `${newErrors.general}\n${msg}` : msg;
+        //   });
+        // } else newErrors.general = "An error occurred. Please try again later.";
+        // setErrors(newErrors);
       } finally {
         setIsLoading(false);
       }
     }
+  };
+
+  const handleContinue = async (event: React.FormEvent) => {
+    event.preventDefault();
+    navigation.navigate("CheckVoterStatus", {
+      zip: zipCode,
+      email,
+    });
   };
 
   return (
@@ -128,38 +152,35 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               onChangeText={handleZipCode}
             />
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSubmit}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>{t("register")}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.privacyNote}>{t("accept1")}{" "}
-          <Text style={styles.linkText} onPress={() =>
-            Linking.openURL(policyUrl)}>
+        <Text style={styles.privacyNote}>
+          {t("accept1")}{" "}
+          <Text
+            style={styles.linkText}
+            onPress={() => Linking.openURL(policyUrl)}
+          >
             {t("policy")}
           </Text>
-          {t("accept2")}</Text>
+          {t("accept2")}
+        </Text>
         <View style={styles.registeredSection}>
           <View style={styles.textColumn}>
             <Text style={styles.sectionTitle}>{t("registered")}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => console.log("Continue pressed")}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleContinue}>
             <Text style={styles.buttonText}>{t("continue")}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.noteSmall}>
-          <Text style={styles.noteBold}>{t('note')}</Text>{t('note_text')}{" "}
+          <Text style={styles.noteBold}>{t("note")}</Text>
+          {t("note_text")}{" "}
           <Text
             style={styles.linkText}
-            onPress={() =>
-              Linking.openURL(Config.REACT_APP_LEARN_MORE || "*")
-            }
+            onPress={() => Linking.openURL(Config.REACT_APP_LEARN_MORE || "*")}
           >
             {t("learn_more")}
           </Text>

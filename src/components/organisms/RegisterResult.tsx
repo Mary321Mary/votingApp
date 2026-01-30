@@ -1,10 +1,14 @@
 import React, { useContext, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { OVR_TYPE_MAP, RegisterFormState, RegisterFormStateError, StateData } from "@/utils/types";
+import {
+  OVR_TYPE_MAP,
+  RegisterFormState,
+  RegisterFormStateError,
+  StateData,
+} from "@/utils/types";
 import { PaperOVR } from "./PaperOVR";
 import { OvrState } from "./OvrState";
 import { ConnectedOVR } from "./ConnectedOVR";
@@ -13,9 +17,10 @@ import { RootStackParamList } from "./Navigation";
 import ConnectedOVRStep2 from "./ConnectedOVRStep2";
 import ConnectedOVRStep3 from "./ConnectedOVRStep3";
 import { NotParticipating } from "./NotParticipating";
+import { useNavigation } from "@react-navigation/native";
 
 function getFlowType(ovrType: string) {
-  return OVR_TYPE_MAP[ovrType] ?? 'paper';
+  return OVR_TYPE_MAP[ovrType] ?? "paper";
 }
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
@@ -115,8 +120,10 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
   const navigation = useNavigation<RegisterScreenNavigation>();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const flowType = getFlowType(state?.ovr_type || '');
-  const [errMsg, setErrMsg] = useState<RegisterFormStateError>(EMPTY_ERROR_MESSAGES);
+  const flowType = getFlowType(state?.ovr_type || "");
+  const [errMsg, setErrMsg] =
+    useState<RegisterFormStateError>(EMPTY_ERROR_MESSAGES);
+
   const [form, setForm] = useState<RegisterFormState>({
     title: "",
     firstName: "",
@@ -209,14 +216,24 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
   });
 
   const renderContent = () => {
-    if (flowType === 'connected_ovr') {
+    if (flowType === "connected_ovr") {
       if (step === 1)
         return (
-          <ConnectedOVR state={state} value={form} errorMessages={errMsg} onChange={setForm} />
+          <ConnectedOVR
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
         );
       if (step === 2)
         return (
-          <ConnectedOVRStep2 state={state} value={form} errorMessages={errMsg} onChange={setForm} />
+          <ConnectedOVRStep2
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
         );
       if (step === 3)
         return (
@@ -230,18 +247,39 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
     }
 
     switch (flowType) {
-      case 'not_participating':
-        return <NotParticipating state={state} value={form} errorMessages={errMsg} onChange={setForm} />;
-      case 'ovr_state':
-        return <OvrState state={state} value={form} errorMessages={errMsg} onChange={setForm} />;
-      case 'paper':
+      case "not_participating":
+        return (
+          <NotParticipating
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      case "ovr_state":
+        return (
+          <OvrState
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      case "paper":
       default:
-        return <PaperOVR state={state} value={form} errorMessages={errMsg} onChange={setForm} />;
+        return (
+          <PaperOVR
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
     }
   };
 
   const handleMainButtonClick = () => {
-    if (flowType === 'connected_ovr') {
+    if (flowType === "connected_ovr") {
       if (step === 1) {
         setStep(2);
       } else if (step === 2) {
@@ -258,12 +296,26 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
     <View style={styles.box}>
       {renderContent()}
       <View style={styles.buttonBox}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleMainButtonClick}
-        >
-          <Text style={styles.buttonText}>{t("register")}</Text>
-        </TouchableOpacity>
+        {flowType !== "not_participating" && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleMainButtonClick}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                flowType === "connected_ovr" && step !== 3
+                  ? styles.registerText
+                  : styles.restartText,
+              ]}
+              //  style={styles.buttonText}
+            >
+              {flowType === "connected_ovr" && step !== 3
+                ? t("register")
+                : t("restart")}
+            </Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.link} onPress={() => navigation.goBack()}>
           {t("back")}
         </Text>
@@ -271,7 +323,6 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
     </View>
   );
 };
-
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
@@ -285,7 +336,7 @@ const getStyles = (theme: any) =>
       display: "flex",
       alignItems: "center",
       gap: 20,
-      marginTop: 20
+      marginTop: 20,
     },
     button: {
       backgroundColor: theme.primary,
@@ -297,15 +348,20 @@ const getStyles = (theme: any) =>
       justifyContent: "center",
     },
     buttonText: {
-      color: theme.white,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
       fontWeight: "semibold",
+    },
+    registerText: {
+      color: theme.white,
+    },
+    restartText: {
+      color: "green",
     },
     link: {
       color: theme.link,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
-      fontWeight: "medium"
-    }
-  })
+      fontWeight: "medium",
+    },
+  });

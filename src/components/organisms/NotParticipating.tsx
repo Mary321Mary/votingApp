@@ -1,16 +1,17 @@
-import React, { useContext } from 'react';
-import { FormProps } from '@/utils/types';
-import { StyleSheet, Text } from 'react-native';
-import { ThemeContext } from '@/styles/ThemeProvider';
-import RenderHTML from 'react-native-render-html';
+import React, { useContext } from "react";
+import { FormProps } from "@/utils/types";
+import { StyleSheet, Text } from "react-native";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import RenderHTML from "react-native-render-html";
+import { useTranslation } from "react-i18next";
 
 export const NotParticipating = ({ state }: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { t } = useTranslation();
 
   return (
     <>
-      {/* <Text style={styles.desc}>{state.name} does not require voter registration, but you do need to have a valid forms of identification that can be used for voting, and on Election Day be at least 18 years of age and have lived in {state.name} for at least 30 days</Text> */}
       <RenderHTML
         source={{ html: state.not_participating_text || "" }}
         tagsStyles={{
@@ -20,16 +21,20 @@ export const NotParticipating = ({ state }: FormProps) => {
           },
         }}
       />
-      <RenderHTML
-        source={{ html: state.sos_address || "" }}
-      />
+      <Text style={styles.text}>
+        {t("more_info")}
+        <RenderHTML source={{ html: state.sos_address || "" }} />
+      </Text>
+      <Text>{t("secretary")}</Text>
+      <RenderHTML source={{ html: state.sos_address || "" }} />
+      <RenderHTML source={{ html: state.sos_phone || "" }} />
     </>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    desc: {
-      marginBottom: 10,
+    text: {
+      display: "flex",
     },
   });

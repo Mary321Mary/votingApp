@@ -4,20 +4,26 @@ import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/components/modules/Header";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/components/organisms/Navigation";
 
-export default function SuccessScreen() {
+type LookupScreenNavigation = NativeStackNavigationProp<
+  RootStackParamList,
+  "Register"
+>;
+
+export default function LookupScreen() {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<LookupScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
   return (
     <View style={styles.container}>
-      <Header text={t("success")} />
+      <Header text="Sorry, John!" />
 
       <View style={styles.content}>
-        <Text style={styles.text}>{t("success_text1")}</Text>
-        <Text style={styles.text}>{t("success_text2")}</Text>
+        <Text style={styles.text}>{t("sorry_text1")}</Text>
       </View>
 
       <TouchableOpacity
