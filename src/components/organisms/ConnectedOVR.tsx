@@ -5,6 +5,7 @@ import { ThemeContext } from '@/styles/ThemeProvider';
 import { useTranslation } from 'react-i18next';
 import { Radio } from '../atoms/Radio';
 import { Checkbox } from '../atoms/Checkbox';
+import { RegisterStepHeader } from '../modules/RegisterStepHeader';
 
 export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
   const theme = useContext(ThemeContext);
@@ -20,36 +21,41 @@ export const ConnectedOVR = ({ state, value, onChange }: FormProps) => {
 
   return (
     <View style={styles.block}>
+      <RegisterStepHeader
+        titleKey="register_page.eligibility_title"
+        completedSteps={1}
+        currentStep={2}
+      />
       <Checkbox
         value={value.isCitizen}
         label={t("register_page.eligibility.citizen")}
         required
-        onValueChange={() => updateField("isCitizen", value.isCitizen)}
+        onValueChange={(checked: boolean) => updateField("isCitizen", checked)}
       />
       <Checkbox
         value={value.isAdult}
         label={t("register_page.eligibility.age")}
         required
-        onValueChange={() => updateField("isAdult", value.isAdult)}
+        onValueChange={(checked: boolean) => updateField("isAdult", checked)}
       />
       <Checkbox
         value={value.residency}
         label={t("register_page.eligibility.residency", {
           state: state.name,
         })}
-        onValueChange={() => updateField("residency", value.isAdult)}
+        onValueChange={(checked: boolean) => updateField("residency", checked)}
       />
       <Checkbox
         value={value.cancelPrevious}
         label={t("register_page.eligibility.cancelPrevious")}
         required
-        onValueChange={() => updateField("cancelPrevious", value.cancelPrevious)}
+        onValueChange={(checked: boolean) => updateField("cancelPrevious", checked)}
       />
       <Checkbox
         value={value.digitalSignature}
         label={t("register_page.eligibility.digitalSignature")}
         required
-        onValueChange={() => updateField("digitalSignature", value.digitalSignature)}
+        onValueChange={(checked: boolean) => updateField("digitalSignature", checked)}
       />
 
       {/* LICENSE UPDATE */}

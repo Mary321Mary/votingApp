@@ -33,7 +33,7 @@ export default function RegisterScreen() {
     return null;
   }
 
-  const { status, state: regState, zip } = state;
+  const { status, state: regState, zip, email } = state;
 
   const title =
     status.success && regState
@@ -44,7 +44,7 @@ export default function RegisterScreen() {
     <>
       <Header text={title} />
       {status.success && regState ? (
-        <RegisterResult state={regState} zip={zip} />
+        <RegisterResult state={regState} zip={zip} email={email} />
       ) : (
         <View>
           {status.errors?.map((error: string, index: number) => (

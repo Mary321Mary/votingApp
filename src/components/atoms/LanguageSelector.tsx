@@ -1,27 +1,20 @@
 import React, { useContext } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Button } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { loadRemoteTranslations } from "@/i18n/loader";
-
-interface LanguageOption {
-  code: string;
-  label: string;
-}
-
-const LANGUAGES: LanguageOption[] = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "ph", label: "Tagalog" },
-];
+import { clearTranslationsCache } from "@/i18n/cache";
 
 const LanguageSelector: React.FC = () => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    loadRemoteTranslations(i18n.language);
+
+  const changeLanguage = async (lang: string) => {
+    if (i18n.language === lang) return;
+
+    await loadRemoteTranslations(lang);
+    await i18n.changeLanguage(lang);
   };
 
   const getOptionStyle = (langCode: string) => [
@@ -31,23 +24,24 @@ const LanguageSelector: React.FC = () => {
 
   return (
     // <View style={styles.container}>
-    <View style={styles.block}>
-      <TouchableOpacity onPress={() => changeLanguage("en")}>
-        <Text style={getOptionStyle("en")}>
-          English
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => changeLanguage("es")}>
-        <Text style={getOptionStyle("es")}>
-          Español
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => changeLanguage("ph")}>
-        <Text style={getOptionStyle("ph")}>
-          Tagalog
-        </Text>
-      </TouchableOpacity>
-      {/* <Picker
+    <>
+      <View style={styles.block}>
+        <TouchableOpacity onPress={() => changeLanguage("en")}>
+          <Text style={getOptionStyle("en")}>
+            English
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => changeLanguage("es")}>
+          <Text style={getOptionStyle("es")}>
+            Español
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => changeLanguage("tl")}>
+          <Text style={getOptionStyle("tl")}>
+            Tagalog
+          </Text>
+        </TouchableOpacity>
+        {/* <Picker
           selectedValue={i18n.language}
           style={styles.picker}
           onValueChange={itemValue => changeLanguage(itemValue)}
@@ -63,7 +57,19 @@ const LanguageSelector: React.FC = () => {
             />
           ))}
         </Picker> */}
-    </View>
+
+      </View>
+      <Button
+        title="Refresh translations"
+        onPress={async () => {
+          const lang = i18n.language;
+
+          await clearTranslationsCache(lang);
+          await loadRemoteTranslations(lang);
+          await i18n.changeLanguage(lang);
+        }}
+      />
+    </>
     // </View>
   );
 };

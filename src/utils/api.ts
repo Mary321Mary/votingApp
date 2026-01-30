@@ -76,19 +76,7 @@ export function submitEmailZip(
 }
 
 export function fetchUIConfiguration(headers: Record<string, string> = {}) {
-  // return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
-  return {
-    data: {
-      "display_locale_switcher": "true",
-      "supported_locales": ["EN- US", "ES"],
-      "urls": {
-        "homepage": "https://register.rockthevote.org/",
-        "terms": "https://www.rockthevote.org/terms",
-        "privacy": "https://www.rockthevote.org/privacy-policy/",
-        "shortcode": "https://bitly.com/1234567"
-      }
-    }
-  };
+  return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
 }
 
 export async function submitEmailZipFake(

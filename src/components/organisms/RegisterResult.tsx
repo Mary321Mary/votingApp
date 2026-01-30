@@ -1,19 +1,26 @@
 import React, { useContext, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { OVR_TYPE_MAP, RegisterFormState, StateData } from "@/utils/types";
+import {
+  OVR_TYPE_MAP,
+  RegisterFormState,
+  RegisterFormStateError,
+  StateData,
+} from "@/utils/types";
 import { PaperOVR } from "./PaperOVR";
 import { OvrState } from "./OvrState";
 import { ConnectedOVR } from "./ConnectedOVR";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "./Navigation";
 import ConnectedOVRStep2 from "./ConnectedOVRStep2";
+import ConnectedOVRStep3 from "./ConnectedOVRStep3";
+import { NotParticipating } from "./NotParticipating";
+import { useNavigation } from "@react-navigation/native";
 
 function getFlowType(ovrType: string) {
-  return OVR_TYPE_MAP[ovrType] ?? 'paper';
+  return OVR_TYPE_MAP[ovrType] ?? "paper";
 }
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
@@ -24,16 +31,99 @@ type RegisterScreenNavigation = NativeStackNavigationProp<
 interface RegisterResultProps {
   state: StateData;
   zip: string;
+  email: string;
 }
 
-export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
+const EMPTY_ERROR_MESSAGES = {
+  title: "",
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  suffix: "",
+  changedTitle: "",
+  changedFirstName: "",
+  changedMiddleName: "",
+  changedLastName: "",
+  changedSuffix: "",
+  isCitizen: "",
+  isAdult: "",
+  email: "",
+
+  address: "",
+  unit: "",
+  city: "",
+  state: "",
+  zip: "",
+  differentAddress: "",
+  differentUnit: "",
+  differentCity: "",
+  differentState: "",
+  differentZip: "",
+  changedAddress: "",
+  changedUnit: "",
+  changedCity: "",
+  changedState: "",
+  changedZip: "",
+  hasStateId: "",
+
+  poNumber: "",
+  poCity: "",
+  poState: "",
+  poZip: "",
+
+  idNumber: "",
+
+  race: "",
+  party: "",
+
+  birthMonth: "",
+  birthDay: "",
+  birthYear: "",
+  phone: "",
+  phoneType: "",
+
+  smsConsent: "",
+  emailConsent: "",
+  volunteer: "",
+  mailForm: "",
+
+  residency: "",
+  cancelPrevious: "",
+  digitalSignature: "",
+  licenseUpdated: "",
+  duplicateLicense: "",
+
+  fullName: "",
+  licenseNumber: "",
+  eyeColor: "",
+  ssnLast4: "",
+
+  streetName: "",
+  streetNumber: "",
+  streetType: "",
+  streetDirection: "",
+  mailingStreetName: "",
+  mailingStreetNumber: "",
+  mailingStreetType: "",
+  mailingUnit: "",
+  mailingCity: "",
+  mailingState: "",
+  mailingZip: "",
+  mailingAddressType: "",
+  isAdultBlock: "",
+};
+
+export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
   const navigation = useNavigation<RegisterScreenNavigation>();
 
-  const [step, setStep] = useState<1 | 2>(1);
-  const flowType = getFlowType(state?.ovr_type || '');
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const flowType = getFlowType(state?.ovr_type || "");
+  const [errMsg, setErrMsg] =
+    useState<RegisterFormStateError>(EMPTY_ERROR_MESSAGES);
+
   const [form, setForm] = useState<RegisterFormState>({
     title: "",
     firstName: "",
@@ -65,6 +155,38 @@ export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
     changedZip: "",
     hasStateId: true,
 
+    email: email,
+    streetName: "",
+    streetNumber: "",
+    streetType: "",
+    streetDirection: "",
+    mailingStreetName: "",
+    mailingStreetNumber: "",
+    mailingStreetType: "",
+    mailingUnit: "",
+    mailingCity: "",
+    mailingState: "",
+    mailingZip: "",
+    mailingAddressType: "STANDARD",
+
+    poNumber: "",
+    poCity: "",
+    poState: "",
+    poZip: "",
+
+    militaryType: "",
+    militaryGroupNumber: "",
+    militaryNumber: "",
+    militaryPostOffice: "",
+    militaryPostState: "",
+    militaryZip: "",
+
+    internationalAddress1: "",
+    internationalAddress2: "",
+    internationalAddress3: "",
+    internationalCountry: "",
+    internationalZip: "",
+
     idNumber: "",
 
     race: "",
@@ -94,25 +216,74 @@ export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
   });
 
   const renderContent = () => {
-    if (flowType === 'connected_ovr') {
-      return step === 1
-        ? <ConnectedOVR state={state} value={form} onChange={setForm} />
-        : <ConnectedOVRStep2 state={state} value={form} onChange={setForm} />;
+    if (flowType === "connected_ovr") {
+      if (step === 1)
+        return (
+          <ConnectedOVR
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      if (step === 2)
+        return (
+          <ConnectedOVRStep2
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      if (step === 3)
+        return (
+          <ConnectedOVRStep3
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
     }
 
     switch (flowType) {
-      case 'ovr_state':
-        return <OvrState state={state} value={form} onChange={setForm} />;
-      case 'paper':
+      case "not_participating":
+        return (
+          <NotParticipating
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      case "ovr_state":
+        return (
+          <OvrState
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
+      case "paper":
       default:
-        return <PaperOVR state={state} value={form} onChange={setForm} />;
+        return (
+          <PaperOVR
+            state={state}
+            value={form}
+            errorMessages={errMsg}
+            onChange={setForm}
+          />
+        );
     }
   };
 
   const handleMainButtonClick = () => {
-    if (flowType === 'connected_ovr') {
+    if (flowType === "connected_ovr") {
       if (step === 1) {
         setStep(2);
+      } else if (step === 2) {
+        setStep(3);
       } else {
         navigation.navigate("Success");
       }
@@ -125,12 +296,26 @@ export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
     <View style={styles.box}>
       {renderContent()}
       <View style={styles.buttonBox}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleMainButtonClick}
-        >
-          <Text style={styles.buttonText}>{t("register")}</Text>
-        </TouchableOpacity>
+        {flowType !== "not_participating" && (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleMainButtonClick}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                flowType === "connected_ovr" && step !== 3
+                  ? styles.registerText
+                  : styles.restartText,
+              ]}
+              //  style={styles.buttonText}
+            >
+              {flowType === "connected_ovr" && step !== 3
+                ? t("register")
+                : t("restart")}
+            </Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.link} onPress={() => navigation.goBack()}>
           {t("back")}
         </Text>
@@ -138,7 +323,6 @@ export const RegisterResult = ({ state, zip }: RegisterResultProps) => {
     </View>
   );
 };
-
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
@@ -152,7 +336,7 @@ const getStyles = (theme: any) =>
       display: "flex",
       alignItems: "center",
       gap: 20,
-      marginTop: 20
+      marginTop: 20,
     },
     button: {
       backgroundColor: theme.primary,
@@ -164,15 +348,20 @@ const getStyles = (theme: any) =>
       justifyContent: "center",
     },
     buttonText: {
-      color: theme.white,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
       fontWeight: "semibold",
+    },
+    registerText: {
+      color: theme.white,
+    },
+    restartText: {
+      color: "green",
     },
     link: {
       color: theme.link,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
-      fontWeight: "medium"
-    }
-  })
+      fontWeight: "medium",
+    },
+  });

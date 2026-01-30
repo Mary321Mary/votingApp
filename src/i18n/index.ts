@@ -4,9 +4,9 @@ import * as RNLocalize from "react-native-localize";
 
 import en from "./en.json";
 import es from "./es.json";
-import ph from "./ph.json";
+import tl from "./tl.json";
 
-const SUPPORTED_LANGS = ['en', 'es', 'ph'];
+const SUPPORTED_LANGS = ['en', 'es', 'tl'];
 
 const languageDetector = {
   type: "languageDetector" as ModuleType,
@@ -36,11 +36,9 @@ i18n
     resources: {
       en: { translation: en },
       es: { translation: es },
-      ph: { translation: ph },
+      tl: { translation: tl },
     },
-    supportedLngs: SUPPORTED_LANGS,
     fallbackLng: "en",
-    nonExplicitSupportedLngs: true,
     interpolation: {
       escapeValue: false,
     },
