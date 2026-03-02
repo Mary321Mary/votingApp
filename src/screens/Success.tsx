@@ -36,13 +36,11 @@ const getStyles = (theme: any) =>
       flex: 1,
       backgroundColor: theme.white,
     },
-
     content: {
       paddingHorizontal: 20,
       paddingTop: 30,
       gap: 12,
     },
-
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
@@ -50,20 +48,18 @@ const getStyles = (theme: any) =>
       lineHeight: 22,
       color: theme.textPrimary,
     },
-
     button: {
       marginTop: "auto",
       marginHorizontal: 20,
       marginBottom: 30,
-      backgroundColor: theme.primary,
+      backgroundColor: "green",
       paddingVertical: 14,
       borderRadius: 6,
       alignItems: "center",
     },
-
     buttonText: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      color: "green",
+      color: theme.textPrimary,
       fontSize: 16,
       fontWeight: "semibold",
     },

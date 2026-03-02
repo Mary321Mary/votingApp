@@ -71,6 +71,19 @@ const EMPTY_ERROR_MESSAGES = {
   poState: "",
   poZip: "",
 
+  militaryType: "",
+  militaryGroupNumber: "",
+  militaryNumber: "",
+  militaryPostOffice: "",
+  militaryPostState: "",
+  militaryZip: "",
+
+  internationalAddress1: "",
+  internationalAddress2: "",
+  internationalAddress3: "",
+  internationalCountry: "",
+  internationalZip: "",
+
   idNumber: "",
 
   race: "",
@@ -224,6 +237,7 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
       if (step === 2)
@@ -233,6 +247,7 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
       if (step === 3)
@@ -242,6 +257,7 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
     }
@@ -254,6 +270,7 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
       case "ovr_state":
@@ -263,6 +280,7 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
       case "paper":
@@ -273,15 +291,125 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             value={form}
             errorMessages={errMsg}
             onChange={setForm}
+            onChangeError={setErrMsg}
           />
         );
     }
   };
 
+  const validateConnectedOvr = () => {
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    const miIdRegex = /^[A-Z]\d{12}$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let errorMessage = { ...EMPTY_ERROR_MESSAGES };
+    if (step === 1) {
+      if (!form.isCitizen) {
+        errorMessage.isCitizen = t("register_page.us_citizen_2");
+      }
+      if (!form.isAdult) {
+        errorMessage.isAdult = t("register_page.age_eligibility_error_2", {
+          state: state.name,
+        });
+      }
+      if (!form.residency) {
+        errorMessage.residency = "show";
+      }
+      if (!form.cancelPrevious) {
+        errorMessage.cancelPrevious = "show";
+      }
+      if (!form.digitalSignature) {
+        errorMessage.digitalSignature = "show";
+      }
+      if (form.licenseUpdated !== "no") {
+        errorMessage.licenseUpdated = "show";
+      }
+      if (form.duplicateLicense !== "no") {
+        errorMessage.duplicateLicense = "show";
+      }
+    } else if (step === 2) {
+      if (!form.fullName.trim()) {
+        errorMessage.fullName = t("register_page.required");
+      }
+      if (!form.licenseNumber.trim()) {
+        errorMessage.licenseNumber = t("register_page.id_number_error_2");
+      } else if (!miIdRegex.test(form.licenseNumber.trim())) {
+        errorMessage.licenseNumber = t("register_page.id_number_error_1");
+      }
+      if (!form.birthMonth.trim()) {
+        errorMessage.birthMonth = t("register_page.required");
+      }
+      if (!form.birthDay.trim()) {
+        errorMessage.birthDay = t("register_page.required");
+      }
+      if (!form.birthYear.trim()) {
+        errorMessage.birthYear = t("register_page.required");
+      } else if (Number(form.birthYear) < 1900) {
+        errorMessage.birthYear = t("register_page.invalid_year");
+      }
+      if (
+        form.birthYear.trim() &&
+        form.birthMonth.trim() &&
+        form.birthDay.trim()
+      ) {
+        const year = Number(form.birthYear);
+        const month = Number(form.birthMonth) - 1;
+        const day = Number(form.birthDay);
+
+        const date = new Date(year, month, day);
+
+        const isInvalidDate =
+          date.getFullYear() !== year ||
+          date.getMonth() !== month ||
+          date.getDate() !== day;
+
+        if (isInvalidDate) {
+          errorMessage.birthDay = t("register_page.invalid_birth_date");
+        }
+      }
+      if (!form.ssnLast4.trim() || form.ssnLast4.trim().length !== 4) {
+        errorMessage.ssnLast4 = t("register_page.ssn_error");
+      }
+    } else if (step === 3) {
+      if (!form.streetNumber.trim()) {
+        errorMessage.streetNumber = t("register_page.required");
+      }
+      if (!form.streetName.trim()) {
+        errorMessage.streetName = t("register_page.required");
+      }
+      if (!form.city.trim()) {
+        errorMessage.city = t("register_page.required");
+      }
+      if (!form.state.trim()) {
+        errorMessage.state = t("register_page.required");
+      }
+      if (!form.zip.trim()) {
+        errorMessage.zip = t("register_page.required");
+      } else if (!zipRegex.test(form.zip.trim())) {
+        errorMessage.zip = t("register_page.invalid_zip");
+      }
+      // Mailing Address Toggle validation need here ...
+      if (form.smsConsent && !form.phone.trim()) {
+        errorMessage.phone = t("register_page.phone_election_error");
+      }
+      if (!form.email.trim()) {
+        errorMessage.email = t("register_page.required");
+      } else if (!emailRegex.test(form.email.trim())) {
+        errorMessage.email = t("register_page.email_invalid");
+      }
+    }
+
+    setErrMsg(errorMessage);
+    return !Object.values(errorMessage).some(value => value.trim() !== "");
+  };
+
   const handleMainButtonClick = () => {
     if (flowType === "connected_ovr") {
       if (step === 1) {
-        setStep(2);
+        if (validateConnectedOvr()) {
+          navigation.navigate("Success");
+        }
+        // setStep(2);
       } else if (step === 2) {
         setStep(3);
       } else {
@@ -339,7 +467,7 @@ const getStyles = (theme: any) =>
       marginTop: 20,
     },
     button: {
-      backgroundColor: theme.primary,
+      backgroundColor: "green",
       paddingVertical: 12,
       paddingHorizontal: 15,
       borderRadius: 5,
@@ -356,7 +484,7 @@ const getStyles = (theme: any) =>
       color: theme.white,
     },
     restartText: {
-      color: "green",
+      color: theme.textPrimary,
     },
     link: {
       color: theme.link,
