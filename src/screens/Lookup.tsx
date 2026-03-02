@@ -61,7 +61,7 @@ const getStyles = (theme: any) =>
       marginTop: "auto",
       marginHorizontal: 20,
       marginBottom: 30,
-      backgroundColor: theme.primary,
+      backgroundColor: "green",
       paddingVertical: 14,
       borderRadius: 6,
       alignItems: "center",
@@ -69,7 +69,7 @@ const getStyles = (theme: any) =>
 
     buttonText: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      color: "green",
+      color: theme.textPrimary,
       fontSize: 16,
       fontWeight: "semibold",
     },

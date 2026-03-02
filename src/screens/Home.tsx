@@ -185,7 +185,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             {t("learn_more")}
           </Text>
         </Text>
-        <Text style={styles.extraLink}>
+        <Text style={styles.noteSmall}>
           {t("living_abroad")}{" "}
           <Text
             style={styles.linkText}
@@ -220,7 +220,7 @@ const getStyles = (theme: any) =>
     zipCodeRow: {
       flexDirection: "row",
       alignItems: "flex-end",
-      marginBottom: 20,
+      marginBottom: 10,
     },
     button: {
       backgroundColor: theme.primary,
@@ -267,7 +267,6 @@ const getStyles = (theme: any) =>
     noteSmall: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 10,
-      marginBottom: 10,
       color: theme.textPrimary,
     },
     noteBold: {
@@ -279,14 +278,6 @@ const getStyles = (theme: any) =>
       color: theme.link,
       textDecorationLine: "underline",
       fontWeight: "medium",
-    },
-    bold: {
-      fontWeight: "bold",
-    },
-    extraLink: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      color: theme.textPrimary,
     },
     errorText: {
       fontFamily: "Inter-VariableFont_opsz_wght",

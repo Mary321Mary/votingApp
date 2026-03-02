@@ -22,10 +22,10 @@ export interface AuthState {
 }
 
 export const OVR_TYPE_MAP: Record<string, string> = {
-  paper_only: 'paper',
-  paper_or_finish_with_state: 'ovr_state',
-  connected_MI: 'connected_ovr',
-  not_participating: 'not_participating',
+  paper_only: "paper",
+  paper_or_finish_with_state: "ovr_state",
+  connected_MI: "connected_ovr",
+  not_participating: "not_participating",
 };
 
 export interface StateData {
@@ -34,13 +34,13 @@ export interface StateData {
   ovr_type: string;
   ovr_locales?: string[];
   not_participating_text?: string | null;
-  online_registration_system_name?: string,
-  online_registration_system_url?: string,
-  online_status_check_url?: string,
-  registration_deadline?: string | null,
-  sos_address?: string,
-  sos_phone?: string,
-  sos_url?: string
+  online_registration_system_name?: string;
+  online_registration_system_url?: string;
+  online_status_check_url?: string;
+  registration_deadline?: string | null;
+  sos_address?: string;
+  sos_phone?: string;
+  sos_url?: string;
 }
 
 export type RegisterFormState = {
@@ -194,6 +194,19 @@ export type RegisterFormStateError = {
   poState: string;
   poZip: string;
 
+  militaryType: string;
+  militaryGroupNumber: string;
+  militaryNumber: string;
+  militaryPostOffice: string;
+  militaryPostState: string;
+  militaryZip: string;
+
+  internationalAddress1: string;
+  internationalAddress2: string;
+  internationalAddress3: string;
+  internationalCountry: string;
+  internationalZip: string;
+
   // ID
   idNumber: string;
 
@@ -232,8 +245,9 @@ export type RegisterFormStateError = {
 export type FormProps = {
   state: StateData;
   value: RegisterFormState;
-  errorMessages: Partial<Record<keyof RegisterFormState, string>>;
+  errorMessages: RegisterFormStateError;
   onChange: (value: RegisterFormState) => void;
+  onChangeError: (value: RegisterFormStateError) => void;
 };
 
 export interface LoginCredentials {
