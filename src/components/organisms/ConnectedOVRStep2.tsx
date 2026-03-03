@@ -7,11 +7,15 @@ import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
 import { RegisterStepHeader } from "../modules/RegisterStepHeader";
 import { DateRow } from "../atoms/DateRow";
+import { isRequired, isVisible } from "@/utils/constants";
 
 export default function ConnectedOVRStep2({
   state,
   value,
+  formCongif,
+  errorMessages,
   onChange,
+  onChangeError,
 }: FormProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -22,6 +26,12 @@ export default function ConnectedOVRStep2({
     fieldValue: RegisterFormState[K],
   ) => {
     onChange({ ...value, [key]: fieldValue });
+    if (errorMessages[key].length) {
+      onChangeError({
+        ...errorMessages,
+        [key]: "",
+      });
+    }
   };
 
   return (
@@ -44,73 +54,92 @@ export default function ConnectedOVRStep2({
       {/* NAME */}
       <View style={styles.fieldset}>
         <Text style={styles.legend}>{t("register_page.section_name")}</Text>
-        <InputField
-          value={value.fullName}
-          label={t("register_page.full_name_label", { state: state.name })}
-          required
-          onChangeText={(text: string) => updateField("fullName", text)}
-        />
+        {isVisible(formCongif, "full_name") && (
+          <InputField
+            value={value.fullName}
+            label={t("register_page.full_name_label", { state: state.name })}
+            required={isRequired(formCongif, "full_name")}
+            errorMessage={errorMessages.fullName}
+            onChangeText={(text: string) => updateField("fullName", text)}
+          />
+        )}
+        {/* {isVisible(formCongif, "state_id_number") && ( */}
         <InputField
           value={value.licenseNumber}
           label={t("register_page.license_number_label", { state: state.name })}
-          required
+          required={isRequired(formCongif, "state_id_number")}
+          errorMessage={errorMessages.licenseNumber}
           onChangeText={(text: string) => updateField("licenseNumber", text)}
         />
+        {/* )} */}
 
-        <DateRow value={value} updateField={updateField} />
+        {isVisible(formCongif, "date_of_birth") && (
+          <DateRow
+            value={value}
+            updateField={updateField}
+            required={isRequired(formCongif, "date_of_birth")}
+          />
+        )}
 
         {/* EYE COLOR */}
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("register_page.eye_color.label")}
-            <Text style={styles.required}>*</Text>
-          </Text>
+        {isVisible(formCongif, "eye_color") && (
+          <View style={styles.inputBlock}>
+            <Text style={styles.label}>
+              {t("register_page.eye_color.label")}
+              {isRequired(formCongif, "eye_color") && (
+                <Text style={styles.required}>*</Text>
+              )}
+            </Text>
 
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.eyeColor}
-              onValueChange={(text: string) => updateField("eyeColor", text)}
-            >
-              <Picker.Item label="" value="" />
-              <Picker.Item
-                label={t("register_page.eye_color.none")}
-                value="UNK"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.black")}
-                value="BLK"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.blue")}
-                value="BLU"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.brown")}
-                value="BRO"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.green")}
-                value="GRN"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.gray")}
-                value="GRY"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.hazel")}
-                value="HIZ"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.maroon")}
-                value="MAR"
-              />
-              <Picker.Item
-                label={t("register_page.eye_color.pink")}
-                value="PNK"
-              />
-            </Picker>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={value.eyeColor}
+                onValueChange={(text: string) => updateField("eyeColor", text)}
+              >
+                <Picker.Item label="" value="" />
+                <Picker.Item
+                  label={t("register_page.eye_color.none")}
+                  value="UNK"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.black")}
+                  value="BLK"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.blue")}
+                  value="BLU"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.brown")}
+                  value="BRO"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.green")}
+                  value="GRN"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.gray")}
+                  value="GRY"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.hazel")}
+                  value="HIZ"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.maroon")}
+                  value="MAR"
+                />
+                <Picker.Item
+                  label={t("register_page.eye_color.pink")}
+                  value="PNK"
+                />
+              </Picker>
+            </View>
+            {errorMessages.eyeColor.length > 0 && (
+              <Text style={styles.required}>{errorMessages.eyeColor}</Text>
+            )}
           </View>
-        </View>
+        )}
 
         {/* SSN */}
         <InputField

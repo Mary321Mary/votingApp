@@ -1,6 +1,8 @@
 import type {
   AuthData,
   AuthMeResponse,
+  DataConfigurationRequest,
+  FetchDataCollectionConfigResponse,
   LoginCredentials,
   RegisterCredentials,
   RegisterData,
@@ -77,6 +79,17 @@ export function submitEmailZip(
 
 export function fetchUIConfiguration(headers: Record<string, string> = {}) {
   return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
+}
+
+export function fetchDataConfiguration(
+  data: DataConfigurationRequest,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.get<FetchDataCollectionConfigResponse>(
+    ENDPOINTS.DATA_CONFIG +
+      `&state_abbreviation=${data.state_abbreviation}&workflow_type=${data.workflow_type}&locale=${data.locale}`,
+    headers,
+  );
 }
 
 export async function submitEmailZipFake(

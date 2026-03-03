@@ -19,11 +19,11 @@ export default function ZipErrorScreen() {
     return null;
   }
 
-  const { text } = state;
+  const { text, header } = state;
 
   return (
     <View style={styles.container}>
-      <Header text="Zip Code Error" />
+      <Header text={header || "Zip Code Error"} />
 
       <View style={styles.content}>
         <Text style={styles.text}>{text}</Text>

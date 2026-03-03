@@ -57,6 +57,7 @@ export type RegisterFormState = {
   changedSuffix: string;
   isCitizen: boolean;
   isAdult: boolean;
+  email: string;
 
   // ADDRESS
   address: string;
@@ -75,42 +76,34 @@ export type RegisterFormState = {
   changedState: string;
   changedZip: string;
   hasStateId: boolean | null;
-
-  email: string;
   streetName: string;
   streetNumber: string;
   streetType: string;
   streetDirection: string;
-
   mailingStreetName: string;
   mailingStreetNumber: string;
   mailingStreetType: string;
+  mailingStreetAddress: string;
   mailingUnit: string;
   mailingCity: string;
   mailingState: string;
   mailingZip: string;
   mailingAddressType: string;
-
-  poNumber: string;
-  poCity: string;
-  poState: string;
-  poZip: string;
-
-  militaryType: string;
-  militaryGroupNumber: string;
-  militaryNumber: string;
-  militaryPostOffice: string;
-  militaryPostState: string;
-  militaryZip: string;
-
-  internationalAddress1: string;
-  internationalAddress2: string;
-  internationalAddress3: string;
-  internationalCountry: string;
-  internationalZip: string;
+  poBoxNumber: string;
+  boxGroupType: string;
+  boxGroupNumber: string;
+  boxNumber: string;
+  apoFpoDpo: string;
+  aaAeAp: string;
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  mailingCountry: string;
 
   // ID
   idNumber: string;
+  has_state_license: boolean;
+  has_ssn: boolean;
 
   // ADDITIONAL
   race: string;
@@ -183,32 +176,27 @@ export type RegisterFormStateError = {
   mailingStreetName: string;
   mailingStreetNumber: string;
   mailingStreetType: string;
+  mailingStreetAddress: string;
   mailingUnit: string;
   mailingCity: string;
   mailingState: string;
   mailingZip: string;
   mailingAddressType: string;
-
-  poNumber: string;
-  poCity: string;
-  poState: string;
-  poZip: string;
-
-  militaryType: string;
-  militaryGroupNumber: string;
-  militaryNumber: string;
-  militaryPostOffice: string;
-  militaryPostState: string;
-  militaryZip: string;
-
-  internationalAddress1: string;
-  internationalAddress2: string;
-  internationalAddress3: string;
-  internationalCountry: string;
-  internationalZip: string;
+  poBoxNumber: string;
+  boxGroupType: string;
+  boxGroupNumber: string;
+  boxNumber: string;
+  apoFpoDpo: string;
+  aaAeAp: string;
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  mailingCountry: string;
 
   // ID
   idNumber: string;
+  has_state_license: string;
+  has_ssn: string;
 
   // ADDITIONAL
   race: string;
@@ -245,8 +233,23 @@ export type RegisterFormStateError = {
 export type FormProps = {
   state: StateData;
   value: RegisterFormState;
+  formCongif: DataCollectionConfiguration;
   errorMessages: RegisterFormStateError;
+  showChangeName?: boolean;
+  showDifferentMailAddress?: boolean;
+  showChangedAddress?: boolean;
+  showIsAdultBlock?: boolean;
+  showMailingAddress?: boolean;
   onChange: (value: RegisterFormState) => void;
+  handleCheckbox?: (
+    newVal: boolean,
+    name:
+      | "showChangeName"
+      | "showDifferentMailAddress"
+      | "showChangedAddress"
+      | "showIsAdultBlock"
+      | "showMailingAddress",
+  ) => void;
   onChangeError: (value: RegisterFormStateError) => void;
 };
 
@@ -327,4 +330,44 @@ export interface SubmitEmailZipResponse {
 export interface SubmitEmailZipResponseProps extends SubmitEmailZipResponse {
   zip: string;
   email: string;
+}
+
+export interface DataConfigurationRequest {
+  state_abbreviation: string;
+  workflow_type: string;
+  locale: string;
+}
+
+export interface FieldValidation {
+  regexp?: string;
+  enforce_e164?: boolean;
+  min_length?: number;
+  max_length?: number;
+}
+
+export interface FieldConfig {
+  visible: boolean;
+  value_required: boolean;
+  dependent?: boolean;
+  dependent_field?: string;
+  options?: string[];
+  tooltip?: string;
+  validations?: FieldValidation;
+  checked?: boolean;
+}
+
+export interface DataCollectionConfiguration {
+  fields: Record<string, FieldConfig>;
+  validations: {
+    po_box_allowed: boolean;
+    min_age: number;
+  };
+}
+
+export interface FetchDataCollectionConfigResponse {
+  status: {
+    success: boolean;
+    errors: string[] | null;
+  };
+  configuration: DataCollectionConfiguration;
 }

@@ -1,3 +1,5 @@
+import { DataCollectionConfiguration } from "./types";
+
 export const STATES = [
   { name: "", value: "" },
   { name: "Alabama", value: "AL" },
@@ -74,3 +76,13 @@ export const MAILING_TYPE = [
     value: "INTERNATIONAL",
   },
 ];
+
+export const isVisible = (
+  formConfig: DataCollectionConfiguration,
+  key: string,
+) => formConfig?.fields?.[key]?.visible;
+
+export const isRequired = (
+  formConfig: DataCollectionConfiguration,
+  key: string,
+) => formConfig?.fields?.[key]?.value_required;

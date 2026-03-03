@@ -59,7 +59,7 @@ const getStyles = (theme: any) =>
     },
     buttonText: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      color: theme.textPrimary,
+      color: theme.white,
       fontSize: 16,
       fontWeight: "semibold",
     },

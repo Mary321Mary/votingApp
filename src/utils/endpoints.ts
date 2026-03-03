@@ -1,8 +1,9 @@
-export const AUTH_LOGIN = '/auth/login';
-export const AUTH_REGISTER = '/auth/register';
-export const AUTH_ME = '/auth/me';
-export const AUTH_REFRESH = '/auth/refresh';
-export const AUTH_UPDATE_ME = '/auth/me/update';
+export const AUTH_LOGIN = "/auth/login";
+export const AUTH_REGISTER = "/auth/register";
+export const AUTH_ME = "/auth/me";
+export const AUTH_REFRESH = "/auth/refresh";
+export const AUTH_UPDATE_ME = "/auth/me/update";
 
-export const EMAIL_ZIP = '/submit_email_zip';
-export const UI_CONFIG = '/fetch_ui_configuration?partner_id=1';
+export const EMAIL_ZIP = "/submit_email_zip";
+export const UI_CONFIG = "/fetch_ui_configuration?partner_id=1";
+export const DATA_CONFIG = "/fetch_data_collection_configuration?partner_id=1";

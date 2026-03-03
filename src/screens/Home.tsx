@@ -87,22 +87,29 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         });
       } catch (error: any) {
         console.error("Register failed:", error);
-        navigation.navigate("ZipError", {
-          text:
-            zipCode === "00000" ? t("zip_error_text1") : t("zip_error_text2"),
-        });
-        // const newErrors: { email?: string; zip?: string; general?: string } = {};
-        // if (error?.response?.status === 422 && Array.isArray(error?.response?.data?.status?.errors)) {
-        //   error.response.data.status.errors.forEach((msg: string) => {
-        //     const lowerMsg = msg.toLowerCase();
-        //     if (lowerMsg.includes('email')) {
-        //       newErrors.email = msg;
-        //     } else if (lowerMsg.includes('zip')) {
-        //       newErrors.zip = msg;
-        //     } else newErrors.general = newErrors.general ? `${newErrors.general}\n${msg}` : msg;
-        //   });
-        // } else newErrors.general = "An error occurred. Please try again later.";
-        // setErrors(newErrors);
+        // navigation.navigate("ZipError", {
+        //   text:
+        //     zipCode === "00000" ? t("zip_error_text1") : t("zip_error_text2"),
+        // });
+        const newErrors: { email?: string; zip?: string; general?: string } =
+          {};
+        if (
+          error?.response?.status === 422 &&
+          Array.isArray(error?.response?.data?.status?.errors)
+        ) {
+          error.response.data.status.errors.forEach((msg: string) => {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes("email")) {
+              newErrors.email = msg;
+            } else if (lowerMsg.includes("zip")) {
+              newErrors.zip = msg;
+            } else
+              newErrors.general = newErrors.general
+                ? `${newErrors.general}\n${msg}`
+                : msg;
+          });
+        } else newErrors.general = "An error occurred. Please try again later.";
+        setErrors(newErrors);
       } finally {
         setIsLoading(false);
       }

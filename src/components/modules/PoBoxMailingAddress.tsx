@@ -2,70 +2,94 @@ import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Picker } from "@react-native-picker/picker";
-import { STATES } from "@/utils/constants";
+import { isRequired, isVisible, STATES } from "@/utils/constants";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import InputField from "../atoms/InputField";
 
-export const PoBoxMailingAddress = ({ errorMessages, value, onChange }: FormProps) => {
+export const PoBoxMailingAddress = ({
+  errorMessages,
+  value,
+  formCongif,
+  onChange,
+  onChangeError,
+}: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
-    fieldValue: RegisterFormState[K]
+    fieldValue: RegisterFormState[K],
   ) => {
     onChange({ ...value, [key]: fieldValue });
+    if (errorMessages[key].length) {
+      onChangeError({
+        ...errorMessages,
+        [key]: "",
+      });
+    }
   };
 
-  return <>
-    <InputField
-      label={t('register_page.po_box_number')}
-      required
-      value={value.poNumber}
-      errorMessage={errorMessages.poNumber}
-      onChangeText={(text: string) => updateField("poNumber", text)}
-    />
+  return (
+    <>
+      <InputField
+        label={t("register_page.po_box_number")}
+        required
+        value={value.poBoxNumber}
+        errorMessage={errorMessages.poBoxNumber}
+        onChangeText={(text: string) => updateField("poBoxNumber", text)}
+      />
 
-    <InputField
-      label={t("register_page.city")}
-      value={value.poCity}
-      errorMessage={errorMessages.poCity}
-      required
-      onChangeText={(text: string) => updateField("poCity", text)}
-    />
+      {isVisible(formCongif, "mailing_city") && (
+        <InputField
+          label={t("register_page.city")}
+          value={value.mailingCity}
+          required={isRequired(formCongif, "mailing_city")}
+          errorMessage={errorMessages.mailingCity}
+          onChangeText={(text: string) => updateField("mailingCity", text)}
+        />
+      )}
 
-    <View style={styles.inputBlock}>
-      <Text style={styles.label}>
-        {t("register_page.state")}
-        <Text style={styles.required}> *</Text>
-      </Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={value.poState}
-          onValueChange={(text: string) => updateField("poState", text)}
-        >
-          {STATES.map((state_value) => (
-            <Picker.Item
-              key={state_value.value}
-              label={state_value.name}
-              value={state_value.value}
-            />
-          ))}
-        </Picker>
-      </View>
-    </View>
+      {isVisible(formCongif, "mailing_state") && (
+        <View style={styles.inputBlock}>
+          <Text style={styles.label}>
+            {t("register_page.state")}
+            {isRequired(formCongif, "mailing_state") && (
+              <Text style={styles.required}> *</Text>
+            )}
+          </Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={value.mailingState}
+              onValueChange={(text: string) =>
+                updateField("mailingState", text)
+              }
+            >
+              {STATES.map(state_value => (
+                <Picker.Item
+                  key={state_value.value}
+                  label={state_value.name}
+                  value={state_value.value}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      )}
 
-    <InputField
-      label={t("zip")}
-      value={value.poZip}
-      errorMessage={errorMessages.poZip}
-      numeric
-      required
-      onChangeText={(text: string) => updateField("poZip", text)}
-    />
-  </>
+      {isVisible(formCongif, "mailing_zip_code") && (
+        <InputField
+          label={t("zip")}
+          value={value.mailingZip}
+          required={isRequired(formCongif, "mailing_zip_code")}
+          errorMessage={errorMessages.mailingZip}
+          numeric
+          onChangeText={(text: string) => updateField("mailingZip", text)}
+        />
+      )}
+    </>
+  );
 };
 
 const getStyles = (theme: any) =>

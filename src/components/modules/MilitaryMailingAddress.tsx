@@ -5,99 +5,135 @@ import { useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
+import { isRequired, isVisible } from "@/utils/constants";
 
-export const MilitaryMailingAddress = ({ errorMessages, value, onChange }: FormProps) => {
+export const MilitaryMailingAddress = ({
+  errorMessages,
+  value,
+  formCongif,
+  onChange,
+  onChangeError,
+}: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
-    fieldValue: RegisterFormState[K]
+    fieldValue: RegisterFormState[K],
   ) => {
     onChange({ ...value, [key]: fieldValue });
+    if (errorMessages[key].length) {
+      onChangeError({
+        ...errorMessages,
+        [key]: "",
+      });
+    }
   };
 
-  return <>
-    <View style={styles.inputBlock}>
-      <Text style={styles.label}>
-        {t('register_page.box_group_type')}
-        <Text style={styles.required}> *</Text>
-      </Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={value.militaryType}
-          onValueChange={(text: string) => updateField("militaryType", text)}
-        >
-          <Picker.Item label="" value="" />
-          <Picker.Item label={t('register_page.unit')} value="UNIT" />
-          <Picker.Item label={t('register_page.cmr')} value="CMR" />
-          <Picker.Item label={t('register_page.psc')} value="PSC" />
-        </Picker>
+  const BOX_GROUP_TYPE = [
+    { name: "", value: "" },
+    { name: "UNIT", value: "unit" },
+    { name: "CMR", value: "cmr" },
+    { name: "PSC", value: "psc" },
+  ];
+
+  return (
+    <>
+      <View style={styles.inputBlock}>
+        <Text style={styles.label}>
+          {t("register_page.military.box.box_group_type")}
+          <Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={value.boxGroupType}
+            onValueChange={(text: string) => updateField("boxGroupType", text)}
+          >
+            {BOX_GROUP_TYPE.map(item => (
+              <Picker.Item
+                key={item.value}
+                label={item.name}
+                value={item.value}
+              />
+            ))}
+          </Picker>
+        </View>
+        {errorMessages.boxGroupType && (
+          <Text style={styles.required}>{errorMessages.boxGroupType}</Text>
+        )}
       </View>
-    </View>
 
-    <InputField
-      label={t('register_page.box_group_number')}
-      required
-      value={value.militaryGroupNumber}
-      errorMessage={errorMessages.militaryGroupNumber}
-      onChangeText={(text: string) => updateField("militaryGroupNumber", text)}
-    />
+      <InputField
+        label={t("register_page.military.box_group_number")}
+        // required
+        value={value.boxGroupNumber}
+        errorMessage={errorMessages.boxGroupNumber}
+        onChangeText={(text: string) => updateField("boxGroupNumber", text)}
+      />
 
-    <InputField
-      label={t('register_page.box_number')}
-      value={value.militaryNumber}
-      errorMessage={errorMessages.militaryNumber}
-      required
-      onChangeText={(text: string) => updateField("militaryNumber", text)}
-    />
+      <InputField
+        label={t("register_page.military.box_number")}
+        value={value.boxNumber}
+        errorMessage={errorMessages.boxNumber}
+        // required
+        onChangeText={(text: string) => updateField("boxNumber", text)}
+      />
 
-    <View style={styles.inputBlock}>
-      <Text style={styles.label}>
-        APO/FPO/DPO
-        <Text style={styles.required}> *</Text>
-      </Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={value.militaryPostOffice}
-          onValueChange={(text: string) => updateField("militaryPostOffice", text)}
-        >
-          <Picker.Item label="" value="" />
-          <Picker.Item label="APO" value="APO" />
-          <Picker.Item label="FPO" value="FPO" />
-          <Picker.Item label="DPO" value="DPO" />
-        </Picker>
+      <View style={styles.inputBlock}>
+        <Text style={styles.label}>
+          APO/FPO/DPO
+          <Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={value.apoFpoDpo}
+            onValueChange={(text: string) => updateField("apoFpoDpo", text)}
+          >
+            <Picker.Item label="" value="" />
+            <Picker.Item label="APO" value="APO" />
+            <Picker.Item label="FPO" value="FPO" />
+            <Picker.Item label="DPO" value="DPO" />
+          </Picker>
+        </View>
+        {errorMessages.apoFpoDpo && (
+          <Text style={styles.required}>{errorMessages.apoFpoDpo}</Text>
+        )}
       </View>
-    </View>
 
-    <View style={styles.inputBlock}>
-      <Text style={styles.label}>
-        AA/AE/AP
-        <Text style={styles.required}> *</Text>
-      </Text>
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={value.militaryPostState}
-          onValueChange={(text: string) => updateField("militaryPostState", text)}
-        >
-          <Picker.Item label="" value="" />
-          <Picker.Item label="AA" value="AA" />
-          <Picker.Item label="AE" value="AE" />
-          <Picker.Item label="AP" value="AP" />
-        </Picker>
+      <View style={styles.inputBlock}>
+        <Text style={styles.label}>
+          AA/AE/AP
+          <Text style={styles.required}> *</Text>
+        </Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={value.aaAeAp}
+            onValueChange={(text: string) => updateField("aaAeAp", text)}
+          >
+            <Picker.Item label="" value="" />
+            <Picker.Item label="AA" value="AA" />
+            <Picker.Item label="AE" value="AE" />
+            <Picker.Item label="AP" value="AP" />
+          </Picker>
+        </View>
+        {errorMessages.aaAeAp && (
+          <Text style={styles.required}>{errorMessages.aaAeAp}</Text>
+        )}
       </View>
-    </View>
 
-    <InputField
-      label={t("zip")}
-      value={value.militaryZip}
-      errorMessage={errorMessages.militaryZip}
-      numeric
-      required
-      onChangeText={(text: string) => updateField("militaryZip", text)}
-    />
-  </>
+      {isVisible(formCongif, "mailing_zip_code") && (
+        <InputField
+          label={t("zip")}
+          value={value.mailingZip}
+          required={isRequired(formCongif, "mailing_zip_code")}
+          errorMessage={errorMessages.mailingZip}
+          numeric
+          onChangeText={(text: string) => updateField("mailingZip", text)}
+        />
+      )}
+    </>
+  );
 };
 
 const getStyles = (theme: any) =>

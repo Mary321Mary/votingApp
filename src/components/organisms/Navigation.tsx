@@ -15,7 +15,7 @@ export type RootStackParamList = {
   Success: undefined; // or { id: string }
   CheckVoterStatus: { email: string; zip: string };
   Lookup: undefined;
-  ZipError: { text: string };
+  ZipError: { text: string; header?: string };
 };
 
 const withDefaultLayout = (Component: React.ComponentType<any>) => {

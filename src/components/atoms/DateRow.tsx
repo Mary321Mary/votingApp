@@ -7,13 +7,18 @@ import { RegisterFormState } from "@/utils/types";
 
 interface DateRowProps {
   value: any;
+  required?: boolean;
   updateField: <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K],
   ) => void;
 }
 
-export const DateRow = ({ value, updateField }: DateRowProps) => {
+export const DateRow = ({
+  value,
+  required = false,
+  updateField,
+}: DateRowProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -23,7 +28,7 @@ export const DateRow = ({ value, updateField }: DateRowProps) => {
     <View style={styles.inputBlock}>
       <Text style={styles.label}>
         {t("register_page.dob")}
-        <Text style={styles.required}> *</Text>
+        {required && <Text style={styles.required}> *</Text>}
       </Text>
 
       <View style={styles.dateRow}>

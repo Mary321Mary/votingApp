@@ -8,10 +8,18 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import InputField from "../atoms/InputField";
 import { Checkbox } from "../atoms/Checkbox";
 import { DateRow } from "../atoms/DateRow";
+import { isRequired, isVisible } from "@/utils/constants";
 
-interface ContactSectionProps extends Pick<FormProps, "value" | "onChange"> {}
+interface ContactSectionProps extends FormProps {}
 
-export const ContactSection = ({ value, onChange }: ContactSectionProps) => {
+export const ContactSection = ({
+  value,
+  formCongif,
+  errorMessages,
+  showIsAdultBlock,
+  onChange,
+  onChangeError,
+}: ContactSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -21,6 +29,12 @@ export const ContactSection = ({ value, onChange }: ContactSectionProps) => {
     fieldValue: RegisterFormState[K],
   ) => {
     onChange({ ...value, [key]: fieldValue });
+    if (errorMessages[key].length) {
+      onChangeError({
+        ...errorMessages,
+        [key]: "",
+      });
+    }
   };
 
   return (
@@ -29,15 +43,25 @@ export const ContactSection = ({ value, onChange }: ContactSectionProps) => {
         {t("register_page.section_contact")}
       </Text>
 
-      <DateRow value={value} updateField={updateField} />
-      <View style={styles.row}>
-        <InputField
-          label={t("register_page.phone")}
-          helpText={t("register_page.phone_help")}
-          placeholder="###-###-####"
-          value={value.phone}
-          onChangeText={(text: string) => updateField("phone", text)}
+      {isVisible(formCongif, "date_of_birth") && (
+        <DateRow
+          value={value}
+          required={isRequired(formCongif, "date_of_birth")}
+          updateField={updateField}
         />
+      )}
+      <View style={styles.row}>
+        {isVisible(formCongif, "phone") && (
+          <InputField
+            label={t("register_page.phone")}
+            helpText={t("register_page.phone_help")}
+            placeholder="###-###-####"
+            value={value.phone}
+            required={isRequired(formCongif, "phone")}
+            errorMessage={errorMessages.phone}
+            onChangeText={(text: string) => updateField("phone", text)}
+          />
+        )}
         <View>
           <Text style={styles.inputLabel}>{t("register_page.phone_type")}</Text>
           <View style={styles.pickerWrapper}>
@@ -69,33 +93,49 @@ export const ContactSection = ({ value, onChange }: ContactSectionProps) => {
       </View>
 
       <View style={styles.section}>
-        <Checkbox
-          label={t("register_page.sms_opt_in")}
-          value={value.smsConsent}
-          onValueChange={(checked: boolean) =>
-            updateField("smsConsent", checked)
-          }
-        />
+        {isVisible(formCongif, "opt_in_sms") && (
+          <Checkbox
+            label={t("register_page.sms_opt_in")}
+            value={value.smsConsent}
+            required={isRequired(formCongif, "opt_in_sms")}
+            errorText={errorMessages.smsConsent}
+            onValueChange={(checked: boolean) =>
+              updateField("smsConsent", checked)
+            }
+          />
+        )}
         <Text style={styles.hint}>{t("register_page.sms_disclaimer")}</Text>
-        <Checkbox
-          label={t("register_page.email_opt_in")}
-          value={value.emailConsent}
-          onValueChange={(checked: boolean) =>
-            updateField("emailConsent", checked)
-          }
-        />
-        <Checkbox
-          label={t("register_page.volunteer")}
-          value={value.volunteer}
-          onValueChange={(checked: boolean) =>
-            updateField("volunteer", checked)
-          }
-        />
-        <Checkbox
-          label={t("register_page.mail_form")}
-          value={value.mailForm}
-          onValueChange={(checked: boolean) => updateField("mailForm", checked)}
-        />
+        {isVisible(formCongif, "opt_in_email") && (
+          <Checkbox
+            label={t("register_page.email_opt_in")}
+            value={value.emailConsent}
+            required={isRequired(formCongif, "opt_in_email")}
+            errorText={errorMessages.emailConsent}
+            onValueChange={(checked: boolean) =>
+              updateField("emailConsent", checked)
+            }
+          />
+        )}
+        {isVisible(formCongif, "volunteer") && (
+          <Checkbox
+            label={t("register_page.volunteer")}
+            value={value.volunteer}
+            required={isRequired(formCongif, "volunteer")}
+            errorText={errorMessages.volunteer}
+            onValueChange={(checked: boolean) =>
+              updateField("volunteer", checked)
+            }
+          />
+        )}
+        {(!showIsAdultBlock || !value.hasStateId) && (
+          <Checkbox
+            label={t("register_page.mail_form")}
+            value={value.mailForm}
+            onValueChange={(checked: boolean) =>
+              updateField("mailForm", checked)
+            }
+          />
+        )}
       </View>
     </View>
   );
