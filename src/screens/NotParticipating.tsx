@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
-import { FormProps } from "@/utils/types";
+import { StateData } from "@/utils/types";
 import { StyleSheet, Text } from "react-native";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import RenderHTML from "react-native-render-html";
 import { useTranslation } from "react-i18next";
 
-export const NotParticipating = ({ state }: FormProps) => {
+export const NotParticipatingScreen = (state: StateData) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();

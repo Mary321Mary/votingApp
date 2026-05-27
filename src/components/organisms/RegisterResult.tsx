@@ -1,8 +1,19 @@
-import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
 
+import i18n from "@/i18n";
+import { isRequired, isVisible } from "@/utils/constants";
 import {
   DataCollectionConfiguration,
   OVR_TYPE_MAP,
@@ -10,18 +21,97 @@ import {
   RegisterFormStateError,
   StateData,
 } from "@/utils/types";
-import { PaperOVR } from "./PaperOVR";
-import { OvrState } from "./OvrState";
-import { ConnectedOVR } from "./ConnectedOVR";
+import { fetchDataConfiguration, getSurveyQuestions } from "@/utils/api";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "./Navigation";
-import ConnectedOVRStep2 from "./ConnectedOVRStep2";
-import ConnectedOVRStep3 from "./ConnectedOVRStep3";
-import { NotParticipating } from "./NotParticipating";
-import { useNavigation } from "@react-navigation/native";
-import i18n from "@/i18n";
-import { fetchDataConfiguration } from "@/utils/api";
-import { isRequired } from "@/utils/constants";
+
+import { PaperOVR } from "./PaperOVR";
+import { OvrState } from "./OvrState";
+import { ConnectedOVR } from "./MI/ConnectedOVR";
+import ConnectedOVRStep2 from "./MI/ConnectedOVRStep2";
+import ConnectedOVRStep3 from "./MI/ConnectedOVRStep3";
+import FinishWithState from "./FinishWithState";
+import AcceptNotice from "./AcceptNotice";
+import { ConnectedWA } from "./ConnectedWA";
+import { ConnectedPA } from "./PA/ConnectedPA";
+import { ConnectedCA } from "./ConnectedCA";
+import { ConnectedPAStep2 } from "./PA/ConnectedPAStep2";
+import { ConnectedPAStep3Upload } from "./PA/ConnectedPAStep3Upload";
+import { ConnectedPAStep3HasID } from "./PA/ConnectedPAStep3HasID";
+import RenderHTML from "react-native-render-html";
+
+/** Minimum age for Pennsylvania connected OVR registration (17 years + 180 days). */
+export const PA_CONNECTED_REGISTRATION_MIN_YEARS = 17;
+export const PA_CONNECTED_REGISTRATION_MIN_EXTRA_DAYS = 180;
+
+export type PaConnectedRegistrationDobResult =
+  | { outcome: "defer" }
+  | { outcome: "too_young"; errorMessageKey: string }
+  | { outcome: "eligible"; preregistrationAgeWindow: boolean };
+
+/**
+ * Evaluates date of birth for Pennsylvania connected OVR: minimum 17 years + 180 days,
+ * and whether the registrant is in the preregistration window (before 18th birthday).
+ * Used by RegisterResult `validateWA`; exported so other code can reuse the same rules.
+ */
+export function evaluatePaConnectedRegistrationDateOfBirth(
+  birthYear: string,
+  birthMonth: string,
+  birthDay: string,
+  referenceDate: Date = new Date(),
+): PaConnectedRegistrationDobResult {
+  if (!birthYear.trim() || !birthMonth.trim() || !birthDay.trim()) {
+    return { outcome: "defer" };
+  }
+
+  const year = Number(birthYear);
+  const month = Number(birthMonth) - 1;
+  const day = Number(birthDay);
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day)
+  ) {
+    return { outcome: "defer" };
+  }
+
+  const birth = new Date(year, month, day);
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+
+  if (birth > today) {
+    return { outcome: "defer" };
+  }
+
+  const invalidCalendar =
+    birth.getFullYear() !== year ||
+    birth.getMonth() !== month ||
+    birth.getDate() !== day;
+  if (invalidCalendar) {
+    return { outcome: "defer" };
+  }
+
+  const minAgeThresholdDate = new Date(today);
+  minAgeThresholdDate.setFullYear(
+    minAgeThresholdDate.getFullYear() - PA_CONNECTED_REGISTRATION_MIN_YEARS,
+  );
+  minAgeThresholdDate.setDate(
+    minAgeThresholdDate.getDate() - PA_CONNECTED_REGISTRATION_MIN_EXTRA_DAYS,
+  );
+
+  if (birth > minAgeThresholdDate) {
+    return {
+      outcome: "too_young",
+      errorMessageKey: "pennsylvania.connected_pa_min_registration_age_error",
+    };
+  }
+
+  const eighteenthBirthday = new Date(year, month, day);
+  eighteenthBirthday.setFullYear(eighteenthBirthday.getFullYear() + 18);
+  const preregistrationAgeWindow = today < eighteenthBirthday;
+
+  return { outcome: "eligible", preregistrationAgeWindow };
+}
 
 function getFlowType(ovrType: string) {
   return OVR_TYPE_MAP[ovrType] ?? "paper";
@@ -36,104 +126,130 @@ interface RegisterResultProps {
   state: StateData;
   zip: string;
   email: string;
+  pageFromLookup: string;
+  showRedirectText: boolean;
+  form?: RegisterFormState;
 }
 
 const EMPTY_ERROR_MESSAGES = {
-  title: "",
-  firstName: "",
-  middleName: "",
-  lastName: "",
+  partner_id: "",
+  lang: "",
+
+  name_title: "",
+  first_name: "",
+  middle_name: "",
+  last_name: "",
   suffix: "",
-  changedTitle: "",
-  changedFirstName: "",
-  changedMiddleName: "",
-  changedLastName: "",
-  changedSuffix: "",
-  isCitizen: "",
-  isAdult: "",
-  email: "",
+  change_of_name: "",
+  prev_name_title: "",
+  prev_first_name: "",
+  prev_middle_name: "",
+  prev_last_name: "",
+  prev_name_suffix: "",
+  us_citizen: "",
+  will_be_18_by_election: "",
+  email_address: "",
 
-  address: "",
+  home_address: "",
+  address_line_2: "",
+  unit_type: "",
   unit: "",
-  city: "",
+  home_city: "",
   state: "",
-  zip: "",
-  differentAddress: "",
-  differentUnit: "",
-  differentCity: "",
-  differentState: "",
-  differentZip: "",
-  changedAddress: "",
-  changedUnit: "",
-  changedCity: "",
-  changedState: "",
-  changedZip: "",
-  hasStateId: "",
+  home_zip_code: "",
+  mailing_address: "",
+  mailing_unit: "",
+  mailing_city: "",
+  mailing_state: "",
+  mailing_zip_code: "",
 
-  idNumber: "",
-  has_state_license: "",
-  has_ssn: "",
+  change_of_address: "",
+  prev_address: "",
+  prev_unit: "",
+  prev_city: "",
+  prev_state: "",
+  prev_zip_code: "",
 
   race: "",
   party: "",
-
+  home_county: "",
+  signature_base64: "",
   birthMonth: "",
   birthDay: "",
   birthYear: "",
+  date_of_birth: "",
+  pa_preregistration_age_window: "",
   phone: "",
-  phoneType: "",
 
-  smsConsent: "",
-  emailConsent: "",
+  issueMonth: "",
+  issueDay: "",
+  issueYear: "",
+
+  opt_in_sms: "",
+  opt_in_email: "",
   volunteer: "",
   mailForm: "",
+  survey_question_1: "",
+  survey_answer_1: "",
+  survey_question_2: "",
+  survey_answer_2: "",
 
-  residency: "",
-  cancelPrevious: "",
-  digitalSignature: "",
-  licenseUpdated: "",
-  duplicateLicense: "",
+  residency_duration_ack: "",
+  cancel_previous_registration_ack: "",
+  use_stored_signature_ack: "",
+  updated_dln_recently: "",
+  request_duplicate_dln_today: "",
 
-  fullName: "",
-  licenseNumber: "",
-  eyeColor: "",
-  ssnLast4: "",
+  full_name: "",
+  state_id_number: "",
+  eye_color: "",
+  last_four_ss_number: "",
+  has_no_state_license: "",
+  has_no_ssn: "",
+  someone_helped: "",
+  helper_electronic_signature_acknowledged: "",
 
-  streetName: "",
-  streetNumber: "",
-  streetType: "",
-  streetDirection: "",
-  mailingStreetName: "",
-  mailingStreetNumber: "",
-  mailingStreetType: "",
-  mailingStreetAddress: "",
-  mailingUnit: "",
-  mailingCity: "",
-  mailingState: "",
-  mailingZip: "",
+  street_name: "",
+  street_number: "",
+  street_type: "",
+  street_direction: "",
+
+  has_mailing_address: "",
+  mailing_postal_code: "",
   mailingAddressType: "",
-  isAdultBlock: "",
+  age_eligibility: "",
 
-  poBoxNumber: "",
-  boxGroupType: "",
-  boxGroupNumber: "",
-  boxNumber: "",
-  apoFpoDpo: "",
-  aaAeAp: "",
-  addressLine1: "",
-  addressLine2: "",
-  addressLine3: "",
-  mailingCountry: "",
+  mailing_po_box_number: "",
+  mailing_box_group_type: "",
+  mailing_box_group_number: "",
+  mailing_box_number: "",
+  mailing_apo: "",
+  mailing_ap: "",
+  mailing_address_line1: "",
+  mailing_address_line2: "",
+  mailing_address_line3: "",
+  mailing_country: "",
 };
 
-export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
+export const RegisterResult = ({
+  state,
+  zip,
+  email,
+  pageFromLookup,
+  showRedirectText,
+  form: initform,
+}: RegisterResultProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
   const navigation = useNavigation<RegisterScreenNavigation>();
+  const [showRedirect, setShowRedirectText] =
+    useState<boolean>(showRedirectText);
+  const scrollRef = useRef<ScrollView>(null);
+  const { width } = useWindowDimensions();
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const flowType = getFlowType(state?.ovr_type || "");
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  let flowType = pageFromLookup || getFlowType(state?.ovr_type || "");
   const [formCongif, setFormCongif] = useState<DataCollectionConfiguration>({
     fields: {},
     validations: {
@@ -145,113 +261,118 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
     useState<RegisterFormStateError>(EMPTY_ERROR_MESSAGES);
 
   const [form, setForm] = useState<RegisterFormState>({
-    title: "",
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    suffix: "",
-    changedTitle: "",
-    changedFirstName: "",
-    changedMiddleName: "",
-    changedLastName: "",
-    changedSuffix: "",
-    isCitizen: false,
-    isAdult: false,
-    email,
+    partner_id: 1,
+    lang: i18n.language,
 
-    address: "",
-    unit: "",
-    city: "",
-    state: state.abbreviation,
-    zip,
-    differentAddress: "",
-    differentUnit: "",
-    differentCity: "",
-    differentState: state.abbreviation,
-    differentZip: "",
-    changedAddress: "",
-    changedUnit: "",
-    changedCity: "",
-    changedState: "",
-    changedZip: "",
-    hasStateId: true,
+    name_title: initform?.name_title || "",
+    first_name: initform?.first_name || "",
+    middle_name: initform?.middle_name || "",
+    last_name: initform?.last_name || "",
+    suffix: initform?.suffix || "",
 
-    idNumber: "",
-    has_state_license: false,
-    has_ssn: false,
+    change_of_name: initform?.change_of_name || false,
+    prev_name_title: initform?.prev_name_title || "",
+    prev_first_name: initform?.prev_first_name || "",
+    prev_middle_name: initform?.prev_middle_name || "",
+    prev_last_name: initform?.prev_last_name || "",
+    prev_name_suffix: initform?.prev_name_suffix || "",
+    us_citizen: initform?.us_citizen || false,
+    will_be_18_by_election: initform?.will_be_18_by_election || false,
+    email_address: initform?.email_address || email,
 
-    race: "",
-    party: "",
+    home_address: initform?.home_address || "",
+    address_line_2: initform?.address_line_2 || "",
+    unit_type: initform?.unit_type || "",
+    unit: initform?.unit || "",
+    home_city: initform?.home_city || "",
+    state: initform?.state || state.abbreviation,
+    home_zip_code: initform?.home_zip_code || zip,
+    mailing_address: initform?.mailing_address || "",
+    mailing_unit: initform?.mailing_unit || "",
+    mailing_city: initform?.mailing_city || "",
+    mailing_state: initform?.mailing_state || state.abbreviation,
+    mailing_zip_code: initform?.mailing_zip_code || "",
 
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    phone: "",
-    phoneType: "Mobile",
+    change_of_address: initform?.change_of_address || false,
+    prev_address: initform?.prev_address || "",
+    prev_unit: initform?.prev_unit || "",
+    prev_city: initform?.prev_city || "",
+    prev_state: initform?.prev_state || "",
+    prev_zip_code: initform?.prev_zip_code || "",
 
-    smsConsent: false,
-    emailConsent: true,
-    volunteer: false,
-    mailForm: false,
+    race: initform?.race || "",
+    party: initform?.party || "",
+    home_county: initform?.home_county || "",
+    signature_base64: initform?.signature_base64 || "",
 
-    residency: false,
-    cancelPrevious: false,
-    digitalSignature: false,
-    licenseUpdated: null,
-    duplicateLicense: null,
+    birthMonth: initform?.birthMonth || "",
+    birthDay: initform?.birthDay || "",
+    birthYear: initform?.birthYear || "",
+    date_of_birth: "",
+    pa_preregistration_age_window:
+      initform?.pa_preregistration_age_window ?? false,
+    phone: initform?.phone || "",
 
-    fullName: "",
-    licenseNumber: "",
-    eyeColor: "",
-    ssnLast4: "",
+    issueMonth: "",
+    issueDay: "",
+    issueYear: "",
 
-    streetName: "",
-    streetNumber: "",
-    streetType: "",
-    streetDirection: "",
-    mailingStreetName: "",
-    mailingStreetNumber: "",
-    mailingStreetType: "",
-    mailingStreetAddress: "",
-    mailingUnit: "",
-    mailingCity: "",
-    mailingState: "",
-    mailingZip: "",
+    opt_in_sms: initform?.opt_in_sms || false,
+    opt_in_email: initform?.opt_in_email || true,
+    volunteer: initform?.volunteer || false,
+    mailForm: initform?.mailForm || false,
+    survey_question_1: initform?.survey_question_1 || "",
+    survey_answer_1: initform?.survey_answer_1 || "",
+    survey_question_2: initform?.survey_question_2 || "",
+    survey_answer_2: initform?.survey_answer_2 || "",
+
+    residency_duration_ack: initform?.residency_duration_ack || false,
+    cancel_previous_registration_ack:
+      initform?.cancel_previous_registration_ack || false,
+    use_stored_signature_ack: initform?.use_stored_signature_ack || false,
+    updated_dln_recently: initform?.updated_dln_recently || null,
+    request_duplicate_dln_today: initform?.request_duplicate_dln_today || null,
+    age_eligibility: initform?.age_eligibility || false,
+
+    full_name: initform?.full_name || "",
+    state_id_number: initform?.state_id_number || "",
+    eye_color: initform?.eye_color || "",
+    last_four_ss_number: initform?.last_four_ss_number || "",
+    has_no_state_license: initform?.has_no_state_license || null,
+    has_no_ssn: initform?.has_no_ssn || null,
+    someone_helped: initform?.someone_helped || false,
+    helper_electronic_signature_acknowledged:
+      initform?.helper_electronic_signature_acknowledged || false,
+
+    street_name: initform?.street_name || "",
+    street_number: initform?.street_number || "",
+    street_type: initform?.street_type || "",
+    street_direction: initform?.street_direction || "",
+
+    has_mailing_address: false,
+    mailing_postal_code: "",
     mailingAddressType: "STANDARD",
-    poBoxNumber: "",
-    boxGroupType: "",
-    boxGroupNumber: "",
-    boxNumber: "",
-    apoFpoDpo: "",
-    aaAeAp: "",
-    addressLine1: "",
-    addressLine2: "",
-    addressLine3: "",
-    mailingCountry: "",
+    mailing_po_box_number: "",
+    mailing_box_group_type: "",
+    mailing_box_group_number: "",
+    mailing_box_number: "",
+    mailing_apo: "",
+    mailing_ap: "",
+    mailing_address_line1: "",
+    mailing_address_line2: "",
+    mailing_address_line3: "",
+    mailing_country: "",
   });
 
-  const [showChangeName, setShowChangeName] = useState(false);
-  const [showDifferentMailAddress, setShowDifferentMailAddress] =
-    useState(false);
-  const [showChangedAddress, setShowChangedAddress] = useState(false);
-  const [showIsAdultBlock, setShowIsAdultBlock] = useState(false);
-  const [showMailingAddress, setShowMailingAddress] = useState(true);
-
-  const handleCheckbox = (newVal: boolean, name: string) => {
-    if (name === "showChangeName") {
-      setShowChangeName(newVal);
-    } else if (name === "showDifferentMailAddress") {
-      setShowDifferentMailAddress(newVal);
-    } else if (name === "showChangedAddress") {
-      setShowChangedAddress(newVal);
-    } else if (name === "showIsAdultBlock") {
-      setShowIsAdultBlock(newVal);
-    } else if (name === "showMailingAddress") {
-      setShowMailingAddress(newVal);
-    }
-  };
-
   const renderContent = () => {
+    const shortLang = i18n.language.split("-")[0];
+    if (
+      !state.ovr_locales.includes(shortLang) &&
+      flowType !== "not_participating"
+    ) {
+      flowType = "paper";
+    }
+
     if (flowType === "connected_ovr") {
       if (step === 1)
         return (
@@ -262,6 +383,12 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             errorMessages={errMsg}
             onChange={setForm}
             onChangeError={setErrMsg}
+            handleMainButton={
+              <Button
+                title={t("ovr_landing_page.next_button")}
+                onPress={handleMainButtonClick}
+              />
+            }
           />
         );
       if (step === 2)
@@ -273,6 +400,12 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             errorMessages={errMsg}
             onChange={setForm}
             onChangeError={setErrMsg}
+            handleMainButton={
+              <Button
+                title={t("ovr_landing_page.next_button")}
+                onPress={handleMainButtonClick}
+              />
+            }
           />
         );
       if (step === 3)
@@ -281,43 +414,255 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             state={state}
             value={form}
             formCongif={formCongif}
-            showMailingAddress={showMailingAddress}
             errorMessages={errMsg}
             onChange={setForm}
             onChangeError={setErrMsg}
-            handleCheckbox={handleCheckbox}
+            handleMainButton={
+              <Button title="Submit" onPress={handleMainButtonClick} />
+            }
           />
         );
     }
 
     switch (flowType) {
+      case "connected_WA":
+        if (step === 1)
+          return (
+            <ConnectedWA
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+
+        if (step === 2)
+          return (
+            <PaperOVR
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("nvra_form_page.print_form")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        break;
+      case "connected_PA":
+        if (step === 1)
+          return (
+            <ConnectedPA
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        if (step === 2)
+          return (
+            <ConnectedPAStep2
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        if (step === 3) {
+          if (form.has_no_state_license) {
+            return (
+              <ConnectedPAStep3Upload
+                state={state}
+                errorMessages={errMsg}
+                value={form}
+                formCongif={formCongif}
+                onChange={setForm}
+                onChangeError={setErrMsg}
+                handleMainButton={
+                  <Button
+                    title={t("ovr_landing_page.next_button")}
+                    onPress={handleMainButtonClick}
+                  />
+                }
+              />
+            );
+          } else {
+            return (
+              <ConnectedPAStep3HasID
+                value={form}
+                goBack={stepNumber => setStep(stepNumber)}
+                handleMainButtonClick={handleMainButtonClick}
+              />
+            );
+          }
+        }
+        if (step === 4)
+          return (
+            <ConnectedPAStep3HasID
+              value={form}
+              goBack={stepNumber => setStep(stepNumber)}
+              handleMainButtonClick={handleMainButtonClick}
+            />
+          );
+        break;
+      case "connected_CA":
+        if (step === 1)
+          return (
+            <ConnectedCA
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        if (step === 2)
+          return (
+            <AcceptNotice
+              state={state}
+              value={form}
+              onChange={setForm}
+              handleMainButton={
+                <Button
+                  title={"< " + t("general.no_thanks_continue_rtv")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        if (step === 3)
+          return (
+            <PaperOVR
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        break;
       case "not_participating":
-        return (
-          <NotParticipating
-            state={state}
-            value={form}
-            formCongif={formCongif}
-            errorMessages={errMsg}
-            onChange={setForm}
-            onChangeError={setErrMsg}
-          />
-        );
+        navigation.navigate("NotParticipating", { state });
+        break;
       case "ovr_state":
-        return (
-          <OvrState
-            state={state}
-            value={form}
-            formCongif={formCongif}
-            showChangeName={showChangeName}
-            showDifferentMailAddress={showDifferentMailAddress}
-            showChangedAddress={showChangedAddress}
-            showIsAdultBlock={showIsAdultBlock}
-            errorMessages={errMsg}
-            onChange={setForm}
-            onChangeError={setErrMsg}
-            handleCheckbox={handleCheckbox}
-          />
-        );
+        if (step === 1)
+          return (
+            <OvrState
+              state={state}
+              value={form}
+              formCongif={formCongif}
+              errorMessages={errMsg}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        if (step === 2) {
+          if (form.has_no_state_license) {
+            return (
+              <PaperOVR
+                state={state}
+                errorMessages={errMsg}
+                value={form}
+                formCongif={formCongif}
+                onChange={setForm}
+                onChangeError={setErrMsg}
+                handleMainButton={
+                  <Button
+                    title={t("nvra_form_page.print_form")}
+                    onPress={handleMainButtonClick}
+                  />
+                }
+              />
+            );
+          } else
+            return (
+              <FinishWithState
+                state={state}
+                errorMessages={errMsg}
+                value={form}
+                formCongif={formCongif}
+                onChange={setForm}
+                onChangeError={setErrMsg}
+                handleMainButton={
+                  <TouchableOpacity
+                    style={styles.outlineButton}
+                    onPress={handleMainButtonClick}
+                  >
+                    <Text style={styles.outlineButtonText}>
+                      {t("finish_with_state_page2.paper_button")}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              />
+            );
+        }
+        if (step === 3)
+          return (
+            <PaperOVR
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        break;
       case "paper":
       default:
         return (
@@ -325,177 +670,200 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
             state={state}
             value={form}
             formCongif={formCongif}
-            showChangeName={showChangeName}
-            showDifferentMailAddress={showDifferentMailAddress}
-            showChangedAddress={showChangedAddress}
-            showIsAdultBlock={showIsAdultBlock}
             errorMessages={errMsg}
             onChange={setForm}
             onChangeError={setErrMsg}
-            handleCheckbox={handleCheckbox}
+            handleMainButton={
+              <Button
+                title={t("nvra_form_page.prepare_form")}
+                onPress={handleMainButtonClick}
+              />
+            }
           />
         );
     }
   };
 
-  const validatePaper = () => {
+  const validate = () => {
     const zipRegex = /^\d{5}(-\d{4})?$/;
     const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    const validationCfg = formCongif.fields.state_id_number?.validations;
+    const configRegex = validationCfg?.regexp;
+    const minLen = validationCfg?.min_length;
+    const maxLen = validationCfg?.max_length;
+
+    let finalRegex = /^.*$/;
+
+    if (configRegex) {
+      finalRegex = new RegExp(`^${configRegex}$`);
+    } else if (minLen !== undefined && maxLen !== undefined) {
+      finalRegex = new RegExp(`^[a-z0-9]{${minLen},${maxLen}}$`, "i");
+    }
 
     let errorMessage = { ...EMPTY_ERROR_MESSAGES };
-    if (!form.title.trim() && isRequired(formCongif, "name_title")) {
-      errorMessage.title = t("register_page.required");
+    if (!form.name_title.trim() && isRequired(formCongif, "name_title")) {
+      errorMessage.name_title = "general.required";
     }
-    if (!form.firstName.trim() && isRequired(formCongif, "first_name")) {
-      errorMessage.firstName = t("register_page.required");
+    if (!form.first_name.trim() && isRequired(formCongif, "first_name")) {
+      errorMessage.first_name = "general.required";
     }
-    if (!form.middleName.trim() && isRequired(formCongif, "middle_name")) {
-      errorMessage.middleName = t("register_page.required");
+    if (!form.middle_name.trim() && isRequired(formCongif, "middle_name")) {
+      errorMessage.middle_name = "general.required";
     }
-    if (!form.lastName.trim() && isRequired(formCongif, "last_name")) {
-      errorMessage.lastName = t("register_page.required");
+    if (!form.last_name.trim() && isRequired(formCongif, "last_name")) {
+      errorMessage.last_name = "general.required";
     }
     if (!form.suffix.trim() && isRequired(formCongif, "name_suffix")) {
-      errorMessage.suffix = t("register_page.required");
+      errorMessage.suffix = "general.required";
     }
-    if (showChangeName || isRequired(formCongif, "change_of_name")) {
+    if (form.change_of_name || isRequired(formCongif, "change_of_name")) {
       if (
-        !form.changedTitle.trim() &&
+        !form.prev_name_title.trim() &&
         isRequired(formCongif, "prev_name_title")
       ) {
-        errorMessage.changedTitle = t("register_page.required");
+        errorMessage.prev_name_title = "general.required";
       }
       if (
-        !form.changedFirstName.trim() &&
+        !form.prev_first_name.trim() &&
         isRequired(formCongif, "prev_first_name")
       ) {
-        errorMessage.changedFirstName = t("register_page.required");
+        errorMessage.prev_first_name = "general.required";
       }
       if (
-        !form.changedMiddleName.trim() &&
+        !form.prev_middle_name.trim() &&
         isRequired(formCongif, "prev_middle_name")
       ) {
-        errorMessage.changedMiddleName = t("register_page.required");
+        errorMessage.prev_middle_name = "general.required";
       }
       if (
-        !form.changedLastName.trim() &&
+        !form.prev_last_name.trim() &&
         isRequired(formCongif, "prev_last_name")
       ) {
-        errorMessage.changedLastName = t("register_page.required");
+        errorMessage.prev_last_name = "general.required";
       }
       if (
-        !form.changedSuffix.trim() &&
+        !form.prev_name_suffix.trim() &&
         isRequired(formCongif, "prev_name_suffix")
       ) {
-        errorMessage.changedSuffix = t("register_page.required");
+        errorMessage.prev_name_suffix = "general.required";
       }
     }
-    if (!form.isCitizen && isRequired(formCongif, "us_citizen")) {
-      errorMessage.isCitizen = t("register_page.us_citizen");
+    if (!form.us_citizen && isRequired(formCongif, "us_citizen")) {
+      errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
     }
-    if (!form.address.trim() && isRequired(formCongif, "home_address")) {
-      errorMessage.address = t("register_page.required");
+    if (!form.home_address.trim() && isRequired(formCongif, "home_address")) {
+      errorMessage.home_address = "general.required";
     }
     if (!form.unit.trim() && isRequired(formCongif, "home_unit")) {
-      errorMessage.unit = t("register_page.required");
+      errorMessage.unit = "general.required";
     }
-    if (!form.city.trim() && isRequired(formCongif, "home_city")) {
-      errorMessage.city = t("register_page.required");
+    if (!form.home_city.trim() && isRequired(formCongif, "home_city")) {
+      errorMessage.home_city = "general.required";
     }
     if (!form.state.trim() && isRequired(formCongif, "home_state")) {
-      errorMessage.state = t("register_page.required");
+      errorMessage.state = "general.required";
     }
-    if (!form.zip.trim() && isRequired(formCongif, "home_zip_code")) {
-      errorMessage.zip = t("register_page.required");
-    } else if (!zipRegex.test(form.zip.trim())) {
-      errorMessage.zip = t("register_page.invalid_zip");
+    if (!form.home_zip_code.trim() && isRequired(formCongif, "home_zip_code")) {
+      errorMessage.home_zip_code = "general.required";
+    } else if (!zipRegex.test(form.home_zip_code.trim())) {
+      errorMessage.home_zip_code = "form_fields.zip_code_error";
     }
     if (
-      showDifferentMailAddress ||
+      form.has_mailing_address ||
       isRequired(formCongif, "has_mailing_address")
     ) {
       if (
-        !form.differentAddress.trim() &&
+        !form.mailing_address.trim() &&
         isRequired(formCongif, "mailing_address")
       ) {
-        errorMessage.differentAddress = t("register_page.required");
+        errorMessage.mailing_address = "general.required";
+      }
+      if (!form.mailing_unit.trim() && isRequired(formCongif, "mailing_unit")) {
+        errorMessage.mailing_unit = "general.required";
+      }
+      if (!form.mailing_city.trim() && isRequired(formCongif, "mailing_city")) {
+        errorMessage.mailing_city = "general.required";
       }
       if (
-        !form.differentUnit.trim() &&
-        isRequired(formCongif, "mailing_unit")
-      ) {
-        errorMessage.differentUnit = t("register_page.required");
-      }
-      if (
-        !form.differentCity.trim() &&
-        isRequired(formCongif, "mailing_city")
-      ) {
-        errorMessage.differentCity = t("register_page.required");
-      }
-      if (
-        !form.differentState.trim() &&
+        !form.mailing_state.trim() &&
         isRequired(formCongif, "mailing_state")
       ) {
-        errorMessage.differentState = t("register_page.required");
+        errorMessage.mailing_state = "general.required";
       }
       if (
-        !form.differentZip.trim() &&
+        !form.mailing_zip_code.trim() &&
         isRequired(formCongif, "mailing_zip_code")
       ) {
-        errorMessage.differentZip = t("register_page.required");
-      } else if (!zipRegex.test(form.differentZip.trim())) {
-        errorMessage.differentZip = t("register_page.invalid_zip");
+        errorMessage.mailing_zip_code = "general.required";
+      } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+        errorMessage.mailing_zip_code = "form_fields.zip_code_error";
       }
     }
-    if (showChangedAddress || isRequired(formCongif, "change_of_address")) {
+    if (form.change_of_address || isRequired(formCongif, "change_of_address")) {
+      if (!form.prev_address.trim() && isRequired(formCongif, "prev_address")) {
+        errorMessage.prev_address = "general.required";
+      }
+      if (!form.prev_unit.trim() && isRequired(formCongif, "prev_unit")) {
+        errorMessage.prev_unit = "general.required";
+      }
+      if (!form.prev_city.trim() && isRequired(formCongif, "prev_city")) {
+        errorMessage.prev_city = "general.required";
+      }
+      if (!form.prev_state.trim() && isRequired(formCongif, "prev_state")) {
+        errorMessage.prev_state = "general.required";
+      }
       if (
-        !form.changedAddress.trim() &&
-        isRequired(formCongif, "prev_address")
+        !form.prev_zip_code.trim() &&
+        isRequired(formCongif, "prev_zip_code")
       ) {
-        errorMessage.changedAddress = t("register_page.required");
-      }
-      if (!form.changedUnit.trim() && isRequired(formCongif, "prev_unit")) {
-        errorMessage.changedUnit = t("register_page.required");
-      }
-      if (!form.changedCity.trim() && isRequired(formCongif, "prev_city")) {
-        errorMessage.changedCity = t("register_page.required");
-      }
-      if (!form.changedState.trim() && isRequired(formCongif, "prev_state")) {
-        errorMessage.changedState = t("register_page.required");
-      }
-      if (!form.changedZip.trim() && isRequired(formCongif, "prev_zip_code")) {
-        errorMessage.changedZip = t("register_page.required");
-      } else if (!zipRegex.test(form.changedZip.trim())) {
-        errorMessage.changedZip = t("register_page.invalid_zip");
+        errorMessage.prev_zip_code = "general.required";
+      } else if (!zipRegex.test(form.prev_zip_code.trim())) {
+        errorMessage.prev_zip_code = "form_fields.zip_code_error";
       }
     }
-    if (!form.has_state_license)
-      if (!form.idNumber.trim() && isRequired(formCongif, "state_id_number")) {
-        errorMessage.idNumber = t("register_page.required");
-      }
-    if (form.has_state_license && !form.has_ssn)
+    if (form.has_no_state_license == null && flowType !== "paper") {
+      errorMessage.has_no_state_license =
+        "finish_with_state_page1.dl_id_answer_required";
+    }
+    if (!form.has_no_state_license && (flowType === "paper" || showRedirect)) {
       if (
-        !form.ssnLast4.trim() &&
+        !form.state_id_number.trim() &&
+        isRequired(formCongif, "state_id_number")
+      ) {
+        errorMessage.state_id_number = "general.required";
+      } else if (!finalRegex.test(form.state_id_number.trim())) {
+        errorMessage.state_id_number = "form_fields.invalid_id_number";
+      }
+    }
+    if (
+      form.has_no_state_license &&
+      !form.has_no_ssn &&
+      (flowType === "paper" || showRedirect)
+    )
+      if (
+        !form.last_four_ss_number.trim() &&
         isRequired(formCongif, "last_four_ss_number")
       ) {
-        errorMessage.ssnLast4 = t("register_page.required");
+        errorMessage.last_four_ss_number = "general.required";
+      } else if (!/^\d{4}$/.test(form.last_four_ss_number.trim())) {
+        errorMessage.last_four_ss_number = "form_fields.invalid_ssn4";
       }
     if (!form.race.trim() && isRequired(formCongif, "race")) {
-      errorMessage.race = t("register_page.required");
+      errorMessage.race = "general.required";
     }
     if (!form.party.trim() && isRequired(formCongif, "party")) {
-      errorMessage.party = t("register_page.required");
+      errorMessage.party = "general.required";
     }
     if (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthMonth = t("register_page.required");
+      errorMessage.birthMonth = "general.required";
     }
     if (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthDay = t("register_page.required");
+      errorMessage.birthDay = "general.required";
     }
     if (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthYear = t("register_page.required");
+      errorMessage.birthYear = "general.required";
     } else if (Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = t("register_page.invalid_year");
+      errorMessage.birthMonth = "form_fields.invalid_year";
     }
     if (
       form.birthYear.trim() &&
@@ -508,359 +876,142 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
       const day = Number(form.birthDay);
 
       const date = new Date(year, month, day);
+      const today = new Date();
 
-      const isInvalidDate =
-        date.getFullYear() !== year ||
-        date.getMonth() !== month ||
-        date.getDate() !== day;
+      today.setHours(0, 0, 0, 0);
 
-      if (isInvalidDate) {
-        errorMessage.birthDay = t("register_page.invalid_birth_date");
+      if (date > today) {
+        errorMessage.birthYear = "form_fields.invalid_year_future";
       } else {
-        const today = new Date();
-        let age = today.getFullYear() - date.getFullYear();
-        const monthDiff = today.getMonth() - date.getMonth();
-        const dayDiff = today.getDate() - date.getDate();
+        const isInvalidDate =
+          date.getFullYear() !== year ||
+          date.getMonth() !== month ||
+          date.getDate() !== day;
 
-        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-          age--;
-        }
+        if (isInvalidDate) {
+          errorMessage.birthDay = "form_fields.invalid_birth_date";
+        } else {
+          let age = today.getFullYear() - date.getFullYear();
+          const monthDiff = today.getMonth() - date.getMonth();
+          const dayDiff = today.getDate() - date.getDate();
 
-        if (age < formCongif.validations.min_age) {
-          errorMessage.birthDay = t("register_page.under_18_error");
-        }
-      }
-    }
-    if (
-      form.smsConsent &&
-      !form.phone.trim() &&
-      isRequired(formCongif, "phone_number")
-    ) {
-      errorMessage.phone = t("register_page.required_phone");
-    } else if (form.smsConsent && !fullPhoneRegex.test(form.phone.trim())) {
-      errorMessage.phone = t("register_page.invalid_phone");
-    }
-    if (form.emailConsent && isRequired(formCongif, "opt_in_email")) {
-      errorMessage.emailConsent = t("register_page.required");
-    }
-    if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
-      errorMessage.volunteer = t("register_page.required");
-    }
+          if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+            age--;
+          }
 
-    console.log("!!! errorMessage", errorMessage);
-    setErrMsg(errorMessage);
-
-    return !Object.values(errorMessage).some(value => value.trim() !== "");
-  };
-  const validateOvrState = () => {
-    const zipRegex = /^\d{5}(-\d{4})?$/;
-    const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-
-    let errorMessage = { ...EMPTY_ERROR_MESSAGES };
-
-    if (!form.title.trim() && isRequired(formCongif, "name_title")) {
-      errorMessage.title = t("register_page.required");
-    }
-    if (!form.firstName.trim() && isRequired(formCongif, "first_name")) {
-      errorMessage.firstName = t("register_page.required");
-    }
-    if (!form.middleName.trim() && isRequired(formCongif, "middle_name")) {
-      errorMessage.middleName = t("register_page.required");
-    }
-    if (!form.lastName.trim() && isRequired(formCongif, "last_name")) {
-      errorMessage.lastName = t("register_page.required");
-    }
-    if (!form.suffix.trim() && isRequired(formCongif, "name_suffix")) {
-      errorMessage.suffix = t("register_page.required");
-    }
-    if (showChangeName || isRequired(formCongif, "change_of_name")) {
-      if (
-        !form.changedTitle.trim() &&
-        isRequired(formCongif, "prev_name_title")
-      ) {
-        errorMessage.changedTitle = t("register_page.required");
-      }
-      if (
-        !form.changedFirstName.trim() &&
-        isRequired(formCongif, "prev_first_name")
-      ) {
-        errorMessage.changedFirstName = t("register_page.required");
-      }
-      if (
-        !form.changedMiddleName.trim() &&
-        isRequired(formCongif, "prev_middle_name")
-      ) {
-        errorMessage.changedMiddleName = t("register_page.required");
-      }
-      if (
-        !form.changedLastName.trim() &&
-        isRequired(formCongif, "prev_last_name")
-      ) {
-        errorMessage.changedLastName = t("register_page.required");
-      }
-      if (
-        !form.changedSuffix.trim() &&
-        isRequired(formCongif, "prev_name_suffix")
-      ) {
-        errorMessage.changedSuffix = t("register_page.required");
-      }
-    }
-    if (!form.isCitizen && isRequired(formCongif, "us_citizen")) {
-      errorMessage.isCitizen = t("register_page.us_citizen");
-    }
-    if (!form.address.trim() && isRequired(formCongif, "home_address")) {
-      errorMessage.address = t("register_page.required");
-    }
-    if (!form.city.trim() && isRequired(formCongif, "home_city")) {
-      errorMessage.city = t("register_page.required");
-    }
-    if (!form.unit.trim() && isRequired(formCongif, "home_unit")) {
-      errorMessage.unit = t("register_page.required");
-    }
-    if (!form.state.trim() && isRequired(formCongif, "home_state")) {
-      errorMessage.state = t("register_page.required");
-    }
-    if (!form.zip.trim() && isRequired(formCongif, "home_zip_code")) {
-      errorMessage.zip = t("register_page.required");
-    } else if (!zipRegex.test(form.zip.trim())) {
-      errorMessage.zip = t("register_page.invalid_zip");
-    }
-    if (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthMonth = t("register_page.required");
-    }
-    if (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthDay = t("register_page.required");
-    }
-    if (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthYear = t("register_page.required");
-    } else if (Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = t("register_page.invalid_year");
-    }
-    if (
-      form.birthYear.trim() &&
-      form.birthMonth.trim() &&
-      form.birthDay.trim() &&
-      isRequired(formCongif, "date_of_birth")
-    ) {
-      const year = Number(form.birthYear);
-      const month = Number(form.birthMonth) - 1;
-      const day = Number(form.birthDay);
-
-      const date = new Date(year, month, day);
-
-      const isInvalidDate =
-        date.getFullYear() !== year ||
-        date.getMonth() !== month ||
-        date.getDate() !== day;
-
-      if (isInvalidDate) {
-        errorMessage.birthDay = t("register_page.invalid_birth_date");
-      }
-    }
-    if (
-      form.smsConsent &&
-      !form.phone.trim() &&
-      isRequired(formCongif, "phone_number")
-    ) {
-      errorMessage.phone = t("register_page.required_phone");
-    } else if (form.smsConsent && !fullPhoneRegex.test(form.phone.trim())) {
-      errorMessage.phone = t("register_page.invalid_phone");
-    }
-    if (!showIsAdultBlock) {
-      errorMessage.isAdultBlock = t("register_page.age_eligibility_error");
-    }
-    if (!form.hasStateId) {
-      if (showChangeName || isRequired(formCongif, "change_of_name")) {
-        if (
-          !form.changedTitle.trim() &&
-          isRequired(formCongif, "prev_name_title")
-        ) {
-          errorMessage.changedTitle = t("register_page.required");
-        }
-        if (
-          !form.changedFirstName.trim() &&
-          isRequired(formCongif, "prev_first_name")
-        ) {
-          errorMessage.changedFirstName = t("register_page.required");
-        }
-        if (
-          !form.changedMiddleName.trim() &&
-          isRequired(formCongif, "prev_middle_name")
-        ) {
-          errorMessage.changedMiddleName = t("register_page.required");
-        }
-        if (
-          !form.changedLastName.trim() &&
-          isRequired(formCongif, "prev_last_name")
-        ) {
-          errorMessage.changedLastName = t("register_page.required");
-        }
-        if (
-          !form.changedSuffix.trim() &&
-          isRequired(formCongif, "prev_name_suffix")
-        ) {
-          errorMessage.changedSuffix = t("register_page.required");
+          if (age < formCongif.validations.min_age) {
+            errorMessage.birthMonth = "form_fields.age_eligibility_error";
+          } else {
+            form.date_of_birth =
+              form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+          }
         }
       }
-      if (
-        showDifferentMailAddress ||
-        isRequired(formCongif, "has_mailing_address")
-      ) {
-        if (
-          !form.differentAddress.trim() &&
-          isRequired(formCongif, "mailing_address")
-        ) {
-          errorMessage.differentAddress = t("register_page.required");
-        }
-        if (
-          !form.differentUnit.trim() &&
-          isRequired(formCongif, "mailing_unit")
-        ) {
-          errorMessage.differentUnit = t("register_page.required");
-        }
-        if (
-          !form.differentCity.trim() &&
-          isRequired(formCongif, "mailing_city")
-        ) {
-          errorMessage.differentCity = t("register_page.required");
-        }
-        if (
-          !form.differentState.trim() &&
-          isRequired(formCongif, "mailing_state")
-        ) {
-          errorMessage.differentState = t("register_page.required");
-        }
-        if (
-          !form.differentZip.trim() &&
-          isRequired(formCongif, "mailing_zip_code")
-        ) {
-          errorMessage.differentZip = t("register_page.required");
-        } else if (!zipRegex.test(form.differentZip.trim())) {
-          errorMessage.differentZip = t("register_page.invalid_zip");
-        }
-      }
-      if (showChangedAddress || isRequired(formCongif, "change_of_address")) {
-        if (
-          !form.changedAddress.trim() &&
-          isRequired(formCongif, "prev_address")
-        ) {
-          errorMessage.changedAddress = t("register_page.required");
-        }
-        if (!form.changedUnit.trim() && isRequired(formCongif, "prev_unit")) {
-          errorMessage.changedUnit = t("register_page.required");
-        }
-        if (!form.changedCity.trim() && isRequired(formCongif, "prev_city")) {
-          errorMessage.changedCity = t("register_page.required");
-        }
-        if (!form.changedState.trim() && isRequired(formCongif, "prev_state")) {
-          errorMessage.changedState = t("register_page.required");
-        }
-        if (
-          !form.changedZip.trim() &&
-          isRequired(formCongif, "prev_zip_code")
-        ) {
-          errorMessage.changedZip = t("register_page.required");
-        } else if (!zipRegex.test(form.changedZip.trim())) {
-          errorMessage.changedZip = t("register_page.invalid_zip");
-        }
-      }
-      if (!form.idNumber.trim() && isRequired(formCongif, "state_id_number")) {
-        errorMessage.idNumber = t("register_page.required");
-      }
     }
-    if (!showIsAdultBlock || !form.hasStateId) {
+    if (isVisible(formCongif, "age_eligibility") && !form.age_eligibility) {
+      errorMessage.age_eligibility = "form_fields.age_eligibility_error";
+    }
+    if (!form.age_eligibility || !form.has_no_state_license) {
       if (!form.race.trim() && isRequired(formCongif, "race")) {
-        errorMessage.race = t("register_page.required");
+        errorMessage.race = "general.required";
       }
       if (!form.party.trim() && isRequired(formCongif, "party")) {
-        errorMessage.party = t("register_page.required");
+        errorMessage.party = "general.required";
       }
     }
     if (
-      form.smsConsent &&
       !form.phone.trim() &&
-      isRequired(formCongif, "phone_number")
+      isRequired(formCongif, "phone", form.opt_in_sms)
     ) {
-      errorMessage.phone = t("register_page.phone_election_error");
+      errorMessage.phone = "form_fields.required_phone";
+    } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
+      errorMessage.phone = "form_fields.invalid_phone";
     }
-    if (form.emailConsent && isRequired(formCongif, "opt_in_email")) {
-      errorMessage.emailConsent = t("register_page.required");
+    if (form.opt_in_email && isRequired(formCongif, "opt_in_email")) {
+      errorMessage.opt_in_email = "general.required";
     }
     if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
-      errorMessage.volunteer = t("register_page.required");
+      errorMessage.volunteer = "general.required";
     }
 
     setErrMsg(errorMessage);
-
-    return !Object.values(errorMessage).some(value => value.trim() !== "");
+    return !Object.values(errorMessage).some(value => !!value);
   };
   const validateConnectedOvr = () => {
     const zipRegex = /^\d{5}(-\d{4})?$/;
-    const miIdRegex = /^[A-Z]\d{12}$/i;
+    const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    const miIdRegex = /^[a-zA-Z]\d{12}$/i;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     let errorMessage = { ...EMPTY_ERROR_MESSAGES };
     if (step === 1) {
-      if (!form.isCitizen && isRequired(formCongif, "us_citizen")) {
-        errorMessage.isCitizen = t("register_page.us_citizen_2");
-      }
-      if (!form.isAdult && isRequired(formCongif, "will_be_18_by_election")) {
-        errorMessage.isAdult = t("register_page.age_eligibility_error_2", {
-          state: state.name,
-        });
-      }
-      if (!form.residency && isRequired(formCongif, "residency_duration_ack")) {
-        errorMessage.residency = "show";
+      if (!form.us_citizen && isRequired(formCongif, "us_citizen")) {
+        errorMessage.us_citizen = "michigan.eligibility.citizen_error";
       }
       if (
-        !form.cancelPrevious &&
+        !form.will_be_18_by_election &&
+        isRequired(formCongif, "will_be_18_by_election")
+      ) {
+        errorMessage.will_be_18_by_election = "michigan.eligibility.age_error";
+      }
+      if (
+        !form.residency_duration_ack &&
+        isRequired(formCongif, "residency_duration_ack")
+      ) {
+        errorMessage.residency_duration_ack = "show";
+      }
+      if (
+        !form.cancel_previous_registration_ack &&
         isRequired(formCongif, "cancel_previous_registration_ack")
       ) {
-        errorMessage.cancelPrevious = "show";
+        errorMessage.cancel_previous_registration_ack = "show";
       }
       if (
-        !form.digitalSignature &&
+        !form.use_stored_signature_ack &&
         isRequired(formCongif, "use_stored_signature_ack")
       ) {
-        errorMessage.digitalSignature = "show";
+        errorMessage.use_stored_signature_ack = "show";
       }
       if (
-        form.licenseUpdated !== "no" &&
+        form.updated_dln_recently !== "no" &&
         isRequired(formCongif, "updated_dln_recently")
       ) {
-        errorMessage.licenseUpdated = "show";
+        errorMessage.updated_dln_recently = "show";
       }
       if (
-        form.duplicateLicense !== "no" &&
+        form.request_duplicate_dln_today !== "no" &&
         isRequired(formCongif, "request_duplicate_dln_today")
       ) {
-        errorMessage.duplicateLicense = "show";
+        errorMessage.request_duplicate_dln_today = "show";
       }
     } else if (step === 2) {
-      if (!form.fullName.trim() && isRequired(formCongif, "full_name")) {
-        errorMessage.fullName = t("register_page.required");
+      if (!form.full_name.trim() && isRequired(formCongif, "full_name")) {
+        errorMessage.full_name = "general.required";
       }
-      if (!form.eyeColor.trim() && isRequired(formCongif, "eye_color")) {
-        errorMessage.eyeColor = t("register_page.required");
+      if (!form.eye_color.trim() && isRequired(formCongif, "eye_color")) {
+        errorMessage.eye_color = "general.required";
       }
       if (
-        !form.licenseNumber.trim() &&
+        !form.state_id_number.trim() &&
         isRequired(formCongif, "state_id_number")
       ) {
-        errorMessage.licenseNumber = t("register_page.id_number_error_2");
-      } else if (!miIdRegex.test(form.licenseNumber.trim())) {
-        errorMessage.licenseNumber = t("register_page.id_number_error_1");
+        errorMessage.state_id_number = "michigan.id_empty_error";
+      } else if (
+        !miIdRegex.test(form.state_id_number.trim()) &&
+        form.state_id_number.trim() !== "NONE"
+      ) {
+        errorMessage.state_id_number = "michigan.id_format_error";
       }
       if (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) {
-        errorMessage.birthMonth = t("register_page.required");
+        errorMessage.birthMonth = "general.required";
       }
       if (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) {
-        errorMessage.birthDay = t("register_page.required");
+        errorMessage.birthDay = "general.required";
       }
       if (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth")) {
-        errorMessage.birthYear = t("register_page.required");
+        errorMessage.birthYear = "general.required";
       } else if (Number(form.birthYear) < 1900) {
-        errorMessage.birthYear = t("register_page.invalid_year");
+        errorMessage.birthYear = "form_fields.invalid_year";
       }
       if (
         form.birthYear.trim() &&
@@ -873,182 +1024,598 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
         const day = Number(form.birthDay);
 
         const date = new Date(year, month, day);
+        const today = new Date();
 
-        const isInvalidDate =
-          date.getFullYear() !== year ||
-          date.getMonth() !== month ||
-          date.getDate() !== day;
+        today.setHours(0, 0, 0, 0);
 
-        if (isInvalidDate) {
-          errorMessage.birthDay = t("register_page.invalid_birth_date");
+        if (date > today) {
+          errorMessage.birthYear = "form_fields.invalid_year_future";
+        } else {
+          const isInvalidDate =
+            date.getFullYear() !== year ||
+            date.getMonth() !== month ||
+            date.getDate() !== day;
+
+          if (isInvalidDate) {
+            errorMessage.birthDay = "form_fields.invalid_birth_date";
+          } else {
+            let age = today.getFullYear() - date.getFullYear();
+            const monthDiff = today.getMonth() - date.getMonth();
+            const dayDiff = today.getDate() - date.getDate();
+
+            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+              age--;
+            }
+
+            if (age < formCongif.validations.min_age) {
+              errorMessage.birthMonth = "form_fields.age_eligibility_error";
+            } else {
+              form.date_of_birth =
+                form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+            }
+          }
         }
       }
-      if (!form.ssnLast4.trim() || form.ssnLast4.trim().length !== 4) {
-        errorMessage.ssnLast4 = t("register_page.ssn_error");
+      if (
+        !form.last_four_ss_number.trim() ||
+        form.last_four_ss_number.trim().length !== 4
+      ) {
+        errorMessage.last_four_ss_number = "michigan.ssn_last4_empty_error";
+      } else if (!/^\d{4}$/.test(form.last_four_ss_number.trim())) {
+        errorMessage.last_four_ss_number = "michigan.ssn_last4_invalid_error";
       }
     } else if (step === 3) {
       if (
-        !form.streetNumber.trim() &&
+        !form.street_number.trim() &&
         isRequired(formCongif, "street_number")
       ) {
-        errorMessage.streetNumber = t("register_page.required");
+        errorMessage.street_number = "general.required";
       }
-      if (!form.streetName.trim() && isRequired(formCongif, "street_name")) {
-        errorMessage.streetName = t("register_page.required");
+      if (!form.street_name.trim() && isRequired(formCongif, "street_name")) {
+        errorMessage.street_name = "general.required";
       }
-      if (!form.streetType.trim() && isRequired(formCongif, "street_type")) {
-        errorMessage.streetType = t("register_page.required");
+      if (!form.street_type.trim() && isRequired(formCongif, "street_type")) {
+        errorMessage.street_type = "general.required";
       }
       if (
-        !form.streetDirection.trim() &&
+        !form.street_direction.trim() &&
         isRequired(formCongif, "street_direction")
       ) {
-        errorMessage.streetDirection = t("register_page.required");
+        errorMessage.street_direction = "general.required";
       }
       if (!form.unit.trim() && isRequired(formCongif, "street_apt_unit")) {
-        errorMessage.unit = t("register_page.required");
+        errorMessage.unit = "general.required";
       }
-      if (!form.city.trim() && isRequired(formCongif, "city")) {
-        errorMessage.city = t("register_page.required");
+      if (!form.home_city.trim() && isRequired(formCongif, "city")) {
+        errorMessage.home_city = "general.required";
       }
       if (!form.state.trim() && isRequired(formCongif, "state")) {
-        errorMessage.state = t("register_page.required");
+        errorMessage.state = "general.required";
       }
-      if (!form.zip.trim() && isRequired(formCongif, "zip_code")) {
-        errorMessage.zip = t("register_page.required");
-      } else if (!zipRegex.test(form.zip.trim())) {
-        errorMessage.zip = t("register_page.invalid_zip");
+      if (!form.home_zip_code.trim() && isRequired(formCongif, "zip_code")) {
+        errorMessage.home_zip_code = "general.required";
+      } else if (!zipRegex.test(form.home_zip_code.trim())) {
+        errorMessage.home_zip_code = "form_fields.zip_code_error";
       }
       if (
         !form.mailingAddressType.trim() &&
         isRequired(formCongif, "mailing_address_type")
       ) {
-        errorMessage.mailingAddressType = t("register_page.required");
+        errorMessage.mailingAddressType = "general.required";
       }
-      if (!showMailingAddress) {
+      if (form.has_mailing_address) {
         if (form.mailingAddressType === "STANDARD") {
-          // if (!form.mailingStreetNumber.trim()) {
-          //   errorMessage.mailingStreetNumber = t("register_page.required");
-          // }
-          // if (!form.mailingStreetName.trim()) {
-          //   errorMessage.mailingStreetName = t("register_page.required");
-          // }
           if (
-            !form.mailingStreetAddress.trim() &&
+            !form.mailing_address.trim() &&
             isRequired(formCongif, "mailing_address")
           ) {
-            errorMessage.mailingStreetAddress = t("register_page.required");
+            errorMessage.mailing_address = "general.required";
           }
+          console.log("!form.mailing_state.trim()", !form.mailing_city.trim());
+          console.log(
+            "isRequired(formCongif, ",
+            isRequired(formCongif, "mailing_city"),
+          );
           if (
-            !form.mailingCity.trim() &&
+            !form.mailing_city.trim() &&
             isRequired(formCongif, "mailing_city")
           ) {
-            errorMessage.mailingCity = t("register_page.required");
+            errorMessage.mailing_city = "general.required";
           }
           if (
-            !form.mailingState.trim() &&
+            !form.mailing_state.trim() &&
             isRequired(formCongif, "mailing_state")
           ) {
-            errorMessage.mailingState = t("register_page.required");
+            errorMessage.mailing_state = "general.required";
           }
           if (
-            !form.mailingZip.trim() &&
+            !form.mailing_zip_code.trim() &&
             isRequired(formCongif, "mailing_zip_code")
           ) {
-            errorMessage.mailingZip = t("register_page.required");
-          } else if (!zipRegex.test(form.mailingZip.trim())) {
-            errorMessage.mailingZip = t("register_page.invalid_zip");
+            errorMessage.mailing_zip_code = "general.required";
+          } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+            errorMessage.mailing_zip_code = "form_fields.zip_code_error";
           }
         } else if (form.mailingAddressType === "PO_BOX") {
-          // if (!form.poBoxNumber.trim()) {
-          //   errorMessage.poBoxNumber = t("register_page.required");
-          // }
           if (
-            !form.mailingCity.trim() &&
+            !form.mailing_po_box_number.trim() &&
+            isRequired(formCongif, "mailing_po_box_number")
+          ) {
+            errorMessage.mailing_po_box_number = "general.required";
+          }
+          if (
+            !form.mailing_city.trim() &&
             isRequired(formCongif, "mailing_city")
           ) {
-            errorMessage.mailingCity = t("register_page.required");
+            errorMessage.mailing_city = "general.required";
           }
           if (
-            !form.mailingState.trim() &&
+            !form.mailing_state.trim() &&
             isRequired(formCongif, "mailing_state")
           ) {
-            errorMessage.mailingState = t("register_page.required");
+            errorMessage.mailing_state = "general.required";
           }
           if (
-            !form.mailingZip.trim() &&
+            !form.mailing_zip_code.trim() &&
             isRequired(formCongif, "mailing_zip_code")
           ) {
-            errorMessage.mailingZip = t("register_page.required");
-          } else if (!zipRegex.test(form.mailingZip.trim())) {
-            errorMessage.mailingZip = t("register_page.invalid_zip");
+            errorMessage.mailing_zip_code = "general.required";
+          } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+            errorMessage.mailing_zip_code = "form_fields.zip_code_error";
           }
         } else if (form.mailingAddressType === "MILITARY") {
-          // if (!form.boxGroupType.trim()) {
-          //   errorMessage.boxGroupType = t("register_page.required");
-          // }
-          // if (!form.boxGroupNumber.trim()) {
-          //   errorMessage.boxGroupNumber = t("register_page.required");
-          // }
-          // if (!form.boxNumber.trim()) {
-          //   errorMessage.boxNumber = t("register_page.required");
-          // }
-          if (!form.apoFpoDpo.trim()) {
-            errorMessage.apoFpoDpo = t("register_page.required");
-          }
-          if (!form.aaAeAp.trim()) {
-            errorMessage.aaAeAp = t("register_page.required");
+          if (
+            !form.mailing_box_group_type.trim() &&
+            isRequired(formCongif, "mailing_box_group_type")
+          ) {
+            errorMessage.mailing_box_group_type = "general.required";
           }
           if (
-            !form.mailingZip.trim() &&
+            !form.mailing_box_group_number.trim() &&
+            isRequired(formCongif, "mailing_box_group_number")
+          ) {
+            errorMessage.mailing_box_group_number = "general.required";
+          }
+          if (
+            !form.mailing_box_number.trim() &&
+            isRequired(formCongif, "mailing_box_number")
+          ) {
+            errorMessage.mailing_box_number = "general.required";
+          }
+          if (
+            !form.mailing_apo.trim() &&
+            isRequired(formCongif, "mailing_apo")
+          ) {
+            errorMessage.mailing_apo = "general.required";
+          }
+          if (!form.mailing_ap.trim() && isRequired(formCongif, "mailing_ap")) {
+            errorMessage.mailing_ap = "general.required";
+          }
+          if (
+            !form.mailing_zip_code.trim() &&
             isRequired(formCongif, "mailing_zip_code")
           ) {
-            errorMessage.mailingZip = t("register_page.required");
-          } else if (!zipRegex.test(form.mailingZip.trim())) {
-            errorMessage.mailingZip = t("register_page.invalid_zip");
+            errorMessage.mailing_zip_code = "general.required";
+          } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+            errorMessage.mailing_zip_code = "form_fields.zip_code_error";
           }
         } else if (form.mailingAddressType === "INTERNATIONAL") {
-          // if (!form.addressLine1.trim()) {
-          //   errorMessage.addressLine1 = t("register_page.required");
-          // }
-          if (!form.mailingCountry.trim()) {
-            errorMessage.mailingCountry = t("register_page.required");
+          if (
+            !form.mailing_address_line1.trim() &&
+            isRequired(formCongif, "mailing_address_line1")
+          ) {
+            errorMessage.mailing_address_line1 = "general.required";
           }
           if (
-            !form.mailingZip.trim() &&
-            isRequired(formCongif, "mailing_zip_code")
+            !form.mailing_address_line2.trim() &&
+            isRequired(formCongif, "mailing_address_line2")
           ) {
-            errorMessage.mailingZip = t("register_page.required");
-          } else if (!zipRegex.test(form.mailingZip.trim())) {
-            errorMessage.mailingZip = t("register_page.invalid_zip");
+            errorMessage.mailing_address_line2 = "general.required";
+          }
+          if (
+            !form.mailing_address_line3.trim() &&
+            isRequired(formCongif, "mailing_address_line3")
+          ) {
+            errorMessage.mailing_address_line3 = "general.required";
+          }
+          if (
+            !form.mailing_country.trim() &&
+            isRequired(formCongif, "mailing_country")
+          ) {
+            errorMessage.mailing_country = "general.required";
+          }
+          if (
+            !form.mailing_postal_code.trim() &&
+            isRequired(formCongif, "mailing_postal_code")
+          ) {
+            errorMessage.mailing_postal_code = "general.required";
           }
         }
       }
+      // if (form.has_mailing_address || isRequired(formCongif, "has_mailing_address")) {
+      //   if (!form.mailing_address.trim() || isRequired(formCongif, "mailing_address")) {
+      //     errorMessage.mailing_address = "general.required";
+      //   }
+      //   if (!form.mailing_unit.trim() || isRequired(formCongif, "mailing_unit")) {
+      //     errorMessage.mailing_unit = "general.required";
+      //   }
+      //   if (!form.mailing_city.trim() || isRequired(formCongif, "mailing_city")) {
+      //     errorMessage.mailing_city = "general.required";
+      //   }
+      //   if (!form.mailing_state.trim() || isRequired(formCongif, "mailing_state")) {
+      //     errorMessage.mailing_state = "general.required";
+      //   }
+      //   if (!form.mailing_zip_code.trim() || isRequired(formCongif, "mailing_zip_code")) {
+      //     errorMessage.mailing_zip_code = "general.required";
+      //   } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+      //     errorMessage.mailing_zip_code = "form_fields.zip_code_error";
+      //   }
+      // }
       if (
-        form.smsConsent &&
         !form.phone.trim() &&
-        isRequired(formCongif, "phone_number")
+        isRequired(formCongif, "phone_number", form.opt_in_sms)
       ) {
-        errorMessage.phone = t("register_page.phone_election_error");
+        errorMessage.phone = "michigan.phone_election_error";
+      } else if (
+        form.phone.trim() &&
+        (form.opt_in_sms ||
+          formCongif?.fields?.phone?.validations?.enforce_e164) &&
+        !fullPhoneRegex.test(form.phone.trim())
+      ) {
+        errorMessage.phone = "form_fields.invalid_phone";
       }
-      if (form.smsConsent && isRequired(formCongif, "opt_in_sms")) {
-        errorMessage.smsConsent = t("register_page.required");
+      if (form.opt_in_sms && isRequired(formCongif, "opt_in_sms")) {
+        errorMessage.opt_in_sms = "general.required";
       }
-      if (!form.email.trim() && isRequired(formCongif, "email")) {
-        errorMessage.email = t("register_page.required");
-      } else if (!emailRegex.test(form.email.trim())) {
-        errorMessage.email = t("register_page.email_invalid");
+      if (!form.email_address.trim() && isRequired(formCongif, "email")) {
+        errorMessage.email_address = "general.required";
+      } else if (!emailRegex.test(form.email_address.trim())) {
+        errorMessage.email_address = "form_fields.email_error";
       }
-      if (form.emailConsent && isRequired(formCongif, "opt_in_email")) {
-        errorMessage.emailConsent = t("register_page.required");
+      if (form.opt_in_email && isRequired(formCongif, "opt_in_email")) {
+        errorMessage.opt_in_email = "general.required";
       }
       if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
-        errorMessage.volunteer = t("register_page.required");
+        errorMessage.volunteer = "general.required";
       }
     }
 
     setErrMsg(errorMessage);
-    return !Object.values(errorMessage).some(value => value.trim() !== "");
+    return !Object.values(errorMessage).some(value => !!value);
+  };
+  const validateWA = (isWA: string = "") => {
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    const idRegex = /^[a-z0-9]{12}$/i;
+
+    let errorMessage = { ...EMPTY_ERROR_MESSAGES };
+
+    const needsValidation = (
+      configKey: string,
+      stateKey: keyof RegisterFormState,
+    ) => {
+      const isFieldVisible = isVisible(formCongif, configKey);
+      const hasStateValue = form[stateKey] !== undefined;
+      return (
+        isFieldVisible && hasStateValue && isRequired(formCongif, configKey)
+      );
+    };
+
+    const nameFields: (keyof RegisterFormState)[] = [
+      "name_title",
+      "first_name",
+      "middle_name",
+      "last_name",
+      "suffix",
+    ];
+    nameFields.forEach(field => {
+      const configKey = field === "suffix" ? "name_suffix" : field;
+      const fieldValue = form[field];
+      if (
+        needsValidation(configKey, field) &&
+        (typeof fieldValue !== "string" || !fieldValue.trim())
+      ) {
+        errorMessage[field] = "general.required";
+      }
+    });
+
+    if (form.change_of_name) {
+      const prevFields: (keyof RegisterFormState)[] = [
+        "prev_name_title",
+        "prev_first_name",
+        "prev_middle_name",
+        "prev_last_name",
+        "prev_name_suffix",
+      ];
+      prevFields.forEach(field => {
+        const fieldValue = form[field];
+        if (
+          needsValidation(field, field) &&
+          (typeof fieldValue !== "string" || !fieldValue.trim())
+        ) {
+          errorMessage[field] = "general.required";
+        }
+      });
+    }
+
+    if (needsValidation("us_citizen", "us_citizen") && !form.us_citizen) {
+      errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
+    }
+    if (
+      needsValidation("will_be_18_by_election", "will_be_18_by_election") &&
+      !form.will_be_18_by_election
+    ) {
+      errorMessage.will_be_18_by_election = "washington.age_eligibility_error";
+    }
+
+    if (isRequired(formCongif, "date_of_birth")) {
+      if (!form.birthMonth?.trim())
+        errorMessage.birthMonth = "general.required";
+      if (!form.birthDay?.trim()) errorMessage.birthDay = "general.required";
+      if (!form.birthYear?.trim()) {
+        errorMessage.birthYear = "general.required";
+      } else if (Number(form.birthYear) < 1900) {
+        errorMessage.birthYear = "form_fields.invalid_year";
+      }
+      if (
+        form.birthYear.trim() &&
+        form.birthMonth.trim() &&
+        form.birthDay.trim()
+      ) {
+        const year = Number(form.birthYear);
+        const month = Number(form.birthMonth) - 1;
+        const day = Number(form.birthDay);
+
+        const date = new Date(year, month, day);
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        if (date > today) {
+          errorMessage.birthYear = "form_fields.invalid_year_future";
+        } else {
+          const isInvalidDate =
+            date.getFullYear() !== year ||
+            date.getMonth() !== month ||
+            date.getDate() !== day;
+
+          if (isInvalidDate) {
+            errorMessage.birthDay = "form_fields.invalid_birth_date";
+          } else if (isWA === "connected_PA") {
+            const paDob = evaluatePaConnectedRegistrationDateOfBirth(
+              form.birthYear,
+              form.birthMonth,
+              form.birthDay,
+              today,
+            );
+            if (paDob.outcome === "too_young") {
+              errorMessage.date_of_birth = paDob.errorMessageKey;
+              form.pa_preregistration_age_window = false;
+            } else if (paDob.outcome === "eligible") {
+              form.date_of_birth =
+                form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+              form.pa_preregistration_age_window =
+                paDob.preregistrationAgeWindow;
+            }
+          } else {
+            let age = today.getFullYear() - date.getFullYear();
+            const monthDiff = today.getMonth() - date.getMonth();
+            const dayDiff = today.getDate() - date.getDate();
+
+            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+              age--;
+            }
+
+            if (age < formCongif.validations.min_age) {
+              errorMessage.birthMonth = "form_fields.age_eligibility_error";
+            } else {
+              form.date_of_birth =
+                form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+              form.pa_preregistration_age_window = false;
+            }
+          }
+        }
+      }
+    }
+
+    if (
+      needsValidation("home_address", "home_address") &&
+      !form.home_address?.trim()
+    )
+      errorMessage.home_address = "general.required";
+    const hasSecondaryAddressValue = [
+      form.unit_type?.trim(),
+      form.unit?.trim(),
+    ].some(Boolean);
+    if (isWA === "connected_PA" && hasSecondaryAddressValue) {
+      if (!form.unit_type?.trim()) {
+        errorMessage.unit_type = "general.required";
+      }
+      if (!form.unit?.trim()) {
+        errorMessage.unit = "general.required";
+      }
+    } else if (needsValidation("home_unit", "unit") && !form.unit?.trim())
+      errorMessage.unit = "general.required";
+    if (needsValidation("home_city", "home_city") && !form.home_city?.trim())
+      errorMessage.home_city = "general.required";
+    if (needsValidation("home_state", "state") && !form.state?.trim())
+      errorMessage.state = "general.required";
+
+    if (needsValidation("home_zip_code", "home_zip_code")) {
+      if (!form.home_zip_code?.trim()) {
+        errorMessage.home_zip_code = "general.required";
+      } else if (!zipRegex.test(form.home_zip_code.trim())) {
+        errorMessage.home_zip_code = "form_fields.zip_code_error";
+      }
+    }
+
+    if (
+      form.has_mailing_address ||
+      isRequired(formCongif, "has_mailing_address")
+    ) {
+      const mailFields: (keyof RegisterFormState)[] = [
+        "mailing_address",
+        "mailing_unit",
+        "mailing_city",
+        "mailing_state",
+        "mailing_zip_code",
+      ];
+      mailFields.forEach(field => {
+        const fieldValue = form[field];
+        if (
+          needsValidation(field, field) &&
+          (typeof fieldValue !== "string" || !fieldValue.trim())
+        ) {
+          errorMessage[field] = "general.required";
+        }
+      });
+    }
+
+    if (form.change_of_address || isRequired(formCongif, "change_of_address")) {
+      const mailFields: (keyof RegisterFormState)[] = [
+        "prev_address",
+        "prev_unit",
+        "prev_city",
+        "prev_state",
+        "prev_zip_code",
+      ];
+      mailFields.forEach(field => {
+        const fieldValue = form[field];
+        if (
+          needsValidation(field, field) &&
+          (typeof fieldValue !== "string" || !fieldValue.trim())
+        ) {
+          errorMessage[field] = "general.required";
+        }
+      });
+    }
+
+    if (isWA === "connected_WA") {
+      if (!form.has_no_state_license) {
+        const configRegex =
+          formCongif.fields.state_id_number?.validations?.regexp;
+        const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
+        if (
+          (!form.state_id_number.trim() ||
+            !regex.test(form.state_id_number.trim())) &&
+          form.state_id_number.trim() !== "NONE"
+        ) {
+          errorMessage.state_id_number = "general.required";
+        }
+        const isYearFilled = !!form.issueYear?.trim();
+        const isMonthFilled = !!form.issueMonth?.trim();
+        const isDayFilled = !!form.issueDay?.trim();
+
+        if (!isMonthFilled) errorMessage.issueMonth = "general.required";
+        if (!isDayFilled) errorMessage.issueDay = "general.required";
+        if (!isYearFilled) {
+          errorMessage.issueYear = "general.required";
+        } else {
+          if (isMonthFilled && isDayFilled) {
+            const selectedDate = new Date(
+              Number(form.issueYear),
+              Number(form.issueMonth) - 1,
+              Number(form.issueDay),
+            );
+            const today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate > today) {
+              errorMessage.issueYear = "washington.invalid_wdl_date";
+            }
+          }
+        }
+
+        if (
+          form.issueYear.trim() &&
+          form.issueMonth.trim() &&
+          form.issueDay.trim()
+        ) {
+          const year = Number(form.issueYear);
+          const month = Number(form.issueMonth) - 1;
+          const day = Number(form.issueDay);
+
+          const date = new Date(year, month, day);
+
+          const isInvalidDate =
+            date.getFullYear() !== year ||
+            date.getMonth() !== month ||
+            date.getDate() !== day;
+
+          if (isInvalidDate) {
+            errorMessage.issueDay = "form_fields.invalid_birth_date";
+          }
+        }
+      }
+    }
+
+    const phoneReq = isRequired(formCongif, "phone", form.opt_in_sms);
+    if (phoneReq && !form.phone?.trim()) {
+      errorMessage.phone = "form_fields.required_phone";
+    } else if (form.phone?.trim() && !fullPhoneRegex.test(form.phone.trim())) {
+      errorMessage.phone = "form_fields.invalid_phone";
+    }
+
+    if (isWA === "connected_PA") {
+      if (step === 2) {
+        if (!form.has_no_state_license) {
+          const configRegex =
+            formCongif.fields.state_id_number?.validations?.regexp;
+          const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
+          if (
+            !form.state_id_number.trim() &&
+            isRequired(formCongif, "state_id_number")
+          ) {
+            errorMessage.state_id_number =
+              "pennsylvania.penn_dot_number_empty_error";
+          } else if (!regex.test(form.state_id_number.trim())) {
+            errorMessage.state_id_number =
+              "pennsylvania.penn_dot_number_invalid_error";
+          }
+        }
+      }
+      if (step === 3) {
+        if (form.has_no_ssn !== null && !form.has_no_ssn) {
+          if (
+            !form.last_four_ss_number.trim() ||
+            form.last_four_ss_number.trim().length !== 4
+          ) {
+            errorMessage.last_four_ss_number =
+              "pennsylvania.ssn_last4_empty_error";
+          } else if (!/^\d{4}$/.test(form.last_four_ss_number.trim())) {
+            errorMessage.last_four_ss_number =
+              "pennsylvania.ssn_last4_invalid_error";
+          }
+        }
+        if (!form.signature_base64.trim()) {
+          errorMessage.signature_base64 = "general.required";
+        }
+        if (
+          form.someone_helped &&
+          !form.helper_electronic_signature_acknowledged
+        ) {
+          errorMessage.helper_electronic_signature_acknowledged =
+            "pennsylvania.helper_terms_confirm_required";
+        }
+      }
+      if (!form.race.trim() && isRequired(formCongif, "race")) {
+        errorMessage.race = "general.required";
+      }
+      if (!form.party.trim() && isRequired(formCongif, "party")) {
+        errorMessage.party = "general.required";
+      }
+      if (!form.home_county.trim()) {
+        errorMessage.home_county = "general.required";
+      }
+    }
+
+    if (needsValidation("opt_in_email", "opt_in_email") && !form.opt_in_email) {
+      errorMessage.opt_in_email = "general.required";
+    }
+
+    setErrMsg(errorMessage);
+    return !Object.values(errorMessage).some(value => !!value);
   };
 
   const handleMainButtonClick = () => {
@@ -1063,24 +1630,161 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
         }
       } else {
         if (validateConnectedOvr()) {
-          if (form.ssnLast4 === "0000") {
-            // todo: redirect to the error page
+          if (form.last_four_ss_number === "0000") {
             navigation.navigate("ZipError", {
               text: t("previous_step"),
               header: t("was_problem_text"),
             });
           } else {
-            navigation.navigate("Success");
+            if (!form.unit) navigation.navigate("SuccessMI", { state });
+            else navigation.navigate("FailMI", { state, form });
           }
         }
       }
     } else if (flowType === "paper") {
-      if (validatePaper()) {
-        navigation.navigate("Success");
+      // if (step === 1) {
+      if (validate()) {
+        //     setStep(2);
+        //   }
+        // } else {
+        if (form.mailForm) {
+          navigation.navigate("Success", {
+            form,
+            state,
+            workflow_type: "ovr", // ? state.ovr_type
+            finish_with_state: false,
+          });
+        } else
+          navigation.navigate("Print", {
+            form,
+            state,
+            workflow_type: "ovr", // ? state.ovr_type
+            finish_with_state: false,
+          });
       }
     } else if (flowType === "ovr_state") {
-      if (validateOvrState()) {
-        navigation.navigate("Success");
+      if (step === 1) {
+        if (validate()) {
+          if (form.has_no_state_license) {
+            setShowRedirectText(true);
+          }
+          setStep(2);
+        }
+      } else if (step === 2) {
+        if (validate()) {
+          if (form.has_no_state_license) {
+            if (form.mailForm) {
+              navigation.navigate("Success", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+            } else
+              navigation.navigate("Print", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+          } else {
+            setStep(3);
+          }
+        }
+      } else {
+        if (validate()) {
+          if (form.mailForm) {
+            navigation.navigate("Success", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+            });
+          } else
+            navigation.navigate("Print", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+            });
+        }
+      }
+    } else if (flowType === "connected_WA") {
+      if (step === 1) {
+        if (validateWA("connected_WA")) {
+          if (!form.has_no_state_license) {
+            navigation.navigate("Print", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+              under_construction: true,
+            });
+          } else {
+            setShowRedirectText(true);
+            setStep(2);
+          }
+        }
+      } else {
+        // ???
+        navigation.navigate("Print", {
+          form,
+          state,
+          workflow_type: "ovr", // ? state.ovr_type
+          finish_with_state: false,
+          under_construction: true,
+        });
+      }
+    } else if (flowType === "connected_PA") {
+      if (step === 1) {
+        if (validateWA("connected_PA")) {
+          setStep(2);
+        }
+      } else if (step === 2) {
+        if (validateWA("connected_PA")) {
+          setStep(3);
+        }
+      } else if (step === 3) {
+        if (validateWA("connected_PA")) {
+          if (form.has_no_state_license) {
+            setStep(4);
+          } else {
+            navigation.navigate("Print", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+              under_construction: true,
+            });
+          }
+        }
+      } else {
+        navigation.navigate("Print", {
+          form,
+          state,
+          workflow_type: "ovr", // ? state.ovr_type
+          finish_with_state: false,
+          under_construction: true,
+        });
+      }
+    } else if (flowType === "connected_CA") {
+      if (step === 1) {
+        if (validateWA()) {
+          setStep(2);
+        }
+      } else if (step === 2) {
+        if (validateWA()) {
+          setShowRedirectText(true);
+          setStep(3);
+        }
+      } else {
+        navigation.navigate("Print", {
+          form,
+          state,
+          workflow_type: "ovr", // ? state.ovr_type
+          finish_with_state: false,
+          under_construction: true,
+        });
       }
     } else navigation.navigate("Home");
   };
@@ -1089,82 +1793,139 @@ export const RegisterResult = ({ state, zip, email }: RegisterResultProps) => {
     const fetchConfig = async () => {
       try {
         const response = await fetchDataConfiguration({
+          partner_id: "1",
           state_abbreviation: state.abbreviation,
           locale: i18n.language,
           workflow_type: "ovr",
         });
+        const config = response.data.configuration;
         setFormCongif(response.data.configuration);
+        setForm((prev: RegisterFormState) => ({
+          ...prev,
+          opt_in_sms:
+            initform?.opt_in_sms ??
+            config.fields.opt_in_sms?.checked ??
+            prev.opt_in_sms,
+          opt_in_email:
+            initform?.opt_in_email ??
+            config.fields.opt_in_email?.checked ??
+            prev.opt_in_email,
+          volunteer: config.fields.opt_in_volunteer?.checked ?? prev.volunteer,
+        }));
       } catch (err) {
         console.error("Failed to fetch Data configuration:", err);
       }
     };
 
     fetchConfig();
-  }, [state.abbreviation]);
+
+    const fetchQuestions = async () => {
+      try {
+        const response = await getSurveyQuestions({
+          partner_id: form.partner_id.toString(),
+          locale: i18n.language,
+        });
+        const data = response.data;
+        setForm((prev: RegisterFormState) => ({
+          ...prev,
+          survey_question_1: data.survey_question_1,
+          survey_question_2: data.survey_question_2,
+        }));
+      } catch (err) {
+        console.error("Failed to fetch Data configuration:", err);
+      }
+    };
+
+    fetchQuestions();
+  }, [state.abbreviation, state.ovr_locales]);
+
+  useEffect(() => {
+    if (pageFromLookup === "paper" || pageFromLookup === "connected_ovr") {
+      setStep(1);
+    }
+  }, [pageFromLookup]);
+
+  const goBack = () => {
+    setShowRedirectText(false);
+    if (step === 1) {
+      navigation.goBack();
+    } else {
+      setStep(prev => (prev > 1 ? ((prev - 1) as 1 | 2 | 3) : prev));
+    }
+  };
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      y: 0,
+      animated: true,
+    });
+  }, [step]);
 
   return (
-    <View style={styles.box}>
-      {renderContent()}
-      <View style={styles.buttonBox}>
-        {flowType !== "not_participating" && (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleMainButtonClick}
-          >
-            <Text
-              style={[styles.buttonText, styles.registerText]}
-              //  style={styles.buttonText}
-            >
-              {t("register")}
-            </Text>
-          </TouchableOpacity>
+    <ScrollView ref={scrollRef}>
+      <View style={styles.box}>
+        {showRedirect && (
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: t("nvra_form_page.redirect_notice", {
+                state_abbr: state.abbreviation,
+                state_name: state.name,
+              }),
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 14,
+                lineHeight: 18,
+                marginVertical: 5,
+              },
+              strong: {
+                fontWeight: "bold",
+              },
+            }}
+          />
         )}
-        <Text style={styles.link} onPress={() => navigation.goBack()}>
-          {t("back")}
-        </Text>
+        {renderContent()}
+        {flowType !== "not_participating" && (
+          <Text style={styles.link} onPress={goBack}>
+            {"< "} {t("general.previous_step")}
+          </Text>
+        )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
     box: {
-      marginVertical: 20,
-      padding: 15,
-      backgroundColor: theme.background,
-      borderRadius: 10,
+      maxWidth: "100%",
+      padding: 10,
     },
-    buttonBox: {
-      display: "flex",
-      alignItems: "center",
-      gap: 20,
-      marginTop: 20,
-    },
-    button: {
-      backgroundColor: theme.primary,
-      paddingVertical: 12,
-      paddingHorizontal: 15,
-      borderRadius: 5,
-      marginLeft: 10,
-      height: 45,
-      justifyContent: "center",
-    },
-    buttonText: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 16,
-      fontWeight: "semibold",
-    },
-    registerText: {
-      color: theme.white,
-    },
-    restartText: {
-      color: theme.textPrimary,
+    strong: {
+      fontWeight: "bold",
     },
     link: {
+      marginTop: 20,
+      marginHorizontal: "auto",
       color: theme.link,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       fontWeight: "medium",
+      textDecorationLine: "underline",
+    },
+
+    outlineButton: {
+      borderWidth: 1,
+      borderColor: theme.primary,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 10,
+    },
+    outlineButtonText: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: "600",
     },
   });

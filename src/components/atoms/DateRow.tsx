@@ -6,8 +6,9 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 
 interface DateRowProps {
-  value: any;
-  required?: boolean;
+  value: RegisterFormState;
+  disabled?: boolean;
+  useIssue?: boolean;
   updateField: <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K],
@@ -16,7 +17,8 @@ interface DateRowProps {
 
 export const DateRow = ({
   value,
-  required = false,
+  disabled = false,
+  useIssue = false,
   updateField,
 }: DateRowProps) => {
   const theme = useContext(ThemeContext);
@@ -24,118 +26,117 @@ export const DateRow = ({
   const { t } = useTranslation();
   const [error, setError] = useState("");
 
-  return (
-    <View style={styles.inputBlock}>
-      <Text style={styles.label}>
-        {t("register_page.dob")}
-        {required && <Text style={styles.required}> *</Text>}
-      </Text>
+  const MONTHS = [
+    { value: "", name: t("general.months.month") },
+    { value: "01", name: t("general.months.january") },
+    { value: "02", name: t("general.months.february") },
+    { value: "03", name: t("general.months.march") },
+    { value: "04", name: t("general.months.april") },
+    { value: "05", name: t("general.months.may") },
+    { value: "06", name: t("general.months.june") },
+    { value: "07", name: t("general.months.july") },
+    { value: "08", name: t("general.months.august") },
+    { value: "09", name: t("general.months.september") },
+    { value: "10", name: t("general.months.october") },
+    { value: "11", name: t("general.months.november") },
+    { value: "12", name: t("general.months.december") },
+  ];
 
-      <View style={styles.dateRow}>
-        <View style={styles.inputBlock}>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.birthMonth}
-              onValueChange={(text: string) => updateField("birthMonth", text)}
-            >
-              <Picker.Item label="- Select Month -" value="" />
-              <Picker.Item label={t("01 - January")} value="1" />
-              <Picker.Item label={t("02 - February")} value="2" />
-              <Picker.Item label={t("03 - March")} value="3" />
-              <Picker.Item label={t("04 - April")} value="4" />
-              <Picker.Item label={t("05 - May")} value="5" />
-              <Picker.Item label={t("06 - June")} value="6" />
-              <Picker.Item label={t("07 - July")} value="7" />
-              <Picker.Item label={t("08 - August")} value="8" />
-              <Picker.Item label={t("09 - September")} value="9" />
-              <Picker.Item label={t("10 - October")} value="10" />
-              <Picker.Item label={t("11 - November")} value="11" />
-              <Picker.Item label={t("12 - December")} value="12" />
-            </Picker>
-          </View>
+  const handleDayChange = (text: string) => {
+    if (/^\d*$/.test(text) && text.length <= 2) {
+      if (useIssue) updateField("issueDay", text);
+      else updateField("birthDay", text);
+    }
+  };
+
+  return (
+    <View style={styles.dateRow}>
+      <View style={styles.inputBlock}>
+        <View
+          style={[
+            styles.pickerWrapper,
+            disabled && { backgroundColor: theme.borderColor },
+          ]}
+        >
+          <Picker
+            enabled={!disabled}
+            selectedValue={useIssue ? value.issueMonth : value.birthMonth}
+            onValueChange={(text: string) => {
+              if (useIssue) updateField("issueMonth", text);
+              else updateField("birthMonth", text);
+            }}
+          >
+            {MONTHS.map(month => (
+              <Picker.Item
+                key={month.value}
+                label={month.name}
+                value={month.value}
+              />
+            ))}
+          </Picker>
         </View>
-        <View style={styles.inputBlock}>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.birthDay}
-              onValueChange={(text: string) => updateField("birthDay", text)}
-            >
-              <Picker.Item label="- Select Day -" value="" />
-              <Picker.Item label={t("01")} value="01" />
-              <Picker.Item label={t("02")} value="02" />
-              <Picker.Item label={t("03")} value="03" />
-              <Picker.Item label={t("04")} value="04" />
-              <Picker.Item label={t("05")} value="05" />
-              <Picker.Item label={t("06")} value="06" />
-              <Picker.Item label={t("07")} value="07" />
-              <Picker.Item label={t("08")} value="08" />
-              <Picker.Item label={t("09")} value="09" />
-              <Picker.Item label={t("10")} value="10" />
-              <Picker.Item label={t("11")} value="11" />
-              <Picker.Item label={t("12")} value="12" />
-              <Picker.Item label={t("13")} value="13" />
-              <Picker.Item label={t("14")} value="14" />
-              <Picker.Item label={t("15")} value="15" />
-              <Picker.Item label={t("16")} value="16" />
-              <Picker.Item label={t("17")} value="17" />
-              <Picker.Item label={t("18")} value="18" />
-              <Picker.Item label={t("19")} value="19" />
-              <Picker.Item label={t("20")} value="20" />
-              <Picker.Item label={t("21")} value="21" />
-              <Picker.Item label={t("22")} value="22" />
-              <Picker.Item label={t("23")} value="23" />
-              <Picker.Item label={t("24")} value="24" />
-              <Picker.Item label={t("25")} value="25" />
-              <Picker.Item label={t("26")} value="26" />
-              <Picker.Item label={t("27")} value="27" />
-              <Picker.Item label={t("28")} value="28" />
-              <Picker.Item label={t("29")} value="29" />
-              <Picker.Item label={t("30")} value="30" />
-              <Picker.Item label={t("31")} value="31" />
-            </Picker>
-          </View>
-        </View>
-        <TextInput
-          style={styles.dateInput}
-          placeholder="YYYY"
-          keyboardType="number-pad"
-          maxLength={4}
-          value={value.birthYear}
-          onChangeText={(text: string) => {
-            updateField("birthYear", text);
-            if (Number(value.birthYear) < 1900) {
-              setError(t("register_page.invalid_year"));
-            } else {
-              setError("");
-            }
-          }}
-        />
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </View>
+      <TextInput
+        style={[
+          styles.dateInput,
+          disabled && { backgroundColor: theme.borderColor },
+        ]}
+        placeholder="DD"
+        keyboardType="number-pad"
+        maxLength={2}
+        editable={!disabled}
+        value={useIssue ? value.issueDay : value.birthDay}
+        onChangeText={handleDayChange}
+      />
+      <TextInput
+        style={[
+          styles.dateInput,
+          disabled && { backgroundColor: theme.borderColor },
+        ]}
+        placeholder="YYYY"
+        keyboardType="number-pad"
+        maxLength={4}
+        editable={!disabled}
+        value={useIssue ? value.issueYear : value.birthYear}
+        onChangeText={(text: string) => {
+          if (useIssue) updateField("issueYear", text);
+          else updateField("birthYear", text);
+          if (Number(text) < 1900) {
+            setError(t("form_fields.invalid_year"));
+          } else {
+            setError("");
+          }
+        }}
+      />
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
+    section: {
+      marginTop: 5,
+    },
     inputBlock: {
-      gap: 4,
       width: "100%",
     },
     label: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       fontWeight: "medium",
+      textTransform: "uppercase",
     },
     required: {
       color: theme.secondary,
     },
     dateRow: {
       gap: 10,
+      marginBottom: 10,
     },
     dateInput: {
       backgroundColor: theme.white,
-      height: 55,
+      height: 48,
       borderWidth: 1,
       borderColor: theme.borderColor,
       borderRadius: 6,
@@ -148,10 +149,12 @@ const getStyles = (theme: any) =>
       marginTop: 5,
     },
     pickerWrapper: {
+      height: 48,
       backgroundColor: theme.white,
       borderWidth: 1,
       borderColor: theme.borderColor,
       borderRadius: 6,
       overflow: "hidden",
+      justifyContent: "center",
     },
   });

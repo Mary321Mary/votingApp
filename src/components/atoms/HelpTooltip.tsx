@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import Popover from "react-native-popover-view";
 
 type HelpTooltipProps = {
   text: string;
@@ -12,19 +13,24 @@ const HelpTooltip: React.FC<HelpTooltipProps> = ({ text }) => {
   const [visible, setVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => setVisible((prev) => !prev)}
-        style={styles.questionMarkContainer}
+    <View>
+      <Popover
+        isVisible={visible}
+        arrowSize={{ width: 0, height: 0 }}
+        onRequestClose={() => setVisible(false)}
+        from={
+          <TouchableOpacity
+            onPress={() => setVisible(true)}
+            style={styles.questionMarkContainer}
+          >
+            <Text style={styles.questionMark}>?</Text>
+          </TouchableOpacity>
+        }
       >
-        <Text style={styles.questionMark}>?</Text>
-      </TouchableOpacity>
-
-      {visible && (
         <View style={styles.tooltip}>
           <Text style={styles.tooltipText}>{text}</Text>
         </View>
-      )}
+      </Popover>
     </View>
   );
 };
@@ -33,10 +39,6 @@ export default HelpTooltip;
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    container: {
-      marginLeft: 4,
-      position: "relative",
-    },
     questionMarkContainer: {
       marginLeft: 5,
       width: 18,
@@ -52,17 +54,12 @@ const getStyles = (theme: any) =>
       fontSize: 12,
     },
     tooltip: {
-      position: "absolute",
-      top: 24,
-      left: -50,
-      backgroundColor: theme.textPrimary,
       padding: 8,
-      borderRadius: 6,
-      minWidth: 200,
-      zIndex: 999,
+      maxWidth: 260,
     },
     tooltipText: {
-      color: theme.white,
+      color: theme.textPrimary,
+      lineHeight: 20,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontWeight: "regular",
       fontSize: 12,

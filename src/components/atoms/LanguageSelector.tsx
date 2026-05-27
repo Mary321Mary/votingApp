@@ -1,10 +1,8 @@
 import React, { useContext } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Button } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { loadRemoteTranslations } from "@/i18n/loader";
-import { clearTranslationsCache } from "@/i18n/cache";
 
 const LanguageSelector: React.FC = () => {
   const theme = useContext(ThemeContext);
@@ -19,7 +17,7 @@ const LanguageSelector: React.FC = () => {
 
   const getOptionStyle = (langCode: string) => [
     styles.option,
-    i18n.language === langCode ? styles.activeOption : styles.inactiveOption
+    i18n.language === langCode ? styles.activeOption : styles.inactiveOption,
   ];
 
   return (
@@ -27,19 +25,13 @@ const LanguageSelector: React.FC = () => {
     <>
       <View style={styles.block}>
         <TouchableOpacity onPress={() => changeLanguage("en")}>
-          <Text style={getOptionStyle("en")}>
-            English
-          </Text>
+          <Text style={getOptionStyle("en")}>English</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => changeLanguage("es")}>
-          <Text style={getOptionStyle("es")}>
-            Español
-          </Text>
+          <Text style={getOptionStyle("es")}>Español</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => changeLanguage("tl")}>
-          <Text style={getOptionStyle("tl")}>
-            Tagalog
-          </Text>
+          <Text style={getOptionStyle("tl")}>Tagalog</Text>
         </TouchableOpacity>
         {/* <Picker
           selectedValue={i18n.language}
@@ -57,9 +49,8 @@ const LanguageSelector: React.FC = () => {
             />
           ))}
         </Picker> */}
-
       </View>
-      <Button
+      {/* <Button
         title="Refresh translations"
         onPress={async () => {
           const lang = i18n.language;
@@ -68,7 +59,7 @@ const LanguageSelector: React.FC = () => {
           await loadRemoteTranslations(lang);
           await i18n.changeLanguage(lang);
         }}
-      />
+      /> */}
     </>
     // </View>
   );

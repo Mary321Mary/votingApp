@@ -22,7 +22,7 @@ export const RegisterStepHeader: React.FC<Props> = ({
       <Text style={styles.title}>{t(titleKey)}</Text>
 
       <View style={styles.progressBar}>
-        <Text style={styles.stepLabel}>{t("register_page.step")}</Text>
+        <Text style={styles.stepLabel}>{t("general.step")}</Text>
 
         {Array.from({ length: totalSteps }, (_, i) => {
           const step = i + 1;
@@ -38,9 +38,7 @@ export const RegisterStepHeader: React.FC<Props> = ({
                 (isCompleted || isCurrent) && styles.stepItemActive,
               ]}
             >
-              <Text style={styles.stepText}>
-                {isCompleted ? "✓" : step}
-              </Text>
+              <Text style={styles.stepText}>{isCompleted ? "✓" : step}</Text>
             </View>
           );
         })}

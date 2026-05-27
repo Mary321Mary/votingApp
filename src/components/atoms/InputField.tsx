@@ -13,7 +13,7 @@ interface InputFieldProp {
   disabled?: boolean;
   numeric?: boolean;
   maxLength?: number;
-  errorMessage?: string;
+  errorMessage?: React.ReactNode;
   helpText?: string;
   onChangeText?: (text: string) => void;
 }
@@ -38,34 +38,40 @@ const InputField = ({
     <View style={styles.inputContainer}>
       <Text style={styles.inputLabel}>
         {label}
-        {required && <Text style={styles.requiredStar}> *</Text>} {helpText && <HelpTooltip text={helpText} />}
+        {required && <Text style={styles.requiredStar}> *</Text>}{" "}
+        {helpText && <HelpTooltip text={helpText} />}
       </Text>
       {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <TextInput
         value={value ?? ""}
-        style={[styles.textInput, errorMessage && styles.inputError]}
+        style={[
+          styles.textInput,
+          !!errorMessage && styles.inputError,
+          disabled && { backgroundColor: theme.borderColor },
+        ]}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
-        disableFullscreenUI={disabled}
+        editable={!disabled}
         keyboardType={numeric ? "number-pad" : "default"}
         maxLength={maxLength}
         onChangeText={onChangeText}
       />
     </View>
-  )
+  );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
     inputContainer: {
       marginTop: 10,
-      width: "100%"
+      width: "100%",
     },
     inputLabel: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       marginBottom: 5,
       color: theme.textPrimary,
+      textTransform: "uppercase",
     },
     requiredStar: {
       color: theme.secondary,

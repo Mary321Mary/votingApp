@@ -1,28 +1,32 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 
 import InputField from "../atoms/InputField";
-import HelpTooltip from "../atoms/HelpTooltip";
-import { isRequired, isVisible } from "@/utils/constants";
+import { isRequired } from "@/utils/constants";
+import { Checkbox } from "../atoms/Checkbox";
+import { Radio } from "../atoms/Radio";
+import RenderHTML from "react-native-render-html";
 
-interface IDSectionProps extends FormProps {}
+interface IDSectionProps extends FormProps {
+  showRadioButtons?: boolean;
+}
 
 export const IDSection = ({
   state,
   value,
   formCongif,
   errorMessages,
-  showIsAdultBlock,
+  showRadioButtons = false,
   onChange,
   onChangeError,
 }: IDSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -37,163 +41,160 @@ export const IDSection = ({
     }
   };
 
+  const onlyDigits = (text: string) => text.replace(/\D/g, "");
+
+  const handleSSNChange = (text: string) => {
+    const digits = onlyDigits(text);
+    const lastFour = digits.slice(-4);
+    updateField("last_four_ss_number", lastFour);
+  };
+
   return (
     <View style={styles.section}>
-      {(!showIsAdultBlock || !value.hasStateId) && (
-        <InputField
-          label={t("register_page.id_number")}
-          value={value.idNumber}
-          required={isRequired(formCongif, "state_id_number")}
-          errorMessage={errorMessages.idNumber}
-          onChangeText={(text: string) => updateField("idNumber", text)}
-        />
-      )}
-      <Text style={styles.hint}>{t("register_page.provide_full_SSN")}</Text>
+      {showRadioButtons ? (
+        <>
+          <Text style={styles.header}>
+            <RenderHTML
+              contentWidth={width}
+              source={{
+                html: `
+                  ${t("finish_with_state_page1.dl_id_question", {
+                    state_abbr: state.abbreviation,
+                  })}
+                  ${
+                    isRequired(formCongif, "id_number_radio_button_set")
+                      ? '<span style="color:red">*</span>'
+                      : ""
+                  }
+                `,
+              }}
+              tagsStyles={{
+                body: {
+                  fontSize: 14,
+                  lineHeight: 18,
+                  marginVertical: 5,
+                },
+                strong: {
+                  fontWeight: "bold",
+                },
+                span: {
+                  color: "red",
+                  fontWeight: "bold",
+                },
+              }}
+            />
+          </Text>
+          <Radio
+            label={t("finish_with_state_page1.dl_id_answer_yes", {
+              state_abbr: state.abbreviation,
+            })}
+            selected={value.has_no_state_license === false}
+            onPress={() => updateField("has_no_state_license", false)}
+          />
+          {value.has_no_state_license && value.age_eligibility ? (
+            <Text style={styles.required}>
+              {t("register_page.license_age_eligibility")}
+            </Text>
+          ) : (
+            ""
+          )}
+          <Radio
+            label={t("finish_with_state_page1.dl_id_answer_no", {
+              state_abbr: state.abbreviation,
+            })}
+            selected={value.has_no_state_license === true}
+            onPress={() => updateField("has_no_state_license", true)}
+          />
+          {errorMessages.has_no_state_license && (
+            <Text style={styles.required}>
+              {t(errorMessages.has_no_state_license)}
+            </Text>
+          )}
+        </>
+      ) : (
+        <>
+          <InputField
+            label={t("form_fields.id_number")}
+            value={value.state_id_number}
+            required={isRequired(formCongif, "state_id_number")}
+            disabled={value.has_no_state_license === true}
+            maxLength={
+              formCongif.fields.state_id_number?.validations?.max_length
+            }
+            errorMessage={
+              value.has_no_state_license !== true &&
+              t(errorMessages.state_id_number, {
+                state_abbr: state.abbreviation,
+              })
+            }
+            onChangeText={(text: string) => {
+              const digits = onlyDigits(text);
+              const lastFour = digits.slice(-4);
 
-      {/* <Text style={styles.hint}>
-        {t("register_page.driver_license", { name: state.name })}
-      </Text> */}
-      {(!showIsAdultBlock || !value.hasStateId) &&
-        isVisible(formCongif, "race") && (
-          <>
-            <Text style={styles.inputLabel}>
-              {t("register_page.race.title")}
-              {isRequired(formCongif, "race") && (
-                <Text style={styles.required}> *</Text>
-              )}
-              <HelpTooltip
-                text={t("register_page.race_help", { name: state.name })}
+              // Batch all updates together to prevent overwriting
+              onChange({
+                ...value,
+                state_id_number: text,
+                has_no_state_license: false,
+                last_four_ss_number: lastFour,
+              });
+
+              // Clear errors for updated fields
+              const clearedErrors = { ...errorMessages };
+              if (errorMessages.state_id_number?.length) {
+                clearedErrors.state_id_number = "";
+              }
+              if (errorMessages.last_four_ss_number?.length) {
+                clearedErrors.last_four_ss_number = "";
+              }
+              onChangeError(clearedErrors);
+            }}
+          />
+          <Text style={styles.hint}>
+            {formCongif.fields.state_id_number?.tooltip}
+          </Text>
+          <Checkbox
+            value={value.has_no_state_license === true}
+            label={t("nvra_form_page.no_license_number_label")}
+            required={isRequired(formCongif, "has_no_state_license")}
+            onValueChange={checked =>
+              updateField("has_no_state_license", checked)
+            }
+          />
+          {value.has_no_state_license && (
+            <>
+              <InputField
+                maxLength={4}
+                value={value.last_four_ss_number}
+                errorMessage={t(errorMessages.last_four_ss_number)}
+                disabled={
+                  !value.has_no_state_license || value.has_no_ssn === true
+                }
+                required={
+                  !value.has_no_ssn &&
+                  isRequired(formCongif, "last_four_ss_number")
+                }
+                label={t("form_fields.ssn_last4")}
+                onChangeText={handleSSNChange}
               />
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={value.race}
-                onValueChange={itemValue => updateField("race", itemValue)}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item
-                  label={t("register_page.race.asian")}
-                  value="Asian"
-                />
-                <Picker.Item
-                  label={t("register_page.race.black")}
-                  value="Black or African American"
-                />
-                <Picker.Item
-                  label={t("register_page.race.hispanic")}
-                  value="Hispanic or Latino"
-                />
-                <Picker.Item
-                  label={t("register_page.race.native_american")}
-                  value="Native American or Alaskan Native"
-                />
-                <Picker.Item
-                  label={t("register_page.race.pacific")}
-                  value="Native Hawaiian or Other Pacific Islander"
-                />
-                <Picker.Item
-                  label={t("register_page.race.other")}
-                  value="Other"
-                />
-                <Picker.Item
-                  label={t("register_page.race.multiple")}
-                  value="Two or More Races"
-                />
-                <Picker.Item
-                  label={t("register_page.race.white")}
-                  value="White"
-                />
-                <Picker.Item
-                  label={t("register_page.race.decline")}
-                  value="Decline to State"
-                />
-              </Picker>
-            </View>
-            {errorMessages.race && (
-              <Text style={styles.required}>{errorMessages.race}</Text>
-            )}
-          </>
-        )}
-      {(!showIsAdultBlock || !value.hasStateId) &&
-        isVisible(formCongif, "party") && (
-          <>
-            <Text style={styles.inputLabel}>
-              {t("register_page.party.title")}
-              {isRequired(formCongif, "party") && (
-                <Text style={styles.required}> *</Text>
-              )}
-              <HelpTooltip text={t("register_page.party_help")} />
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={value.party}
-                onValueChange={itemValue => updateField("party", itemValue)}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item
-                  label={t("register_page.party.democratic")}
-                  value="Democratic"
-                />
-                <Picker.Item
-                  label={t("register_page.party.independent")}
-                  value="Independent"
-                />
-                <Picker.Item
-                  label={t("register_page.party.republican")}
-                  value="Republican"
-                />
-                <Picker.Item
-                  label={t("register_page.party.libertarian")}
-                  value="Libertarian"
-                />
-                <Picker.Item
-                  label={t("register_page.party.none")}
-                  value="None (No Affiliation)"
-                />
-              </Picker>
-            </View>
-            {errorMessages.party && (
-              <Text style={styles.required}>{errorMessages.party}</Text>
-            )}
-          </>
-        )}
+              <Checkbox
+                value={value.has_no_ssn === true}
+                required={isRequired(formCongif, "has_no_ssn")}
+                label={t("nvra_form_page.no_ssn_last4")}
+                onValueChange={checked => updateField("has_no_ssn", checked)}
+              />
+            </>
+          )}
+        </>
+      )}
     </View>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    section: {
-      paddingHorizontal: 5,
-      marginBottom: 10,
-    },
-    inputLabel: {
-      marginVertical: 5,
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      color: theme.textPrimary,
-    },
-    pickerWrapper: {
-      flexBasis: "18%",
-      minWidth: 70,
-      height: 48,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 8,
-      justifyContent: "center",
-      backgroundColor: theme.white,
-    },
-    picker: {
-      // height: 48,
-      width: "100%",
-    },
-    pickerItem: {
-      fontSize: 14,
-    },
+    section: {},
+    header: { marginVertical: 10 },
     hint: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 13,
@@ -201,6 +202,9 @@ const getStyles = (theme: any) =>
       marginTop: 8,
       marginBottom: 8,
       lineHeight: 18,
+    },
+    strong: {
+      fontWeight: "bold",
     },
     required: {
       color: theme.secondary,

@@ -33,37 +33,41 @@ export const PoBoxMailingAddress = ({
 
   return (
     <>
-      <InputField
-        label={t("register_page.po_box_number")}
-        required
-        value={value.poBoxNumber}
-        errorMessage={errorMessages.poBoxNumber}
-        onChangeText={(text: string) => updateField("poBoxNumber", text)}
-      />
+      {isVisible(formCongif, "mailing_po_box_number") && (
+        <InputField
+          label={t("michigan.po_box_number")}
+          required={isRequired(formCongif, "mailing_po_box_number")}
+          value={value.mailing_po_box_number}
+          errorMessage={errorMessages.mailing_po_box_number}
+          onChangeText={(text: string) =>
+            updateField("mailing_po_box_number", text)
+          }
+        />
+      )}
 
       {isVisible(formCongif, "mailing_city") && (
         <InputField
-          label={t("register_page.city")}
-          value={value.mailingCity}
+          label={t("form_fields.city")}
+          value={value.mailing_city}
           required={isRequired(formCongif, "mailing_city")}
-          errorMessage={errorMessages.mailingCity}
-          onChangeText={(text: string) => updateField("mailingCity", text)}
+          errorMessage={errorMessages.mailing_city}
+          onChangeText={(text: string) => updateField("mailing_city", text)}
         />
       )}
 
       {isVisible(formCongif, "mailing_state") && (
         <View style={styles.inputBlock}>
           <Text style={styles.label}>
-            {t("register_page.state")}
+            {t("form_fields.state")}
             {isRequired(formCongif, "mailing_state") && (
               <Text style={styles.required}> *</Text>
             )}
           </Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={value.mailingState}
+              selectedValue={value.mailing_state}
               onValueChange={(text: string) =>
-                updateField("mailingState", text)
+                updateField("mailing_state", text)
               }
             >
               {STATES.map(state_value => (
@@ -80,12 +84,12 @@ export const PoBoxMailingAddress = ({
 
       {isVisible(formCongif, "mailing_zip_code") && (
         <InputField
-          label={t("zip")}
-          value={value.mailingZip}
+          label={t("form_fields.zip")}
+          value={value.mailing_zip_code}
           required={isRequired(formCongif, "mailing_zip_code")}
-          errorMessage={errorMessages.mailingZip}
+          errorMessage={errorMessages.mailing_zip_code}
           numeric
-          onChangeText={(text: string) => updateField("mailingZip", text)}
+          onChangeText={(text: string) => updateField("mailing_zip_code", text)}
         />
       )}
     </>
@@ -114,6 +118,7 @@ const getStyles = (theme: any) =>
       marginBottom: 16,
     },
     label: {
+      textTransform: "uppercase",
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       marginBottom: 6,

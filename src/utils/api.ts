@@ -2,8 +2,14 @@ import type {
   AuthData,
   AuthMeResponse,
   DataConfigurationRequest,
+  DataSurveyQuestionsRequest,
   FetchDataCollectionConfigResponse,
+  FetchDataSurveyQuestionsResponse,
   LoginCredentials,
+  PDFDocRequest,
+  PDFDocResponse,
+  PDFTokenRequest,
+  PDFTokenResponse,
   RegisterCredentials,
   RegisterData,
   SubmitEmailZipRequest,
@@ -87,7 +93,40 @@ export function fetchDataConfiguration(
 ) {
   return HttpClient.Client.get<FetchDataCollectionConfigResponse>(
     ENDPOINTS.DATA_CONFIG +
-      `&state_abbreviation=${data.state_abbreviation}&workflow_type=${data.workflow_type}&locale=${data.locale}`,
+      `partner_id=${data.partner_id}&state_abbreviation=${data.state_abbreviation}&workflow_type=${data.workflow_type}&locale=${data.locale}`,
+    headers,
+  );
+}
+
+export function requestTokenPDF(
+  data: PDFTokenRequest,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<PDFTokenRequest, PDFTokenResponse>(
+    ENDPOINTS.PDF_TOKEN_CONFIG,
+    data,
+    headers,
+  );
+}
+
+export function requestTokenDoc(
+  data: PDFDocRequest,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<PDFDocRequest, PDFDocResponse>(
+    ENDPOINTS.GET_PDF,
+    data,
+    headers,
+  );
+}
+
+export function getSurveyQuestions(
+  data: DataSurveyQuestionsRequest,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.get<FetchDataSurveyQuestionsResponse>(
+    ENDPOINTS.GET_SERVEY_QUESTIONS +
+      `partner_id=${data.partner_id}&locale=${data.locale}`,
     headers,
   );
 }

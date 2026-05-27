@@ -28,47 +28,65 @@ export const InternationalMailingAddress = ({
 
   return (
     <>
-      <InputField
-        label={t("register_page.international.address_line_1")}
-        required
-        value={value.addressLine1}
-        errorMessage={errorMessages.addressLine1}
-        onChangeText={(text: string) => updateField("addressLine1", text)}
-      />
-
-      <InputField
-        label={t("register_page.international.address_line_2")}
-        value={value.addressLine2}
-        errorMessage={errorMessages.addressLine2}
-        onChangeText={(text: string) => updateField("addressLine2", text)}
-      />
-
-      <InputField
-        label={t("register_page.international.address_line_3")}
-        value={value.addressLine3}
-        errorMessage={errorMessages.addressLine3}
-        onChangeText={(text: string) => updateField("addressLine3", text)}
-      />
-
-      {isVisible(formCongif, "mailing_zip_code") && (
+      {isVisible(formCongif, "mailing_address_line1") && (
         <InputField
-          label={t("register_page.international.postal_code")}
-          value={value.mailingZip}
-          required={isRequired(formCongif, "mailing_zip_code")}
-          errorMessage={errorMessages.mailingZip}
-          numeric
-          onChangeText={(text: string) => updateField("mailingZip", text)}
+          label={t("michigan.international.address_line_1")}
+          value={value.mailing_address_line1}
+          required={isRequired(formCongif, "mailing_address_line1")}
+          errorMessage={errorMessages.mailing_address_line1}
+          onChangeText={(text: string) =>
+            updateField("mailing_address_line1", text)
+          }
         />
       )}
 
-      <InputField
-        label={t("register_page.country")}
-        value={value.mailingCountry}
-        errorMessage={errorMessages.mailingCountry}
-        numeric
-        required
-        onChangeText={(text: string) => updateField("mailingCountry", text)}
-      />
+      {isVisible(formCongif, "mailing_address_line2") && (
+        <InputField
+          label={t("michigan.international.address_line_2")}
+          value={value.mailing_address_line2}
+          required={isRequired(formCongif, "mailing_address_line2")}
+          errorMessage={errorMessages.mailing_address_line2}
+          onChangeText={(text: string) =>
+            updateField("mailing_address_line2", text)
+          }
+        />
+      )}
+
+      {isVisible(formCongif, "mailing_address_line3") && (
+        <InputField
+          label={t("michigan.international.address_line_3")}
+          value={value.mailing_address_line3}
+          required={isRequired(formCongif, "mailing_address_line3")}
+          errorMessage={errorMessages.mailing_address_line3}
+          onChangeText={(text: string) =>
+            updateField("mailing_address_line3", text)
+          }
+        />
+      )}
+
+      {isVisible(formCongif, "mailing_postal_code") && (
+        <InputField
+          label={t("michigan.international.postal_code")}
+          value={value.mailing_postal_code}
+          required={isRequired(formCongif, "mailing_postal_code")}
+          errorMessage={errorMessages.mailing_postal_code}
+          numeric
+          onChangeText={(text: string) =>
+            updateField("mailing_postal_code", text)
+          }
+        />
+      )}
+
+      {isVisible(formCongif, "mailing_country") && (
+        <InputField
+          label={t("michigan.international.mailing_country")}
+          value={value.mailing_country}
+          errorMessage={errorMessages.mailing_country}
+          numeric
+          required
+          onChangeText={(text: string) => updateField("mailing_country", text)}
+        />
+      )}
     </>
   );
 };

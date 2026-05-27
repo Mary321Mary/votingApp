@@ -4,29 +4,49 @@ import { useTranslation } from "react-i18next";
 import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import InputField from "../atoms/InputField";
-import HelpTooltip from "../atoms/HelpTooltip";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import { Checkbox } from "../atoms/Checkbox";
 import { isRequired, isVisible } from "@/utils/constants";
 
 interface NameSectionProps extends FormProps {
+  showChangeName?: boolean;
   showAgeEligibility?: boolean;
+  showWillBe18ByElection?: boolean;
 }
 
 export const NameSection = ({
   value,
   formCongif,
   errorMessages,
-  showChangeName,
-  showIsAdultBlock,
   onChange,
   onChangeError,
-  handleCheckbox,
+  showChangeName = false,
   showAgeEligibility = false,
+  showWillBe18ByElection = false,
 }: NameSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+
+  const TITLES = [
+    { name: "", value: "" },
+    { name: t("general.titles.mr"), value: "Mr." },
+    { name: t("general.titles.mrs"), value: "Mrs." },
+    { name: t("general.titles.miss"), value: "Miss" },
+    { name: t("general.titles.ms"), value: "Ms." },
+  ];
+  const SUFFIX = [
+    { name: t("general.none"), value: "" },
+    { name: "Jr.", value: "Jr." },
+    { name: "Sr.", value: "Sr." },
+    { name: "I", value: "I" },
+    { name: "II", value: "II" },
+    { name: "III", value: "III" },
+    { name: "IV", value: "IV" },
+    { name: "V", value: "V" },
+    { name: "VI", value: "VI" },
+    { name: "VII", value: "VII" },
+  ];
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -43,131 +63,140 @@ export const NameSection = ({
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>
-        {t("register_page.section_name")}
-        <HelpTooltip text={t("register_page.name_help")} />
-      </Text>
-
       <View style={styles.row}>
-        {isVisible(formCongif, "name_title") && (
-          <View>
-            <Text style={styles.inputLabel}>
-              {t("register_page.title")}
-              {isRequired(formCongif, "name_title") && (
-                <Text style={styles.required}> *</Text>
-              )}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={value.title}
-                onValueChange={itemValue => updateField("title", itemValue)}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="Mr." value="Mr." />
-                <Picker.Item label="Mrs." value="Mrs." />
-                <Picker.Item label="Miss" value="Miss" />
-                <Picker.Item label="Ms." value="Ms." />
-              </Picker>
-            </View>
-            {errorMessages.title && (
-              <Text style={styles.required}>{errorMessages.title}</Text>
+        {/* {isVisible(formCongif, "name_title") && ( */}
+        <View>
+          <Text style={styles.inputLabel}>
+            {t("form_fields.name_title")}
+            {isRequired(formCongif, "name_title") && (
+              <Text style={styles.required}> *</Text>
             )}
+          </Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              selectedValue={value.name_title}
+              onValueChange={itemValue => updateField("name_title", itemValue)}
+            >
+              {TITLES.map(title => (
+                <Picker.Item
+                  key={title.value}
+                  label={title.name}
+                  value={title.value}
+                />
+              ))}
+            </Picker>
           </View>
-        )}
-
-        {isVisible(formCongif, "first_name") && (
-          <InputField
-            label={t("register_page.first_name")}
-            required={isRequired(formCongif, "first_name")}
-            value={value.firstName}
-            errorMessage={errorMessages.firstName}
-            onChangeText={(text: string) => updateField("firstName", text)}
-          />
-        )}
-        {(!showIsAdultBlock || !value.hasStateId) &&
-          isVisible(formCongif, "middle_name") && (
-            <InputField
-              label={t("register_page.middle_name")}
-              value={value.middleName}
-              required={isRequired(formCongif, "middle_name")}
-              errorMessage={errorMessages.middleName}
-              onChangeText={(text: string) => updateField("middleName", text)}
-            />
+          {errorMessages.name_title && (
+            <Text style={styles.required}>{t(errorMessages.name_title)}</Text>
           )}
-        {isVisible(formCongif, "last_name") && (
+        </View>
+        {/* )} */}
+
+        {/* {isVisible(formCongif, "first_name") && ( */}
+        <InputField
+          label={t("form_fields.first_name")}
+          required={isRequired(formCongif, "first_name")}
+          value={value.first_name}
+          errorMessage={t(errorMessages.first_name)}
+          helpText={t("form_fields.name_help")}
+          onChangeText={(text: string) => updateField("first_name", text)}
+        />
+        {/* )} */}
+        {(!value.age_eligibility || !value.has_no_state_license) && (
+          // isVisible(formCongif, "middle_name") && (
           <InputField
-            label={t("register_page.last_name")}
-            value={value.lastName}
-            errorMessage={errorMessages.lastName}
-            required={isRequired(formCongif, "last_name")}
-            onChangeText={(text: string) => updateField("lastName", text)}
+            label={t("form_fields.middle_name")}
+            value={value.middle_name}
+            required={isRequired(formCongif, "middle_name")}
+            errorMessage={t(errorMessages.middle_name)}
+            onChangeText={(text: string) => updateField("middle_name", text)}
           />
         )}
+        {/* {isVisible(formCongif, "last_name") && ( */}
+        <InputField
+          label={t("form_fields.last_name")}
+          value={value.last_name}
+          errorMessage={t(errorMessages.last_name)}
+          required={isRequired(formCongif, "last_name")}
+          onChangeText={(text: string) => updateField("last_name", text)}
+        />
+        {/* )} */}
 
-        {isVisible(formCongif, "name_suffix") && (
-          <View>
-            <Text style={styles.inputLabel}>
-              {t("register_page.suffix")}
-              {isRequired(formCongif, "name_suffix") && (
-                <Text style={styles.required}> *</Text>
-              )}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={value.suffix}
-                onValueChange={itemValue => updateField("suffix", itemValue)}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="Jr." value="Jr." />
-                <Picker.Item label="Sr." value="Sr." />
-                <Picker.Item label="I" value="I" />
-                <Picker.Item label="II" value="II" />
-                <Picker.Item label="III" value="III" />
-                <Picker.Item label="IV" value="IV" />
-                <Picker.Item label="V" value="V" />
-                <Picker.Item label="VI" value="VI" />
-                <Picker.Item label="VII" value="VII" />
-              </Picker>
-            </View>
-            {errorMessages.suffix && (
-              <Text style={styles.required}>{errorMessages.suffix}</Text>
+        {/* {isVisible(formCongif, "name_suffix") && ( */}
+        <View>
+          <Text style={styles.inputLabel}>
+            {t("form_fields.name_suffix")}
+            {isRequired(formCongif, "name_suffix") && (
+              <Text style={styles.required}> *</Text>
             )}
+          </Text>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              style={styles.picker}
+              itemStyle={styles.pickerItem}
+              selectedValue={value.suffix}
+              onValueChange={itemValue => updateField("suffix", itemValue)}
+            >
+              {SUFFIX.map(suffix => (
+                <Picker.Item
+                  key={suffix.value}
+                  label={suffix.name}
+                  value={suffix.value}
+                />
+              ))}
+            </Picker>
           </View>
-        )}
+          {errorMessages.suffix && (
+            <Text style={styles.required}>{t(errorMessages.suffix)}</Text>
+          )}
+        </View>
+        {/* )} */}
       </View>
 
-      {(!showIsAdultBlock || !value.hasStateId) &&
+      {(!value.age_eligibility || !value.has_no_state_license) &&
+        showChangeName &&
         isVisible(formCongif, "change_of_name") && (
           <Checkbox
-            value={showChangeName}
+            value={value.change_of_name}
             required={isRequired(formCongif, "change_of_name")}
-            label={t("register_page.changed_name")}
-            helpText={t("register_page.changed_name_help")}
+            label={t("nvra_form_page.changed_name")}
+            helpText={t("nvra_form_page.changed_name_help")}
             onValueChange={(checked: boolean) => {
-              if (handleCheckbox) handleCheckbox(checked, "showChangeName");
               if (!checked) {
-                updateField("changedTitle", "");
-                updateField("changedFirstName", "");
-                updateField("changedMiddleName", "");
-                updateField("changedLastName", "");
-                updateField("changedSuffix", "");
+                // Update change_of_name and clear all prev_* fields in one batch
+                onChange({
+                  ...value,
+                  change_of_name: checked,
+                  prev_name_title: "",
+                  prev_first_name: "",
+                  prev_middle_name: "",
+                  prev_last_name: "",
+                  prev_name_suffix: "",
+                });
+                // Clear errors for prev_* fields
+                const clearedErrors = { ...errorMessages };
+                clearedErrors.prev_name_title = "";
+                clearedErrors.prev_first_name = "";
+                clearedErrors.prev_middle_name = "";
+                clearedErrors.prev_last_name = "";
+                clearedErrors.prev_name_suffix = "";
+                onChangeError(clearedErrors);
+              } else {
+                updateField("change_of_name", checked);
               }
             }}
           />
         )}
 
-      {(!showIsAdultBlock || !value.hasStateId) && showChangeName && (
-        <>
-          <Text>{t("register_page.previous_name")}</Text>
+      {(!value.age_eligibility || !value.has_no_state_license) &&
+        value.change_of_name && (
           <View style={styles.row}>
             {isVisible(formCongif, "prev_name_title") && (
               <View>
                 <Text style={styles.inputLabel}>
-                  {t("register_page.title")}
+                  {t("form_fields.name_title")}
                   {isRequired(formCongif, "prev_name_title") && (
                     <Text style={styles.required}> *</Text>
                   )}
@@ -176,9 +205,9 @@ export const NameSection = ({
                   <Picker
                     style={styles.picker}
                     itemStyle={styles.pickerItem}
-                    selectedValue={value.changedTitle}
+                    selectedValue={value.prev_name_title}
                     onValueChange={itemValue =>
-                      updateField("changedTitle", itemValue)
+                      updateField("prev_name_title", itemValue)
                     }
                   >
                     <Picker.Item label="" value="" />
@@ -188,50 +217,50 @@ export const NameSection = ({
                     <Picker.Item label="Ms." value="Ms." />
                   </Picker>
                 </View>
-                {errorMessages.changedTitle && (
+                {errorMessages.prev_name_title && (
                   <Text style={styles.required}>
-                    {errorMessages.changedTitle}
+                    {t(errorMessages.prev_name_title)}
                   </Text>
                 )}
               </View>
             )}
             {isVisible(formCongif, "prev_first_name") && (
               <InputField
-                label={t("register_page.first_name")}
-                value={value.changedFirstName}
+                label={t("form_fields.first_name")}
+                value={value.prev_first_name}
                 required={isRequired(formCongif, "prev_first_name")}
-                errorMessage={errorMessages.changedFirstName}
+                errorMessage={t(errorMessages.prev_first_name)}
                 onChangeText={(text: string) =>
-                  updateField("changedFirstName", text)
+                  updateField("prev_first_name", text)
                 }
               />
             )}
             {isVisible(formCongif, "prev_middle_name") && (
               <InputField
-                label={t("register_page.middle_name")}
-                value={value.changedMiddleName}
+                label={t("form_fields.middle_name")}
+                value={value.prev_middle_name}
                 required={isRequired(formCongif, "prev_middle_name")}
-                errorMessage={errorMessages.changedMiddleName}
+                errorMessage={t(errorMessages.prev_middle_name)}
                 onChangeText={(text: string) =>
-                  updateField("changedMiddleName", text)
+                  updateField("prev_middle_name", text)
                 }
               />
             )}
             {isVisible(formCongif, "prev_last_name") && (
               <InputField
-                label={t("register_page.last_name")}
+                label={t("form_fields.last_name")}
                 required={isRequired(formCongif, "prev_last_name")}
-                errorMessage={errorMessages.changedLastName}
-                value={value.changedLastName}
+                errorMessage={t(errorMessages.prev_last_name)}
+                value={value.prev_last_name}
                 onChangeText={(text: string) =>
-                  updateField("changedLastName", text)
+                  updateField("prev_last_name", text)
                 }
               />
             )}
             {isVisible(formCongif, "prev_name_suffix") && (
               <View>
                 <Text style={styles.inputLabel}>
-                  {t("register_page.suffix")}
+                  {t("form_fields.name_suffix")}
                   {isRequired(formCongif, "prev_name_suffix") && (
                     <Text style={styles.required}> *</Text>
                   )}
@@ -240,9 +269,9 @@ export const NameSection = ({
                   <Picker
                     style={styles.picker}
                     itemStyle={styles.pickerItem}
-                    selectedValue={value.changedSuffix}
+                    selectedValue={value.prev_name_suffix}
                     onValueChange={itemValue =>
-                      updateField("changedSuffix", itemValue)
+                      updateField("prev_name_suffix", itemValue)
                     }
                   >
                     <Picker.Item label="" value="" />
@@ -257,54 +286,94 @@ export const NameSection = ({
                     <Picker.Item label="VII" value="VII" />
                   </Picker>
                 </View>
-                {errorMessages.changedSuffix && (
+                {errorMessages.prev_name_suffix && (
                   <Text style={styles.required}>
-                    {errorMessages.changedSuffix}
+                    {t(errorMessages.prev_name_suffix)}
                   </Text>
                 )}
               </View>
             )}
           </View>
-        </>
-      )}
+        )}
       {isVisible(formCongif, "us_citizen") && (
         <Checkbox
-          label={t("register_page.eligibility.citizen")}
-          value={value.isCitizen}
+          label={t("nvra_form_page.citizen")}
+          value={value.us_citizen}
           required={isRequired(formCongif, "us_citizen")}
-          errorText={errorMessages.isCitizen}
-          onValueChange={() => updateField("isCitizen", !value.isCitizen)}
+          errorText={t(errorMessages.us_citizen)}
+          onValueChange={() => updateField("us_citizen", !value.us_citizen)}
         />
       )}
       {showAgeEligibility && (
         <Checkbox
-          label={t("register_page.age_eligibility")}
+          label={t("nvra_form_page.age_eligibility")}
           required
-          value={showIsAdultBlock}
+          value={value.age_eligibility}
+          errorText={t(errorMessages.age_eligibility)}
           onValueChange={checked => {
-            if (handleCheckbox) handleCheckbox(checked, "showIsAdultBlock");
-            if (checked && value.hasStateId) {
-              if (handleCheckbox) handleCheckbox(false, "showChangeName");
-              updateField("changedTitle", "");
-              updateField("changedFirstName", "");
-              updateField("changedMiddleName", "");
-              updateField("changedLastName", "");
-              updateField("changedSuffix", "");
-              if (handleCheckbox)
-                handleCheckbox(false, "showDifferentMailAddress");
-              updateField("differentAddress", "");
-              updateField("differentUnit", "");
-              updateField("differentCity", "");
-              updateField("differentState", "");
-              updateField("differentZip", "");
-              if (handleCheckbox) handleCheckbox(false, "showChangedAddress");
-              updateField("changedAddress", "");
-              updateField("changedUnit", "");
-              updateField("changedCity", "");
-              updateField("changedState", "");
-              updateField("changedZip", "");
+            if (!checked) {
+              // Update age_eligibility and clear all prev_* and mailing_* fields in one batch
+              onChange({
+                ...value,
+                change_of_name: checked,
+                prev_name_title: "",
+                prev_first_name: "",
+                prev_middle_name: "",
+                prev_last_name: "",
+                prev_name_suffix: "",
+
+                has_mailing_address: false,
+                mailing_address: "",
+                mailing_unit: "",
+                mailing_city: "",
+                mailing_state: "",
+                mailing_zip_code: "",
+
+                change_of_address: false,
+                prev_address: "",
+                prev_unit: "",
+                prev_city: "",
+                prev_state: "",
+                prev_zip_code: "",
+              });
+              // Clear errors for prev_* fields
+              const clearedErrors = { ...errorMessages };
+              clearedErrors.prev_name_title = "";
+              clearedErrors.prev_first_name = "";
+              clearedErrors.prev_middle_name = "";
+              clearedErrors.prev_last_name = "";
+              clearedErrors.prev_name_suffix = "";
+
+              clearedErrors.mailing_address = "";
+              clearedErrors.mailing_unit = "";
+              clearedErrors.mailing_city = "";
+              clearedErrors.mailing_state = "";
+              clearedErrors.mailing_zip_code = "";
+
+              clearedErrors.prev_address = "";
+              clearedErrors.prev_unit = "";
+              clearedErrors.prev_city = "";
+              clearedErrors.prev_state = "";
+              clearedErrors.prev_zip_code = "";
+              onChangeError(clearedErrors);
+            } else {
+              updateField("age_eligibility", checked);
             }
           }}
+        />
+      )}
+      {showWillBe18ByElection && (
+        <Checkbox
+          label={
+            formCongif?.fields?.will_be_18_by_election?.label ||
+            t("michigan.eligibility.age")
+          }
+          required
+          value={value.will_be_18_by_election}
+          errorText={t(errorMessages.will_be_18_by_election)}
+          onValueChange={checked =>
+            updateField("will_be_18_by_election", checked)
+          }
         />
       )}
     </View>
@@ -313,10 +382,7 @@ export const NameSection = ({
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    section: {
-      marginBottom: 10,
-      paddingHorizontal: 5,
-    },
+    section: {},
     sectionTitle: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 18,
@@ -326,13 +392,14 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       color: theme.textPrimary,
+      textTransform: "uppercase",
+      marginTop: 5,
     },
     required: {
       color: theme.secondary,
     },
     row: {
       flexWrap: "wrap",
-      gap: 8,
       width: "100%",
       marginBottom: 16,
       alignItems: "flex-end",
@@ -343,7 +410,7 @@ const getStyles = (theme: any) =>
       height: 48,
       borderWidth: 1,
       borderColor: theme.borderColor,
-      borderRadius: 8,
+      borderRadius: 6,
       justifyContent: "center",
       backgroundColor: theme.white,
     },

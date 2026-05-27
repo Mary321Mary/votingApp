@@ -1,50 +1,64 @@
 import React, { useContext } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import Header from "@/components/modules/Header";
+import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { RootStackParamList } from "@/components/organisms/Navigation";
 import { RegisterResult } from "@/components/organisms/RegisterResult";
+import { SubmitEmailZipResponseProps } from "@/utils/types";
+
+interface RegisterScreenProps {
+  route: { params: SubmitEmailZipResponseProps };
+}
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
   "Register"
 >;
 
-export default function RegisterScreen() {
+export default function RegisterScreen({ route }: RegisterScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
   const navigation = useNavigation<RegisterScreenNavigation>();
-  const route = useRoute<any>();
 
   const state = route?.params ?? null;
 
   if (!state) {
-    navigation.navigate('Home');
+    navigation.navigate("Home");
     return null;
   }
 
-  const { status, state: regState, zip, email } = state;
+  const {
+    status,
+    state: regState,
+    zip,
+    email,
+    pageFromLookup,
+    showRedirectText,
+    form,
+  } = state;
 
   const title =
     status.success && regState
       ? `Register in ${regState.name}`
-      : 'Zip Code Error';
+      : "Zip Code Error";
 
   return (
     <>
       <Header text={title} />
       {status.success && regState ? (
-        <RegisterResult state={regState} zip={zip} email={email} />
+        <RegisterResult
+          state={regState}
+          zip={zip}
+          email={email}
+          pageFromLookup={pageFromLookup || ""}
+          showRedirectText={showRedirectText || false}
+          form={form}
+        />
       ) : (
         <View>
           {status.errors?.map((error: string, index: number) => (
@@ -67,22 +81,6 @@ export default function RegisterScreen() {
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    box: {
-      marginVertical: 20,
-      padding: 15,
-      backgroundColor: theme.background,
-      borderRadius: 10,
-    },
-    text: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      marginBottom: 6,
-      color: theme.textPrimary,
-    },
-    bold: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontWeight: "700",
-    },
     errorText: {
       color: theme.secondary,
       fontFamily: "Inter-VariableFont_opsz_wght",

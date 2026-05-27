@@ -1,4 +1,4 @@
-import { DataCollectionConfiguration } from "./types";
+import { DataCollectionConfiguration, RegisterFormState } from "./types";
 
 export const STATES = [
   { name: "", value: "" },
@@ -67,16 +67,6 @@ export const DIRECTIONS = [
   { name: "W", value: "W" },
 ];
 
-export const MAILING_TYPE = [
-  { name: "register_page.mailing_address_type.standard", value: "STANDARD" },
-  { name: "register_page.mailing_address_type.po_box", value: "PO_BOX" },
-  { name: "register_page.mailing_address_type.military", value: "MILITARY" },
-  {
-    name: "register_page.mailing_address_type.international",
-    value: "INTERNATIONAL",
-  },
-];
-
 export const isVisible = (
   formConfig: DataCollectionConfiguration,
   key: string,
@@ -85,4 +75,113 @@ export const isVisible = (
 export const isRequired = (
   formConfig: DataCollectionConfiguration,
   key: string,
-) => formConfig?.fields?.[key]?.value_required;
+  dependentValue?: boolean,
+) => {
+  const field = formConfig?.fields?.[key];
+  if (field?.dependent) {
+    if (dependentValue === true) return true;
+  } else {
+    if (field?.value_required) return true;
+  }
+  return false;
+};
+
+const ALLOWED_REGISTRANT_FIELDS = [
+  "partner_id",
+  "lang",
+
+  "name_title",
+  "first_name",
+  "middle_name",
+  "last_name",
+  // "suffix",
+
+  "change_of_name",
+  "prev_first_name",
+  "prev_last_name",
+  "prev_middle_name",
+  "prev_name_suffix",
+  "prev_name_title",
+  "us_citizen",
+  "will_be_18_by_election",
+  "email_address",
+
+  "home_address",
+  // "address_line_2", ???
+  // "unit_type",
+  // "unit",
+  "home_city",
+  "state",
+  "home_zip_code",
+
+  "mailing_address",
+  "mailing_unit",
+  "mailing_city",
+  "mailing_state",
+  "mailing_zip_code",
+
+  "change_of_address",
+  "prev_address",
+  "prev_unit",
+  "prev_city",
+  "prev_state",
+  "prev_zip_code",
+
+  // MI
+  // "street_name",
+  // "street_number",
+  // "street_type",
+  // "street_direction",
+  // "has_mailing_address",
+  // "mailing_postal_code",
+  // "mailing_po_box_number",
+  // "mailing_box_group_type",
+  // "mailing_box_group_number",
+  // "mailing_box_number",
+  // "mailing_apo",
+  // "mailing_ap",
+  // "mailing_address_line1",
+  // "mailing_address_line2",
+  // "mailing_address_line3",
+  // "mailing_country",
+
+  "party",
+  "race",
+  "home_county",
+  // "signature_base64", ???
+
+  "date_of_birth",
+  "phone",
+  // "date_of_issue", ???
+
+  "opt_in_email",
+  "opt_in_sms",
+  "volunteer",
+  "survey_question_1",
+  "survey_answer_1",
+  "survey_question_2",
+  "survey_answer_2",
+
+  "state_id_number",
+  "last_four_ss_number",
+  // "has_no_state_license",
+  // "has_no_ssn",
+
+  // MI
+  // "full_name",
+  // "eye_color",
+  // "residency_duration_ack",
+  // "cancel_previous_registration_ack",
+  // "use_stored_signature_ack",
+  // "updated_dln_recently",
+  // "request_duplicate_dln_today",
+];
+
+export const filterRegistrant = (rawForm: RegisterFormState) => {
+  return Object.keys(rawForm)
+    .filter(key => ALLOWED_REGISTRANT_FIELDS.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = rawForm[key as keyof RegisterFormState];
+      return obj;
+    }, {} as any);
+};

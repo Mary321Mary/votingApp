@@ -36,7 +36,7 @@ export const StandardMailingAddress = ({
       {/* <InputField
         label={t("register_page.street.number")}
         value={value.mailingStreetNumber}
-        errorMessage={errorMessages.mailingStreetNumber}
+        errorMessage={t(errorMessages.mailingStreetNumber)}
         required
         onChangeText={(text: string) =>
           updateField("mailingStreetNumber", text)
@@ -46,7 +46,7 @@ export const StandardMailingAddress = ({
       <InputField
         label={t("register_page.street.name")}
         value={value.mailingStreetName}
-        errorMessage={errorMessages.mailingStreetName}
+        errorMessage={t(errorMessages.mailingStreetName)}
         required
         onChangeText={(text: string) => updateField("mailingStreetName", text)}
       />
@@ -54,52 +54,50 @@ export const StandardMailingAddress = ({
       <InputField
         label={t("register_page.street.type")}
         value={value.mailingStreetType}
-        errorMessage={errorMessages.mailingStreetType}
+        errorMessage={t(errorMessages.mailingStreetType)}
         onChangeText={(text: string) => updateField("mailingStreetType", text)}
       /> */}
 
       {isVisible(formCongif, "mailing_address") && (
         <InputField
-          label={t("register_page.address")}
-          value={value.mailingStreetAddress}
+          label={t("form_fields.address")}
+          value={value.mailing_address}
           required={isRequired(formCongif, "mailing_address")}
-          errorMessage={errorMessages.mailingStreetAddress}
-          onChangeText={(text: string) =>
-            updateField("mailingStreetAddress", text)
-          }
+          errorMessage={t(errorMessages.mailing_address)}
+          onChangeText={(text: string) => updateField("mailing_address", text)}
         />
       )}
 
       <InputField
-        label={t("register_page.street.apt")}
-        value={value.mailingUnit}
-        errorMessage={errorMessages.mailingUnit}
-        onChangeText={(text: string) => updateField("mailingUnit", text)}
+        label={t("michigan.street.apt")}
+        value={value.mailing_unit}
+        errorMessage={t(errorMessages.mailing_unit)}
+        onChangeText={(text: string) => updateField("mailing_unit", text)}
       />
 
       {isVisible(formCongif, "mailing_city") && (
         <InputField
-          label={t("register_page.city")}
-          value={value.mailingCity}
+          label={t("form_fields.city")}
+          value={value.mailing_city}
           required={isRequired(formCongif, "mailing_city")}
-          errorMessage={errorMessages.mailingCity}
-          onChangeText={(text: string) => updateField("mailingCity", text)}
+          errorMessage={t(errorMessages.mailing_city)}
+          onChangeText={(text: string) => updateField("mailing_city", text)}
         />
       )}
 
       {isVisible(formCongif, "mailing_state") && (
         <View style={styles.inputBlock}>
           <Text style={styles.label}>
-            {t("register_page.state")}
+            {t("form_fields.state")}
             {isRequired(formCongif, "mailing_state") && (
               <Text style={styles.required}> *</Text>
             )}
           </Text>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={value.mailingState}
+              selectedValue={value.mailing_state}
               onValueChange={(text: string) =>
-                updateField("mailingState", text)
+                updateField("mailing_state", text)
               }
             >
               {STATES.map(state_value => (
@@ -111,20 +109,22 @@ export const StandardMailingAddress = ({
               ))}
             </Picker>
           </View>
-          {errorMessages.mailingState && (
-            <Text style={styles.required}>{errorMessages.mailingState}</Text>
+          {errorMessages.mailing_state && (
+            <Text style={styles.required}>
+              {t(errorMessages.mailing_state)}
+            </Text>
           )}
         </View>
       )}
 
       {isVisible(formCongif, "mailing_zip_code") && (
         <InputField
-          label={t("zip")}
-          value={value.mailingZip}
+          label={t("form_fields.zip")}
+          value={value.mailing_zip_code}
           required={isRequired(formCongif, "mailing_zip_code")}
-          errorMessage={errorMessages.mailingZip}
+          errorMessage={t(errorMessages.mailing_zip_code)}
           numeric
-          onChangeText={(text: string) => updateField("mailingZip", text)}
+          onChangeText={(text: string) => updateField("mailing_zip_code", text)}
         />
       )}
     </>
@@ -137,12 +137,13 @@ const getStyles = (theme: any) =>
       color: theme.secondary,
     },
     inputBlock: {
-      marginBottom: 16,
+      marginTop: 5,
     },
     label: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       marginBottom: 6,
+      textTransform: "uppercase",
     },
     pickerWrapper: {
       backgroundColor: theme.white,

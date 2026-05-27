@@ -1,16 +1,22 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import Header from "@/components/modules/Header";
+import Header from "@/layout/Header";
+import logo from "assets/images/warning-zone.jpg";
 
-export default function ZipErrorScreen() {
+interface ZipErrorScreenProps {
+  route: {
+    params: { text: string; header?: string; showImage?: boolean };
+  };
+}
+
+export default function ZipErrorScreen({ route }: ZipErrorScreenProps) {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const route = useRoute<any>();
 
   const state = route?.params ?? null;
 
@@ -19,7 +25,7 @@ export default function ZipErrorScreen() {
     return null;
   }
 
-  const { text, header } = state;
+  const { text, header, showImage } = state;
 
   return (
     <View style={styles.container}>
@@ -27,6 +33,7 @@ export default function ZipErrorScreen() {
 
       <View style={styles.content}>
         <Text style={styles.text}>{text}</Text>
+        {showImage && <Image source={logo} style={styles.logo} />}
       </View>
 
       <TouchableOpacity
@@ -75,5 +82,12 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
       fontSize: 16,
       fontWeight: "semibold",
+    },
+
+    logo: {
+      width: 200,
+      height: 200,
+      resizeMode: "contain",
+      marginBottom: 20,
     },
   });

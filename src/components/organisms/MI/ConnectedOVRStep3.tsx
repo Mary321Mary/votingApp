@@ -1,38 +1,52 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Linking,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 
-import InputField from "../atoms/InputField";
+import InputField from "../../atoms/InputField";
 import { Picker } from "@react-native-picker/picker";
-import { RegisterStepHeader } from "../modules/RegisterStepHeader";
+import { RegisterStepHeader } from "../../modules/RegisterStepHeader";
 import { FormProps, RegisterFormState } from "@/utils/types";
-import HelpTooltip from "../atoms/HelpTooltip";
-import { Checkbox } from "../atoms/Checkbox";
+import HelpTooltip from "../../atoms/HelpTooltip";
+import { Checkbox } from "../../atoms/Checkbox";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import {
-  DIRECTIONS,
-  isRequired,
-  isVisible,
-  MAILING_TYPE,
-} from "@/utils/constants";
-import { StandardMailingAddress } from "../modules/StandardMailingAddress";
-import { PoBoxMailingAddress } from "../modules/PoBoxMailingAddress";
-import { MilitaryMailingAddress } from "../modules/MilitaryMailingAddress";
-import { InternationalMailingAddress } from "../modules/InternationalMailingAddress";
+import { DIRECTIONS, isRequired, isVisible } from "@/utils/constants";
+import { StandardMailingAddress } from "../../modules/StandardMailingAddress";
+import { PoBoxMailingAddress } from "../../modules/PoBoxMailingAddress";
+import { MilitaryMailingAddress } from "../../modules/MilitaryMailingAddress";
+import { InternationalMailingAddress } from "../../modules/InternationalMailingAddress";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import RenderHTML from "react-native-render-html";
 
 export default function ConnectedOVRStep3({
   state,
   value,
   formCongif,
   errorMessages,
-  showMailingAddress,
   onChange,
   onChangeError,
-  handleCheckbox,
+  handleMainButton,
 }: FormProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  const { config } = useUIConfig();
+  const { width } = useWindowDimensions();
+
+  const MAILING_TYPE = [
+    { name: t("michigan.mailing_address_type.standard"), value: "STANDARD" },
+    { name: t("michigan.mailing_address_type.po_box"), value: "PO_BOX" },
+    { name: t("michigan.mailing_address_type.military"), value: "MILITARY" },
+    {
+      name: t("michigan.mailing_address_type.international"),
+      value: "INTERNATIONAL",
+    },
+  ];
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -103,54 +117,49 @@ export default function ConnectedOVRStep3({
   };
 
   return (
-    <View style={styles.fieldset}>
+    <>
       {/* Header */}
       <RegisterStepHeader
-        titleKey="register_page.address"
+        titleKey="form_fields.address"
         completedSteps={3}
         currentStep={4}
       />
 
-      {/* Residential Address */}
-      <Text style={styles.sectionTitle}>
-        {t("register_page.residential_address")}
-        <HelpTooltip text={t("register_page.residential_address_help")} />
-      </Text>
-
       {isVisible(formCongif, "street_number") && (
         <InputField
-          label={t("register_page.street.number")}
-          value={value.streetNumber}
+          label={t("michigan.street.number")}
+          value={value.street_number}
           required={isRequired(formCongif, "street_number")}
-          errorMessage={errorMessages.streetNumber}
-          onChangeText={(text: string) => updateField("streetNumber", text)}
+          helpText={t("form_fields.home_address_help")}
+          errorMessage={t(errorMessages.street_number)}
+          onChangeText={(text: string) => updateField("street_number", text)}
         />
       )}
 
       {isVisible(formCongif, "street_name") && (
         <InputField
-          label={t("register_page.street.name")}
-          value={value.streetName}
+          label={t("michigan.street.name")}
+          value={value.street_name}
           required={isRequired(formCongif, "street_name")}
-          errorMessage={errorMessages.streetName}
-          onChangeText={(text: string) => updateField("streetName", text)}
+          errorMessage={t(errorMessages.street_name)}
+          onChangeText={(text: string) => updateField("street_name", text)}
         />
       )}
 
       {isVisible(formCongif, "street_type") && (
         <InputField
-          label={t("register_page.street.type")}
-          value={value.streetType}
+          label={t("michigan.street.type")}
+          value={value.street_type}
           required={isRequired(formCongif, "street_type")}
-          errorMessage={errorMessages.streetType}
-          onChangeText={(text: string) => updateField("streetType", text)}
+          errorMessage={t(errorMessages.street_type)}
+          onChangeText={(text: string) => updateField("street_type", text)}
         />
       )}
 
       {isVisible(formCongif, "street_direction") && (
-        <View style={styles.inputBlock}>
+        <View>
           <Text style={styles.label}>
-            {t("register_page.street.direction")}{" "}
+            {t("michigan.street.direction")}{" "}
             {isRequired(formCongif, "street_direction") && (
               <Text style={styles.required}> *</Text>
             )}
@@ -158,9 +167,9 @@ export default function ConnectedOVRStep3({
 
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={value.streetDirection}
+              selectedValue={value.street_direction}
               onValueChange={(text: string) =>
-                updateField("streetDirection", text)
+                updateField("street_direction", text)
               }
             >
               {DIRECTIONS.map(
@@ -174,35 +183,37 @@ export default function ConnectedOVRStep3({
               )}
             </Picker>
           </View>
-          {errorMessages.streetDirection && (
-            <Text style={styles.required}>{errorMessages.streetDirection}</Text>
+          {errorMessages.street_direction && (
+            <Text style={styles.required}>
+              {t(errorMessages.street_direction)}
+            </Text>
           )}
         </View>
       )}
 
       {isVisible(formCongif, "street_apt_unit") && (
         <InputField
-          label={t("register_page.street.apt")}
+          label={t("michigan.street.apt")}
           value={value.unit}
           required={isRequired(formCongif, "street_apt_unit")}
-          errorMessage={errorMessages.unit}
+          errorMessage={t(errorMessages.unit)}
           onChangeText={(text: string) => updateField("unit", text)}
         />
       )}
 
       {isVisible(formCongif, "city") && (
         <InputField
-          label={t("register_page.city")}
-          value={value.city}
+          label={t("form_fields.city")}
+          value={value.home_city}
           required={isRequired(formCongif, "city")}
-          errorMessage={errorMessages.city}
-          onChangeText={(text: string) => updateField("city", text)}
+          errorMessage={t(errorMessages.home_city)}
+          onChangeText={(text: string) => updateField("home_city", text)}
         />
       )}
 
       {isVisible(formCongif, "state") && (
         <InputField
-          label={t("register_page.state")}
+          label={t("form_fields.state")}
           value={value.state}
           required={isRequired(formCongif, "state")}
           disabled
@@ -212,48 +223,58 @@ export default function ConnectedOVRStep3({
       {isVisible(formCongif, "zip_code") && (
         <InputField
           label={t("zip")}
-          value={value.zip}
+          value={value.home_zip_code}
           required={isRequired(formCongif, "zip_code")}
           disabled
         />
       )}
 
       {/* Mailing Address Toggle */}
-      {isVisible(formCongif, "mailing_same_as_residential") && (
-        <Checkbox
-          label={t("register_page.mailing_address_2")}
-          value={showMailingAddress}
-          onValueChange={(checked: boolean) => {
-            if (handleCheckbox) handleCheckbox(checked, "showMailingAddress");
-            if (checked) {
-              updateField("mailingStreetName", "");
-              updateField("mailingStreetNumber", "");
-              updateField("mailingStreetType", "");
-              updateField("mailingUnit", "");
-              updateField("mailingCity", "");
-              updateField("mailingState", "");
-              updateField("mailingZip", "");
-              updateField("mailingAddressType", "STANDARD");
-            }
-          }}
-        />
+      {isVisible(formCongif, "has_mailing_address") && (
+        <View style={styles.inputBlock}>
+          <Checkbox
+            label={t("nvra_form_page.different_mail_address")}
+            value={value.has_mailing_address}
+            onValueChange={(checked: boolean) => {
+              if (!checked) {
+                // Update has_mailing_address and clear all mailing_* fields in one batch
+                onChange({
+                  ...value,
+                  has_mailing_address: checked,
+                  mailing_address: "",
+                  mailing_unit: "",
+                  mailing_city: "",
+                  mailing_state: "",
+                  mailing_zip_code: "",
+                  mailingAddressType: "STANDARD",
+                });
+                // Clear errors for mailing_* fields
+                const clearedErrors = { ...errorMessages };
+                clearedErrors.mailing_address = "";
+                clearedErrors.mailing_unit = "";
+                clearedErrors.mailing_city = "";
+                clearedErrors.mailing_state = "";
+                clearedErrors.mailing_zip_code = "";
+                onChangeError(clearedErrors);
+              } else {
+                updateField("has_mailing_address", checked);
+              }
+            }}
+          />
+        </View>
       )}
 
       {/* Mailing Address */}
-      {!showMailingAddress && (
+      {value.has_mailing_address && (
         <>
-          <Text style={styles.sectionTitle}>
-            {t("register_page.mailing_address")}
-            <HelpTooltip text={t("register_page.mailing_address_help")} />
-          </Text>
-
           {isVisible(formCongif, "mailing_address_type") && (
-            <View style={styles.inputBlock}>
+            <View>
               <Text style={styles.label}>
-                {t("register_page.street.mailing_type")}
+                {t("michigan.mailing_type")}
                 {isRequired(formCongif, "mailing_address_type") && (
                   <Text style={styles.required}> *</Text>
                 )}
+                <HelpTooltip text={t("form_fields.mailing_address_help")} />
               </Text>
 
               <View style={styles.pickerWrapper}>
@@ -276,7 +297,7 @@ export default function ConnectedOVRStep3({
               </View>
               {errorMessages.mailingAddressType && (
                 <Text style={styles.required}>
-                  {errorMessages.mailingAddressType}
+                  {t(errorMessages.mailingAddressType)}
                 </Text>
               )}
             </View>
@@ -289,52 +310,85 @@ export default function ConnectedOVRStep3({
       {/* Phone & Consents */}
       {isVisible(formCongif, "phone_number") && (
         <InputField
-          label={t("register_page.phone_election")}
+          label={t("michigan.phone_election")}
           value={value.phone}
           required={isRequired(formCongif, "phone_number")}
-          errorMessage={errorMessages.phone}
+          errorMessage={t(errorMessages.phone)}
           numeric
           onChangeText={(text: string) => updateField("phone", text)}
         />
       )}
 
       {isVisible(formCongif, "opt_in_sms") && (
-        <Checkbox
-          label={t("register_page.sms_opt_in")}
-          value={value.smsConsent}
-          required={isRequired(formCongif, "opt_in_sms")}
-          onValueChange={(checked: boolean) =>
-            updateField("smsConsent", checked)
-          }
-        />
+        <View style={styles.inputBlock}>
+          <Checkbox
+            label={t("general.opt_ins.sms_opt_in")}
+            value={value.opt_in_sms}
+            required={isRequired(formCongif, "opt_in_sms")}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_sms", checked)
+            }
+          />
+        </View>
       )}
 
-      <Text style={styles.disclaimer}>{t("register_page.sms_disclaimer")}</Text>
+      <RenderHTML
+        contentWidth={width}
+        source={{
+          html: t("general.opt_ins.sms_disclaimer", {
+            rtv_terms_url: config?.urls?.terms,
+            rtv_privacy_url: config?.urls?.privacy,
+          }),
+        }}
+        tagsStyles={{
+          body: {
+            fontSize: 14,
+            color: theme.gray,
+            lineHeight: 18,
+            marginVertical: 5,
+          },
+          a: {
+            color: theme.link,
+            textDecorationLine: "underline",
+          },
+        }}
+        renderersProps={{
+          a: {
+            onPress: (_, href) => {
+              if (href) {
+                Linking.openURL(href);
+              }
+            },
+          },
+        }}
+      />
 
       {isVisible(formCongif, "email") && (
         <InputField
-          label={t("email")}
-          value={value.email}
+          label={t("form_fields.email")}
+          value={value.email_address}
           required={isRequired(formCongif, "email")}
-          errorMessage={errorMessages.email}
-          onChangeText={(text: string) => updateField("email", text)}
+          errorMessage={t(errorMessages.email_address)}
+          onChangeText={(text: string) => updateField("email_address", text)}
         />
       )}
 
       {isVisible(formCongif, "opt_in_email") && (
-        <Checkbox
-          label={t("register_page.email_opt_in")}
-          value={value.emailConsent}
-          required={isRequired(formCongif, "opt_in_email")}
-          onValueChange={(checked: boolean) =>
-            updateField("emailConsent", checked)
-          }
-        />
+        <View style={styles.inputBlock}>
+          <Checkbox
+            label={t("general.opt_ins.email_opt_in")}
+            value={value.opt_in_email}
+            required={isRequired(formCongif, "opt_in_email")}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_email", checked)
+            }
+          />
+        </View>
       )}
 
       {isVisible(formCongif, "opt_in_volunteer") && (
         <Checkbox
-          label={t("register_page.volunteer")}
+          label={t("general.opt_ins.volunteer")}
           value={value.volunteer}
           required={isRequired(formCongif, "opt_in_volunteer")}
           onValueChange={(checked: boolean) =>
@@ -342,15 +396,13 @@ export default function ConnectedOVRStep3({
           }
         />
       )}
-    </View>
+      {handleMainButton}
+    </>
   );
 }
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    fieldset: {
-      marginBottom: 24,
-    },
     sectionTitle: {
       fontSize: 14,
       fontWeight: "600",
@@ -358,22 +410,18 @@ const getStyles = (theme: any) =>
       marginBottom: 8,
       textTransform: "uppercase",
     },
-    disclaimer: {
-      fontSize: 12,
-      marginVertical: 12,
-      color: "#555",
-    },
     required: {
       color: theme.secondary,
     },
 
     inputBlock: {
-      marginBottom: 16,
+      marginTop: 10,
     },
     label: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       marginBottom: 6,
+      textTransform: "uppercase",
     },
     pickerWrapper: {
       backgroundColor: theme.white,

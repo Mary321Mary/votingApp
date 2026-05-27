@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import Spinner from "../atoms/Spinner";
+import Spinner from "../components/atoms/Spinner";
 import logo from "@/assets/images/AWS logo.png";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
@@ -24,26 +24,26 @@ const Footer = () => {
       <View style={styles.linksBlock}>
         {sources && (
           <View style={styles.linksContainer}>
-            <TouchableOpacity onPress={() => openUrl(sources.homepage)}>
-              <Text style={styles.link}>{t("home")}</Text>
-            </TouchableOpacity>
-            <Text style={styles.separator}> | </Text>
-            <TouchableOpacity onPress={() => openUrl(sources.terms)}>
-              <Text style={styles.link}>{t("terms")}</Text>
+            <TouchableOpacity onPress={() => openUrl(sources.faq)}>
+              <Text style={styles.link}>{t("general.footer.faq")}</Text>
             </TouchableOpacity>
             <Text style={styles.separator}> | </Text>
             <TouchableOpacity onPress={() => openUrl(sources.privacy)}>
-              <Text style={styles.link}>{t("policy")}</Text>
+              <Text style={styles.link}>
+                {t("general.footer.privacy_policy")}
+              </Text>
             </TouchableOpacity>
             <Text style={styles.separator}> | </Text>
-            <TouchableOpacity onPress={() => openUrl(sources.shortcode)}>
-              <Text style={styles.link}>{t("shortcode")}</Text>
+            <TouchableOpacity onPress={() => openUrl(sources.contact)}>
+              <Text style={styles.link}>{t("general.footer.contact")}</Text>
+            </TouchableOpacity>
+            <Text style={styles.separator}> | </Text>
+            <TouchableOpacity onPress={() => openUrl(sources.about)}>
+              <Text style={styles.link}>{t("general.footer.about")}</Text>
             </TouchableOpacity>
           </View>
         )}
-        <Text style={styles.copyright}>
-          © Copyright 2025, Rock the Vote
-        </Text>
+        <Text style={styles.copyright}>© Copyright 2025, Rock the Vote</Text>
       </View>
       {isLoading && <Spinner />}
       <View style={styles.rightBlock}>
@@ -65,10 +65,10 @@ const getStyles = (theme: any) =>
       flexDirection: "column",
       justifyContent: "space-between",
       alignItems: "center",
-      marginTop: 10,
       padding: 15,
       borderTopWidth: 1,
       borderTopColor: theme.borderColor,
+      backgroundColor: theme.background,
     },
     linksBlock: {
       flex: 1,
@@ -77,13 +77,13 @@ const getStyles = (theme: any) =>
     linksContainer: {
       flexDirection: "row",
       flexWrap: "wrap",
-      alignItems: "center"
+      alignItems: "center",
     },
     link: {
       color: theme.textPrimary,
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 12,
-      fontWeight: "medium"
+      fontWeight: "medium",
     },
     separator: {
       fontSize: 14,
@@ -111,8 +111,8 @@ const getStyles = (theme: any) =>
     },
     awsLogo: {
       width: 50,
-      height: 20
-    }
+      height: 20,
+    },
   });
 
 export default Footer;

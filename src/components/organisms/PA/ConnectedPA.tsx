@@ -1,32 +1,50 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
-
-import InputField from "../atoms/InputField";
-import { Checkbox } from "../atoms/Checkbox";
+import { NameSection } from "../../modules/NameSection";
+import { ContactSection } from "../../modules/ContactSection";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
+import { StyleSheet, Text, View } from "react-native";
+import { DateRow } from "../../atoms/DateRow";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { useTranslation } from "react-i18next";
+import { RaceAndParty } from "../../modules/RaceAndParty";
+import InputField from "../../atoms/InputField";
+import { Picker } from "@react-native-picker/picker";
+import { Checkbox } from "../../atoms/Checkbox";
 
-interface AddressSectionProps extends FormProps {
-  showChangeOfAddress?: boolean;
-  changedAddressLabel?: string;
-}
-
-export const AddressSection = ({
+export const ConnectedPA = ({
   state,
   value,
   formCongif,
   errorMessages,
-  showChangeOfAddress = false,
-  changedAddressLabel = "",
-  onChange,
   onChangeError,
-}: AddressSectionProps) => {
+  onChange,
+  handleMainButton,
+}: FormProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+
+  const hasSecondaryAddressValue = [
+    value.unit_type?.trim(),
+    value.unit?.trim(),
+  ].some(Boolean);
+
+  const paCounties = t("pennsylvania.counties", { returnObjects: true });
+  const paUnitTypes = t("pennsylvania.unit_types", { returnObjects: true });
+
+  const UNIT_OPTIONS = [
+    { name: "", value: "" },
+    ...(Array.isArray(paUnitTypes)
+      ? paUnitTypes.map(unitType => ({ name: unitType, value: unitType }))
+      : []),
+  ];
+  const COUNTY_OPTIONS = [
+    { name: "", value: "" },
+    ...(Array.isArray(paCounties)
+      ? paCounties.map(county => ({ name: county, value: county }))
+      : []),
+  ];
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -42,58 +60,132 @@ export const AddressSection = ({
   };
 
   return (
-    <View style={styles.section}>
-      <View style={styles.row}>
-        {/* {isVisible(formCongif, "home_address") && ( */}
-        <InputField
-          label={t("form_fields.address")}
-          value={value.home_address}
-          helpText={t("form_fields.home_address_help")}
-          required={isRequired(formCongif, "home_address")}
-          errorMessage={t(errorMessages.home_address)}
-          onChangeText={(text: string) => updateField("home_address", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_unit") && ( */}
-        <InputField
-          label={t("form_fields.unit_lot")}
-          value={value.unit}
-          required={isRequired(formCongif, "home_unit")}
-          errorMessage={t(errorMessages.unit)}
-          onChangeText={(text: string) => updateField("unit", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_city") && ( */}
-        <InputField
-          label={t("form_fields.city")}
-          value={value.home_city}
-          required={isRequired(formCongif, "home_city")}
-          errorMessage={t(errorMessages.home_city)}
-          onChangeText={(text: string) => updateField("home_city", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_state") && ( */}
-        <InputField
-          label={t("form_fields.state")}
-          disabled
-          value={state.abbreviation}
-          required={isRequired(formCongif, "home_state")}
-          errorMessage={t(errorMessages.state)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_zip_code") && ( */}
-        <InputField
-          label={t("form_fields.zip")}
-          disabled
-          value={value.home_zip_code}
-          required={isRequired(formCongif, "home_zip_code")}
-          errorMessage={t(errorMessages.home_zip_code)}
-        />
-        {/* )} */}
+    <>
+      {/* NAME */}
+      <NameSection
+        value={value}
+        state={state}
+        formCongif={formCongif}
+        errorMessages={errorMessages}
+        showChangeName
+        showWillBe18ByElection
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
+
+      {isVisible(formCongif, "date_of_birth") && (
+        <>
+          <Text style={styles.label}>
+            {t("form_fields.dob")}
+            {isRequired(formCongif, "date_of_birth") && (
+              <Text style={styles.required}> *</Text>
+            )}
+          </Text>
+          <DateRow value={value} updateField={updateField} />
+        </>
+      )}
+
+      {/* ADDRESS */}
+      <InputField
+        label={t("form_fields.address")}
+        value={value.home_address}
+        helpText={t("register_page.address_help")}
+        required={isRequired(formCongif, "home_address")}
+        errorMessage={t(errorMessages.home_address)}
+        onChangeText={(text: string) => updateField("home_address", text)}
+      />
+      <InputField
+        label={t("michigan.international.address_line_2")}
+        value={value.address_line_2}
+        errorMessage={t(errorMessages.address_line_2)}
+        onChangeText={(text: string) => updateField("address_line_2", text)}
+      />
+      <Text style={styles.inputLabel}>
+        {t("form_fields.unit_type")}
+        {hasSecondaryAddressValue && <Text style={styles.required}> *</Text>}
+      </Text>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          selectedValue={value.unit_type}
+          onValueChange={itemValue => updateField("unit_type", itemValue)}
+        >
+          {UNIT_OPTIONS.map((state_value: { value: string; name: string }) => (
+            <Picker.Item
+              key={state_value.name}
+              label={state_value.name}
+              value={state_value.value}
+            />
+          ))}
+        </Picker>
       </View>
+      {errorMessages.unit_type && (
+        <Text style={styles.required}>{t(errorMessages.unit_type)}</Text>
+      )}
+      <InputField
+        label={t("form_fields.unit_number")}
+        value={value.unit}
+        required={hasSecondaryAddressValue}
+        errorMessage={t(errorMessages.unit)}
+        onChangeText={(text: string) => updateField("unit", text)}
+      />
+      <InputField
+        label={t("form_fields.city")}
+        value={value.home_city}
+        required={isRequired(formCongif, "home_city")}
+        errorMessage={t(errorMessages.home_city)}
+        onChangeText={(text: string) => updateField("home_city", text)}
+      />
+      <Text style={styles.inputLabel}>
+        {t("form_fields.county")}
+        {isRequired(formCongif, "home_county") && (
+          <Text style={styles.required}> *</Text>
+        )}
+      </Text>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          style={styles.picker}
+          itemStyle={styles.pickerItem}
+          selectedValue={value.home_county}
+          onValueChange={itemValue => updateField("home_county", itemValue)}
+        >
+          {[
+            { name: "", value: "" },
+            ...(formCongif.fields.home_county?.options?.map(
+              (option: string) => ({
+                name: option,
+                value: option,
+              }),
+            ) ?? COUNTY_OPTIONS),
+          ].map((state_value: { value: string; name: string }) => (
+            <Picker.Item
+              key={state_value.name}
+              label={state_value.name}
+              value={state_value.value}
+            />
+          ))}
+        </Picker>
+      </View>
+      {errorMessages.home_county && (
+        <Text style={styles.required}>{t(errorMessages.home_county)}</Text>
+      )}
+      <InputField
+        label={t("form_fields.state")}
+        disabled
+        value={state.abbreviation}
+        required={isRequired(formCongif, "home_state")}
+        errorMessage={t(errorMessages.state)}
+      />
+      <InputField
+        label={t("form_fields.zip")}
+        disabled
+        value={value.home_zip_code}
+        required={isRequired(formCongif, "home_zip_code")}
+        errorMessage={t(errorMessages.home_zip_code)}
+      />
 
       {(!value.age_eligibility || !value.has_no_state_license) &&
-        showChangeOfAddress &&
         isVisible(formCongif, "has_mailing_address") && (
           <Checkbox
             label={t("nvra_form_page.different_mail_address")}
@@ -216,10 +308,9 @@ export const AddressSection = ({
           </>
         )}
       {(!value.age_eligibility || !value.has_no_state_license) &&
-        showChangeOfAddress &&
         isVisible(formCongif, "change_of_address") && (
           <Checkbox
-            label={changedAddressLabel || t("nvra_form_page.changed_address")}
+            label={t("nvra_form_page.changed_address")}
             value={value.change_of_address}
             helpText={t("form_fields.changed_address_help")}
             required={isRequired(formCongif, "change_of_address")}
@@ -336,13 +427,38 @@ export const AddressSection = ({
             </View>
           </>
         )}
-    </View>
+
+      <RaceAndParty
+        value={value}
+        state={state}
+        formCongif={formCongif}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
+      <View style={styles.divider} />
+
+      <ContactSection
+        value={value}
+        state={state}
+        formCongif={formCongif}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
+      {handleMainButton}
+    </>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    section: {},
+    label: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      fontWeight: "medium",
+      textTransform: "uppercase",
+    },
     row: {
       flexDirection: "row",
       flexWrap: "wrap",
@@ -356,6 +472,7 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       color: theme.textPrimary,
+      marginTop: 5,
     },
     pickerWrapper: {
       flexBasis: "18%",
@@ -363,7 +480,7 @@ const getStyles = (theme: any) =>
       height: 48,
       borderWidth: 1,
       borderColor: theme.borderColor,
-      borderRadius: 8,
+      borderRadius: 6,
       justifyContent: "center",
       backgroundColor: theme.white,
     },
@@ -373,7 +490,13 @@ const getStyles = (theme: any) =>
     pickerItem: {
       fontSize: 14,
     },
+
     required: {
       color: theme.secondary,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: theme.gray,
+      marginVertical: 16,
     },
   });

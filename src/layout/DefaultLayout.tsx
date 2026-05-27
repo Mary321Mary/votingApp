@@ -1,8 +1,8 @@
 import React, { ReactNode, useContext } from "react";
-import { View, ScrollView } from "react-native";
+import { View } from "react-native";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Footer from "@/components/modules/Footer";
+import Footer from "@/layout/Footer";
 import Spinner from "@/components/atoms/Spinner";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
@@ -19,13 +19,15 @@ const DefaultLayout = ({ children }: { children: ReactNode }) => {
       }
     >
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.container}>
+          {/* <View style={styles.scrollContent}> */}
           {children}
-          <Footer />
-        </ScrollView>
+          {/* </View> */}
+        </View>
+        <Footer />
       </SafeAreaView>
     </React.Suspense>
-  )
+  );
 };
 
 const getStyles = (theme: any) =>
@@ -35,14 +37,10 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
       fontWeight: "regular",
+      alignItems: "center",
     },
     safeArea: {
       flex: 1,
-      backgroundColor: theme.white,
-    },
-    scrollContent: {
-      alignItems: "center",
-      paddingBottom: 40,
     },
   });
 

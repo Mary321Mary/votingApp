@@ -10,35 +10,35 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import Header from "@/layout/Header";
 import { filterRegistrant } from "@/utils/constants";
-import { requestTokenDoc, requestTokenPDF } from "@/utils/api";
-import { downloadPdf } from "../utils/downloadFile";
-import { RegisterFormState, StateData } from "@/utils/types";
-import { ThemeContext } from "@/styles/ThemeProvider";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/components/organisms/Navigation";
+import { requestTokenDoc, requestTokenPDF } from "@/utils/api";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { RegisterFormState, StateData } from "@/utils/types";
 
-interface SuccessScreenProps {
+interface PrintScreenProps {
   route: {
     params: {
       form: RegisterFormState;
       state: StateData;
       workflow_type?: string;
       finish_with_state: boolean;
+      under_construction?: boolean;
     };
   };
 }
 
-type SuccessScreenNavigation = NativeStackNavigationProp<
+type PrintScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
-  "Success"
+  "Print"
 >;
 
-export default function SuccessScreen({ route }: SuccessScreenProps) {
+export default function PrintScreen({ route }: PrintScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<SuccessScreenNavigation>();
+  const navigation = useNavigation<PrintScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
@@ -117,12 +117,29 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   };
   const handleDownload = async () => {
     // if (!pdfUrl) return;
-
-    downloadPdf(
-      "https://voting-three-orcin.vercel.app/form_placeholder.pdf",
-      // pdfUrl,
-      "form_placeholder.pdf",
-    );
+    // try {
+    //   setLoading(true);
+    //   const fileName = "voter_registration.pdf";
+    //   const localFile = `${RNFS.CachesDirectoryPath}/${fileName}`;
+    //   const options = {
+    //     fromUrl: pdfUrl,
+    //     toFile: localFile,
+    //   };
+    //   const result = await RNFS.downloadFile(options).promise;
+    //   if (result.statusCode === 200) {
+    //     await Share.open({
+    //       url: `file://${localFile}`,
+    //       type: "application/pdf",
+    //       title: "Print Registration Form",
+    //     });
+    //   } else {
+    //     Alert.alert("Error", "Failed to download PDF");
+    //   }
+    // } catch (e) {
+    //   console.log("Sharing error or cancelled:", e);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   if (form.state === "TN") {
@@ -162,7 +179,9 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
       <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
 
       <View style={styles.body}>
-        <Text style={styles.title}>{t("mail_form_page.should_receive")}</Text>
+        <Text style={styles.title}>
+          {t("print_form_page.must_print_sign_mail")}
+        </Text>
 
         {/* Download */}
         <View style={styles.section}>
@@ -173,8 +192,8 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
             </View>
           ) : (
             <Button
-              title={t("mail_form_page.print_button_text")}
-              // disabled={!pdfUrl}
+              title={t("print_form_page.print_button_text")}
+              disabled={!pdfUrl}
               onPress={handleDownload}
             />
           )}
@@ -182,7 +201,7 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
 
         {/* Printer */}
         <Text style={styles.title}>
-          {t("mail_form_page.you_will_need_to_sign")}
+          {t("print_form_page.dont_have_printer")}
         </Text>
         <View style={styles.divider} />
         {/* Learn more */}
@@ -229,8 +248,8 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    container: { flex: 1, padding: 20 },
-    body: { marginTop: 30, alignItems: "center" },
+    container: { flex: 1 },
+    body: { padding: 10, alignItems: "center" },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
     subtitle: { fontSize: 16, textAlign: "center" },
     bodyText: { fontSize: 18, textAlign: "center", marginVertical: 20 },
@@ -255,7 +274,7 @@ const getStyles = (theme: any) =>
     divider: {
       width: "100%",
       height: 1,
-      backgroundColor: theme.background,
+      backgroundColor: theme.gray,
       marginVertical: 16,
     },
 
