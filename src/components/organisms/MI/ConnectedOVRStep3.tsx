@@ -194,10 +194,10 @@ export default function ConnectedOVRStep3({
       {isVisible(formCongif, "street_apt_unit") && (
         <InputField
           label={t("michigan.street.apt")}
-          value={value.unit}
+          value={value.home_unit}
           required={isRequired(formCongif, "street_apt_unit")}
-          errorMessage={t(errorMessages.unit)}
-          onChangeText={(text: string) => updateField("unit", text)}
+          errorMessage={t(errorMessages.home_unit)}
+          onChangeText={(text: string) => updateField("home_unit", text)}
         />
       )}
 

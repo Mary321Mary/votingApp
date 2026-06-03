@@ -9,13 +9,15 @@ import {
   Linking,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 
 import { DateRow } from "@/components/atoms/DateRow";
 import InputField from "@/components/atoms/InputField";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { Checkbox } from "@/components/atoms/Checkbox";
-import { CheckRegistrationStatusError, RegisterFormState } from "@/utils/types";
+import {
+  CheckRegistrationStatus,
+  CheckRegistrationStatusError,
+} from "@/utils/types";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
@@ -23,6 +25,7 @@ import RenderHTML from "react-native-render-html";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
+import { evaluatePaConnectedRegistrationDateOfBirth } from "@/components/organisms/RegisterResult";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -30,9 +33,10 @@ type CheckVoterStatusScreenProps = NativeStackScreenProps<
 >;
 
 const EMPTY_ERROR_MESSAGES = {
-  firstName: "",
-  lastName: "",
-  suffix: "",
+  partner_id: "",
+  first_name: "",
+  last_name: "",
+  state: "",
   address: "",
   city: "",
   phone: "",
@@ -43,6 +47,7 @@ const EMPTY_ERROR_MESSAGES = {
   birthMonth: "",
   birthDay: "",
   birthYear: "",
+  date_of_birth: "",
 };
 
 export const CheckVoterStatusScreen = ({
@@ -58,7 +63,7 @@ export const CheckVoterStatusScreen = ({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  const [form, setForm] = useState<RegisterFormState>(initialForm);
+  const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -85,14 +90,14 @@ export const CheckVoterStatusScreen = ({
   const onContinue = async () => {
     if (validateRegistrationStatus()) {
       const response = await submitEmailZip({
-        email: form.email_address,
-        zip: form.home_zip_code,
+        email: form.email,
+        zip: form.zip,
         locale: i18n.language,
         partner_id: "1",
       });
 
       if (response.data.state?.abbreviation === "ND") {
-        // navigation.navigate(PATH.REGISTER.INELIGIBLE, { state: response.data.state });
+        navigation.navigate("NotParticipating", { state: response.data.state });
         return;
       }
       if (form.first_name === "John") {
@@ -115,10 +120,11 @@ export const CheckVoterStatusScreen = ({
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     let errorMessage = { ...EMPTY_ERROR_MESSAGES };
-    if (!form.first_name.trim()) errorMessage.firstName = t("general.required");
-    if (!form.last_name.trim()) errorMessage.lastName = t("general.required");
-    if (!form.home_city.trim()) errorMessage.city = t("general.required");
-    if (!form.home_address.trim()) errorMessage.address = t("general.required");
+    if (!form.first_name.trim())
+      errorMessage.first_name = t("general.required");
+    if (!form.last_name.trim()) errorMessage.first_name = t("general.required");
+    if (!form.city.trim()) errorMessage.city = t("general.required");
+    if (!form.address.trim()) errorMessage.address = t("general.required");
     if (!form.birthMonth.trim())
       errorMessage.birthMonth = t("general.required");
     if (!form.birthDay.trim()) errorMessage.birthDay = t("general.required");
@@ -128,6 +134,15 @@ export const CheckVoterStatusScreen = ({
       errorMessage.birthYear = t("form_fields.invalid_year");
     }
     if (
+      !form.birthMonth.trim() ||
+      !form.birthDay.trim() ||
+      !form.birthYear.trim()
+    ) {
+      errorMessage.birthDay = "general.required";
+    } else if (Number(form.birthYear) < 1900) {
+      errorMessage.birthYear = "form_fields.invalid_year";
+    }
+    if (
       form.birthYear.trim() &&
       form.birthMonth.trim() &&
       form.birthDay.trim()
@@ -135,27 +150,59 @@ export const CheckVoterStatusScreen = ({
       const year = Number(form.birthYear);
       const month = Number(form.birthMonth) - 1;
       const day = Number(form.birthDay);
+
       const date = new Date(year, month, day);
-      const isInvalidDate =
-        date.getFullYear() !== year ||
-        date.getMonth() !== month ||
-        date.getDate() !== day;
-      if (isInvalidDate)
-        errorMessage.birthDay = t("form_fields.invalid_birth_date");
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+
+      if (date > today) {
+        errorMessage.birthYear = "form_fields.invalid_year_future";
+      } else {
+        const isInvalidDate =
+          date.getFullYear() !== year ||
+          date.getMonth() !== month ||
+          date.getDate() !== day;
+
+        if (isInvalidDate) {
+          errorMessage.birthDay = "form_fields.invalid_birth_date";
+        } else {
+          const paDob = evaluatePaConnectedRegistrationDateOfBirth(
+            form.birthYear,
+            form.birthMonth,
+            form.birthDay,
+            today,
+          );
+
+          if (paDob.outcome === "too_young") {
+            // "You must be 18..."
+            errorMessage.birthMonth = paDob.errorMessageKey;
+          } else if (paDob.outcome === "eligible") {
+            // >= 18 (preregistrationAgeWindow: false),
+            // And from 17.5 to 18 (preregistrationAgeWindow: true)
+            // No Error
+            form.date_of_birth =
+              form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+          } else {
+            form.date_of_birth =
+              form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+          }
+        }
+      }
     }
-    if (form.opt_in_sms && !form.phone.trim()) {
+    if (form.smsConsent && !form.phone.trim()) {
       errorMessage.phone = t("form_fields.required_phone");
-    } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
+    } else if (form.smsConsent && !fullPhoneRegex.test(form.phone.trim())) {
       errorMessage.phone = t("form_fields.invalid_phone");
     }
-    if (!form.home_zip_code.trim()) {
+    if (!form.zip.trim()) {
       errorMessage.zip = t("general.required");
-    } else if (!zipRegex.test(form.home_zip_code.trim())) {
+    } else if (!zipRegex.test(form.zip.trim())) {
       errorMessage.zip = t("form_fields.zip_code_error");
     }
-    if (!form.email_address.trim()) {
+    if (!form.email.trim()) {
       errorMessage.email = t("general.required");
-    } else if (!emailRegex.test(form.email_address.trim())) {
+    } else if (!emailRegex.test(form.email.trim())) {
       errorMessage.email = t("form_fields.email_error");
     }
     setErrMsg(errorMessage);
@@ -172,18 +219,18 @@ export const CheckVoterStatusScreen = ({
             label={t("form_fields.first_name")}
             required
             value={form.first_name}
-            errorMessage={errMsg.firstName}
+            errorMessage={errMsg.first_name}
             onChangeText={(text: string) => updateField("first_name", text)}
           />
           <InputField
             label={t("form_fields.last_name")}
             required
             value={form.last_name}
-            errorMessage={errMsg.lastName}
+            errorMessage={errMsg.last_name}
             onChangeText={(text: string) => updateField("last_name", text)}
           />
 
-          <View>
+          {/* <View>
             <Text style={styles.inputLabel}>
               {t("form_fields.name_suffix")}{" "}
             </Text>
@@ -206,11 +253,30 @@ export const CheckVoterStatusScreen = ({
                 <Picker.Item label="VII" value="VII" />
               </Picker>
             </View>
-          </View>
+          </View> */}
         </View>
 
         <Text style={styles.label}>{t("form_fields.dob")}</Text>
-        <DateRow value={form} updateField={updateField} />
+        <DateRow
+          value={{
+            month: {
+              name: "birthMonth",
+              value: form.birthMonth,
+              errorText: t(errMsg.birthMonth),
+            },
+            day: {
+              name: "birthDay",
+              value: form.birthDay,
+              errorText: t(errMsg.birthDay),
+            },
+            year: {
+              name: "birthYear",
+              value: form.birthYear,
+              errorText: t(errMsg.birthYear),
+            },
+          }}
+          updateField={updateField}
+        />
 
         <View style={styles.fieldset}>
           <InputField
@@ -223,38 +289,38 @@ export const CheckVoterStatusScreen = ({
           <InputField
             label={t("form_fields.address")}
             required
-            value={form.home_address}
+            value={form.address}
             errorMessage={errMsg.address}
-            onChangeText={(text: string) => updateField("home_address", text)}
+            onChangeText={(text: string) => updateField("address", text)}
           />
           <InputField
             label={t("form_fields.city")}
             required
-            value={form.home_city}
+            value={form.city}
             errorMessage={errMsg.city}
-            onChangeText={(text: string) => updateField("home_city", text)}
+            onChangeText={(text: string) => updateField("city", text)}
           />
           <InputField
             label={t("zip")}
             required
-            value={form.home_zip_code}
+            value={form.zip}
             errorMessage={errMsg.zip}
-            onChangeText={(text: string) => updateField("home_zip_code", text)}
+            onChangeText={(text: string) => updateField("zip", text)}
           />
 
           <InputField
             label={t("email")}
-            value={form.email_address}
+            value={form.email}
             required
             errorMessage={errMsg.email}
-            onChangeText={(text: string) => updateField("email_address", text)}
+            onChangeText={(text: string) => updateField("email", text)}
           />
         </View>
 
         {/* Checkboxes */}
         <Checkbox
           label={t("general.opt_ins.email_opt_in")}
-          value={form.opt_in_email}
+          value={form.emailConsent}
           onValueChange={(checked: boolean) =>
             updateField("emailConsent", checked)
           }
@@ -262,9 +328,9 @@ export const CheckVoterStatusScreen = ({
 
         <Checkbox
           label={t("general.opt_ins.sms_opt_in")}
-          value={form.opt_in_sms}
+          value={form.smsConsent}
           onValueChange={(checked: boolean) =>
-            updateField("opt_in_sms", checked)
+            updateField("smsConsent", checked)
           }
         />
         <RenderHTML

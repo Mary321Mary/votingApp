@@ -376,9 +376,9 @@
     "ssn_last4_invalid_error": "Please provide the last <em>four</em> digits of your Social Security Number.",
     "ssn_last4_empty_error": "If you don't know you social security number, please select: I do not know the last four digits of my social security number ",
     "someone_helped": "Someone helped me with this form.",
-    "helper_name_label": "Helper Name *",
-    "helper_address_label": "Helper Address *",
-    "helper_phone_label": "Helper Phone *",
+    "helper_name_label": "Helper Name",
+    "helper_address_label": "Helper Address",
+    "helper_phone_label": "Helper Phone",
     "helper_terms_paragraph_1": "If you helped a voter complete this voter registration application, you must also sign the application.",
     "helper_terms_paragraph_2": "By checking the box, you are signing the application electronically. In doing so:",
     "helper_terms_bullet_1": "You understand that your electronic signature on this application will constitute the legal equivalent of your signature.",
@@ -392,8 +392,7 @@
     "declaration2": "If you provided your PA driver's license or PennDOT ID number, you understand that the signathure from the PennDOT record will constituet your signature oon your voter registration record. If you upload an image of your signature, you understand that the signature you upload will cinstitute your signature on your voter registration record. You understand that you do not have to register electronically, and may use a paper or other non-electronic from of this voter registration application.",
     "i_confirm": "I confirm that I have read and agree to the terms above.",
     "you_must_confirm": "You must confirm that you agree to the terms above.",
-    "finish_with_pa": "Finish your voter registration online with PA",
-    "connected_pa_min_registration_age_error": "You must be at least 17 years and 180 days old to continue. Please enter a date of birth that meets this minimum age."
+    "finish_with_pa": "Finish your voter registration online with PA"
   },
   "ballot-lookup": {
     "header": "Ballot Information Tool",

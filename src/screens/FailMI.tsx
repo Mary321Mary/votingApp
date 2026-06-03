@@ -55,6 +55,7 @@ export default function FailMIScreen({ route }: FailMIScreenProps) {
           form.street_direction,
       },
       pageFromLookup: "paper",
+      workflowType: "nvra",
       showRedirectText: true,
     });
   };

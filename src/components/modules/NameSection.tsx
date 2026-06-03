@@ -197,9 +197,11 @@ export const NameSection = ({
               <View>
                 <Text style={styles.inputLabel}>
                   {t("form_fields.name_title")}
-                  {isRequired(formCongif, "prev_name_title") && (
-                    <Text style={styles.required}> *</Text>
-                  )}
+                  {isRequired(
+                    formCongif,
+                    "prev_name_title",
+                    value.change_of_name,
+                  ) && <Text style={styles.required}> *</Text>}
                 </Text>
                 <View style={styles.pickerWrapper}>
                   <Picker
@@ -228,7 +230,11 @@ export const NameSection = ({
               <InputField
                 label={t("form_fields.first_name")}
                 value={value.prev_first_name}
-                required={isRequired(formCongif, "prev_first_name")}
+                required={isRequired(
+                  formCongif,
+                  "prev_first_name",
+                  value.change_of_name,
+                )}
                 errorMessage={t(errorMessages.prev_first_name)}
                 onChangeText={(text: string) =>
                   updateField("prev_first_name", text)
@@ -239,7 +245,11 @@ export const NameSection = ({
               <InputField
                 label={t("form_fields.middle_name")}
                 value={value.prev_middle_name}
-                required={isRequired(formCongif, "prev_middle_name")}
+                required={isRequired(
+                  formCongif,
+                  "prev_middle_name",
+                  value.change_of_name,
+                )}
                 errorMessage={t(errorMessages.prev_middle_name)}
                 onChangeText={(text: string) =>
                   updateField("prev_middle_name", text)
@@ -249,7 +259,11 @@ export const NameSection = ({
             {isVisible(formCongif, "prev_last_name") && (
               <InputField
                 label={t("form_fields.last_name")}
-                required={isRequired(formCongif, "prev_last_name")}
+                required={isRequired(
+                  formCongif,
+                  "prev_last_name",
+                  value.change_of_name,
+                )}
                 errorMessage={t(errorMessages.prev_last_name)}
                 value={value.prev_last_name}
                 onChangeText={(text: string) =>
@@ -261,9 +275,11 @@ export const NameSection = ({
               <View>
                 <Text style={styles.inputLabel}>
                   {t("form_fields.name_suffix")}
-                  {isRequired(formCongif, "prev_name_suffix") && (
-                    <Text style={styles.required}> *</Text>
-                  )}
+                  {isRequired(
+                    formCongif,
+                    "prev_name_suffix",
+                    value.change_of_name,
+                  ) && <Text style={styles.required}> *</Text>}
                 </Text>
                 <View style={styles.pickerWrapper}>
                   <Picker

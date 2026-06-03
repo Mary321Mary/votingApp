@@ -119,6 +119,7 @@ export type RegisterFormState = {
   prev_middle_name: string;
   prev_last_name: string;
   prev_name_suffix: string;
+
   us_citizen: boolean;
   will_be_18_by_election: boolean;
   email_address: string;
@@ -126,13 +127,15 @@ export type RegisterFormState = {
   // ADDRESS
   home_address: string;
   address_line_2: string;
-  unit_type: string;
-  unit: string;
+  home_unit_type: string;
+  home_unit: string;
   home_city: string;
   state: string;
   home_zip_code: string;
 
   // different
+  mailing_unit_type: string;
+  mailing_unit_number: string;
   mailing_address: string;
   mailing_unit: string;
   mailing_city: string;
@@ -145,6 +148,8 @@ export type RegisterFormState = {
   prev_city: string;
   prev_state: string;
   prev_zip_code: string;
+  prev_unit_number: string;
+  prev_unit_type: string;
 
   street_name: string;
   street_number: string;
@@ -201,8 +206,12 @@ export type RegisterFormState = {
   last_four_ss_number: string;
   has_no_state_license: boolean | null;
   has_no_ssn: boolean | null;
-  someone_helped: boolean;
   helper_electronic_signature_acknowledged: boolean;
+
+  someone_helped: boolean;
+  helper_name: string;
+  helper_address: string;
+  helper_phone: string;
 
   // Eligibility
   residency_duration_ack: boolean;
@@ -237,13 +246,15 @@ export type RegisterFormStateError = {
   // ADDRESS
   home_address: string;
   address_line_2: string;
-  unit_type: string;
-  unit: string;
+  home_unit_type: string;
+  home_unit: string;
   home_city: string;
   state: string;
   home_zip_code: string;
 
   // different
+  mailing_unit_type: string;
+  mailing_unit_number: string;
   mailing_address: string;
   mailing_unit: string;
   mailing_city: string;
@@ -256,6 +267,8 @@ export type RegisterFormStateError = {
   prev_city: string;
   prev_state: string;
   prev_zip_code: string;
+  prev_unit_number: string;
+  prev_unit_type: string;
 
   street_name: string;
   street_number: string;
@@ -312,8 +325,12 @@ export type RegisterFormStateError = {
   last_four_ss_number: string;
   has_no_state_license: string;
   has_no_ssn: string;
-  someone_helped: string;
   helper_electronic_signature_acknowledged: string;
+
+  someone_helped: string;
+  helper_name: string;
+  helper_address: string;
+  helper_phone: string;
 
   // Eligibility
   residency_duration_ack: string;
@@ -322,6 +339,50 @@ export type RegisterFormStateError = {
   updated_dln_recently: string;
   request_duplicate_dln_today: string;
   age_eligibility: string;
+};
+
+export type SubmitMICovrPayload = {
+  email: string;
+  partner_id: number;
+  locale: string;
+  confirm_us_citizen: boolean;
+  confirm_will_be_18: boolean;
+  is_30_day_resident: boolean;
+  registration_cancellation_authorized: boolean;
+  digital_signature_authorized: boolean;
+  full_name: string;
+  date_of_birth: string; // YYYY-MM-DD
+  eye_color_code: string;
+  dln: string;
+  email_address: string;
+  registration_address_number: string;
+  registration_address_street_name: string;
+  registration_address_street_type: string;
+  registration_unit_number: string;
+  registration_city: string;
+  registration_zip_code: string;
+  registration_county: string;
+  has_mailing_address: boolean;
+  opt_in_email: boolean;
+  opt_in_sms: boolean;
+  phone: string;
+};
+
+export type SubmitVoterStatusResponse = {
+  status: {
+    success: boolean;
+    errors: string[] | null;
+  };
+  registrant_uid: string | null;
+  voter: {
+    uid: string | null;
+    email: string;
+    registration_status: boolean;
+    registration_status_date: string | null;
+    registration_date: string | null;
+    pledge_status: boolean;
+    pledge_data: string | null;
+  } | null;
 };
 
 export type FormProps = {
@@ -335,9 +396,12 @@ export type FormProps = {
 };
 
 export type CheckRegistrationStatus = {
-  firstName: string;
-  lastName: string;
-  suffix: string;
+  partner_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  zip: string;
+  state: string;
   address: string;
   city: string;
   phone: string;
@@ -346,11 +410,13 @@ export type CheckRegistrationStatus = {
   birthMonth: string;
   birthDay: string;
   birthYear: string;
+  date_of_birth: string;
 };
 export type CheckRegistrationStatusError = {
-  firstName: string;
-  lastName: string;
-  suffix: string;
+  partner_id: string;
+  first_name: string;
+  last_name: string;
+  state: string;
   address: string;
   city: string;
   phone: string;
@@ -361,6 +427,11 @@ export type CheckRegistrationStatusError = {
   birthMonth: string;
   birthDay: string;
   birthYear: string;
+  date_of_birth: string;
+};
+export type CheckRegistrationStatusResponse = {
+  status: { success: boolean; errors: string[] | null };
+  found: boolean;
 };
 
 // zip
@@ -406,6 +477,7 @@ export interface SubmitEmailZipResponseProps {
   zip: string;
   email: string;
   pageFromLookup?: string;
+  workflowType?: string;
   showRedirectText?: boolean;
   form?: RegisterFormState;
 }
@@ -494,3 +566,15 @@ export interface FetchDataSurveyQuestionsResponse {
   survey_question_1: string;
   survey_question_2: string;
 }
+
+export type CovrStatus = "pending" | "success" | "failure" | null;
+
+export type VoterStatusData = {
+  registrant_uid: string | null;
+};
+
+export type VoterStatusResponse = {
+  status: CovrStatus;
+  voter_status_id: string | null;
+  response_outcome: string | null;
+};

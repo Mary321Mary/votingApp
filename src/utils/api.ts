@@ -1,6 +1,8 @@
 import type {
   AuthData,
   AuthMeResponse,
+  CheckRegistrationStatus,
+  CheckRegistrationStatusResponse,
   DataConfigurationRequest,
   DataSurveyQuestionsRequest,
   FetchDataCollectionConfigResponse,
@@ -14,8 +16,12 @@ import type {
   RegisterData,
   SubmitEmailZipRequest,
   SubmitEmailZipResponse,
+  SubmitMICovrPayload,
+  SubmitVoterStatusResponse,
   UIConfig,
   User,
+  VoterStatusData,
+  VoterStatusResponse,
 } from "utils/types";
 import { HttpClient } from "utils/http/http";
 import * as ENDPOINTS from "utils/endpoints";
@@ -127,6 +133,38 @@ export function getSurveyQuestions(
   return HttpClient.Client.get<FetchDataSurveyQuestionsResponse>(
     ENDPOINTS.GET_SERVEY_QUESTIONS +
       `partner_id=${data.partner_id}&locale=${data.locale}`,
+    headers,
+  );
+}
+
+export function submitLookup(
+  data: CheckRegistrationStatus,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    CheckRegistrationStatus,
+    CheckRegistrationStatusResponse
+  >(ENDPOINTS.SUBMIT_LOOKUP, data, headers);
+}
+
+export function submitMICovr(
+  data: SubmitMICovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<SubmitMICovrPayload, SubmitVoterStatusResponse>(
+    ENDPOINTS.SUBMIT_MI_COVR,
+    data,
+    headers,
+  );
+}
+
+export function checkMICovr(
+  data: VoterStatusData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<VoterStatusData, VoterStatusResponse>(
+    ENDPOINTS.CHECK_MI_COVR,
+    data,
     headers,
   );
 }

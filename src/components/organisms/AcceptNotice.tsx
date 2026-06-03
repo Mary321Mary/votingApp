@@ -11,12 +11,7 @@ interface AcceptNoticeProps {
   handleMainButton?: ReactNode;
 }
 
-function AcceptNotice({
-  state,
-  value,
-  onChange,
-  handleMainButton,
-}: AcceptNoticeProps) {
+function AcceptNotice({ state, handleMainButton }: AcceptNoticeProps) {
   const [accept, setAccept] = useState<boolean>(false);
   const { t } = useTranslation();
 

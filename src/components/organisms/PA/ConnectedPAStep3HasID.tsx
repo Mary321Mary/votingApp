@@ -18,7 +18,7 @@ import { Eye, EyeOff } from "lucide-react-native";
 interface ConnectedPAStep3HasIDProps {
   value: RegisterFormState;
   handleMainButtonClick: () => void;
-  goBack?: (step: SetStateAction<1 | 2 | 3 | 4>) => void;
+  goBack?: (step: SetStateAction<1 | 2 | 3 | 4 | 5>) => void;
 }
 
 export const ConnectedPAStep3HasID = ({
@@ -38,7 +38,7 @@ export const ConnectedPAStep3HasID = ({
   const renderRow = (
     label: string,
     content: React.ReactNode,
-    step: SetStateAction<1 | 2 | 3 | 4>,
+    step: SetStateAction<1 | 2 | 3 | 4 | 5>,
   ) => (
     <>
       <View style={styles.row}>
@@ -156,6 +156,24 @@ export const ConnectedPAStep3HasID = ({
           t("form_fields.phone"),
           <Text style={styles.value}>{value.phone}</Text>,
           1,
+        )}
+      {value.helper_name &&
+        renderRow(
+          t("pennsylvania.helper_name_label"),
+          <Text style={styles.value}>{value.helper_name}</Text>,
+          4,
+        )}
+      {value.helper_address &&
+        renderRow(
+          t("pennsylvania.helper_address_label"),
+          <Text style={styles.value}>{value.helper_address}</Text>,
+          4,
+        )}
+      {value.helper_phone &&
+        renderRow(
+          t("pennsylvania.helper_phone_label"),
+          <Text style={styles.value}>{value.helper_phone}</Text>,
+          4,
         )}
 
       {/* Declaration */}

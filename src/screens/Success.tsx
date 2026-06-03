@@ -42,8 +42,7 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const { form, state, workflow_type, finish_with_state, under_construction } =
-    route.params as any;
+  const { form, state, workflow_type, finish_with_state } = route.params as any;
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,9 +52,7 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
 
   useEffect(() => {
     isMounted.current = true;
-    if (under_construction) {
-      setError(true);
-    } else startProcess();
+    startProcess();
 
     return () => {
       isMounted.current = false;
@@ -68,7 +65,8 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
       const responseToken = await requestTokenPDF({
         registrant: {
           ...cleanRegistrant,
-          id_number_radio_button_set: false,
+          has_ssn: !state.form.has_no_ssn,
+          has_state_license: !state.form.has_no_state_license,
           phone_type: "Mobile",
         },
         workflow_type: workflow_type,

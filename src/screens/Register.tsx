@@ -38,6 +38,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
     zip,
     email,
     pageFromLookup,
+    workflowType,
     showRedirectText,
     form,
   } = state;
@@ -56,6 +57,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
           zip={zip}
           email={email}
           pageFromLookup={pageFromLookup || ""}
+          workflowType={workflowType}
           showRedirectText={showRedirectText || false}
           form={form}
         />

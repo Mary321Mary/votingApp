@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultLayout from "@/layout/DefaultLayout";
 import {
+  CheckRegistrationStatus,
   RegisterFormState,
   StateData,
   SubmitEmailZipResponseProps,
@@ -17,6 +18,7 @@ import { NotParticipatingScreen } from "@/screens/NotParticipating";
 import { SuccessMIScreen } from "@/screens/SuccessMI";
 import FailMIScreen from "@/screens/FailMI";
 import LookupNotFoundScreen from "@/screens/LookupNotFound";
+import { Under18Screen } from "@/screens/Under18Screen";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -30,15 +32,15 @@ export type RootStackParamList = {
   CheckVoterStatus: {
     email: string;
     zip: string;
-    form: RegisterFormState;
+    form: CheckRegistrationStatus;
   };
   Lookup: {
-    state: StateData;
-    form: RegisterFormState;
+    state?: StateData;
+    form?: CheckRegistrationStatus;
   };
   LookupNotFound: {
     state: StateData;
-    form: RegisterFormState;
+    form: CheckRegistrationStatus;
   };
   ZipError: { text: string; header?: string; showImage?: boolean };
   NotParticipating: { state: StateData };
@@ -47,7 +49,6 @@ export type RootStackParamList = {
     state: StateData;
     workflow_type?: string;
     finish_with_state: boolean;
-    under_construction?: boolean;
   };
   SuccessMI: {
     state: StateData;
@@ -55,6 +56,9 @@ export type RootStackParamList = {
   FailMI: {
     state: StateData;
     form: RegisterFormState;
+  };
+  Under18: {
+    state: StateData;
   };
 };
 
@@ -106,6 +110,10 @@ function Navigation({}) {
         component={withDefaultLayout(SuccessMIScreen)}
       />
       <Stack.Screen name="FailMI" component={withDefaultLayout(FailMIScreen)} />
+      <Stack.Screen
+        name="Under18"
+        component={withDefaultLayout(Under18Screen)}
+      />
     </Stack.Navigator>
   );
 }

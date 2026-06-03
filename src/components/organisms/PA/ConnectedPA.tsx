@@ -26,8 +26,8 @@ export const ConnectedPA = ({
   const { t } = useTranslation();
 
   const hasSecondaryAddressValue = [
-    value.unit_type?.trim(),
-    value.unit?.trim(),
+    value.home_unit_type?.trim(),
+    value.home_unit?.trim(),
   ].some(Boolean);
 
   const paCounties = t("pennsylvania.counties", { returnObjects: true });
@@ -81,7 +81,26 @@ export const ConnectedPA = ({
               <Text style={styles.required}> *</Text>
             )}
           </Text>
-          <DateRow value={value} updateField={updateField} />
+          <DateRow
+            value={{
+              month: {
+                name: "birthMonth",
+                value: value.birthMonth,
+                errorText: t(errorMessages.birthMonth),
+              },
+              day: {
+                name: "birthDay",
+                value: value.birthDay,
+                errorText: t(errorMessages.birthDay),
+              },
+              year: {
+                name: "birthYear",
+                value: value.birthYear,
+                errorText: t(errorMessages.birthYear),
+              },
+            }}
+            updateField={updateField}
+          />
         </>
       )}
 
@@ -108,8 +127,8 @@ export const ConnectedPA = ({
         <Picker
           style={styles.picker}
           itemStyle={styles.pickerItem}
-          selectedValue={value.unit_type}
-          onValueChange={itemValue => updateField("unit_type", itemValue)}
+          selectedValue={value.home_unit_type}
+          onValueChange={itemValue => updateField("home_unit_type", itemValue)}
         >
           {UNIT_OPTIONS.map((state_value: { value: string; name: string }) => (
             <Picker.Item
@@ -120,15 +139,15 @@ export const ConnectedPA = ({
           ))}
         </Picker>
       </View>
-      {errorMessages.unit_type && (
-        <Text style={styles.required}>{t(errorMessages.unit_type)}</Text>
+      {errorMessages.home_unit_type && (
+        <Text style={styles.required}>{t(errorMessages.home_unit_type)}</Text>
       )}
       <InputField
         label={t("form_fields.unit_number")}
-        value={value.unit}
+        value={value.home_unit}
         required={hasSecondaryAddressValue}
-        errorMessage={t(errorMessages.unit)}
-        onChangeText={(text: string) => updateField("unit", text)}
+        errorMessage={t(errorMessages.home_unit)}
+        onChangeText={(text: string) => updateField("home_unit", text)}
       />
       <InputField
         label={t("form_fields.city")}

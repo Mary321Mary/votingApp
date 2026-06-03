@@ -57,10 +57,10 @@ export const AddressSection = ({
         {/* {isVisible(formCongif, "home_unit") && ( */}
         <InputField
           label={t("form_fields.unit_lot")}
-          value={value.unit}
+          value={value.home_unit}
           required={isRequired(formCongif, "home_unit")}
-          errorMessage={t(errorMessages.unit)}
-          onChangeText={(text: string) => updateField("unit", text)}
+          errorMessage={t(errorMessages.home_unit)}
+          onChangeText={(text: string) => updateField("home_unit", text)}
         />
         {/* )} */}
         {/* {isVisible(formCongif, "home_city") && ( */}
@@ -134,7 +134,11 @@ export const AddressSection = ({
                   label={t("form_fields.address")}
                   value={value.mailing_address}
                   helpText={t("form_fields.mailing_address_help")}
-                  required={isRequired(formCongif, "mailing_address")}
+                  required={isRequired(
+                    formCongif,
+                    "mailing_address",
+                    value.has_mailing_address,
+                  )}
                   errorMessage={t(errorMessages.mailing_address)}
                   onChangeText={(text: string) =>
                     updateField("mailing_address", text)
@@ -146,7 +150,11 @@ export const AddressSection = ({
                   label={t("form_fields.unit_lot")}
                   value={value.mailing_unit}
                   errorMessage={t(errorMessages.mailing_unit)}
-                  required={isRequired(formCongif, "mailing_unit")}
+                  required={isRequired(
+                    formCongif,
+                    "mailing_unit",
+                    value.has_mailing_address,
+                  )}
                   onChangeText={(text: string) =>
                     updateField("mailing_unit", text)
                   }
@@ -158,7 +166,11 @@ export const AddressSection = ({
                 <InputField
                   label={t("form_fields.city")}
                   value={value.mailing_city}
-                  required={isRequired(formCongif, "mailing_city")}
+                  required={isRequired(
+                    formCongif,
+                    "mailing_city",
+                    value.has_mailing_address,
+                  )}
                   errorMessage={t(errorMessages.mailing_city)}
                   onChangeText={(text: string) =>
                     updateField("mailing_city", text)
@@ -169,9 +181,11 @@ export const AddressSection = ({
                 <View>
                   <Text style={styles.inputLabel}>
                     {t("form_fields.state")}
-                    {isRequired(formCongif, "mailing_state") && (
-                      <Text style={styles.required}> *</Text>
-                    )}
+                    {isRequired(
+                      formCongif,
+                      "mailing_state",
+                      value.has_mailing_address,
+                    ) && <Text style={styles.required}> *</Text>}
                   </Text>
                   <View style={styles.pickerWrapper}>
                     <Picker
@@ -206,7 +220,11 @@ export const AddressSection = ({
                   numeric
                   value={value.mailing_zip_code}
                   errorMessage={t(errorMessages.mailing_zip_code)}
-                  required={isRequired(formCongif, "mailing_zip_code")}
+                  required={isRequired(
+                    formCongif,
+                    "mailing_zip_code",
+                    value.has_mailing_address,
+                  )}
                   onChangeText={(text: string) =>
                     updateField("mailing_zip_code", text)
                   }
@@ -257,7 +275,11 @@ export const AddressSection = ({
                 <InputField
                   label={t("form_fields.address")}
                   value={value.prev_address}
-                  required={isRequired(formCongif, "prev_address")}
+                  required={isRequired(
+                    formCongif,
+                    "prev_address",
+                    value.change_of_address,
+                  )}
                   errorMessage={t(errorMessages.prev_address)}
                   onChangeText={(text: string) =>
                     updateField("prev_address", text)
@@ -268,7 +290,11 @@ export const AddressSection = ({
                 <InputField
                   label={t("form_fields.unit_lot")}
                   value={value.prev_unit}
-                  required={isRequired(formCongif, "prev_unit")}
+                  required={isRequired(
+                    formCongif,
+                    "prev_unit",
+                    value.change_of_address,
+                  )}
                   errorMessage={t(errorMessages.prev_unit)}
                   onChangeText={(text: string) =>
                     updateField("prev_unit", text)
@@ -279,7 +305,11 @@ export const AddressSection = ({
                 <InputField
                   label={t("form_fields.city")}
                   value={value.prev_city}
-                  required={isRequired(formCongif, "prev_city")}
+                  required={isRequired(
+                    formCongif,
+                    "prev_city",
+                    value.change_of_address,
+                  )}
                   errorMessage={t(errorMessages.prev_city)}
                   onChangeText={(text: string) =>
                     updateField("prev_city", text)
@@ -290,9 +320,11 @@ export const AddressSection = ({
                 <View>
                   <Text style={styles.inputLabel}>
                     {t("form_fields.state")}
-                    {isRequired(formCongif, "prev_state") && (
-                      <Text style={styles.required}> *</Text>
-                    )}
+                    {isRequired(
+                      formCongif,
+                      "prev_state",
+                      value.change_of_address,
+                    ) && <Text style={styles.required}> *</Text>}
                   </Text>
                   <View style={styles.pickerWrapper}>
                     <Picker

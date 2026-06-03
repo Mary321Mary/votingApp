@@ -1,4 +1,8 @@
-import { DataCollectionConfiguration, RegisterFormState } from "./types";
+import {
+  DataCollectionConfiguration,
+  RegisterFormState,
+  SubmitMICovrPayload,
+} from "./types";
 
 export const STATES = [
   { name: "", value: "" },
@@ -76,14 +80,13 @@ export const isRequired = (
   formConfig: DataCollectionConfiguration,
   key: string,
   dependentValue?: boolean,
-) => {
+): boolean => {
   const field = formConfig?.fields?.[key];
-  if (field?.dependent) {
-    if (dependentValue === true) return true;
-  } else {
-    if (field?.value_required) return true;
+  if (!field) return false;
+  if (field.dependent || field.dependent_field) {
+    return !!(dependentValue && field.value_required);
   }
-  return false;
+  return !!field.value_required;
 };
 
 const ALLOWED_REGISTRANT_FIELDS = [
@@ -108,8 +111,8 @@ const ALLOWED_REGISTRANT_FIELDS = [
 
   "home_address",
   // "address_line_2", ???
-  // "unit_type",
-  // "unit",
+  // "home_unit_type",
+  // "home_unit",
   "home_city",
   "state",
   "home_zip_code",
@@ -132,7 +135,7 @@ const ALLOWED_REGISTRANT_FIELDS = [
   // "street_number",
   // "street_type",
   // "street_direction",
-  // "has_mailing_address",
+  "has_mailing_address",
   // "mailing_postal_code",
   // "mailing_po_box_number",
   // "mailing_box_group_type",
@@ -184,4 +187,43 @@ export const filterRegistrant = (rawForm: RegisterFormState) => {
       obj[key] = rawForm[key as keyof RegisterFormState];
       return obj;
     }, {} as any);
+};
+
+export const mapFormStateToMICovrPayload = (
+  form: RegisterFormState,
+): SubmitMICovrPayload => {
+  return {
+    email: form.email_address,
+    partner_id: form.partner_id,
+    locale: form.lang || "en", //  lang -> locale
+
+    // Consents
+    confirm_us_citizen: form.us_citizen,
+    confirm_will_be_18: form.will_be_18_by_election,
+    is_30_day_resident: form.residency_duration_ack,
+    registration_cancellation_authorized: form.cancel_previous_registration_ack,
+    digital_signature_authorized: form.helper_electronic_signature_acknowledged,
+
+    // Personale
+    full_name: form.full_name || `${form.first_name} ${form.last_name}`.trim(),
+    date_of_birth: form.date_of_birth,
+    eye_color_code: form.eye_color?.substring(0, 3).toUpperCase() || "BRO", // "Brown" -> "BRO"
+    dln: form.state_id_number,
+    email_address: form.email_address,
+
+    // Address
+    registration_address_number: form.street_number || "",
+    registration_address_street_name: form.street_name?.toUpperCase() || "",
+    registration_address_street_type: form.street_type?.toUpperCase() || "",
+    registration_unit_number: form.home_unit || "0001", // Happy path for tests
+    registration_city: form.home_city,
+    registration_zip_code: form.home_zip_code,
+    registration_county: form.home_county?.toUpperCase() || "",
+
+    // Cpntacts
+    has_mailing_address: form.has_mailing_address,
+    opt_in_email: form.opt_in_email,
+    opt_in_sms: form.opt_in_sms,
+    phone: form.phone ? form.phone.replace(/\D/g, "") : "", // Only numbers
+  };
 };

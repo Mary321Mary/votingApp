@@ -36,7 +36,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
   const { state, form } = route.params;
 
   const handleOpenLink = async () => {
-    const url = state?.online_status_check_url;
+    const url = state?.online_registration_system_url;
 
     if (url) {
       await Linking.openURL(url);

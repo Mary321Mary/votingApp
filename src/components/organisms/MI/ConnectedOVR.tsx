@@ -155,6 +155,7 @@ export const ConnectedOVR = ({
                               value.street_direction,
                           },
                           pageFromLookup: "paper",
+                          workflowType: "nvra",
                           showRedirectText: true,
                         } as any);
                       },
@@ -222,6 +223,7 @@ export const ConnectedOVR = ({
                               value.street_direction,
                           },
                           pageFromLookup: "paper",
+                          workflowType: "nvra",
                           showRedirectText: true,
                         } as any);
                       },
@@ -306,6 +308,7 @@ export const ConnectedOVR = ({
                         value.street_direction,
                     },
                     pageFromLookup: "paper",
+                    workflowType: "nvra",
                     showRedirectText: true,
                   } as any);
                 },
@@ -380,6 +383,7 @@ export const ConnectedOVR = ({
                         value.street_direction,
                     },
                     pageFromLookup: "paper",
+                    workflowType: "nvra",
                     showRedirectText: true,
                   } as any);
                 },

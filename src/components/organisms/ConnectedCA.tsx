@@ -65,7 +65,26 @@ export const ConnectedCA = ({
               <Text style={styles.required}> *</Text>
             )}
           </Text>
-          <DateRow value={value} updateField={updateField} />
+          <DateRow
+            value={{
+              month: {
+                name: "birthMonth",
+                value: value.birthMonth,
+                errorText: t(errorMessages.birthMonth),
+              },
+              day: {
+                name: "birthDay",
+                value: value.birthDay,
+                errorText: t(errorMessages.birthDay),
+              },
+              year: {
+                name: "birthYear",
+                value: value.birthYear,
+                errorText: t(errorMessages.birthYear),
+              },
+            }}
+            updateField={updateField}
+          />
         </>
       )}
 

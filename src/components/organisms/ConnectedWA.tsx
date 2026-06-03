@@ -62,7 +62,26 @@ export const ConnectedWA = ({
               <Text style={styles.required}> *</Text>
             )}
           </Text>
-          <DateRow value={value} updateField={updateField} />
+          <DateRow
+            value={{
+              month: {
+                name: "birthMonth",
+                value: value.birthMonth,
+                errorText: t(errorMessages.birthMonth),
+              },
+              day: {
+                name: "birthDay",
+                value: value.birthDay,
+                errorText: t(errorMessages.birthDay),
+              },
+              year: {
+                name: "birthYear",
+                value: value.birthYear,
+                errorText: t(errorMessages.birthYear),
+              },
+            }}
+            updateField={updateField}
+          />
         </>
       )}
       <PhoneSection
@@ -134,8 +153,23 @@ export const ConnectedWA = ({
             )}
           </Text>
           <DateRow
-            value={value}
-            useIssue
+            value={{
+              month: {
+                name: "issueMonth",
+                value: value.issueMonth,
+                errorText: t(errorMessages.issueMonth),
+              },
+              day: {
+                name: "issueDay",
+                value: value.issueDay,
+                errorText: t(errorMessages.issueDay),
+              },
+              year: {
+                name: "issueYear",
+                value: value.issueYear,
+                errorText: t(errorMessages.issueYear),
+              },
+            }}
             disabled={!!value.has_no_state_license}
             updateField={updateField}
           />

@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  SetStateAction,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   ScrollView,
@@ -13,7 +19,11 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 
 import i18n from "@/i18n";
-import { isRequired, isVisible } from "@/utils/constants";
+import {
+  isRequired,
+  isVisible,
+  mapFormStateToMICovrPayload,
+} from "@/utils/constants";
 import {
   DataCollectionConfiguration,
   OVR_TYPE_MAP,
@@ -21,7 +31,11 @@ import {
   RegisterFormStateError,
   StateData,
 } from "@/utils/types";
-import { fetchDataConfiguration, getSurveyQuestions } from "@/utils/api";
+import {
+  fetchDataConfiguration,
+  getSurveyQuestions,
+  submitMICovr,
+} from "@/utils/api";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "./Navigation";
 
@@ -36,13 +50,12 @@ import { ConnectedWA } from "./ConnectedWA";
 import { ConnectedPA } from "./PA/ConnectedPA";
 import { ConnectedCA } from "./ConnectedCA";
 import { ConnectedPAStep2 } from "./PA/ConnectedPAStep2";
-import { ConnectedPAStep3Upload } from "./PA/ConnectedPAStep3Upload";
 import { ConnectedPAStep3HasID } from "./PA/ConnectedPAStep3HasID";
 import RenderHTML from "react-native-render-html";
-
-/** Minimum age for Pennsylvania connected OVR registration (17 years + 180 days). */
-export const PA_CONNECTED_REGISTRATION_MIN_YEARS = 17;
-export const PA_CONNECTED_REGISTRATION_MIN_EXTRA_DAYS = 180;
+import { ConnectedPAStep3Select } from "./PA/ConnectedPAStep3Select";
+import { ConnectedPAStep4Signature } from "./PA/ConnectedPAStep4Signature";
+import { ConnectedPAStep3Device } from "./PA/ConnectedPAStep3Device";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type PaConnectedRegistrationDobResult =
   | { outcome: "defer" }
@@ -92,17 +105,13 @@ export function evaluatePaConnectedRegistrationDateOfBirth(
   }
 
   const minAgeThresholdDate = new Date(today);
-  minAgeThresholdDate.setFullYear(
-    minAgeThresholdDate.getFullYear() - PA_CONNECTED_REGISTRATION_MIN_YEARS,
-  );
-  minAgeThresholdDate.setDate(
-    minAgeThresholdDate.getDate() - PA_CONNECTED_REGISTRATION_MIN_EXTRA_DAYS,
-  );
+  minAgeThresholdDate.setFullYear(minAgeThresholdDate.getFullYear() - 17);
+  minAgeThresholdDate.setDate(minAgeThresholdDate.getDate() - 180);
 
   if (birth > minAgeThresholdDate) {
     return {
       outcome: "too_young",
-      errorMessageKey: "pennsylvania.connected_pa_min_registration_age_error",
+      errorMessageKey: "form_fields.age_eligibility_error",
     };
   }
 
@@ -127,11 +136,12 @@ interface RegisterResultProps {
   zip: string;
   email: string;
   pageFromLookup: string;
+  workflowType?: string;
   showRedirectText: boolean;
   form?: RegisterFormState;
 }
 
-const EMPTY_ERROR_MESSAGES = {
+const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   partner_id: "",
   lang: "",
 
@@ -140,23 +150,29 @@ const EMPTY_ERROR_MESSAGES = {
   middle_name: "",
   last_name: "",
   suffix: "",
+  us_citizen: "",
+  will_be_18_by_election: "",
+  email_address: "",
+
   change_of_name: "",
   prev_name_title: "",
   prev_first_name: "",
   prev_middle_name: "",
   prev_last_name: "",
   prev_name_suffix: "",
-  us_citizen: "",
-  will_be_18_by_election: "",
-  email_address: "",
+  prev_unit_number: "",
+  prev_unit_type: "",
 
   home_address: "",
   address_line_2: "",
-  unit_type: "",
-  unit: "",
+  home_unit_type: "",
+  home_unit: "",
   home_city: "",
   state: "",
   home_zip_code: "",
+
+  mailing_unit_type: "",
+  mailing_unit_number: "",
   mailing_address: "",
   mailing_unit: "",
   mailing_city: "",
@@ -206,8 +222,12 @@ const EMPTY_ERROR_MESSAGES = {
   last_four_ss_number: "",
   has_no_state_license: "",
   has_no_ssn: "",
-  someone_helped: "",
   helper_electronic_signature_acknowledged: "",
+
+  someone_helped: "",
+  helper_name: "",
+  helper_address: "",
+  helper_phone: "",
 
   street_name: "",
   street_number: "",
@@ -236,6 +256,7 @@ export const RegisterResult = ({
   zip,
   email,
   pageFromLookup,
+  workflowType = "ovr",
   showRedirectText,
   form: initform,
 }: RegisterResultProps) => {
@@ -247,8 +268,10 @@ export const RegisterResult = ({
     useState<boolean>(showRedirectText);
   const scrollRef = useRef<ScrollView>(null);
   const { width } = useWindowDimensions();
+  const [workflow, setWorkflow] = useState("ovr");
+  const [upload, setUpload] = useState("signature");
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<SetStateAction<1 | 2 | 3 | 4 | 5>>(1);
   let flowType = pageFromLookup || getFlowType(state?.ovr_type || "");
   const [formCongif, setFormCongif] = useState<DataCollectionConfiguration>({
     fields: {},
@@ -282,11 +305,14 @@ export const RegisterResult = ({
 
     home_address: initform?.home_address || "",
     address_line_2: initform?.address_line_2 || "",
-    unit_type: initform?.unit_type || "",
-    unit: initform?.unit || "",
+    home_unit_type: initform?.home_unit_type || "",
+    home_unit: initform?.home_unit || "",
     home_city: initform?.home_city || "",
     state: initform?.state || state.abbreviation,
     home_zip_code: initform?.home_zip_code || zip,
+
+    mailing_unit_type: initform?.mailing_unit_type || "",
+    mailing_unit_number: initform?.mailing_unit_number || "",
     mailing_address: initform?.mailing_address || "",
     mailing_unit: initform?.mailing_unit || "",
     mailing_city: initform?.mailing_city || "",
@@ -299,6 +325,8 @@ export const RegisterResult = ({
     prev_city: initform?.prev_city || "",
     prev_state: initform?.prev_state || "",
     prev_zip_code: initform?.prev_zip_code || "",
+    prev_unit_number: initform?.prev_unit_number || "",
+    prev_unit_type: initform?.prev_unit_type || "",
 
     race: initform?.race || "",
     party: initform?.party || "",
@@ -340,9 +368,13 @@ export const RegisterResult = ({
     last_four_ss_number: initform?.last_four_ss_number || "",
     has_no_state_license: initform?.has_no_state_license || null,
     has_no_ssn: initform?.has_no_ssn || null,
-    someone_helped: initform?.someone_helped || false,
     helper_electronic_signature_acknowledged:
       initform?.helper_electronic_signature_acknowledged || false,
+
+    someone_helped: initform?.someone_helped || false,
+    helper_name: initform?.helper_name || "",
+    helper_address: initform?.helper_address || "",
+    helper_phone: initform?.helper_phone || "",
 
     street_name: initform?.street_name || "",
     street_number: initform?.street_number || "",
@@ -500,17 +532,40 @@ export const RegisterResult = ({
         if (step === 3) {
           if (form.has_no_state_license) {
             return (
-              <ConnectedPAStep3Upload
+              <ConnectedPAStep3Select
                 state={state}
                 errorMessages={errMsg}
                 value={form}
                 formCongif={formCongif}
                 onChange={setForm}
                 onChangeError={setErrMsg}
+                upload={upload}
+                setUpload={setUpload}
                 handleMainButton={
                   <Button
                     title={t("ovr_landing_page.next_button")}
-                    onPress={handleMainButtonClick}
+                    onPress={() => {
+                      if (upload === "print") {
+                        navigation.navigate("Register", {
+                          status: { success: true, errors: [] },
+                          state,
+                          zip: form.home_zip_code,
+                          email: form.email_address,
+                          form: {
+                            ...form,
+                            home_address:
+                              form.home_address + " " + form.address_line_2,
+                            home_unit:
+                              form.home_unit_type + " " + form.home_unit,
+                          },
+                          pageFromLookup: "paper",
+                          workflowType: "nvra",
+                          showRedirectText: true,
+                        });
+                      } else {
+                        handleMainButtonClick();
+                      }
+                    }}
                   />
                 }
               />
@@ -525,11 +580,49 @@ export const RegisterResult = ({
             );
           }
         }
-        if (step === 4)
+        if (step === 4) {
+          if (upload === "signature") {
+            return (
+              <ConnectedPAStep4Signature
+                state={state}
+                errorMessages={errMsg}
+                value={form}
+                formCongif={formCongif}
+                onChange={setForm}
+                onChangeError={setErrMsg}
+                handleMainButton={
+                  <Button
+                    title={t("ovr_landing_page.next_button")}
+                    onPress={handleMainButtonClick}
+                  />
+                }
+              />
+            );
+          }
+          return (
+            <ConnectedPAStep3Device
+              state={state}
+              errorMessages={errMsg}
+              value={form}
+              formCongif={formCongif}
+              onChange={setForm}
+              onChangeError={setErrMsg}
+              handleMainButton={
+                <Button
+                  title={t("ovr_landing_page.next_button")}
+                  onPress={handleMainButtonClick}
+                />
+              }
+            />
+          );
+        }
+        if (step === 5)
           return (
             <ConnectedPAStep3HasID
               value={form}
-              goBack={stepNumber => setStep(stepNumber)}
+              goBack={(stepNumber: SetStateAction<1 | 2 | 3 | 4 | 5>) =>
+                setStep(stepNumber)
+              }
               handleMainButtonClick={handleMainButtonClick}
             />
           );
@@ -719,31 +812,31 @@ export const RegisterResult = ({
     if (form.change_of_name || isRequired(formCongif, "change_of_name")) {
       if (
         !form.prev_name_title.trim() &&
-        isRequired(formCongif, "prev_name_title")
+        isRequired(formCongif, "prev_name_title", form.change_of_name)
       ) {
         errorMessage.prev_name_title = "general.required";
       }
       if (
         !form.prev_first_name.trim() &&
-        isRequired(formCongif, "prev_first_name")
+        isRequired(formCongif, "prev_first_name", form.change_of_name)
       ) {
         errorMessage.prev_first_name = "general.required";
       }
       if (
         !form.prev_middle_name.trim() &&
-        isRequired(formCongif, "prev_middle_name")
+        isRequired(formCongif, "prev_middle_name", form.change_of_name)
       ) {
         errorMessage.prev_middle_name = "general.required";
       }
       if (
         !form.prev_last_name.trim() &&
-        isRequired(formCongif, "prev_last_name")
+        isRequired(formCongif, "prev_last_name", form.change_of_name)
       ) {
         errorMessage.prev_last_name = "general.required";
       }
       if (
         !form.prev_name_suffix.trim() &&
-        isRequired(formCongif, "prev_name_suffix")
+        isRequired(formCongif, "prev_name_suffix", form.change_of_name)
       ) {
         errorMessage.prev_name_suffix = "general.required";
       }
@@ -754,8 +847,8 @@ export const RegisterResult = ({
     if (!form.home_address.trim() && isRequired(formCongif, "home_address")) {
       errorMessage.home_address = "general.required";
     }
-    if (!form.unit.trim() && isRequired(formCongif, "home_unit")) {
-      errorMessage.unit = "general.required";
+    if (!form.home_unit.trim() && isRequired(formCongif, "home_unit")) {
+      errorMessage.home_unit = "general.required";
     }
     if (!form.home_city.trim() && isRequired(formCongif, "home_city")) {
       errorMessage.home_city = "general.required";
@@ -774,25 +867,31 @@ export const RegisterResult = ({
     ) {
       if (
         !form.mailing_address.trim() &&
-        isRequired(formCongif, "mailing_address")
+        isRequired(formCongif, "mailing_address", form.has_mailing_address)
       ) {
         errorMessage.mailing_address = "general.required";
       }
-      if (!form.mailing_unit.trim() && isRequired(formCongif, "mailing_unit")) {
+      if (
+        !form.mailing_unit.trim() &&
+        isRequired(formCongif, "mailing_unit", form.has_mailing_address)
+      ) {
         errorMessage.mailing_unit = "general.required";
       }
-      if (!form.mailing_city.trim() && isRequired(formCongif, "mailing_city")) {
+      if (
+        !form.mailing_city.trim() &&
+        isRequired(formCongif, "mailing_city", form.has_mailing_address)
+      ) {
         errorMessage.mailing_city = "general.required";
       }
       if (
         !form.mailing_state.trim() &&
-        isRequired(formCongif, "mailing_state")
+        isRequired(formCongif, "mailing_state", form.has_mailing_address)
       ) {
         errorMessage.mailing_state = "general.required";
       }
       if (
         !form.mailing_zip_code.trim() &&
-        isRequired(formCongif, "mailing_zip_code")
+        isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
       ) {
         errorMessage.mailing_zip_code = "general.required";
       } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
@@ -800,21 +899,33 @@ export const RegisterResult = ({
       }
     }
     if (form.change_of_address || isRequired(formCongif, "change_of_address")) {
-      if (!form.prev_address.trim() && isRequired(formCongif, "prev_address")) {
+      if (
+        !form.prev_address.trim() &&
+        isRequired(formCongif, "prev_address", form.change_of_address)
+      ) {
         errorMessage.prev_address = "general.required";
       }
-      if (!form.prev_unit.trim() && isRequired(formCongif, "prev_unit")) {
+      if (
+        !form.prev_unit.trim() &&
+        isRequired(formCongif, "prev_unit", form.change_of_address)
+      ) {
         errorMessage.prev_unit = "general.required";
       }
-      if (!form.prev_city.trim() && isRequired(formCongif, "prev_city")) {
+      if (
+        !form.prev_city.trim() &&
+        isRequired(formCongif, "prev_city", form.change_of_address)
+      ) {
         errorMessage.prev_city = "general.required";
       }
-      if (!form.prev_state.trim() && isRequired(formCongif, "prev_state")) {
+      if (
+        !form.prev_state.trim() &&
+        isRequired(formCongif, "prev_state", form.change_of_address)
+      ) {
         errorMessage.prev_state = "general.required";
       }
       if (
         !form.prev_zip_code.trim() &&
-        isRequired(formCongif, "prev_zip_code")
+        isRequired(formCongif, "prev_zip_code", form.change_of_address)
       ) {
         errorMessage.prev_zip_code = "general.required";
       } else if (!zipRegex.test(form.prev_zip_code.trim())) {
@@ -854,16 +965,14 @@ export const RegisterResult = ({
     if (!form.party.trim() && isRequired(formCongif, "party")) {
       errorMessage.party = "general.required";
     }
-    if (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthMonth = "general.required";
-    }
-    if (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) {
+    if (
+      (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
+      (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
+      (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
+    ) {
       errorMessage.birthDay = "general.required";
-    }
-    if (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth")) {
-      errorMessage.birthYear = "general.required";
     } else if (Number(form.birthYear) < 1900) {
-      errorMessage.birthMonth = "form_fields.invalid_year";
+      errorMessage.birthYear = "form_fields.invalid_year";
     }
     if (
       form.birthYear.trim() &&
@@ -891,19 +1000,39 @@ export const RegisterResult = ({
         if (isInvalidDate) {
           errorMessage.birthDay = "form_fields.invalid_birth_date";
         } else {
-          let age = today.getFullYear() - date.getFullYear();
-          const monthDiff = today.getMonth() - date.getMonth();
-          const dayDiff = today.getDate() - date.getDate();
+          const paDob = evaluatePaConnectedRegistrationDateOfBirth(
+            form.birthYear,
+            form.birthMonth,
+            form.birthDay,
+            today,
+          );
 
-          if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-            age--;
-          }
-
-          if (age < formCongif.validations.min_age) {
-            errorMessage.birthMonth = "form_fields.age_eligibility_error";
-          } else {
+          if (paDob.outcome === "too_young") {
+            // "You must be 18..."
+            errorMessage.birthMonth = paDob.errorMessageKey;
+            form.pa_preregistration_age_window = false;
+          } else if (paDob.outcome === "eligible") {
+            // >= 18 (preregistrationAgeWindow: false),
+            // And from 17.5 to 18 (preregistrationAgeWindow: true)
+            // No Error
             form.date_of_birth =
               form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+            form.pa_preregistration_age_window = paDob.preregistrationAgeWindow;
+          } else {
+            let age = today.getFullYear() - date.getFullYear();
+            const monthDiff = today.getMonth() - date.getMonth();
+            const dayDiff = today.getDate() - date.getDate();
+
+            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+              age--;
+            }
+
+            if (age < formCongif.validations.min_age) {
+              errorMessage.birthMonth = "form_fields.age_eligibility_error";
+            } else {
+              form.date_of_birth =
+                form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+            }
           }
         }
       }
@@ -1002,14 +1131,12 @@ export const RegisterResult = ({
       ) {
         errorMessage.state_id_number = "michigan.id_format_error";
       }
-      if (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) {
-        errorMessage.birthMonth = "general.required";
-      }
-      if (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) {
+      if (
+        (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
+        (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
+        (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
+      ) {
         errorMessage.birthDay = "general.required";
-      }
-      if (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth")) {
-        errorMessage.birthYear = "general.required";
       } else if (Number(form.birthYear) < 1900) {
         errorMessage.birthYear = "form_fields.invalid_year";
       }
@@ -1039,19 +1166,40 @@ export const RegisterResult = ({
           if (isInvalidDate) {
             errorMessage.birthDay = "form_fields.invalid_birth_date";
           } else {
-            let age = today.getFullYear() - date.getFullYear();
-            const monthDiff = today.getMonth() - date.getMonth();
-            const dayDiff = today.getDate() - date.getDate();
+            const paDob = evaluatePaConnectedRegistrationDateOfBirth(
+              form.birthYear,
+              form.birthMonth,
+              form.birthDay,
+              today,
+            );
 
-            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-              age--;
-            }
-
-            if (age < formCongif.validations.min_age) {
-              errorMessage.birthMonth = "form_fields.age_eligibility_error";
-            } else {
+            if (paDob.outcome === "too_young") {
+              // "You must be 18..."
+              errorMessage.birthMonth = paDob.errorMessageKey;
+              form.pa_preregistration_age_window = false;
+            } else if (paDob.outcome === "eligible") {
+              // >= 18 (preregistrationAgeWindow: false),
+              // And from 17.5 to 18 (preregistrationAgeWindow: true)
+              // No Error
               form.date_of_birth =
                 form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+              form.pa_preregistration_age_window =
+                paDob.preregistrationAgeWindow;
+            } else {
+              let age = today.getFullYear() - date.getFullYear();
+              const monthDiff = today.getMonth() - date.getMonth();
+              const dayDiff = today.getDate() - date.getDate();
+
+              if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                age--;
+              }
+
+              if (age < formCongif.validations.min_age) {
+                errorMessage.birthMonth = "form_fields.age_eligibility_error";
+              } else {
+                form.date_of_birth =
+                  form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+              }
             }
           }
         }
@@ -1083,8 +1231,8 @@ export const RegisterResult = ({
       ) {
         errorMessage.street_direction = "general.required";
       }
-      if (!form.unit.trim() && isRequired(formCongif, "street_apt_unit")) {
-        errorMessage.unit = "general.required";
+      if (!form.home_unit.trim() && isRequired(formCongif, "street_apt_unit")) {
+        errorMessage.home_unit = "general.required";
       }
       if (!form.home_city.trim() && isRequired(formCongif, "city")) {
         errorMessage.home_city = "general.required";
@@ -1107,30 +1255,25 @@ export const RegisterResult = ({
         if (form.mailingAddressType === "STANDARD") {
           if (
             !form.mailing_address.trim() &&
-            isRequired(formCongif, "mailing_address")
+            isRequired(formCongif, "mailing_address", form.has_mailing_address)
           ) {
             errorMessage.mailing_address = "general.required";
           }
-          console.log("!form.mailing_state.trim()", !form.mailing_city.trim());
-          console.log(
-            "isRequired(formCongif, ",
-            isRequired(formCongif, "mailing_city"),
-          );
           if (
             !form.mailing_city.trim() &&
-            isRequired(formCongif, "mailing_city")
+            isRequired(formCongif, "mailing_city", form.has_mailing_address)
           ) {
             errorMessage.mailing_city = "general.required";
           }
           if (
             !form.mailing_state.trim() &&
-            isRequired(formCongif, "mailing_state")
+            isRequired(formCongif, "mailing_state", form.has_mailing_address)
           ) {
             errorMessage.mailing_state = "general.required";
           }
           if (
             !form.mailing_zip_code.trim() &&
-            isRequired(formCongif, "mailing_zip_code")
+            isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
           ) {
             errorMessage.mailing_zip_code = "general.required";
           } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
@@ -1139,25 +1282,29 @@ export const RegisterResult = ({
         } else if (form.mailingAddressType === "PO_BOX") {
           if (
             !form.mailing_po_box_number.trim() &&
-            isRequired(formCongif, "mailing_po_box_number")
+            isRequired(
+              formCongif,
+              "mailing_po_box_number",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_po_box_number = "general.required";
           }
           if (
             !form.mailing_city.trim() &&
-            isRequired(formCongif, "mailing_city")
+            isRequired(formCongif, "mailing_city", form.has_mailing_address)
           ) {
             errorMessage.mailing_city = "general.required";
           }
           if (
             !form.mailing_state.trim() &&
-            isRequired(formCongif, "mailing_state")
+            isRequired(formCongif, "mailing_state", form.has_mailing_address)
           ) {
             errorMessage.mailing_state = "general.required";
           }
           if (
             !form.mailing_zip_code.trim() &&
-            isRequired(formCongif, "mailing_zip_code")
+            isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
           ) {
             errorMessage.mailing_zip_code = "general.required";
           } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
@@ -1166,34 +1313,49 @@ export const RegisterResult = ({
         } else if (form.mailingAddressType === "MILITARY") {
           if (
             !form.mailing_box_group_type.trim() &&
-            isRequired(formCongif, "mailing_box_group_type")
+            isRequired(
+              formCongif,
+              "mailing_box_group_type",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_box_group_type = "general.required";
           }
           if (
             !form.mailing_box_group_number.trim() &&
-            isRequired(formCongif, "mailing_box_group_number")
+            isRequired(
+              formCongif,
+              "mailing_box_group_number",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_box_group_number = "general.required";
           }
           if (
             !form.mailing_box_number.trim() &&
-            isRequired(formCongif, "mailing_box_number")
+            isRequired(
+              formCongif,
+              "mailing_box_number",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_box_number = "general.required";
           }
           if (
             !form.mailing_apo.trim() &&
-            isRequired(formCongif, "mailing_apo")
+            isRequired(formCongif, "mailing_apo", form.has_mailing_address)
           ) {
             errorMessage.mailing_apo = "general.required";
           }
-          if (!form.mailing_ap.trim() && isRequired(formCongif, "mailing_ap")) {
+          if (
+            !form.mailing_ap.trim() &&
+            isRequired(formCongif, "mailing_ap", form.has_mailing_address)
+          ) {
             errorMessage.mailing_ap = "general.required";
           }
           if (
             !form.mailing_zip_code.trim() &&
-            isRequired(formCongif, "mailing_zip_code")
+            isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
           ) {
             errorMessage.mailing_zip_code = "general.required";
           } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
@@ -1202,66 +1364,58 @@ export const RegisterResult = ({
         } else if (form.mailingAddressType === "INTERNATIONAL") {
           if (
             !form.mailing_address_line1.trim() &&
-            isRequired(formCongif, "mailing_address_line1")
+            isRequired(
+              formCongif,
+              "mailing_address_line1",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_address_line1 = "general.required";
           }
           if (
             !form.mailing_address_line2.trim() &&
-            isRequired(formCongif, "mailing_address_line2")
+            isRequired(
+              formCongif,
+              "mailing_address_line2",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_address_line2 = "general.required";
           }
           if (
             !form.mailing_address_line3.trim() &&
-            isRequired(formCongif, "mailing_address_line3")
+            isRequired(
+              formCongif,
+              "mailing_address_line3",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_address_line3 = "general.required";
           }
           if (
             !form.mailing_country.trim() &&
-            isRequired(formCongif, "mailing_country")
+            isRequired(formCongif, "mailing_country", form.has_mailing_address)
           ) {
             errorMessage.mailing_country = "general.required";
           }
           if (
             !form.mailing_postal_code.trim() &&
-            isRequired(formCongif, "mailing_postal_code")
+            isRequired(
+              formCongif,
+              "mailing_postal_code",
+              form.has_mailing_address,
+            )
           ) {
             errorMessage.mailing_postal_code = "general.required";
           }
         }
       }
-      // if (form.has_mailing_address || isRequired(formCongif, "has_mailing_address")) {
-      //   if (!form.mailing_address.trim() || isRequired(formCongif, "mailing_address")) {
-      //     errorMessage.mailing_address = "general.required";
-      //   }
-      //   if (!form.mailing_unit.trim() || isRequired(formCongif, "mailing_unit")) {
-      //     errorMessage.mailing_unit = "general.required";
-      //   }
-      //   if (!form.mailing_city.trim() || isRequired(formCongif, "mailing_city")) {
-      //     errorMessage.mailing_city = "general.required";
-      //   }
-      //   if (!form.mailing_state.trim() || isRequired(formCongif, "mailing_state")) {
-      //     errorMessage.mailing_state = "general.required";
-      //   }
-      //   if (!form.mailing_zip_code.trim() || isRequired(formCongif, "mailing_zip_code")) {
-      //     errorMessage.mailing_zip_code = "general.required";
-      //   } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
-      //     errorMessage.mailing_zip_code = "form_fields.zip_code_error";
-      //   }
-      // }
       if (
         !form.phone.trim() &&
-        isRequired(formCongif, "phone_number", form.opt_in_sms)
+        isRequired(formCongif, "phone", form.opt_in_sms)
       ) {
         errorMessage.phone = "michigan.phone_election_error";
-      } else if (
-        form.phone.trim() &&
-        (form.opt_in_sms ||
-          formCongif?.fields?.phone?.validations?.enforce_e164) &&
-        !fullPhoneRegex.test(form.phone.trim())
-      ) {
+      } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
         errorMessage.phone = "form_fields.invalid_phone";
       }
       if (form.opt_in_sms && isRequired(formCongif, "opt_in_sms")) {
@@ -1293,11 +1447,14 @@ export const RegisterResult = ({
     const needsValidation = (
       configKey: string,
       stateKey: keyof RegisterFormState,
+      dependentValue?: boolean,
     ) => {
       const isFieldVisible = isVisible(formCongif, configKey);
       const hasStateValue = form[stateKey] !== undefined;
       return (
-        isFieldVisible && hasStateValue && isRequired(formCongif, configKey)
+        isFieldVisible &&
+        hasStateValue &&
+        isRequired(formCongif, configKey, dependentValue)
       );
     };
 
@@ -1349,11 +1506,12 @@ export const RegisterResult = ({
     }
 
     if (isRequired(formCongif, "date_of_birth")) {
-      if (!form.birthMonth?.trim())
-        errorMessage.birthMonth = "general.required";
-      if (!form.birthDay?.trim()) errorMessage.birthDay = "general.required";
-      if (!form.birthYear?.trim()) {
-        errorMessage.birthYear = "general.required";
+      if (
+        (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
+        (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
+        (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
+      ) {
+        errorMessage.birthDay = "general.required";
       } else if (Number(form.birthYear) < 1900) {
         errorMessage.birthYear = "form_fields.invalid_year";
       }
@@ -1381,7 +1539,7 @@ export const RegisterResult = ({
 
           if (isInvalidDate) {
             errorMessage.birthDay = "form_fields.invalid_birth_date";
-          } else if (isWA === "connected_PA") {
+          } else {
             const paDob = evaluatePaConnectedRegistrationDateOfBirth(
               form.birthYear,
               form.birthMonth,
@@ -1389,29 +1547,32 @@ export const RegisterResult = ({
               today,
             );
             if (paDob.outcome === "too_young") {
-              errorMessage.date_of_birth = paDob.errorMessageKey;
+              // "You must be 18..."
+              errorMessage.birthMonth = paDob.errorMessageKey;
               form.pa_preregistration_age_window = false;
             } else if (paDob.outcome === "eligible") {
+              // >= 18 (preregistrationAgeWindow: false),
+              // And from 17.5 to 18 (preregistrationAgeWindow: true)
+              // No Error
               form.date_of_birth =
                 form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
               form.pa_preregistration_age_window =
                 paDob.preregistrationAgeWindow;
-            }
-          } else {
-            let age = today.getFullYear() - date.getFullYear();
-            const monthDiff = today.getMonth() - date.getMonth();
-            const dayDiff = today.getDate() - date.getDate();
-
-            if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-              age--;
-            }
-
-            if (age < formCongif.validations.min_age) {
-              errorMessage.birthMonth = "form_fields.age_eligibility_error";
             } else {
-              form.date_of_birth =
-                form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
-              form.pa_preregistration_age_window = false;
+              let age = today.getFullYear() - date.getFullYear();
+              const monthDiff = today.getMonth() - date.getMonth();
+              const dayDiff = today.getDate() - date.getDate();
+
+              if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                age--;
+              }
+
+              if (age < formCongif.validations.min_age) {
+                errorMessage.birthMonth = "form_fields.age_eligibility_error";
+              } else {
+                form.date_of_birth =
+                  form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
+              }
             }
           }
         }
@@ -1424,18 +1585,21 @@ export const RegisterResult = ({
     )
       errorMessage.home_address = "general.required";
     const hasSecondaryAddressValue = [
-      form.unit_type?.trim(),
-      form.unit?.trim(),
+      form.home_unit_type?.trim(),
+      form.home_unit?.trim(),
     ].some(Boolean);
     if (isWA === "connected_PA" && hasSecondaryAddressValue) {
-      if (!form.unit_type?.trim()) {
-        errorMessage.unit_type = "general.required";
+      if (!form.home_unit_type?.trim()) {
+        errorMessage.home_unit_type = "general.required";
       }
-      if (!form.unit?.trim()) {
-        errorMessage.unit = "general.required";
+      if (!form.home_unit?.trim()) {
+        errorMessage.home_unit = "general.required";
       }
-    } else if (needsValidation("home_unit", "unit") && !form.unit?.trim())
-      errorMessage.unit = "general.required";
+    } else if (
+      needsValidation("home_unit", "home_unit") &&
+      !form.home_unit?.trim()
+    )
+      errorMessage.home_unit = "general.required";
     if (needsValidation("home_city", "home_city") && !form.home_city?.trim())
       errorMessage.home_city = "general.required";
     if (needsValidation("home_state", "state") && !form.state?.trim())
@@ -1459,6 +1623,8 @@ export const RegisterResult = ({
         "mailing_city",
         "mailing_state",
         "mailing_zip_code",
+        "mailing_unit_type",
+        "mailing_unit_number",
       ];
       mailFields.forEach(field => {
         const fieldValue = form[field];
@@ -1478,6 +1644,8 @@ export const RegisterResult = ({
         "prev_city",
         "prev_state",
         "prev_zip_code",
+        "prev_unit_number",
+        "prev_unit_type",
       ];
       mailFields.forEach(field => {
         const fieldValue = form[field];
@@ -1575,8 +1743,8 @@ export const RegisterResult = ({
           }
         }
       }
-      if (step === 3) {
-        if (form.has_no_ssn !== null && !form.has_no_ssn) {
+      if (step === 4) {
+        if (form.has_no_ssn !== true) {
           if (
             !form.last_four_ss_number.trim() ||
             form.last_four_ss_number.trim().length !== 4
@@ -1598,16 +1766,31 @@ export const RegisterResult = ({
           errorMessage.helper_electronic_signature_acknowledged =
             "pennsylvania.helper_terms_confirm_required";
         }
+        if (form.someone_helped) {
+          if (!form.helper_name.trim()) {
+            errorMessage.helper_name = "general.required";
+          }
+          if (!form.helper_address.trim()) {
+            errorMessage.helper_address = "general.required";
+          }
+          if (!form.helper_phone.trim()) {
+            errorMessage.helper_phone = "general.required";
+          }
+        }
       }
+      if (!form.home_county.trim()) {
+        errorMessage.home_county = "general.required";
+      }
+
       if (!form.race.trim() && isRequired(formCongif, "race")) {
         errorMessage.race = "general.required";
       }
       if (!form.party.trim() && isRequired(formCongif, "party")) {
         errorMessage.party = "general.required";
       }
-      if (!form.home_county.trim()) {
-        errorMessage.home_county = "general.required";
-      }
+    }
+    if (form.volunteer && isRequired(formCongif, "volunteer")) {
+      errorMessage.volunteer = "general.required";
     }
 
     if (needsValidation("opt_in_email", "opt_in_email") && !form.opt_in_email) {
@@ -1618,7 +1801,7 @@ export const RegisterResult = ({
     return !Object.values(errorMessage).some(value => !!value);
   };
 
-  const handleMainButtonClick = () => {
+  const handleMainButtonClick = async () => {
     if (flowType === "connected_ovr") {
       if (step === 1) {
         if (validateConnectedOvr()) {
@@ -1636,8 +1819,25 @@ export const RegisterResult = ({
               header: t("was_problem_text"),
             });
           } else {
-            if (!form.unit) navigation.navigate("SuccessMI", { state });
-            else navigation.navigate("FailMI", { state, form });
+            if (form.pa_preregistration_age_window) {
+              navigation.navigate("Under18", { state });
+            } else {
+              const miPayload = mapFormStateToMICovrPayload(form);
+              const response = await submitMICovr(miPayload);
+              if (response.data.registrant_uid) {
+                await AsyncStorage.setItem(
+                  "rtv_registrant_uid",
+                  response.data.registrant_uid,
+                );
+
+                await AsyncStorage.setItem(
+                  "rtv_voter_name",
+                  miPayload.full_name,
+                );
+
+                navigation.navigate("SuccessMI", { state });
+              } else navigation.navigate("FailMI", { state, form });
+            }
           }
         }
       }
@@ -1647,52 +1847,9 @@ export const RegisterResult = ({
         //     setStep(2);
         //   }
         // } else {
-        if (form.mailForm) {
-          navigation.navigate("Success", {
-            form,
-            state,
-            workflow_type: "ovr", // ? state.ovr_type
-            finish_with_state: false,
-          });
-        } else
-          navigation.navigate("Print", {
-            form,
-            state,
-            workflow_type: "ovr", // ? state.ovr_type
-            finish_with_state: false,
-          });
-      }
-    } else if (flowType === "ovr_state") {
-      if (step === 1) {
-        if (validate()) {
-          if (form.has_no_state_license) {
-            setShowRedirectText(true);
-          }
-          setStep(2);
-        }
-      } else if (step === 2) {
-        if (validate()) {
-          if (form.has_no_state_license) {
-            if (form.mailForm) {
-              navigation.navigate("Success", {
-                form,
-                state,
-                workflow_type: "ovr", // ? state.ovr_type
-                finish_with_state: false,
-              });
-            } else
-              navigation.navigate("Print", {
-                form,
-                state,
-                workflow_type: "ovr", // ? state.ovr_type
-                finish_with_state: false,
-              });
-          } else {
-            setStep(3);
-          }
-        }
-      } else {
-        if (validate()) {
+        if (form.pa_preregistration_age_window) {
+          navigation.navigate("Under18", { state });
+        } else {
           if (form.mailForm) {
             navigation.navigate("Success", {
               form,
@@ -1709,31 +1866,98 @@ export const RegisterResult = ({
             });
         }
       }
+    } else if (flowType === "ovr_state") {
+      if (step === 1) {
+        if (validate()) {
+          if (form.has_no_state_license) {
+            setWorkflow("nvra");
+            setShowRedirectText(true);
+          }
+          setStep(2);
+        }
+      } else if (step === 2) {
+        if (validate()) {
+          if (form.has_no_state_license) {
+            if (form.pa_preregistration_age_window) {
+              navigation.navigate("Under18", { state });
+            } else {
+              if (form.mailForm) {
+                navigation.navigate("Success", {
+                  form,
+                  state,
+                  workflow_type: "ovr", // ? state.ovr_type
+                  finish_with_state: false,
+                });
+              } else
+                navigation.navigate("Print", {
+                  form,
+                  state,
+                  workflow_type: "ovr", // ? state.ovr_type
+                  finish_with_state: false,
+                });
+            }
+          } else {
+            setWorkflow("nvra");
+            setShowRedirectText(true);
+            setStep(3);
+          }
+        }
+      } else {
+        if (validate()) {
+          if (form.pa_preregistration_age_window) {
+            navigation.navigate("Under18", { state });
+          } else {
+            if (form.mailForm) {
+              navigation.navigate("Success", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+            } else
+              navigation.navigate("Print", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+          }
+        }
+      }
     } else if (flowType === "connected_WA") {
       if (step === 1) {
         if (validateWA("connected_WA")) {
           if (!form.has_no_state_license) {
-            navigation.navigate("Print", {
-              form,
-              state,
-              workflow_type: "ovr", // ? state.ovr_type
-              finish_with_state: false,
-              under_construction: true,
-            });
+            if (form.pa_preregistration_age_window) {
+              navigation.navigate("Under18", { state });
+            } else {
+              navigation.navigate("Print", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+            }
           } else {
+            setWorkflow("nvra");
             setShowRedirectText(true);
             setStep(2);
           }
         }
       } else {
-        // ???
-        navigation.navigate("Print", {
-          form,
-          state,
-          workflow_type: "ovr", // ? state.ovr_type
-          finish_with_state: false,
-          under_construction: true,
-        });
+        if (validateWA()) {
+          // ???
+          if (form.pa_preregistration_age_window) {
+            navigation.navigate("Under18", { state });
+          } else {
+            navigation.navigate("Print", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+            });
+          }
+        }
       }
     } else if (flowType === "connected_PA") {
       if (step === 1) {
@@ -1745,27 +1969,39 @@ export const RegisterResult = ({
           setStep(3);
         }
       } else if (step === 3) {
+        if (form.has_no_state_license) {
+          setStep(4);
+        } else {
+          if (validateWA("connected_PA")) {
+            if (form.pa_preregistration_age_window) {
+              navigation.navigate("Under18", { state });
+            } else {
+              navigation.navigate("Print", {
+                form,
+                state,
+                workflow_type: "ovr", // ? state.ovr_type
+                finish_with_state: false,
+              });
+            }
+          }
+        }
+      } else if (step === 4) {
         if (validateWA("connected_PA")) {
-          if (form.has_no_state_license) {
-            setStep(4);
+          setStep(5);
+        }
+      } else {
+        if (validateWA("connected_PA")) {
+          if (form.pa_preregistration_age_window) {
+            navigation.navigate("Under18", { state });
           } else {
             navigation.navigate("Print", {
               form,
               state,
               workflow_type: "ovr", // ? state.ovr_type
               finish_with_state: false,
-              under_construction: true,
             });
           }
         }
-      } else {
-        navigation.navigate("Print", {
-          form,
-          state,
-          workflow_type: "ovr", // ? state.ovr_type
-          finish_with_state: false,
-          under_construction: true,
-        });
       }
     } else if (flowType === "connected_CA") {
       if (step === 1) {
@@ -1774,17 +2010,23 @@ export const RegisterResult = ({
         }
       } else if (step === 2) {
         if (validateWA()) {
+          setWorkflow("nvra");
           setShowRedirectText(true);
           setStep(3);
         }
       } else {
-        navigation.navigate("Print", {
-          form,
-          state,
-          workflow_type: "ovr", // ? state.ovr_type
-          finish_with_state: false,
-          under_construction: true,
-        });
+        if (validateWA()) {
+          if (form.pa_preregistration_age_window) {
+            navigation.navigate("Under18", { state });
+          } else {
+            navigation.navigate("Print", {
+              form,
+              state,
+              workflow_type: "ovr", // ? state.ovr_type
+              finish_with_state: false,
+            });
+          }
+        }
       }
     } else navigation.navigate("Home");
   };
@@ -1796,7 +2038,7 @@ export const RegisterResult = ({
           partner_id: "1",
           state_abbreviation: state.abbreviation,
           locale: i18n.language,
-          workflow_type: "ovr",
+          workflow_type: workflow,
         });
         const config = response.data.configuration;
         setFormCongif(response.data.configuration);
@@ -1818,7 +2060,9 @@ export const RegisterResult = ({
     };
 
     fetchConfig();
+  }, [workflow]);
 
+  useEffect(() => {
     const fetchQuestions = async () => {
       try {
         const response = await getSurveyQuestions({
@@ -1837,13 +2081,17 @@ export const RegisterResult = ({
     };
 
     fetchQuestions();
-  }, [state.abbreviation, state.ovr_locales]);
+  }, []);
 
   useEffect(() => {
     if (pageFromLookup === "paper" || pageFromLookup === "connected_ovr") {
       setStep(1);
     }
   }, [pageFromLookup]);
+
+  useEffect(() => {
+    setWorkflow(workflowType || "ovr");
+  }, [workflowType]);
 
   const goBack = () => {
     setShowRedirectText(false);

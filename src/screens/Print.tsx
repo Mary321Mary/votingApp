@@ -18,6 +18,7 @@ import { RootStackParamList } from "@/components/organisms/Navigation";
 import { requestTokenDoc, requestTokenPDF } from "@/utils/api";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState, StateData } from "@/utils/types";
+import { downloadPdf } from "@/utils/downloadFile";
 
 interface PrintScreenProps {
   route: {
@@ -42,8 +43,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const { form, state, workflow_type, finish_with_state, under_construction } =
-    route.params as any;
+  const { form, state, workflow_type, finish_with_state } = route.params as any;
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,9 +53,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
 
   useEffect(() => {
     isMounted.current = true;
-    if (under_construction) {
-      setError(true);
-    } else startProcess();
+    startProcess();
 
     return () => {
       isMounted.current = false;
@@ -68,7 +66,8 @@ export default function PrintScreen({ route }: PrintScreenProps) {
       const responseToken = await requestTokenPDF({
         registrant: {
           ...cleanRegistrant,
-          id_number_radio_button_set: false,
+          has_ssn: !state.form.has_no_ssn,
+          has_state_license: !state.form.has_no_state_license,
           phone_type: "Mobile",
         },
         workflow_type: workflow_type,
@@ -116,63 +115,25 @@ export default function PrintScreen({ route }: PrintScreenProps) {
     checkStatus();
   };
   const handleDownload = async () => {
-    // if (!pdfUrl) return;
-    // try {
-    //   setLoading(true);
-    //   const fileName = "voter_registration.pdf";
-    //   const localFile = `${RNFS.CachesDirectoryPath}/${fileName}`;
-    //   const options = {
-    //     fromUrl: pdfUrl,
-    //     toFile: localFile,
-    //   };
-    //   const result = await RNFS.downloadFile(options).promise;
-    //   if (result.statusCode === 200) {
-    //     await Share.open({
-    //       url: `file://${localFile}`,
-    //       type: "application/pdf",
-    //       title: "Print Registration Form",
-    //     });
-    //   } else {
-    //     Alert.alert("Error", "Failed to download PDF");
-    //   }
-    // } catch (e) {
-    //   console.log("Sharing error or cancelled:", e);
-    // } finally {
-    //   setLoading(false);
-    // }
+    if (!pdfUrl) return;
+
+    downloadPdf(pdfUrl, "form_placeholder.pdf");
   };
 
-  if (form.state === "TN") {
+  if (error) {
     return (
       <View style={styles.container}>
         <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
-        <Text style={styles.bodyText}>
-          {!form.has_no_state_license
-            ? "Finish your voter registration online with TN"
-            : "Finish your voter registration with RTV"}
+        <Text style={styles.errorText}>
+          Something went wrong or page under construction.
         </Text>
         <Button
           title={t("general.restart_test")}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => navigation.navigate("Home" as never)}
         />
       </View>
     );
   }
-
-  // if (error) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
-  //       <Text style={styles.errorText}>
-  //         Something went wrong or page under construction.
-  //       </Text>
-  //       <Button
-  //         title={t("general.restart_test")}
-  //         onPress={() => navigation.navigate("Home" as never)}
-  //       />
-  //     </View>
-  //   );
-  // }
 
   return (
     <View style={styles.container}>

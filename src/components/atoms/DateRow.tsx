@@ -1,30 +1,38 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet, TextInput } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 
-interface DateRowProps {
-  value: RegisterFormState;
+interface DateField {
+  name: keyof RegisterFormState;
+  value: string;
+  errorText?: string;
+}
+interface DateOfBirthFields {
+  day: DateField;
+  month: DateField;
+  year: DateField;
+}
+interface DateOfBirthProps {
+  value: DateOfBirthFields;
   disabled?: boolean;
-  useIssue?: boolean;
   updateField: <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K],
   ) => void;
 }
 
-export const DateRow = ({
+export const DateRow: React.FC<DateOfBirthProps> = ({
   value,
   disabled = false,
-  useIssue = false,
   updateField,
-}: DateRowProps) => {
+}) => {
+  const { day, month, year } = value;
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  const [error, setError] = useState("");
 
   const MONTHS = [
     { value: "", name: t("general.months.month") },
@@ -44,91 +52,73 @@ export const DateRow = ({
 
   const handleDayChange = (text: string) => {
     if (/^\d*$/.test(text) && text.length <= 2) {
-      if (useIssue) updateField("issueDay", text);
-      else updateField("birthDay", text);
+      updateField(day.name, text);
     }
   };
 
   return (
-    <View style={styles.dateRow}>
-      <View style={styles.inputBlock}>
-        <View
+    <>
+      {year.errorText && <Text style={styles.errorText}>{year.errorText}</Text>}
+      {day.errorText && <Text style={styles.errorText}>{day.errorText}</Text>}
+      {month.errorText && (
+        <Text style={styles.errorText}>{month.errorText}</Text>
+      )}
+      <View style={styles.dateRow}>
+        <View style={styles.inputBlock}>
+          <View
+            style={[
+              styles.pickerWrapper,
+              disabled && { backgroundColor: theme.borderColor },
+            ]}
+          >
+            <Picker
+              enabled={!disabled}
+              selectedValue={month.value}
+              onValueChange={(text: string) => updateField(month.name, text)}
+            >
+              {MONTHS.map(monthItem => (
+                <Picker.Item
+                  key={monthItem.value}
+                  label={monthItem.name}
+                  value={monthItem.value}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+        <TextInput
           style={[
-            styles.pickerWrapper,
+            styles.dateInput,
             disabled && { backgroundColor: theme.borderColor },
           ]}
-        >
-          <Picker
-            enabled={!disabled}
-            selectedValue={useIssue ? value.issueMonth : value.birthMonth}
-            onValueChange={(text: string) => {
-              if (useIssue) updateField("issueMonth", text);
-              else updateField("birthMonth", text);
-            }}
-          >
-            {MONTHS.map(month => (
-              <Picker.Item
-                key={month.value}
-                label={month.name}
-                value={month.value}
-              />
-            ))}
-          </Picker>
-        </View>
+          placeholder="DD"
+          keyboardType="number-pad"
+          maxLength={2}
+          editable={!disabled}
+          value={day.value}
+          onChangeText={handleDayChange}
+        />
+        <TextInput
+          style={[
+            styles.dateInput,
+            disabled && { backgroundColor: theme.borderColor },
+          ]}
+          placeholder="YYYY"
+          keyboardType="number-pad"
+          maxLength={4}
+          editable={!disabled}
+          value={year.value}
+          onChangeText={(text: string) => updateField(year.name, text)}
+        />
       </View>
-      <TextInput
-        style={[
-          styles.dateInput,
-          disabled && { backgroundColor: theme.borderColor },
-        ]}
-        placeholder="DD"
-        keyboardType="number-pad"
-        maxLength={2}
-        editable={!disabled}
-        value={useIssue ? value.issueDay : value.birthDay}
-        onChangeText={handleDayChange}
-      />
-      <TextInput
-        style={[
-          styles.dateInput,
-          disabled && { backgroundColor: theme.borderColor },
-        ]}
-        placeholder="YYYY"
-        keyboardType="number-pad"
-        maxLength={4}
-        editable={!disabled}
-        value={useIssue ? value.issueYear : value.birthYear}
-        onChangeText={(text: string) => {
-          if (useIssue) updateField("issueYear", text);
-          else updateField("birthYear", text);
-          if (Number(text) < 1900) {
-            setError(t("form_fields.invalid_year"));
-          } else {
-            setError("");
-          }
-        }}
-      />
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-    </View>
+    </>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    section: {
-      marginTop: 5,
-    },
     inputBlock: {
       width: "100%",
-    },
-    label: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      fontWeight: "medium",
-      textTransform: "uppercase",
-    },
-    required: {
-      color: theme.secondary,
     },
     dateRow: {
       gap: 10,
