@@ -8,6 +8,7 @@ import type {
   FetchDataCollectionConfigResponse,
   FetchDataSurveyQuestionsResponse,
   LoginCredentials,
+  PACovrCheckResponse,
   PDFDocRequest,
   PDFDocResponse,
   PDFTokenRequest,
@@ -17,6 +18,7 @@ import type {
   SubmitEmailZipRequest,
   SubmitEmailZipResponse,
   SubmitMICovrPayload,
+  SubmitPACovrPayload,
   SubmitVoterStatusResponse,
   UIConfig,
   User,
@@ -164,6 +166,28 @@ export function checkMICovr(
 ) {
   return HttpClient.Client.post<VoterStatusData, VoterStatusResponse>(
     ENDPOINTS.CHECK_MI_COVR,
+    data,
+    headers,
+  );
+}
+
+export function submitPACovr(
+  data: SubmitPACovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<SubmitPACovrPayload, SubmitVoterStatusResponse>(
+    ENDPOINTS.SUBMIT_PA_COVR,
+    data,
+    headers,
+  );
+}
+
+export function checkPACovr(
+  data: VoterStatusData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<VoterStatusData, PACovrCheckResponse>(
+    ENDPOINTS.CHECK_PA_COVR,
     data,
     headers,
   );

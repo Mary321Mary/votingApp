@@ -67,7 +67,8 @@ export const ConnectedPAStep4Signature = ({
 
       <SignatureUpload
         initialValue={value.signature_base64}
-        error={errorMessages.signature_base64}
+        error={t(errorMessages.signature_base64)}
+        selectButtonTextKey="pennsylvania.upload_signature_button_text"
         onChange={({ base64 }) => {
           updateField("signature_base64", base64);
         }}

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { DateRow } from "@/components/atoms/DateRow";
+import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { Checkbox } from "@/components/atoms/Checkbox";
@@ -23,9 +23,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import RenderHTML from "react-native-render-html";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { submitEmailZip } from "@/utils/api";
+import { getSurveyQuestions, submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
-import { evaluatePaConnectedRegistrationDateOfBirth } from "@/components/organisms/RegisterResult";
+import { evaluatePaConnectedRegistrationDateOfBirth } from "@/components/atoms/DateOfBirth/dateValidation";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -44,10 +44,17 @@ const EMPTY_ERROR_MESSAGES = {
   email: "",
   emailConsent: "",
   smsConsent: "",
+  volunteer: "",
+
   birthMonth: "",
   birthDay: "",
   birthYear: "",
   date_of_birth: "",
+
+  survey_question_1: "",
+  survey_answer_1: "",
+  survey_question_2: "",
+  survey_answer_2: "",
 };
 
 export const CheckVoterStatusScreen = ({
@@ -176,7 +183,7 @@ export const CheckVoterStatusScreen = ({
 
           if (paDob.outcome === "too_young") {
             // "You must be 18..."
-            errorMessage.birthMonth = paDob.errorMessageKey;
+            errorMessage.birthMonth = paDob.errorMessageKey || "";
           } else if (paDob.outcome === "eligible") {
             // >= 18 (preregistrationAgeWindow: false),
             // And from 17.5 to 18 (preregistrationAgeWindow: true)
@@ -209,6 +216,27 @@ export const CheckVoterStatusScreen = ({
     return !Object.values(errorMessage).some(value => value.trim() !== "");
   };
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await getSurveyQuestions({
+          partner_id: form.partner_id.toString(),
+          locale: i18n.language,
+        });
+        const data = response.data;
+        setForm((prev: CheckRegistrationStatus) => ({
+          ...prev,
+          survey_question_1: data.survey_question_1,
+          survey_question_2: data.survey_question_2,
+        }));
+      } catch (err) {
+        console.error("Failed to fetch Data configuration:", err);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
   return (
     <ScrollView>
       <Header text={t("lookup_page.check_voter_registration_status")} />
@@ -229,31 +257,6 @@ export const CheckVoterStatusScreen = ({
             errorMessage={errMsg.last_name}
             onChangeText={(text: string) => updateField("last_name", text)}
           />
-
-          {/* <View>
-            <Text style={styles.inputLabel}>
-              {t("form_fields.name_suffix")}{" "}
-            </Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                selectedValue={form.suffix}
-                onValueChange={itemValue => updateField("suffix", itemValue)}
-              >
-                <Picker.Item label="" value="" />
-                <Picker.Item label="Jr." value="Jr." />
-                <Picker.Item label="Sr." value="Sr." />
-                <Picker.Item label="I" value="I" />
-                <Picker.Item label="II" value="II" />
-                <Picker.Item label="III" value="III" />
-                <Picker.Item label="IV" value="IV" />
-                <Picker.Item label="V" value="V" />
-                <Picker.Item label="VI" value="VI" />
-                <Picker.Item label="VII" value="VII" />
-              </Picker>
-            </View>
-          </View> */}
         </View>
 
         <Text style={styles.label}>{t("form_fields.dob")}</Text>
@@ -317,6 +320,27 @@ export const CheckVoterStatusScreen = ({
           />
         </View>
 
+        <View style={styles.divider} />
+        <Text style={styles.title}>
+          {t("nvra_form_page.questions_for_you")}
+        </Text>
+
+        <InputField
+          value={form.survey_answer_1}
+          errorMessage={t(errMsg.survey_question_1)}
+          label={form.survey_question_1}
+          onChangeText={(text: string) => updateField("survey_answer_1", text)}
+        />
+
+        <InputField
+          value={form.survey_answer_2}
+          errorMessage={t(errMsg.survey_question_2)}
+          label={form.survey_question_2}
+          onChangeText={(text: string) => updateField("survey_answer_2", text)}
+        />
+
+        <View style={styles.divider} />
+
         {/* Checkboxes */}
         <Checkbox
           label={t("general.opt_ins.email_opt_in")}
@@ -333,6 +357,16 @@ export const CheckVoterStatusScreen = ({
             updateField("smsConsent", checked)
           }
         />
+
+        <Checkbox
+          label={t("general.opt_ins.volunteer")}
+          value={form.volunteer}
+          errorText={t(errMsg.volunteer)}
+          onValueChange={(checked: boolean) =>
+            updateField("volunteer", checked)
+          }
+        />
+
         <RenderHTML
           contentWidth={width}
           source={{
@@ -490,5 +524,11 @@ const getStyles = (theme: any) =>
       color: "#fff",
       fontWeight: "600",
       fontSize: 16,
+    },
+
+    divider: {
+      height: 1,
+      backgroundColor: theme.gray,
+      marginVertical: 16,
     },
   });

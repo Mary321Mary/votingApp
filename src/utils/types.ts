@@ -74,6 +74,7 @@ export interface AuthMeResponse {
 // ---------------------------------------------------
 
 export const OVR_TYPE_MAP: Record<string, string> = {
+  paper: "paper",
   paper_only: "paper",
   paper_or_finish_with_state: "ovr_state",
   connected_MI: "connected_ovr",
@@ -173,8 +174,10 @@ export type RegisterFormState = {
   // ADDITIONAL
   race: string;
   party: string;
+  changed_party: boolean;
   home_county: string;
   signature_base64: string;
+  signature_upload_method: "" | "local" | "device";
 
   // CONTACT
   birthMonth: string;
@@ -188,6 +191,7 @@ export type RegisterFormState = {
   issueMonth: string;
   issueDay: string;
   issueYear: string;
+  date_of_issue: string;
 
   // CONSENTS
   opt_in_sms: boolean;
@@ -292,8 +296,10 @@ export type RegisterFormStateError = {
   // ADDITIONAL
   race: string;
   party: string;
+  changed_party: string;
   home_county: string;
   signature_base64: string;
+  signature_upload_method: string;
 
   // CONTACT
   birthMonth: string;
@@ -307,6 +313,7 @@ export type RegisterFormStateError = {
   issueMonth: string;
   issueDay: string;
   issueYear: string;
+  date_of_issue: string;
 
   // CONSENTS
   opt_in_sms: string;
@@ -350,10 +357,14 @@ export type SubmitMICovrPayload = {
   is_30_day_resident: boolean;
   registration_cancellation_authorized: boolean;
   digital_signature_authorized: boolean;
+  confirm_affirm_privacy_notice: boolean;
+  updated_dln_recently: boolean;
+  requested_duplicate_dln_today: boolean;
   full_name: string;
   date_of_birth: string; // YYYY-MM-DD
   eye_color_code: string;
   dln: string;
+  ssn4: string;
   email_address: string;
   registration_address_number: string;
   registration_address_street_name: string;
@@ -407,10 +418,17 @@ export type CheckRegistrationStatus = {
   phone: string;
   emailConsent: boolean;
   smsConsent: boolean;
+  volunteer: boolean;
+
   birthMonth: string;
   birthDay: string;
   birthYear: string;
   date_of_birth: string;
+
+  survey_question_1: string;
+  survey_answer_1: string;
+  survey_question_2: string;
+  survey_answer_2: string;
 };
 export type CheckRegistrationStatusError = {
   partner_id: string;
@@ -424,10 +442,17 @@ export type CheckRegistrationStatusError = {
   email: string;
   emailConsent: string;
   smsConsent: string;
+  volunteer: string;
+
   birthMonth: string;
   birthDay: string;
   birthYear: string;
   date_of_birth: string;
+
+  survey_question_1: string;
+  survey_answer_1: string;
+  survey_question_2: string;
+  survey_answer_2: string;
 };
 export type CheckRegistrationStatusResponse = {
   status: { success: boolean; errors: string[] | null };
@@ -480,6 +505,7 @@ export interface SubmitEmailZipResponseProps {
   workflowType?: string;
   showRedirectText?: boolean;
   form?: RegisterFormState;
+  initialStep?: 1 | 2 | 3;
 }
 
 export type MediaMainResponse = Record<string, unknown>;
@@ -577,4 +603,50 @@ export type VoterStatusResponse = {
   status: CovrStatus;
   voter_status_id: string | null;
   response_outcome: string | null;
+};
+
+export type SubmitPACovrPayload = {
+  partner_id: number;
+  locale: string;
+  email: string;
+  name_title: string;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  suffix?: string;
+  date_of_birth: string;
+  confirm_us_citizen: boolean;
+  confirm_will_be_18: boolean;
+  registration_address_1: string;
+  registration_city: string;
+  registration_zip_code: string;
+  registration_county: string;
+  phone: string;
+  phone_type: string;
+  party: string;
+  penndot_number: string;
+  confirm_no_penndot_number: boolean;
+  confirm_no_dl_or_ssn: boolean;
+  ssn4?: string;
+  signature?: string;
+  has_mailing_address: boolean;
+  mailing_address_1?: string;
+  mailing_city?: string;
+  mailing_state?: string;
+  mailing_zip_code?: string;
+  change_of_name: boolean;
+  change_of_address: boolean;
+  has_assistant: boolean;
+  helper_name?: string;
+  helper_address?: string;
+  helper_phone?: string;
+  opt_in_email: boolean;
+  opt_in_sms: boolean;
+  confirm_declaration: boolean;
+};
+
+export type PACovrCheckResponse = {
+  status: "pending" | "success" | "failure";
+  transaction_id: string | null;
+  submission_error: string[];
 };

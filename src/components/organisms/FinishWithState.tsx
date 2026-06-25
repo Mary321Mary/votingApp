@@ -1,9 +1,9 @@
-import { FormProps, RegisterFormState } from "@/utils/types";
 import React, { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Linking, StyleSheet, Text, View } from "react-native";
-import InputField from "../atoms/InputField";
+import { FormProps } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import QuestionsSection from "../atoms/QuestionsSection";
 
 function FinishWithState({
   state,
@@ -16,19 +16,6 @@ function FinishWithState({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-
-  const updateField = <K extends keyof RegisterFormState>(
-    key: K,
-    fieldValue: RegisterFormState[K],
-  ) => {
-    onChange({ ...value, [key]: fieldValue });
-    if (errorMessages[key].length) {
-      onChangeError({
-        ...errorMessages,
-        [key]: "",
-      });
-    }
-  };
 
   const handleOpenStateWebsite = async () => {
     const url = state.online_registration_system_url || "";
@@ -52,25 +39,12 @@ function FinishWithState({
         {t("finish_with_state_page2.notice2")}
       </Text>
 
-      <Text style={styles.questionLabel}>
-        {t("finish_with_state_page2.question_label")}
-      </Text>
-
-      <View style={styles.inputs}>
-        <InputField
-          value={value.survey_answer_1}
-          errorMessage={t(errorMessages.survey_question_1)}
-          label={value.survey_question_1}
-          onChangeText={(text: string) => updateField("survey_answer_1", text)}
-        />
-
-        <InputField
-          value={value.survey_answer_2}
-          errorMessage={t(errorMessages.survey_question_2)}
-          label={value.survey_question_2}
-          onChangeText={(text: string) => updateField("survey_answer_2", text)}
-        />
-      </View>
+      <QuestionsSection
+        value={value}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
 
       <View style={styles.buttons}>
         <Button
@@ -104,7 +78,6 @@ const getStyles = (theme: any) =>
       fontSize: 14,
       lineHeight: 22,
       color: theme.textColor,
-      marginBottom: 20,
     },
 
     questionLabel: {

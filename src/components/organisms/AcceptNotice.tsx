@@ -13,13 +13,8 @@ interface AcceptNoticeProps {
 
 function AcceptNotice({ state, handleMainButton }: AcceptNoticeProps) {
   const [accept, setAccept] = useState<boolean>(false);
+  const [showErrorAccept, setShowErrorAccept] = useState<boolean>(false);
   const { t } = useTranslation();
-
-  const handleToggle = () => {
-    const newValue = !accept;
-    setAccept(newValue);
-    // onChange(prev => ({ ...prev, accepted_notices: newValue }));
-  };
 
   return (
     <View style={styles.container}>
@@ -34,28 +29,27 @@ function AcceptNotice({ state, handleMainButton }: AcceptNoticeProps) {
       <Checkbox
         label={t("california.compliance_notices_checkbox")}
         value={accept}
-        onValueChange={handleToggle}
+        errorText={
+          showErrorAccept && t("california.compliance_notices_checkbox_error")
+        }
+        onValueChange={checked => {
+          setAccept(checked);
+          if (checked) setShowErrorAccept(false);
+        }}
       />
 
       <Button
         title={t("california.finish_ca_button_text")}
-        onPress={() =>
-          Linking.openURL(state.online_registration_system_url || "")
-        }
+        onPress={() => {
+          if (accept) {
+            if (state.online_registration_system_url)
+              Linking.openURL(state.online_registration_system_url || "");
+          } else {
+            setAccept(true);
+          }
+        }}
       />
       {handleMainButton}
-      {/* <TouchableOpacity
-        style={styles.checkboxWrapper}
-        onPress={handleToggle}
-        activeOpacity={0.7}
-      >
-        <View style={[styles.checkbox, accept && styles.checkboxChecked]}>
-          {accept && <Text style={styles.checkmark}>✓</Text>}
-        </View>
-        <Text style={styles.label}>
-          {t("california.compliance_notices_checkbox")}
-        </Text>
-      </TouchableOpacity> */}
     </View>
   );
 }

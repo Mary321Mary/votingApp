@@ -19,12 +19,14 @@ interface ConnectedPAStep3HasIDProps {
   value: RegisterFormState;
   handleMainButtonClick: () => void;
   goBack?: (step: SetStateAction<1 | 2 | 3 | 4 | 5>) => void;
+  isSubmitting?: boolean;
 }
 
 export const ConnectedPAStep3HasID = ({
   value,
   handleMainButtonClick,
   goBack,
+  isSubmitting = false,
 }: ConnectedPAStep3HasIDProps) => {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
@@ -34,6 +36,22 @@ export const ConnectedPAStep3HasID = ({
   const [showLast4Numbers, setShowLast4Numbers] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [showErrorConfirm, setShowErrorConfirm] = useState(false);
+
+  const hasMailingAddress = [
+    value.mailing_address?.trim(),
+    value.mailing_city?.trim(),
+    value.mailing_state?.trim(),
+    value.mailing_zip_code?.trim(),
+    value.mailing_unit?.trim(),
+  ].some(Boolean);
+
+  const hasPreviousAddress = [
+    value.prev_address?.trim(),
+    value.prev_city?.trim(),
+    value.prev_state?.trim(),
+    value.prev_zip_code?.trim(),
+    value.prev_unit?.trim(),
+  ].some(Boolean);
 
   const renderRow = (
     label: string,
@@ -65,6 +83,15 @@ export const ConnectedPAStep3HasID = ({
         </Text>,
         1,
       )}
+      {value.change_of_name &&
+        renderRow(
+          t("form_fields.previous_name"),
+          <Text style={styles.value}>
+            {value.prev_name_title} {value.prev_first_name}{" "}
+            {value.prev_middle_name} {value.prev_last_name}
+          </Text>,
+          1,
+        )}
 
       {renderRow(
         t("form_fields.dob"),
@@ -98,11 +125,55 @@ export const ConnectedPAStep3HasID = ({
         1,
       )}
 
-      {renderRow(
-        t("form_fields.political_party"),
-        <Text style={styles.value}>{value.party}</Text>,
-        1,
-      )}
+      {hasMailingAddress
+        ? renderRow(
+            t("nvra_form_page.section_mailing_address"),
+            <>
+              <Text style={styles.value}>
+                {[value.mailing_address, value.mailing_unit]
+                  .filter(Boolean)
+                  .join(" ")}
+              </Text>
+              <Text style={styles.value}>
+                {value.mailing_city}, {value.mailing_state}{" "}
+                {value.mailing_zip_code}
+              </Text>
+            </>,
+            1,
+          )
+        : null}
+
+      {hasPreviousAddress
+        ? renderRow(
+            t("nvra_form_page.section_previous_address"),
+            <>
+              <Text style={styles.value}>
+                {[value.prev_address, value.prev_unit]
+                  .filter(Boolean)
+                  .join(" ")}
+              </Text>
+              <Text style={styles.value}>
+                {value.prev_city}, {value.prev_state} {value.prev_zip_code}
+              </Text>
+            </>,
+            1,
+          )
+        : null}
+
+      {value.party &&
+        renderRow(
+          t("form_fields.political_party"),
+          <Text style={styles.value}>{value.party}</Text>,
+          1,
+        )}
+
+      {value.party &&
+        value.changed_party &&
+        renderRow(
+          t("pennsylvania.changed_party_review_text"),
+          <Text style={styles.value}>{t("general.yes")}</Text>,
+          1,
+        )}
 
       {value.has_no_state_license ? (
         <>
@@ -143,12 +214,6 @@ export const ConnectedPAStep3HasID = ({
           <Text style={styles.value}>{value.state_id_number}</Text>,
           2,
         )
-      )}
-
-      {renderRow(
-        t("form_fields.email"),
-        <Text style={styles.value}>{value.email_address}</Text>,
-        1,
       )}
 
       {!!value.phone &&
@@ -216,7 +281,12 @@ export const ConnectedPAStep3HasID = ({
         onValueChange={() => setConfirm(prev => !prev)}
       />
       <Button
-        title={t("pennsylvania.finish_with_pa")}
+        title={
+          isSubmitting
+            ? t("michigan.submitting_button")
+            : t("pennsylvania.finish_with_pa")
+        }
+        disabled={isSubmitting}
         onPress={() => {
           if (confirm) {
             handleMainButtonClick();

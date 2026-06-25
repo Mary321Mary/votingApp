@@ -1,24 +1,19 @@
-import React, { useContext } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import React, { useContext, useEffect } from "react";
+import { Text, StyleSheet, ScrollView } from "react-native";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { RegisterFormState, StateData } from "@/utils/types";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import RenderHTML from "react-native-render-html";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RegisterFormState, StateData } from "@/utils/types";
 
 interface FailMIScreenProps {
   route: {
-    params: {
+    params?: {
       state: StateData;
+      zip: string;
+      email: string;
       form: RegisterFormState;
     };
   };
@@ -34,11 +29,22 @@ export default function FailMIScreen({ route }: FailMIScreenProps) {
   const styles = getStyles(theme);
   const { t } = useTranslation();
   const navigation = useNavigation<FailMIScreenNavigation>();
-  const { state, form } = route.params;
-  const { width } = useWindowDimensions();
+  const params = route.params;
+
+  useEffect(() => {
+    if (!params?.state || !params?.form) {
+      navigation.replace("Home");
+    }
+  }, [navigation, params]);
+
+  if (!params?.state || !params?.form) {
+    return null;
+  }
+
+  const { state, form } = params;
 
   const handlePaperRegistration = () => {
-    navigation.navigate("Register", {
+    navigation.replace("Register", {
       status: { success: true, errors: [] },
       state,
       zip: form.home_zip_code,
@@ -61,7 +67,7 @@ export default function FailMIScreen({ route }: FailMIScreenProps) {
   };
 
   const handleOnlineRegistration = () => {
-    navigation.navigate("Register", {
+    navigation.replace("Register", {
       status: { success: true, errors: [] },
       state,
       zip: form.home_zip_code,
@@ -73,66 +79,42 @@ export default function FailMIScreen({ route }: FailMIScreenProps) {
   };
 
   return (
-    <>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Header text={t("michigan.error_title")} />
-      <View style={styles.block}>
-        <Text style={styles.text}>{t("michigan.error_text_1")}</Text>
-
-        <Text style={styles.text}>
-          {t("michigan.error_text_2")}{" "}
-          <Text style={styles.link} onPress={handleOnlineRegistration}>
-            {t("michigan.error_text_3")}
-          </Text>{" "}
-          {t("michigan.error_text_4")}
-        </Text>
-
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("michigan.error_text_5", {
-              rtv_paper_form_url: "paper-link",
-            }),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginBottom: 20,
-              textAlign: "center",
-            },
-            a: {
-              color: theme.link,
-              textDecorationLine: "underline",
-            },
-          }}
-          renderersProps={{
-            a: { onPress: handlePaperRegistration },
+      <Text style={styles.bodyText}>
+        <Trans
+          i18nKey="michigan.error_text"
+          components={{
+            p: <Text style={styles.bodyText} />,
+            personalInfoLink: (
+              <Text style={styles.link} onPress={handleOnlineRegistration} />
+            ),
+            paperFormLink: (
+              <Text style={styles.link} onPress={handlePaperRegistration} />
+            ),
           }}
         />
-
-        <Button
-          title={t("michigan.error_text_3")}
-          onPress={handlePaperRegistration}
-        />
-      </View>
-    </>
+      </Text>
+    </ScrollView>
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: { primary: string }) =>
   StyleSheet.create({
-    block: {
-      margin: 10,
+    container: {
+      flex: 1,
     },
-    text: {
-      fontSize: 14,
-      lineHeight: 22,
-      textAlign: "center",
-      marginBottom: 20,
+    content: {
+      paddingBottom: 24,
+    },
+    bodyText: {
+      paddingHorizontal: 20,
+      fontSize: 16,
+      lineHeight: 24,
+      marginTop: 16,
     },
     link: {
-      color: theme.link,
+      color: theme.primary,
       textDecorationLine: "underline",
-      fontWeight: "600",
     },
   });

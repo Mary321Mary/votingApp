@@ -4,13 +4,14 @@ import { NameSection } from "../../modules/NameSection";
 import { ContactSection } from "../../modules/ContactSection";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
 import { StyleSheet, Text, View } from "react-native";
-import { DateRow } from "../../atoms/DateRow";
+import { DateRow } from "../../atoms/DateOfBirth/DateRow";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useTranslation } from "react-i18next";
 import { RaceAndParty } from "../../modules/RaceAndParty";
 import InputField from "../../atoms/InputField";
 import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from "../../atoms/Checkbox";
+import QuestionsSection from "@/components/atoms/QuestionsSection";
 
 export const ConnectedPA = ({
   state,
@@ -156,6 +157,20 @@ export const ConnectedPA = ({
         errorMessage={t(errorMessages.home_city)}
         onChangeText={(text: string) => updateField("home_city", text)}
       />
+      <InputField
+        label={t("form_fields.state")}
+        disabled
+        value={state.abbreviation}
+        required={isRequired(formCongif, "home_state")}
+        errorMessage={t(errorMessages.state)}
+      />
+      <InputField
+        label={t("form_fields.zip")}
+        disabled
+        value={value.home_zip_code}
+        required={isRequired(formCongif, "home_zip_code")}
+        errorMessage={t(errorMessages.home_zip_code)}
+      />
       <Text style={styles.inputLabel}>
         {t("form_fields.county")}
         {isRequired(formCongif, "home_county") && (
@@ -189,20 +204,6 @@ export const ConnectedPA = ({
       {errorMessages.home_county && (
         <Text style={styles.required}>{t(errorMessages.home_county)}</Text>
       )}
-      <InputField
-        label={t("form_fields.state")}
-        disabled
-        value={state.abbreviation}
-        required={isRequired(formCongif, "home_state")}
-        errorMessage={t(errorMessages.state)}
-      />
-      <InputField
-        label={t("form_fields.zip")}
-        disabled
-        value={value.home_zip_code}
-        required={isRequired(formCongif, "home_zip_code")}
-        errorMessage={t(errorMessages.home_zip_code)}
-      />
 
       {(!value.age_eligibility || !value.has_no_state_license) &&
         isVisible(formCongif, "has_mailing_address") && (
@@ -447,6 +448,11 @@ export const ConnectedPA = ({
           </>
         )}
 
+      <Checkbox
+        label={t("pennsylvania.changed_party_checkbox")}
+        value={value.changed_party}
+        onValueChange={checked => updateField("changed_party", checked)}
+      />
       <RaceAndParty
         value={value}
         state={state}
@@ -455,7 +461,12 @@ export const ConnectedPA = ({
         onChange={onChange}
         onChangeError={onChangeError}
       />
-      <View style={styles.divider} />
+      <QuestionsSection
+        value={value}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
 
       <ContactSection
         value={value}

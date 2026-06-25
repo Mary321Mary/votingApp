@@ -3,7 +3,7 @@ import { FormProps, RegisterFormState } from "@/utils/types";
 import { NameSection } from "../modules/NameSection";
 import { AddressSection } from "../modules/AddressSection";
 import { isRequired, isVisible } from "@/utils/constants";
-import { DateRow } from "../atoms/DateRow";
+import { DateRow } from "../atoms/DateOfBirth/DateRow";
 import { PhoneSection } from "../modules/PhoneSection";
 import { useTranslation } from "react-i18next";
 import { ContactSection } from "../modules/ContactSection";

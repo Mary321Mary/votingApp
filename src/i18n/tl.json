@@ -328,8 +328,15 @@
     "describe_living_address": "Ilarawan ang iyong address ng tirahan",
     "describe_living_address_help": "Maaari mong ibigay ang iyong cross street o isang maikling salaysay.",
     "signature_optional": "Opsyonal: Magbigay ng lagda na gagamitin upang i-verify at itugma ang iyong balota",
+    "ssn4_yes": "Huling apat na digit ng SSN",
+    "signature_image_yes": "Larawan ng lagda",
     "upload_signature_image": "Mag-upload ng imahe ng lagda",
     "upload_signature_image_button": "Mag-upload ng imahe ng lagda",
+    "local_upload_option": "Upload a local image file",
+    "other_device_option": "Continue on another device",
+    "paper_option": "Create a paper form to print, sign, and mail",
+    "upload_signature_image_help": "Upload an image of your signature image",
+    "local_upload_help": "To complete your registration, select a file to upload, enter the 4 digits of your Social Security Number, if you have one.",
     "continue_touch_enabled": "Ipagpatuloy ang iyong pagpaparehistro sa isang touch-enabled na device",
     "invalid_wdl_date": "Must be a valid date",
     "prefer_print_myself": "Mas gusto kong i-print, pirmahan at ipadala sa koreo o email ang aking aplikasyon nang mag-isa"
@@ -353,7 +360,18 @@
     "continute_on_touch_device": " Ipagpatuloy ang iyong pagpaparehistro sa isang touch-enabled na device",
     "print_mail": " I-print at ipadala ang isang PDF sa koreo",
     "ssn4": "Hindi ko alam ang huling apat na digit ng aking social security number.",
-    "someone_helped": "May tumulong sa akin sa form na ito."
+    "someone_helped": "May tumulong sa akin sa form na ito.",
+    "text_me_link": "Text me the link",
+    "send_sms": "Send sms",
+    "email_me_link": "Email me the link",
+    "send_email": "Send email",
+    "continue_on_touch_device": "Or open this link on a touch-enabled device to finish your registration",
+    "copy_link": "Copy link",
+    "phone_placeholder": "###-###-####",
+    "signature_preview_alt": "Signature preview",
+    "crop_signature_title": "Crop signature",
+    "upload_signature_button_text": "Select an image to upload",
+    "remove": "Remove signature"
   },
 
   "ballot-lookup": {

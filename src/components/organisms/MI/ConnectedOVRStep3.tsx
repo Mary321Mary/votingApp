@@ -22,6 +22,7 @@ import { MilitaryMailingAddress } from "../../modules/MilitaryMailingAddress";
 import { InternationalMailingAddress } from "../../modules/InternationalMailingAddress";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import RenderHTML from "react-native-render-html";
+import { PhoneSection } from "@/components/modules/PhoneSection";
 
 export default function ConnectedOVRStep3({
   state,
@@ -307,17 +308,14 @@ export default function ConnectedOVRStep3({
         </>
       )}
 
-      {/* Phone & Consents */}
-      {isVisible(formCongif, "phone_number") && (
-        <InputField
-          label={t("michigan.phone_election")}
-          value={value.phone}
-          required={isRequired(formCongif, "phone_number")}
-          errorMessage={t(errorMessages.phone)}
-          numeric
-          onChangeText={(text: string) => updateField("phone", text)}
-        />
-      )}
+      <PhoneSection
+        value={value}
+        state={state}
+        formCongif={formCongif}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
 
       {isVisible(formCongif, "opt_in_sms") && (
         <View style={styles.inputBlock}>

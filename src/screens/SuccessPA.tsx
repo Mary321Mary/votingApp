@@ -15,7 +15,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { StateData } from "@/utils/types";
 
-interface SuccessMIScreenProps {
+interface SuccessPAScreenProps {
   route: {
     params?: {
       state: StateData;
@@ -23,14 +23,14 @@ interface SuccessMIScreenProps {
   };
 }
 
-type SuccessMIScreenNavigation = NativeStackNavigationProp<
+type SuccessPAScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
-  "SuccessMI"
+  "SuccessPA"
 >;
 
-export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
+export const SuccessPAScreen = ({ route }: SuccessPAScreenProps) => {
   const { t } = useTranslation();
-  const navigation = useNavigation<SuccessMIScreenNavigation>();
+  const navigation = useNavigation<SuccessPAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
@@ -56,25 +56,25 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Header text={t("michigan.success_title")} />{" "}
-      <View style={styles.bodyWrapper}>
-        <Text style={styles.bodyText}>{t("michigan.success_text_1")}</Text>
-        <Text style={styles.bodyText}>{t("michigan.success_text_2")}</Text>
+      <Header text={t("pennsylvania.success_title")} />{" "}
+      <View style={styles.body}>
+        <Text style={styles.bodyText}>{t("pennsylvania.success_text_1")}</Text>
+        <Text style={styles.bodyText}>{t("pennsylvania.success_text_2")}</Text>
         <View style={styles.buttonGroup}>
           <Button
-            title={t("michigan.success_button_1")}
+            title={t("pennsylvania.success_button_1")}
             color={theme.primary}
             onPress={handleLearnAbout}
           />
           <View style={styles.buttonSpacer} />
           <Button
-            title={t("michigan.success_button_2")}
+            title={t("pennsylvania.success_button_2")}
             color={theme.primary}
             onPress={() => {}}
           />
           <View style={styles.buttonSpacer} />
           <Button
-            title={t("michigan.success_button_3")}
+            title={t("pennsylvania.success_button_3")}
             color={theme.primary}
             onPress={() => {}}
           />
@@ -92,9 +92,8 @@ const getStyles = (theme: { primary: string }) =>
     content: {
       paddingBottom: 24,
     },
-    bodyWrapper: {
+    body: {
       paddingHorizontal: 20,
-      marginTop: 16,
     },
     bodyText: {
       fontSize: 16,

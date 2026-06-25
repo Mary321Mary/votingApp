@@ -4,7 +4,7 @@ import { NameSection } from "../modules/NameSection";
 import { AddressSection } from "../modules/AddressSection";
 import { ContactSection } from "../modules/ContactSection";
 import { isRequired, isVisible } from "@/utils/constants";
-import { DateRow } from "../atoms/DateRow";
+import { DateRow } from "../atoms/DateOfBirth/DateRow";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { StyleSheet, Text } from "react-native";

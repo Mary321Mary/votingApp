@@ -16,3 +16,8 @@ export const SUBMIT_LOOKUP = "/api/ng/submit_vr_lookup";
 
 export const SUBMIT_MI_COVR = "/api/ng/submit_mi_covr";
 export const CHECK_MI_COVR = "/api/ng/check_mi_covr";
+
+export const SUBMIT_PA_COVR = "/api/ng/pa_submit";
+export const CHECK_PA_COVR = "/api/ng/check_pa_covr";
+
+export const SUBMIT_WA_COVR = "/api/ng/wa_submit";

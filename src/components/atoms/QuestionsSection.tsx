@@ -59,30 +59,26 @@ const QuestionsSection = ({
   };
 
   return (
-    <View style={styles.container}>
+    <>
       <View style={styles.divider} />
       <Text style={styles.title}>{t("nvra_form_page.questions_for_you")}</Text>
 
-      <View style={styles.fieldWrapper}>
-        <InputField
-          value={value.survey_answer_1}
-          errorMessage={t(errorMessages.survey_question_1)}
-          label={value.survey_question_1}
-          onChangeText={(text: string) => updateField("survey_answer_1", text)}
-        />
-      </View>
+      <InputField
+        value={value.survey_answer_1}
+        errorMessage={t(errorMessages.survey_question_1)}
+        label={value.survey_question_1}
+        onChangeText={(text: string) => updateField("survey_answer_1", text)}
+      />
 
-      <View style={styles.fieldWrapper}>
-        <InputField
-          value={value.survey_answer_2}
-          errorMessage={t(errorMessages.survey_question_2)}
-          label={value.survey_question_2}
-          onChangeText={(text: string) => updateField("survey_answer_2", text)}
-        />
-      </View>
+      <InputField
+        value={value.survey_answer_2}
+        errorMessage={t(errorMessages.survey_question_2)}
+        label={value.survey_question_2}
+        onChangeText={(text: string) => updateField("survey_answer_2", text)}
+      />
 
       <View style={styles.divider} />
-    </View>
+    </>
   );
 };
 
@@ -90,9 +86,7 @@ export default QuestionsSection;
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    container: {
-      marginBottom: 16,
-    },
+    container: {},
 
     divider: {
       height: 1,
@@ -105,10 +99,6 @@ const getStyles = (theme: any) =>
       lineHeight: 22,
       fontWeight: "600",
       color: "#111827",
-      marginBottom: 16,
-    },
-
-    fieldWrapper: {
-      marginBottom: 16,
+      marginBottom: 5,
     },
   });

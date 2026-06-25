@@ -6,7 +6,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../../atoms/InputField";
 import { RegisterStepHeader } from "../../modules/RegisterStepHeader";
-import { DateRow } from "../../atoms/DateRow";
+import { DateRow } from "../../atoms/DateOfBirth/DateRow";
 import { isRequired, isVisible } from "@/utils/constants";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";

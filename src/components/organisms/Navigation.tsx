@@ -17,7 +17,13 @@ import PrintScreen from "@/screens/Print";
 import { NotParticipatingScreen } from "@/screens/NotParticipating";
 import { SuccessMIScreen } from "@/screens/SuccessMI";
 import FailMIScreen from "@/screens/FailMI";
+import { SuccessPAScreen } from "@/screens/SuccessPA";
+import FailPAScreen from "@/screens/FailPA";
+import { SuccessWAScreen } from "@/screens/SuccessWA";
+import FailWAScreen from "@/screens/FailWA";
 import LookupNotFoundScreen from "@/screens/LookupNotFound";
+import AlreadyRegisteredScreen from "@/screens/AlreadyRegistered";
+import ApiErrorScreen from "@/screens/ApiError";
 import { Under18Screen } from "@/screens/Under18Screen";
 
 export type RootStackParamList = {
@@ -42,6 +48,10 @@ export type RootStackParamList = {
     state: StateData;
     form: CheckRegistrationStatus;
   };
+  AlreadyRegistered: {
+    state: StateData;
+    form: RegisterFormState;
+  };
   ZipError: { text: string; header?: string; showImage?: boolean };
   NotParticipating: { state: StateData };
   Print: {
@@ -50,16 +60,31 @@ export type RootStackParamList = {
     workflow_type?: string;
     finish_with_state: boolean;
   };
-  SuccessMI: {
-    state: StateData;
-  };
+  SuccessMI: { state: StateData };
   FailMI: {
     state: StateData;
+    zip: string;
+    email: string;
+    form: RegisterFormState;
+  };
+  SuccessPA: { state: StateData };
+  FailPA: {
+    state: StateData;
+    zip: string;
+    email: string;
+    form: RegisterFormState;
+  };
+  SuccessWA: { state: StateData };
+  FailWA: {
+    state: StateData;
+    zip: string;
+    email: string;
     form: RegisterFormState;
   };
   Under18: {
     state: StateData;
   };
+  ApiError: { state: StateData; title?: string };
 };
 
 const withDefaultLayout = (Component: React.ComponentType<any>) => {
@@ -97,6 +122,10 @@ function Navigation({}) {
         component={withDefaultLayout(LookupNotFoundScreen)}
       />
       <Stack.Screen
+        name="AlreadyRegistered"
+        component={withDefaultLayout(AlreadyRegisteredScreen)}
+      />
+      <Stack.Screen
         name="ZipError"
         component={withDefaultLayout(ZipErrorScreen)}
       />
@@ -111,8 +140,22 @@ function Navigation({}) {
       />
       <Stack.Screen name="FailMI" component={withDefaultLayout(FailMIScreen)} />
       <Stack.Screen
+        name="SuccessPA"
+        component={withDefaultLayout(SuccessPAScreen)}
+      />
+      <Stack.Screen name="FailPA" component={withDefaultLayout(FailPAScreen)} />
+      <Stack.Screen
+        name="SuccessWA"
+        component={withDefaultLayout(SuccessWAScreen)}
+      />
+      <Stack.Screen name="FailWA" component={withDefaultLayout(FailWAScreen)} />
+      <Stack.Screen
         name="Under18"
         component={withDefaultLayout(Under18Screen)}
+      />
+      <Stack.Screen
+        name="ApiError"
+        component={withDefaultLayout(ApiErrorScreen)}
       />
     </Stack.Navigator>
   );

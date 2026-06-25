@@ -10,7 +10,7 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { RegisterFormState, StateData } from "@/utils/types";
+import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
@@ -24,7 +24,7 @@ interface LookupNotFoundScreenProps {
   route: {
     params: {
       state: StateData;
-      form: RegisterFormState;
+      form: CheckRegistrationStatus;
     };
   };
 }
@@ -106,19 +106,9 @@ export default function LookupNotFoundScreen({
             navigation.replace("Register", {
               status: { success: true },
               state,
-              zip: form.home_zip_code,
-              email: form.email_address,
-              form: {
-                ...form,
-                home_address:
-                  form.street_name +
-                  " " +
-                  form.street_number +
-                  " " +
-                  form.street_type +
-                  " " +
-                  form.street_direction,
-              },
+              zip: form.zip,
+              email: form.email,
+              form,
               pageFromLookup: "paper",
               workflowType: "nvra",
               showRedirectText: false,

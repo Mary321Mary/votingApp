@@ -6,7 +6,7 @@ import { IDSection } from "../modules/IDSection";
 import { ContactSection } from "../modules/ContactSection";
 import { RaceAndParty } from "../modules/RaceAndParty";
 import { isRequired, isVisible } from "@/utils/constants";
-import { DateRow } from "../atoms/DateRow";
+import { DateRow } from "../atoms/DateOfBirth/DateRow";
 import { PhoneSection } from "../modules/PhoneSection";
 import { StyleSheet, Text } from "react-native";
 import { useTranslation } from "react-i18next";

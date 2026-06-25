@@ -7,7 +7,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
-import { RegisterResult } from "@/components/organisms/RegisterResult";
+import { RegisterResult } from "@/components/organisms/RegisterResult/RegisterResult";
 import { SubmitEmailZipResponseProps } from "@/utils/types";
 
 interface RegisterScreenProps {
@@ -41,6 +41,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
     workflowType,
     showRedirectText,
     form,
+    initialStep,
   } = state;
 
   const title =
@@ -60,6 +61,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
           workflowType={workflowType}
           showRedirectText={showRedirectText || false}
           form={form}
+          initialStep={initialStep}
         />
       ) : (
         <View>

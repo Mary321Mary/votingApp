@@ -5,13 +5,15 @@ import ImagePicker from "react-native-image-crop-picker";
 
 interface SignatureUploadProps {
   initialValue?: string;
-  error?: string;
+  error?: React.ReactNode;
+  selectButtonTextKey?: string;
   onChange: (payload: { file: any; base64: string }) => void;
 }
 
 export default function SignatureUpload({
   initialValue = "",
   error,
+  selectButtonTextKey,
   onChange,
 }: SignatureUploadProps) {
   const { t } = useTranslation();
@@ -25,7 +27,7 @@ export default function SignatureUpload({
         cropping: true,
         includeBase64: true,
         mediaType: "photo",
-        cropperToolbarTitle: "Crop Signature",
+        cropperToolbarTitle: t("pennsylvania.crop_signature_title"),
         compressImageQuality: 0.9,
       });
 
@@ -50,8 +52,15 @@ export default function SignatureUpload({
     <View>
       {!image ? (
         <>
-          <Button title="Upload Signature" onPress={pickImage} />
-          {!!error && <Text style={styles.error}>{t(error)}</Text>}
+          <Button
+            title={
+              selectButtonTextKey
+                ? t(selectButtonTextKey)
+                : t("pennsylvania.upload_signature_button_text")
+            }
+            onPress={pickImage}
+          />
+          {!!error && <Text style={styles.error}>{error}</Text>}
         </>
       ) : (
         <>
@@ -60,9 +69,10 @@ export default function SignatureUpload({
               source={{ uri: image }}
               style={styles.preview}
               resizeMode="contain"
+              accessibilityLabel={t("pennsylvania.signature_preview_alt")}
             />
           </View>
-          <Button title="Remove" onPress={handleRemove} />
+          <Button title={t("pennsylvania.remove")} onPress={handleRemove} />
         </>
       )}
     </View>

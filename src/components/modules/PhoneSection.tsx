@@ -63,7 +63,10 @@ export const PhoneSection = ({
           helpText={t("form_fields.phone_help")}
           placeholder="###-###-####"
           value={value.phone}
-          required={isRequired(formCongif, "phone", value.opt_in_sms)}
+          required={
+            isRequired(formCongif, "phone", value.opt_in_sms) ||
+            value.opt_in_sms
+          }
           errorMessage={t(errorMessages.phone)}
           onChangeText={handlePhoneChange}
         />
