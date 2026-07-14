@@ -7,10 +7,10 @@ import React, {
 } from "react";
 import {
   Button,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -22,11 +22,13 @@ import i18n from "@/i18n";
 import {
   mapFormStateToMICovrPayload,
   mapFormStateToPACovrPayload,
+  mapFormStateToWACovrPayload,
 } from "@/utils/constants";
 import {
   DataCollectionConfiguration,
   RegisterFormState,
   RegisterFormStateError,
+  ReportEventPayload,
   StateData,
 } from "@/utils/types";
 import {
@@ -36,11 +38,11 @@ import {
 } from "@/utils/registerRouting";
 import {
   fetchDataConfiguration,
-  getSurveyQuestions,
+  reportEvent,
+  submitFinishedWithState,
   submitLookup,
 } from "@/utils/api";
 import { submitAndCheckMICovr } from "@/utils/miCovr";
-import { fakeWaSubmit } from "@/utils/waSubmit";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "../Navigation";
 
@@ -76,6 +78,7 @@ import {
   classifyPACovrErrors,
   getPACovrFailNavigationExtras,
 } from "@/utils/paCovrErrors";
+import { submitAndCheckWACovr } from "@/utils/waCovr";
 
 type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -86,6 +89,7 @@ interface RegisterResultProps {
   state: StateData;
   zip: string;
   email: string;
+  registrationUid: string;
   pageFromLookup: string;
   workflowType?: string;
   showRedirectText: boolean;
@@ -97,6 +101,7 @@ export const RegisterResult = ({
   state,
   zip,
   email,
+  registrationUid,
   pageFromLookup,
   workflowType,
   showRedirectText,
@@ -118,7 +123,7 @@ export const RegisterResult = ({
   const isMountedRef = useRef(true);
   const miSubmitAbortRef = useRef<AbortController | null>(null);
   const paSubmitAbortRef = useRef<AbortController | null>(null);
-  const [upload, setUpload] = useState("signature");
+  const waSubmitAbortRef = useRef<AbortController | null>(null);
 
   const [step, setStep] = useState<SetStateAction<1 | 2 | 3 | 4 | 5>>(1);
   let flowType = pageFromLookup || getFlowType(state?.ovr_type || "");
@@ -127,6 +132,12 @@ export const RegisterResult = ({
     validations: {
       po_box_allowed: false,
       min_age: 18,
+    },
+    eligibility: {
+      min_pre_reg_age: 18,
+      min_vr_age: 18,
+      min_age_election_day_buffer_days: 180,
+      before_vr_deadline: true,
     },
   });
   const [errMsg, setErrMsg] =
@@ -189,14 +200,15 @@ export const RegisterResult = ({
     birthDay: initform?.birthDay || "",
     birthYear: initform?.birthYear || "",
     date_of_birth: "",
-    pa_preregistration_age_window:
-      initform?.pa_preregistration_age_window ?? false,
+    dob_routing_outcome: initform?.dob_routing_outcome ?? "",
     phone: initform?.phone || "",
 
     issueMonth: "",
     issueDay: "",
     issueYear: "",
     date_of_issue: "",
+    military_service: initform?.military_service || false,
+    non_standard_address: initform?.non_standard_address || "",
 
     opt_in_sms: initform?.opt_in_sms || false,
     opt_in_email: initform?.opt_in_email || true,
@@ -224,6 +236,7 @@ export const RegisterResult = ({
     helper_electronic_signature_acknowledged:
       initform?.helper_electronic_signature_acknowledged || false,
 
+    upload: initform?.upload || "",
     someone_helped: initform?.someone_helped || false,
     helper_name: initform?.helper_name || "",
     helper_address: initform?.helper_address || "",
@@ -236,7 +249,10 @@ export const RegisterResult = ({
 
     has_mailing_address: false,
     mailing_postal_code: "",
-    mailingAddressType: "STANDARD",
+    mailing_address_number: initform?.mailing_postal_code || "",
+    mailing_address_street_name: initform?.mailing_postal_code || "",
+    mailing_address_street_type: initform?.mailing_postal_code || "",
+    mailing_address_type: "STANDARD",
     mailing_po_box_number: "",
     mailing_box_group_type: "",
     mailing_box_group_number: "",
@@ -347,13 +363,11 @@ export const RegisterResult = ({
                 formCongif={formCongif}
                 onChange={setForm}
                 onChangeError={setErrMsg}
-                upload={upload}
-                setUpload={setUpload}
                 handleMainButton={
                   <Button
                     title={t("ovr_landing_page.next_button")}
                     onPress={() => {
-                      if (upload === "print") {
+                      if (form.upload === "print") {
                         navigation.navigate("Register", {
                           status: { success: true, errors: [] },
                           state,
@@ -365,7 +379,14 @@ export const RegisterResult = ({
                           showRedirectText: true,
                         });
                       } else {
-                        handleMainButtonClick();
+                        if (form.upload) {
+                          handleMainButtonClick();
+                        } else {
+                          setErrMsg(prev => ({
+                            ...prev,
+                            upload: "washington.wdl_number_none_error",
+                          }));
+                        }
                       }
                     }}
                   />
@@ -392,7 +413,7 @@ export const RegisterResult = ({
         }
         if (step === 3) {
           if (form.has_no_state_license) {
-            if (upload === "signature") {
+            if (form.upload === "signature") {
               return (
                 <ConnectedWAStep3LocalUpload
                   state={state}
@@ -492,13 +513,11 @@ export const RegisterResult = ({
                 formCongif={formCongif}
                 onChange={setForm}
                 onChangeError={setErrMsg}
-                upload={upload}
-                setUpload={setUpload}
                 handleMainButton={
                   <Button
                     title={t("ovr_landing_page.next_button")}
                     onPress={() => {
-                      if (upload === "print") {
+                      if (form.upload === "print") {
                         navigation.navigate("Register", {
                           status: { success: true, errors: [] },
                           state,
@@ -516,7 +535,14 @@ export const RegisterResult = ({
                           showRedirectText: true,
                         });
                       } else {
-                        handleMainButtonClick();
+                        if (form.upload) {
+                          handleMainButtonClick();
+                        } else {
+                          setErrMsg(prev => ({
+                            ...prev,
+                            upload: "pennsylvania.penn_dot_number_none_error",
+                          }));
+                        }
                       }
                     }}
                   />
@@ -535,7 +561,7 @@ export const RegisterResult = ({
           }
         }
         if (step === 4) {
-          if (upload === "signature") {
+          if (form.upload === "signature") {
             return (
               <ConnectedPAStep4Signature
                 state={state}
@@ -682,37 +708,10 @@ export const RegisterResult = ({
                 formCongif={formCongif}
                 onChange={setForm}
                 onChangeError={setErrMsg}
-                handleMainButton={
-                  <TouchableOpacity
-                    style={styles.outlineButton}
-                    onPress={handleMainButtonClick}
-                  >
-                    <Text style={styles.outlineButtonText}>
-                      {t("finish_with_state_page2.paper_button")}
-                    </Text>
-                  </TouchableOpacity>
-                }
+                handleMainButtonClick={handleMainButtonClick}
               />
             );
         }
-        if (step === 3)
-          return (
-            <PaperOVR
-              state={state}
-              errorMessages={errMsg}
-              value={form}
-              formCongif={formCongif}
-              onChange={setForm}
-              onChangeError={setErrMsg}
-              handleMainButton={
-                <Button
-                  title={t("ovr_landing_page.next_button")}
-                  onPress={handleMainButtonClick}
-                  disabled={isSubmitting}
-                />
-              }
-            />
-          );
         break;
       case "paper":
       default:
@@ -736,14 +735,8 @@ export const RegisterResult = ({
     }
   };
 
-  const performValidation = (check17andHalf = false) => {
-    const result = validate(
-      form,
-      formCongif,
-      flowType,
-      showRedirect,
-      check17andHalf,
-    );
+  const performValidation = () => {
+    const result = validate(form, formCongif, flowType, showRedirect);
     setErrMsg(result.errorMessage);
     return result.isValid;
   };
@@ -755,7 +748,7 @@ export const RegisterResult = ({
   };
 
   const performWAValidation = (isWA: string = "") => {
-    const result = validateWA(form, formCongif, step, isWA, upload);
+    const result = validateWA(form, formCongif, step, isWA, form.upload);
     setErrMsg(result.errorMessage);
     return result.isValid;
   };
@@ -820,14 +813,42 @@ export const RegisterResult = ({
 
   const handleWaSubmit = async () => {
     setIsSubmitting(true);
+    waSubmitAbortRef.current?.abort();
+    const abortController = new AbortController();
+    waSubmitAbortRef.current = abortController;
+    let loggedPendingCheck = false;
     try {
-      const outcome = await fakeWaSubmit(form);
+      const waPayload = mapFormStateToWACovrPayload(form);
+      const result = await submitAndCheckWACovr(waPayload, {
+        signal: abortController.signal,
+        onCheck: data => {
+          const isTerminal =
+            data.status === "success" || data.status === "failure";
+          if (isTerminal || !loggedPendingCheck) {
+            if (!isTerminal) {
+              loggedPendingCheck = true;
+            }
+          }
+        },
+      });
+
       if (!isMountedRef.current) {
         return;
       }
-      if (outcome === "success") {
-        navigation.replace("SuccessWA", { state });
+
+      if (result.outcome === "success" && result.registrantUid) {
+        await AsyncStorage.setItem("rtv_registrant_uid", result.registrantUid);
+        await AsyncStorage.setItem(
+          "rtv_voter_name",
+          `${waPayload.first_name} ${waPayload.last_name}`.trim(),
+        );
+        navigation.navigate("SuccessWA", { state });
       } else {
+        // Check returning a documented failure should route to the WA fail screen
+        // (retry / paper form prompt), but still be treated as an error.
+        if (result.errors?.length) {
+          console.error("WA check failed:", result.errors);
+        }
         navigation.navigate("FailWA", { state, zip, email, form });
       }
     } catch (error) {
@@ -860,8 +881,16 @@ export const RegisterResult = ({
     }
   };
 
+  const navigateToPreRegister = () => {
+    navigation.replace("PreRegister", {
+      state,
+      form,
+      workflow_type: workflow,
+    });
+  };
+
   const finalizeNvraRegistration = async (
-    validateForm: () => boolean = () => performValidation(true),
+    validateForm: () => boolean = () => performValidation(),
   ) => {
     if (!validateForm()) {
       return;
@@ -884,11 +913,38 @@ export const RegisterResult = ({
         return;
       }
 
-      if (form.pa_preregistration_age_window) {
+      if (form.dob_routing_outcome === "pre_registration_notice") {
+        await reportEvent({
+          registration_uid: registrationUid,
+          partner_id: form.partner_id.toString(),
+          step: 2,
+          event_name: "nvra_pre_reg",
+        });
+        navigateToPreRegister();
+        return;
+      }
+
+      if (form.dob_routing_outcome === "under_18_election_day_ok") {
+        await reportEvent({
+          registration_uid: registrationUid,
+          partner_id: form.partner_id.toString(),
+          step: 2,
+          event_name: "nvra_under_18",
+        });
         navigation.replace("Under18", { state });
         return;
       }
 
+      let eventName: ReportEventPayload["event_name"] = "nvra_print_request";
+      if (form.mailForm) {
+        eventName = "nvra_email_quest";
+      }
+      await reportEvent({
+        registration_uid: registrationUid,
+        partner_id: form.partner_id.toString(),
+        step: 2,
+        event_name: eventName,
+      });
       navigateToNvraPrintOrSuccess();
     } catch (errorTitle) {
       console.error("VR lookup failed:", errorTitle);
@@ -918,9 +974,10 @@ export const RegisterResult = ({
             navigation.replace("ZipError", {
               text: t("previous_step"),
               header: t("was_problem_text"),
+              user: null,
             });
           } else {
-            if (form.pa_preregistration_age_window) {
+            if (form.dob_routing_outcome === "under_18_election_day_ok") {
               navigation.replace("Under18", { state });
             } else {
               setIsSubmitting(true);
@@ -980,18 +1037,44 @@ export const RegisterResult = ({
         if (form.has_no_state_license) {
           await finalizeNvraRegistration();
         } else if (performValidation()) {
-          setWorkflow("nvra");
-          setShowRedirectText(true);
-          setStep(3);
+          try {
+            await submitFinishedWithState({
+              workflow_type: workflow,
+              registrant: {
+                name_title: form.name_title,
+                first_name: form.first_name,
+                last_name: form.last_name,
+                date_of_birth: form.date_of_birth,
+                email_address: form.email_address,
+                state: form.state,
+                lang: form.lang,
+                home_zip_code: form.home_zip_code,
+                us_citizen: form.us_citizen,
+                will_be_18_by_election: form.will_be_18_by_election,
+                opt_in_email: form.opt_in_email,
+                opt_in_sms: form.opt_in_sms,
+                partner_id: form.partner_id,
+
+                survey_question_1: form.survey_question_1,
+                survey_answer_1: form.survey_answer_1,
+                survey_question_2: form.survey_question_2,
+                survey_answer_2: form.survey_answer_2,
+              },
+            });
+            if (state?.online_registration_system_url)
+              Linking.openURL(state.online_registration_system_url);
+            navigation.replace("FinishWithState", { state });
+          } catch (error: any) {
+            console.log("Error", error);
+            navigation.replace("FinishWithState", { state });
+          }
         }
-      } else {
-        await finalizeNvraRegistration();
       }
     } else if (flowType === "connected_WA") {
       if (step === 1) {
         if (performWAValidation("connected_WA")) {
           if (!form.has_no_state_license) {
-            if (form.pa_preregistration_age_window) {
+            if (form.dob_routing_outcome === "under_18_election_day_ok") {
               navigation.replace("Under18", { state });
             } else {
               setForm(prev => ({ ...prev, last_four_ss_number: "" }));
@@ -1005,7 +1088,7 @@ export const RegisterResult = ({
         if (form.has_no_state_license) {
           setStep(3);
         } else if (performWAValidation("connected_WA")) {
-          if (form.pa_preregistration_age_window) {
+          if (form.dob_routing_outcome === "under_18_election_day_ok") {
             navigation.replace("Under18", { state });
           } else {
             setStep(3);
@@ -1017,7 +1100,7 @@ export const RegisterResult = ({
             setStep(4);
           }
         } else if (performWAValidation("connected_WA")) {
-          if (form.pa_preregistration_age_window) {
+          if (form.dob_routing_outcome === "under_18_election_day_ok") {
             navigation.replace("Under18", { state });
           } else {
             await handleWaSubmit();
@@ -1025,7 +1108,7 @@ export const RegisterResult = ({
         }
       } else if (step === 4) {
         if (performWAValidation("connected_WA")) {
-          if (form.pa_preregistration_age_window) {
+          if (form.dob_routing_outcome === "under_18_election_day_ok") {
             navigation.replace("Under18", { state });
           } else {
             await handleWaSubmit();
@@ -1046,7 +1129,7 @@ export const RegisterResult = ({
           setStep(4);
         } else {
           if (performWAValidation("connected_PA")) {
-            if (form.pa_preregistration_age_window) {
+            if (form.dob_routing_outcome === "under_18_election_day_ok") {
               navigation.replace("Under18", { state });
             } else {
               await handlePaSubmit();
@@ -1059,7 +1142,7 @@ export const RegisterResult = ({
         }
       } else {
         if (performWAValidation("connected_PA")) {
-          if (form.pa_preregistration_age_window) {
+          if (form.dob_routing_outcome === "under_18_election_day_ok") {
             navigation.replace("Under18", { state });
           } else {
             await handlePaSubmit();
@@ -1084,10 +1167,16 @@ export const RegisterResult = ({
   };
 
   useEffect(() => {
+    setShowRedirectText(showRedirectText);
+  }, [showRedirectText]);
+
+  useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       miSubmitAbortRef.current?.abort();
+      paSubmitAbortRef.current?.abort();
+      waSubmitAbortRef.current?.abort();
     };
   }, []);
 
@@ -1198,9 +1287,6 @@ const getStyles = (theme: any) =>
       maxWidth: "100%",
       padding: 10,
     },
-    strong: {
-      fontWeight: "bold",
-    },
     link: {
       marginTop: 20,
       marginHorizontal: "auto",
@@ -1209,19 +1295,5 @@ const getStyles = (theme: any) =>
       fontSize: 14,
       fontWeight: "medium",
       textDecorationLine: "underline",
-    },
-
-    outlineButton: {
-      borderWidth: 1,
-      borderColor: theme.primary,
-      height: 40,
-      justifyContent: "center",
-      alignItems: "center",
-      paddingHorizontal: 10,
-    },
-    outlineButtonText: {
-      color: theme.primary,
-      fontSize: 16,
-      fontWeight: "600",
     },
   });

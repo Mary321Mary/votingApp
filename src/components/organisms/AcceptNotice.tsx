@@ -1,8 +1,25 @@
-import React, { ReactNode, useState } from "react";
-import { View, Text, StyleSheet, Button, Linking } from "react-native";
+import React, { ReactNode, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  Linking,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
-import { RegisterFormState, StateData } from "../../utils/types";
+import {
+  RegisterFormState,
+  StateData,
+  SubmitVoterCAResponse,
+} from "../../utils/types";
 import { Checkbox } from "../atoms/Checkbox";
+import { submitCACovr } from "@/utils/api";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "./Navigation";
+import { useNavigation } from "@react-navigation/native";
+import RenderHTML from "react-native-render-html";
 
 interface AcceptNoticeProps {
   state: StateData;
@@ -11,20 +28,59 @@ interface AcceptNoticeProps {
   handleMainButton?: ReactNode;
 }
 
-function AcceptNotice({ state, handleMainButton }: AcceptNoticeProps) {
+type RegisterScreenNavigation = NativeStackNavigationProp<
+  RootStackParamList,
+  "Register"
+>;
+
+function AcceptNotice({ state, value, handleMainButton }: AcceptNoticeProps) {
+  const { t } = useTranslation();
+  const navigation = useNavigation<RegisterScreenNavigation>();
+  const { width } = useWindowDimensions();
+
   const [accept, setAccept] = useState<boolean>(false);
   const [showErrorAccept, setShowErrorAccept] = useState<boolean>(false);
-  const { t } = useTranslation();
+  const [config, setConfig] = useState<SubmitVoterCAResponse>();
+
+  useEffect(() => {
+    const fetchCA = async () => {
+      const response = await submitCACovr({
+        ...value,
+        locale: value.lang,
+        email: value.email_address,
+      });
+      if (response.data.covr_success) {
+        setConfig(response.data);
+        setAccept(response.data.disclosures_prechecked);
+      } else {
+        navigation.navigate("FailCA", {
+          state,
+          form: value,
+          zip: value.home_zip_code,
+          email: value.email_address,
+        });
+      }
+    };
+
+    fetchCA();
+  }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>{t("california.eligible_complete_ca")}</Text>
-
-      <View style={styles.noticeBox}>
-        <Text style={styles.noticeText}>
-          {t("california.compliance_notices_text")}
-        </Text>
-      </View>
+      <ScrollView style={styles.noticeBox} nestedScrollEnabled={true}>
+        {config?.disclosures?.map((htmlContent, index) => (
+          <RenderHTML
+            key={index}
+            contentWidth={width}
+            source={{ html: htmlContent }}
+            tagsStyles={{
+              p: { marginBottom: 8, color: "#333" },
+              strong: { fontWeight: "bold" },
+            }}
+          />
+        ))}
+      </ScrollView>
 
       <Checkbox
         label={t("california.compliance_notices_checkbox")}
@@ -42,10 +98,11 @@ function AcceptNotice({ state, handleMainButton }: AcceptNoticeProps) {
         title={t("california.finish_ca_button_text")}
         onPress={() => {
           if (accept) {
-            if (state.online_registration_system_url)
-              Linking.openURL(state.online_registration_system_url || "");
+            if (config?.redirect_url)
+              Linking.openURL(config?.redirect_url || "");
+            navigation.navigate("FinishWithState", { state });
           } else {
-            setAccept(true);
+            setShowErrorAccept(true);
           }
         }}
       />
@@ -66,10 +123,11 @@ const styles = StyleSheet.create({
   noticeBox: {
     borderWidth: 1,
     borderColor: "#dee2e6",
-    padding: 10,
+    paddingHorizontal: 10,
     borderRadius: 4,
-    height: 150,
+    height: 200,
     backgroundColor: "#f8f9fa",
+    marginBottom: 10,
   },
   noticeText: {
     fontSize: 14,

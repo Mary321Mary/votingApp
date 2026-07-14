@@ -54,7 +54,6 @@ export default function FailWAScreen({ route }: FailWAScreenProps) {
   const { state, zip, email, form } = params;
 
   const handleLinkPress = (_event: unknown, href?: string) => {
-    // Базовый статус-заглушка для соответствия твоему интерфейсу
     const defaultStatus = { success: true, errors: null };
 
     if (href === PERSONAL_INFO_LINK) {
@@ -66,7 +65,8 @@ export default function FailWAScreen({ route }: FailWAScreenProps) {
         zip: zip,
         email: email,
         form: form,
-        workflowType: "paper",
+        pageFromLookup: "paper",
+        workflowType: "nvra",
         initialStep: 1,
       };
 

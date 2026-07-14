@@ -33,30 +33,34 @@ export const StandardMailingAddress = ({
 
   return (
     <>
-      {/* <InputField
-        label={t("register_page.street.number")}
-        value={value.mailingStreetNumber}
-        errorMessage={t(errorMessages.mailingStreetNumber)}
+      <InputField
+        label={t("michigan.mailing_street.number")}
+        value={value.mailing_address_number}
+        errorMessage={t(errorMessages.mailing_address_number)}
         required
         onChangeText={(text: string) =>
-          updateField("mailingStreetNumber", text)
+          updateField("mailing_address_number", text)
         }
       />
 
       <InputField
-        label={t("register_page.street.name")}
-        value={value.mailingStreetName}
-        errorMessage={t(errorMessages.mailingStreetName)}
+        label={t("michigan.mailing_street.name")}
+        value={value.mailing_address_street_name}
+        errorMessage={t(errorMessages.mailing_address_street_name)}
         required
-        onChangeText={(text: string) => updateField("mailingStreetName", text)}
+        onChangeText={(text: string) =>
+          updateField("mailing_address_street_name", text)
+        }
       />
 
       <InputField
-        label={t("register_page.street.type")}
-        value={value.mailingStreetType}
-        errorMessage={t(errorMessages.mailingStreetType)}
-        onChangeText={(text: string) => updateField("mailingStreetType", text)}
-      /> */}
+        label={t("michigan.mailing_street.type")}
+        value={value.mailing_address_street_type}
+        errorMessage={t(errorMessages.mailing_address_street_type)}
+        onChangeText={(text: string) =>
+          updateField("mailing_address_street_type", text)
+        }
+      />
 
       {isVisible(formCongif, "mailing_address") && (
         <InputField

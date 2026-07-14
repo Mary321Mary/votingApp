@@ -1,9 +1,13 @@
 import React, { useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Linking, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FormProps } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import QuestionsSection from "../atoms/QuestionsSection";
+
+interface FinishWithStateProps extends FormProps {
+  handleMainButtonClick: () => void;
+}
 
 function FinishWithState({
   state,
@@ -11,21 +15,11 @@ function FinishWithState({
   errorMessages,
   onChangeError,
   onChange,
-  handleMainButton,
-}: FormProps) {
+  handleMainButtonClick,
+}: FinishWithStateProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-
-  const handleOpenStateWebsite = async () => {
-    const url = state.online_registration_system_url || "";
-    if (!url) return;
-    const supported = await Linking.canOpenURL(url);
-
-    if (supported) {
-      await Linking.openURL(url);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -51,10 +45,16 @@ function FinishWithState({
           title={t("finish_with_state_page2.state_button", {
             state_abbr: state.abbreviation,
           })}
-          onPress={handleOpenStateWebsite}
+          onPress={handleMainButtonClick}
         />
-
-        {handleMainButton}
+        <TouchableOpacity
+          style={styles.outlineButton}
+          onPress={handleMainButtonClick}
+        >
+          <Text style={styles.outlineButtonText}>
+            {t("finish_with_state_page2.paper_button")}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -96,6 +96,19 @@ const getStyles = (theme: any) =>
     buttons: {
       gap: 16,
       alignItems: "center",
+    },
+    outlineButton: {
+      borderWidth: 1,
+      borderColor: theme.primary,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 10,
+    },
+    outlineButtonText: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: "600",
     },
   });
 

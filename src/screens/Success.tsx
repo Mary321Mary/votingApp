@@ -7,8 +7,10 @@ import {
   Button,
   Linking,
   TouchableOpacity,
+  ScrollView,
+  useWindowDimensions,
 } from "react-native";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
@@ -19,6 +21,7 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
+import RenderHTML from "react-native-render-html";
 
 interface SuccessScreenProps {
   route: {
@@ -41,6 +44,7 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   const navigation = useNavigation<SuccessScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { width } = useWindowDimensions();
 
   const { form, state, workflow_type, finish_with_state } = route.params;
 
@@ -109,11 +113,17 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
 
       <View style={styles.body}>
         <Text style={styles.title}>{t("mail_form_page.should_receive")}</Text>
+        <Text>
+          <Trans
+            i18nKey="mail_form_page.dont_want_to_wait"
+            components={{ strong: <strong /> }}
+          />
+        </Text>
 
         <View style={styles.section}>
           {loading ? (
@@ -131,13 +141,23 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
         </View>
 
         {/* Printer */}
-        <Text style={styles.title}>
-          {t("mail_form_page.you_will_need_to_sign")}
+        <Text>
+          <Trans
+            i18nKey="mail_form_page.you_will_need_to_sign"
+            components={{
+              strong: <Text style={styles.boldText} />,
+            }}
+          />
         </Text>
         <View style={styles.divider} />
         {/* Learn more */}
-        <Text style={styles.title}>
-          {t("print_form_page.have_questions_find_out")}
+        <Text>
+          <Trans
+            i18nKey="print_form_page.have_questions_find_out"
+            components={{
+              strong: <Text style={styles.boldText} />,
+            }}
+          />
         </Text>
 
         <View style={styles.section}>
@@ -170,10 +190,26 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
             </Text>
           </TouchableOpacity>
           {/* Footer */}
-          <Text style={styles.title}>{t("print_form_page.get_this_tool")}</Text>
+          <View>
+            <Text style={styles.title}>
+              {t("print_form_page.get_this_tool")}
+            </Text>
+            <RenderHTML
+              contentWidth={width}
+              source={{ html: t("print_form_page.send_us") }}
+              tagsStyles={{
+                p: {
+                  margin: 0,
+                  padding: 0,
+                  color: "#333",
+                  fontSize: 14,
+                },
+              }}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -194,6 +230,13 @@ const getStyles = (theme: { background: string; primary: string }) =>
       marginLeft: 8,
       fontSize: 16,
     },
+    boldText: {
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 16,
+      color: "#000",
+    },
+
     divider: {
       width: "100%",
       height: 1,

@@ -1,11 +1,30 @@
-import React, { useContext } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  Platform,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../../atoms/InputField";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { isRequired } from "@/utils/constants";
+import {
+  isRequired,
+  mapFormStateToPACovrPayload,
+  mapFormStateToWACovrPayload,
+} from "@/utils/constants";
 import { PhoneSection } from "@/components/modules/PhoneSection";
+import {
+  submitDeviceEmail,
+  submitDeviceSMS,
+  submitPADevice,
+  submitWADevice,
+} from "@/utils/api";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 export const ConnectedPAStep3Device = ({
   value,
@@ -18,6 +37,14 @@ export const ConnectedPAStep3Device = ({
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+
+  const [registrantUid, setRegistrantUid] = useState("");
+  const [continueUrl, setContinueUrl] = useState("");
+
+  const statePrefix = value.state === "PA" ? "pennsylvania" : "washington";
+  const [smsNotification, setSmsNotification] = useState("");
+  const [emailNotification, setEmailNotification] = useState("");
+  const [copyNotification, setCopyNotification] = useState("");
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -32,6 +59,96 @@ export const ConnectedPAStep3Device = ({
     }
   };
 
+  useEffect(() => {
+    const fetchConfig = async () => {
+      if (value.state === "PA") {
+        const paPayload = mapFormStateToPACovrPayload(value);
+        try {
+          const response = await submitPADevice(paPayload);
+          setRegistrantUid(response.data.registrant_uid || "");
+          setContinueUrl(response.data.continue_url || "");
+        } catch (err) {
+          console.error(
+            "Failed to create a Pennsylvania state-registrant:",
+            err,
+          );
+        }
+      } else {
+        const waPayload = mapFormStateToWACovrPayload(value);
+        try {
+          const response = await submitWADevice(waPayload);
+          setRegistrantUid(response.data.registrant_uid || "");
+          setContinueUrl(response.data.continue_url || "");
+        } catch (err) {
+          console.error("Failed to create a Washington state-registrant:", err);
+        }
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  const handleSmsSend = async () => {
+    setSmsNotification("");
+    try {
+      await submitDeviceSMS({
+        registrant_uid: registrantUid,
+        phone: value.phone,
+      });
+      setSmsNotification(
+        t(`${statePrefix}.text_sent`, { user_phone: value.phone }),
+      );
+    } catch (err: any) {
+      console.error("Failed to send sms:", err);
+      if (!err.response?.data?.status?.success) {
+        onChangeError({
+          ...errorMessages,
+          phone:
+            err.response?.data?.status?.errors?.join(", ") ||
+            "Error sending SMS",
+        });
+      }
+    }
+  };
+
+  const handleEmailSend = async () => {
+    setEmailNotification("");
+    try {
+      await submitDeviceEmail({
+        registrant_uid: registrantUid,
+        email: value.email_address,
+      });
+      setEmailNotification(
+        t(`${statePrefix}.email_sent`, { user_email: value.email_address }),
+      );
+    } catch (err: any) {
+      console.error("Failed to send email:", err);
+      if (!err.response?.data?.status?.success) {
+        onChangeError({
+          ...errorMessages,
+          email_address:
+            err.response?.data?.status?.errors?.join(", ") ||
+            "Error sending Email",
+        });
+      }
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      Clipboard.setString(continueUrl);
+
+      if (Platform.OS === "android") {
+        ToastAndroid.show(t(`${statePrefix}.link_copied`), ToastAndroid.SHORT);
+      } else {
+        Alert.alert("Success", t(`${statePrefix}.link_copied`));
+      }
+      setCopyNotification(t(`${statePrefix}.link_copied`));
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
   return (
     <View style={styles.deviceBlock}>
       <PhoneSection
@@ -43,7 +160,8 @@ export const ConnectedPAStep3Device = ({
         onChangeError={onChangeError}
       />
 
-      <Button title={t("pennsylvania.send_sms")} onPress={() => {}} />
+      <Button title={t("pennsylvania.send_sms")} onPress={handleSmsSend} />
+      {smsNotification && <Text>{smsNotification}</Text>}
 
       <InputField
         label={t("pennsylvania.email_me_link")}
@@ -53,13 +171,15 @@ export const ConnectedPAStep3Device = ({
         errorMessage={t(errorMessages.email_address)}
       />
 
-      <Button title={t("pennsylvania.send_email")} onPress={() => {}} />
+      <Button title={t("pennsylvania.send_email")} onPress={handleEmailSend} />
+      {emailNotification && <Text>{emailNotification}</Text>}
 
       <Text style={styles.paragraph}>
         {t("pennsylvania.continue_on_touch_device")}
       </Text>
 
-      <Button title={t("pennsylvania.copy_link")} onPress={() => {}} />
+      <Button title={t("pennsylvania.copy_link")} onPress={handleCopyLink} />
+      {copyNotification && <Text>{copyNotification}</Text>}
     </View>
   );
 };

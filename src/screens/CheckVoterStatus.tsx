@@ -25,7 +25,7 @@ import RenderHTML from "react-native-render-html";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { getSurveyQuestions, submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
-import { evaluatePaConnectedRegistrationDateOfBirth } from "@/components/atoms/DateOfBirth/dateValidation";
+import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -132,71 +132,30 @@ export const CheckVoterStatusScreen = ({
     if (!form.last_name.trim()) errorMessage.first_name = t("general.required");
     if (!form.city.trim()) errorMessage.city = t("general.required");
     if (!form.address.trim()) errorMessage.address = t("general.required");
-    if (!form.birthMonth.trim())
-      errorMessage.birthMonth = t("general.required");
-    if (!form.birthDay.trim()) errorMessage.birthDay = t("general.required");
-    if (!form.birthYear.trim()) {
-      errorMessage.birthYear = t("general.required");
-    } else if (Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = t("form_fields.invalid_year");
-    }
-    if (
-      !form.birthMonth.trim() ||
-      !form.birthDay.trim() ||
-      !form.birthYear.trim()
-    ) {
-      errorMessage.birthDay = "general.required";
-    } else if (Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = "form_fields.invalid_year";
-    }
-    if (
-      form.birthYear.trim() &&
-      form.birthMonth.trim() &&
-      form.birthDay.trim()
-    ) {
-      const year = Number(form.birthYear);
-      const month = Number(form.birthMonth) - 1;
-      const day = Number(form.birthDay);
 
-      const date = new Date(year, month, day);
-      const today = new Date();
+    const dobValidation = processDateOfBirthValidation(
+      form.birthYear,
+      form.birthMonth,
+      form.birthDay,
+      {
+        fields: {},
+        validations: {
+          po_box_allowed: false,
+          min_age: 18,
+        },
+        eligibility: {
+          min_pre_reg_age: 18,
+          min_vr_age: 18,
+          min_age_election_day_buffer_days: 180,
+          before_vr_deadline: true,
+        },
+      },
+      true,
+      false,
+    );
+    Object.assign(errorMessage, dobValidation.errors);
+    Object.assign(form, dobValidation.formUpdates);
 
-      today.setHours(0, 0, 0, 0);
-
-      if (date > today) {
-        errorMessage.birthYear = "form_fields.invalid_year_future";
-      } else {
-        const isInvalidDate =
-          date.getFullYear() !== year ||
-          date.getMonth() !== month ||
-          date.getDate() !== day;
-
-        if (isInvalidDate) {
-          errorMessage.birthDay = "form_fields.invalid_birth_date";
-        } else {
-          const paDob = evaluatePaConnectedRegistrationDateOfBirth(
-            form.birthYear,
-            form.birthMonth,
-            form.birthDay,
-            today,
-          );
-
-          if (paDob.outcome === "too_young") {
-            // "You must be 18..."
-            errorMessage.birthMonth = paDob.errorMessageKey || "";
-          } else if (paDob.outcome === "eligible") {
-            // >= 18 (preregistrationAgeWindow: false),
-            // And from 17.5 to 18 (preregistrationAgeWindow: true)
-            // No Error
-            form.date_of_birth =
-              form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
-          } else {
-            form.date_of_birth =
-              form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
-          }
-        }
-      }
-    }
     if (form.smsConsent && !form.phone.trim()) {
       errorMessage.phone = t("form_fields.required_phone");
     } else if (form.smsConsent && !fullPhoneRegex.test(form.phone.trim())) {
@@ -399,7 +358,7 @@ export const CheckVoterStatusScreen = ({
 
         {/* Continue */}
         <Button
-          title={t("register_18_by_election_page.continute_button_text")}
+          title={t("register_18_by_election_page.continue_button_text")}
           onPress={onContinue}
         />
         <RenderHTML
@@ -477,7 +436,6 @@ const getStyles = (theme: any) =>
     title: {
       fontSize: 18,
       fontWeight: "600",
-      marginVertical: 16,
     },
     inputBlock: {
       flex: 1,

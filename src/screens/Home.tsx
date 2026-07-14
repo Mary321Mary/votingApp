@@ -81,23 +81,40 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           locale: i18n.language,
           partner_id: "1",
         });
-        if (Object.keys(response.data.user).length === 0) {
-          navigation.navigate("Register", {
-            ...response.data,
-            zip: zipCode,
-            email,
-          });
+        const isStaging2 = Config.REACT_APP_ENVIRONMENT === "staging2";
+        const shouldHandleReturningUser =
+          isStaging2 && !!response.data.voter?.last_name;
+
+        if (!shouldHandleReturningUser) {
+          if (response.data.state?.before_vr_deadline) {
+            navigation.navigate("Register", {
+              ...response.data,
+              zip: zipCode,
+              email,
+            });
+          } else {
+            navigation.navigate("AfterDeadline", {
+              response: response.data,
+              zip: zipCode,
+              email,
+            });
+          }
         } else {
-          navigation.navigate("ZipError", {
-            header: "Welcome back",
-            text:
-              "Welcome back " +
-              response.data.user.first_name +
-              " " +
-              response.data.user.last_name +
-              ". Your best next step are ...",
-            showImage: true,
-          });
+          if (response.data.voter.address) {
+            navigation.navigate("ZipError", {
+              header: "Welcome back",
+              text:
+                "Welcome back " +
+                response.data.voter.first_name +
+                " " +
+                response.data.voter.last_name +
+                ". Your best next step are ...",
+              showImage: true,
+              user: response.data.voter,
+            });
+          } else {
+            navigation.navigate("ApiError", { state: response.data.state });
+          }
         }
       } catch (error: any) {
         console.error("Register failed:", error);
@@ -242,6 +259,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
                 smsConsent: false,
                 emailConsent: true,
+                volunteer: false,
+
+                survey_question_1: "",
+                survey_answer_1: "",
+                survey_question_2: "",
+                survey_answer_2: "",
               },
             });
           }}

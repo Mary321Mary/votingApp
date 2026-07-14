@@ -7,6 +7,7 @@ import {
   RegisterFormState,
   SubmitMICovrPayload,
   SubmitPACovrPayload,
+  SubmitWACovrPayload,
 } from "./types";
 
 export const STATES = [
@@ -313,10 +314,77 @@ export const mapFormStateToMICovrPayload = (
     registration_zip_code: form.home_zip_code,
     registration_county: form.home_county?.toUpperCase() || "",
 
-    // Cpntacts
-    has_mailing_address: form.has_mailing_address,
+    // Contacts
     opt_in_email: form.opt_in_email,
     opt_in_sms: form.opt_in_sms,
     phone: form.phone ? form.phone.replace(/\D/g, "") : "", // Only numbers
+
+    // Mailing
+    has_mailing_address: form.has_mailing_address,
+    mailing_address_type: form.mailing_address_type,
+    mailing_address_number: form.mailing_address_number,
+    mailing_address_street_name: form.mailing_address_street_name,
+    mailing_address_street_type: form.mailing_address_street_type,
+    mailing_po_box_number: form.mailing_po_box_number,
+    mailing_box_group_type: form.mailing_box_group_type,
+    mailing_box_group_number: form.mailing_box_group_number,
+    mailing_box_number: form.mailing_box_number,
+    mailing_apo: form.mailing_apo,
+    mailing_ap: form.mailing_ap,
+    mailing_country: form.mailing_country,
+    mailing_postal_code: form.mailing_postal_code,
+    mailing_address_line1: form.mailing_address_line1,
+    mailing_address_line2: form.mailing_address_line2,
+    mailing_address_line3: form.mailing_address_line3,
+    mailing_unit: form.mailing_unit,
+    mailing_city: form.mailing_city,
+    mailing_state: form.mailing_state,
+    mailing_zip_code: form.mailing_zip_code,
   };
+};
+
+export const mapFormStateToWACovrPayload = (
+  form: RegisterFormState,
+): SubmitWACovrPayload => {
+  const payload = {
+    locale: form.lang || "en",
+    email: form.email_address,
+    is_citizen: form.us_citizen,
+    confirm_will_be_18: form.will_be_18_by_election,
+    residence_address: buildPAHomeAddressFromForm(form),
+    residence_city: form.home_city,
+    residence_zip: form.home_zip_code,
+    res_county_code: form.home_county,
+    phone_type: form.opt_in_sms ? "mobile" : "home",
+    driver_license: form.state_id_number,
+    ssn4: form.last_four_ss_number,
+    issue_date: form.date_of_issue,
+    confirm_no_dln: form.has_no_state_license,
+    has_assistant: form.someone_helped,
+    ...form,
+  };
+
+  if (form.middle_name?.trim()) {
+    payload.middle_name = form.middle_name.trim();
+  }
+
+  if (form.suffix?.trim()) {
+    payload.suffix = form.suffix.trim();
+  }
+
+  if (form.someone_helped) {
+    payload.helper_name = form.helper_name;
+    payload.helper_address = form.helper_address;
+    payload.helper_phone = form.helper_phone
+      ? form.helper_phone.replace(/\D/g, "")
+      : "";
+  }
+
+  if (form.has_mailing_address) {
+    payload.mailing_city = form.mailing_city;
+    payload.mailing_state = form.mailing_state;
+    payload.mailing_zip_code = form.mailing_zip_code;
+  }
+
+  return payload;
 };

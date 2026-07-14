@@ -7,18 +7,14 @@ import RenderHTML from "react-native-render-html";
 import { Radio } from "@/components/atoms/Radio";
 import { useNavigation } from "@react-navigation/native";
 
-interface FormPropsConnectedWAStep2Select extends FormProps {
-  upload: string;
-  setUpload: (newValue: string) => void;
-}
-
 export const ConnectedWAStep2Select = ({
   state,
   value,
-  upload,
-  setUpload,
+  errorMessages,
+  onChange,
+  onChangeError,
   handleMainButton,
-}: FormPropsConnectedWAStep2Select) => {
+}: FormProps) => {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const navigation = useNavigation<any>();
@@ -64,19 +60,62 @@ export const ConnectedWAStep2Select = ({
 
       <Radio
         label={t("washington.local_upload_option")}
-        selected={upload === "signature"}
-        onPress={() => setUpload("signature")}
+        selected={value.upload === "signature"}
+        onPress={() => {
+          onChange({ ...value, upload: "signature" });
+          onChangeError({
+            ...errorMessages,
+            upload: "",
+          });
+        }}
       />
       <Radio
         label={t("washington.other_device_option")}
-        selected={upload === "device"}
-        onPress={() => setUpload("device")}
+        selected={value.upload === "device"}
+        onPress={() => {
+          onChange({ ...value, upload: "device" });
+          onChangeError({
+            ...errorMessages,
+            upload: "",
+          });
+        }}
       />
       <Radio
         label={t("washington.paper_option")}
-        selected={upload === "print"}
-        onPress={() => setUpload("print")}
+        selected={value.upload === "print"}
+        onPress={() => {
+          onChange({ ...value, upload: "print" });
+          onChangeError({
+            ...errorMessages,
+            upload: "",
+          });
+        }}
       />
+      {errorMessages.upload && (
+        <RenderHTML
+          contentWidth={width}
+          source={{
+            html: t(errorMessages.upload, {
+              rtv_paper_form_url: "paper-link",
+            }),
+          }}
+          tagsStyles={{
+            body: {
+              fontSize: 14,
+              lineHeight: 18,
+              marginBottom: 20,
+              color: theme.secondary,
+            },
+            a: {
+              color: theme.link,
+              textDecorationLine: "underline",
+            },
+          }}
+          renderersProps={{
+            a: { onPress: goToPaper },
+          }}
+        />
+      )}
       {handleMainButton}
     </>
   );

@@ -71,6 +71,37 @@ export interface AuthMeResponse {
   zip: string;
 }
 
+// -----
+
+export interface ReportEventPayload {
+  registration_uid: string;
+  partner_id: string;
+  step: number;
+  event_name:
+    | "nvra_pre_reg"
+    | "nvra_under_18"
+    | "nvra_email_quest"
+    | "nvra_print_request";
+}
+
+export type ReportInternalData = {
+  message: string;
+  registration_uid: string;
+  voter_uid: string;
+  partner_id: string;
+  workflow_type: string;
+  severity: string;
+  context: {};
+};
+
+export type ReportInternalResponse = {
+  status: {
+    success: boolean;
+    errors: string[];
+  };
+  recorded: boolean;
+};
+
 // ---------------------------------------------------
 
 export const OVR_TYPE_MAP: Record<string, string> = {
@@ -101,6 +132,7 @@ export interface StateData {
   learn_about_url?: string;
   show_vr_check_button?: boolean;
   recent_register_date: string;
+  before_vr_deadline?: boolean;
 }
 
 export type RegisterFormState = {
@@ -159,7 +191,10 @@ export type RegisterFormState = {
 
   has_mailing_address: boolean;
   mailing_postal_code: string;
-  mailingAddressType: string;
+  mailing_address_number: string;
+  mailing_address_street_name: string;
+  mailing_address_street_type: string;
+  mailing_address_type: string;
   mailing_po_box_number: string;
   mailing_box_group_type: string;
   mailing_box_group_number: string;
@@ -184,7 +219,7 @@ export type RegisterFormState = {
   birthDay: string;
   birthYear: string;
   date_of_birth: string;
-  pa_preregistration_age_window: boolean;
+  dob_routing_outcome: string;
   phone: string;
 
   // ISSUE DATE
@@ -192,6 +227,8 @@ export type RegisterFormState = {
   issueDay: string;
   issueYear: string;
   date_of_issue: string;
+  military_service: boolean;
+  non_standard_address: string;
 
   // CONSENTS
   opt_in_sms: boolean;
@@ -212,6 +249,7 @@ export type RegisterFormState = {
   has_no_ssn: boolean | null;
   helper_electronic_signature_acknowledged: boolean;
 
+  upload: string;
   someone_helped: boolean;
   helper_name: string;
   helper_address: string;
@@ -281,7 +319,10 @@ export type RegisterFormStateError = {
 
   has_mailing_address: string;
   mailing_postal_code: string;
-  mailingAddressType: string;
+  mailing_address_number: string;
+  mailing_address_street_name: string;
+  mailing_address_street_type: string;
+  mailing_address_type: string;
   mailing_po_box_number: string;
   mailing_box_group_type: string;
   mailing_box_group_number: string;
@@ -306,7 +347,7 @@ export type RegisterFormStateError = {
   birthDay: string;
   birthYear: string;
   date_of_birth: string;
-  pa_preregistration_age_window: string;
+  dob_routing_outcome: string;
   phone: string;
 
   // ISSUE DATE
@@ -314,6 +355,8 @@ export type RegisterFormStateError = {
   issueDay: string;
   issueYear: string;
   date_of_issue: string;
+  military_service: string;
+  non_standard_address: string;
 
   // CONSENTS
   opt_in_sms: string;
@@ -334,6 +377,7 @@ export type RegisterFormStateError = {
   has_no_ssn: string;
   helper_electronic_signature_acknowledged: string;
 
+  upload: string;
   someone_helped: string;
   helper_name: string;
   helper_address: string;
@@ -373,10 +417,30 @@ export type SubmitMICovrPayload = {
   registration_city: string;
   registration_zip_code: string;
   registration_county: string;
-  has_mailing_address: boolean;
   opt_in_email: boolean;
   opt_in_sms: boolean;
   phone: string;
+
+  has_mailing_address: boolean;
+  mailing_postal_code: string;
+  mailing_address_number: string;
+  mailing_address_street_name: string;
+  mailing_address_street_type: string;
+  mailing_address_type: string;
+  mailing_po_box_number: string;
+  mailing_box_group_type: string;
+  mailing_box_group_number: string;
+  mailing_box_number: string;
+  mailing_apo: string;
+  mailing_ap: string;
+  mailing_address_line1: string;
+  mailing_address_line2: string;
+  mailing_address_line3: string;
+  mailing_country: string;
+  mailing_unit: string;
+  mailing_city: string;
+  mailing_state: string;
+  mailing_zip_code: string;
 };
 
 export type SubmitVoterStatusResponse = {
@@ -484,20 +548,44 @@ export interface SubmitEmailZipRequest {
 }
 
 export type UserData = {
+  uid: string;
+  email: string;
   first_name: string;
   last_name: string;
-  email: string;
-  locale: string;
+  address: string;
+  aptunit: string | null;
+  city: string;
+  zip: string;
+  date_of_birth: string;
+  phone: string;
+  survey_question_1: string | null;
+  survey_answer_1: string | null;
+  survey_question_2: string | null;
+  survey_answer_2: string | null;
+  opt_in_email: boolean | null;
+  opt_in_sms: boolean | null;
+  partner_opt_in_email: boolean | null;
+  partner_opt_in_sms: boolean | null;
+  opt_in_volunteer: boolean | null;
+  partner_opt_in_volunteer: boolean | null;
+  registration_status: boolean;
+  registration_status_date: string;
+  registration_date: string;
+  pledge_status: boolean;
+  pledge_date: string | null;
 };
 
 export interface SubmitEmailZipResponse {
   status: { success: boolean; errors: string[] | null };
   state: StateData;
-  user: UserData;
+  voter: UserData;
+  registration_uid?: string;
+  counties?: string[];
 }
 
 export interface SubmitEmailZipResponseProps {
   status: { success: boolean; errors: string[] | null };
+  registration_uid?: string;
   state?: StateData;
   zip: string;
   email: string;
@@ -542,6 +630,12 @@ export interface DataCollectionConfiguration {
     po_box_allowed: boolean;
     min_age: number;
   };
+  eligibility: {
+    min_pre_reg_age: number;
+    min_vr_age: number;
+    min_age_election_day_buffer_days: number;
+    before_vr_deadline: boolean;
+  };
 }
 
 export interface FetchDataCollectionConfigResponse {
@@ -550,6 +644,20 @@ export interface FetchDataCollectionConfigResponse {
     errors: string[] | null;
   };
   configuration: DataCollectionConfiguration;
+}
+
+export interface SubmitFinishedWithStatData {
+  workflow_type: string;
+  registrant: Partial<RegisterFormState>;
+}
+
+export interface SubmitFonoshedWithStateResponce {
+  status: {
+    success: boolean;
+    errors: string[];
+  };
+  registration_uid: string;
+  voter: UserData;
 }
 
 export interface PDFTokenRequest {
@@ -605,6 +713,35 @@ export type VoterStatusResponse = {
   response_outcome: string | null;
 };
 
+export type SubmitVoterDeviceStatusResponse = SubmitVoterStatusResponse & {
+  continue_url: string;
+};
+
+export type SubmitVoterCAResponse = SubmitVoterStatusResponse & {
+  covr_success: boolean;
+  redirect_url: string;
+  disclosures: string[];
+  disclosures_prechecked: boolean;
+};
+
+export type VoterDeviceSMSData = {
+  registrant_uid: string;
+  phone: string;
+};
+
+export type VoterDeviceEmailData = {
+  registrant_uid: string;
+  email: string;
+};
+
+export type VoterDeviceResponse = {
+  status: {
+    success: boolean;
+    errors: string[];
+  };
+  sent: boolean;
+};
+
 export type SubmitPACovrPayload = {
   partner_id: number;
   locale: string;
@@ -645,7 +782,35 @@ export type SubmitPACovrPayload = {
   confirm_declaration: boolean;
 };
 
+export type SubmitWACovrPayload = RegisterFormState & {
+  locale: string;
+  email: string;
+  is_citizen: boolean;
+  confirm_will_be_18: boolean | null;
+  residence_address: string;
+  residence_city: string;
+  residence_zip: string;
+  res_county_code: string;
+  phone_type: string;
+  driver_license: string;
+  ssn4: string;
+  issue_date: string;
+  confirm_no_dln: boolean | null;
+  has_assistant: boolean;
+};
+
+export type SubmitCACovrPayload = RegisterFormState & {
+  locale: string;
+  email: string;
+};
+
 export type PACovrCheckResponse = {
+  status: "pending" | "success" | "failure";
+  transaction_id: string | null;
+  submission_error: string[];
+};
+
+export type WACovrCheckResponse = {
   status: "pending" | "success" | "failure";
   transaction_id: string | null;
   submission_error: string[];

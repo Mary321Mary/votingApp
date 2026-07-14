@@ -27,66 +27,100 @@ export interface DateValidationProcessingResult {
   };
   formUpdates: {
     date_of_birth?: string;
-    pa_preregistration_age_window?: boolean;
+    dob_routing_outcome?:
+      | "eligible"
+      | "under_18_election_day_ok"
+      | "pre_registration_notice";
   };
 }
 
-/**
- * Validates a date of birth for Pennsylvania connected OVR:
- * - minimum 17 years + 180 days
- * - determines if registrant is in preregistration window (before 18th birthday)
- */
-export function evaluatePaConnectedRegistrationDateOfBirth(
+interface ParsedBirthDate {
+  year: number;
+  month: number;
+  day: number;
+  date: Date;
+}
+
+function parseBirthDateComponents(
   birthYear: string,
   birthMonth: string,
   birthDay: string,
-  referenceDate: Date = new Date(),
-): {
-  outcome: "defer" | "too_young" | "eligible";
-  errorMessageKey?: string;
-  preregistrationAgeWindow?: boolean;
-} {
+): ParsedBirthDate | null {
   if (!birthYear.trim() || !birthMonth.trim() || !birthDay.trim()) {
-    return { outcome: "defer" };
+    return null;
   }
 
   const year = Number(birthYear);
   const month = Number(birthMonth) - 1;
   const day = Number(birthDay);
-  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
-    return { outcome: "defer" };
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day)
+  ) {
+    return null;
   }
 
-  const birth = new Date(year, month, day);
+  const date = new Date(year, month, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return { year, month, day, date };
+}
+
+function getReferenceToday(referenceDate: Date = new Date()): Date {
   const today = new Date(referenceDate);
   today.setHours(0, 0, 0, 0);
+  return today;
+}
 
-  if (birth > today) {
-    return { outcome: "defer" };
+/**
+ * Вычисляет точный возраст пользователя (с учетом дробных долей для Оклахомы 17.5)
+ */
+function calculateExactAge(parsed: ParsedBirthDate, today: Date): number {
+  let age = today.getFullYear() - parsed.year;
+  const monthDiff = today.getMonth() - parsed.month;
+  const dayDiff = today.getDate() - parsed.day;
+
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
   }
 
-  const invalidCalendar =
-    birth.getFullYear() !== year || birth.getMonth() !== month || birth.getDate() !== day;
-  if (invalidCalendar) {
-    return { outcome: "defer" };
-  }
+  const lastBirthday = new Date(parsed.year + age, parsed.month, parsed.day);
+  const nextBirthday = new Date(
+    parsed.year + age + 1,
+    parsed.month,
+    parsed.day,
+  );
 
-  const minAgeThresholdDate = new Date(today);
-  minAgeThresholdDate.setFullYear(minAgeThresholdDate.getFullYear() - 17);
-  minAgeThresholdDate.setDate(minAgeThresholdDate.getDate() - 180);
+  const msInYear = nextBirthday.getTime() - lastBirthday.getTime();
+  const msPassedSinceBirthday = today.getTime() - lastBirthday.getTime();
 
-  if (birth > minAgeThresholdDate) {
-    return {
-      outcome: "too_young",
-      errorMessageKey: "form_fields.age_eligibility_error",
-    };
-  }
+  return age + msPassedSinceBirthday / msInYear;
+}
 
-  const eighteenthBirthday = new Date(year, month, day);
-  eighteenthBirthday.setFullYear(eighteenthBirthday.getFullYear() + 18);
-  const preregistrationAgeWindow = today < eighteenthBirthday;
+/**
+ * Проверяет порог "возраст минус N дней буфера" для выборов
+ */
+function hasReachedAgeWithBuffer(
+  parsed: ParsedBirthDate,
+  baseAge: number,
+  bufferDays: number,
+  today: Date,
+): boolean {
+  const thresholdDate = new Date(today);
+  thresholdDate.setFullYear(thresholdDate.getFullYear() - baseAge);
+  thresholdDate.setDate(thresholdDate.getDate() + bufferDays);
+  return parsed.date <= thresholdDate;
+}
 
-  return { outcome: "eligible", preregistrationAgeWindow };
+export function normalizeStateAbbreviation(abbreviation?: string): string {
+  return (abbreviation ?? "").trim().toUpperCase();
 }
 
 /**
@@ -102,7 +136,7 @@ export function processDateOfBirthValidation(
   birthDay: string,
   formConfig: DataCollectionConfiguration,
   isRequired: boolean = true,
-  usePaConnectedRules: boolean = false,
+  isFinishWithStateWorkflow: boolean = false,
 ): DateValidationProcessingResult {
   const result: DateValidationProcessingResult = {
     errors: {},
@@ -110,7 +144,10 @@ export function processDateOfBirthValidation(
   };
 
   // Check if fields are required but not filled
-  if ((!birthMonth.trim() || !birthDay.trim() || !birthYear.trim()) && isRequired) {
+  if (
+    (!birthMonth.trim() || !birthDay.trim() || !birthYear.trim()) &&
+    isRequired
+  ) {
     result.errors.birthDay = "general.required";
     return result;
   }
@@ -126,66 +163,100 @@ export function processDateOfBirthValidation(
     return result;
   }
 
-  const year = Number(birthYear);
-  const month = Number(birthMonth) - 1;
-  const day = Number(birthDay);
-  const date = new Date(year, month, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // Check if date is in the future
-  if (date > today) {
-    result.errors.birthYear = "form_fields.invalid_year_future";
-    return result;
-  }
-
-  // Check if date is valid calendar date
-  const isInvalidDate =
-    date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day;
-
-  if (isInvalidDate) {
+  const parsed = parseBirthDateComponents(birthYear, birthMonth, birthDay);
+  if (!parsed) {
     result.errors.birthDay = "form_fields.invalid_birth_date";
     return result;
   }
 
-  if (usePaConnectedRules) {
-    // Evaluate PA connected OVR special logic only when requested
-    const paDob = evaluatePaConnectedRegistrationDateOfBirth(
-      birthYear,
-      birthMonth,
-      birthDay,
+  const today = getReferenceToday();
+
+  // Check if date is in the future
+  if (parsed.date > today) {
+    result.errors.birthYear = "form_fields.invalid_year_future";
+    return result;
+  }
+
+  // Загружаем настройки группы "eligibility"
+  const eligibility = formConfig?.eligibility || {
+    min_pre_reg_age: 18,
+    min_vr_age: 18,
+    min_age_election_day_buffer_days: 180,
+    before_vr_deadline: true,
+  };
+
+  let minPreRegAge = eligibility.min_pre_reg_age ?? 18;
+  const minVrAge = eligibility.min_vr_age ?? 18;
+  const bufferDays = eligibility.min_age_election_day_buffer_days ?? 180;
+
+  // Угловой кейс: ошибка конфигурации
+  if (minVrAge < minPreRegAge) {
+    console.error(
+      "Internal Configuration Error: min_vr_age is less than min_pre_reg_age.",
+    );
+    minPreRegAge = minVrAge;
+  }
+
+  const userAge = calculateExactAge(parsed, today);
+  const ageErrorKey = "form_fields.age_eligibility_error";
+
+  // -------------------------------------------------------------
+  // ДЛЯ ВОРКФЛОУ FINISH WITH STATE (ВТОРАЯ ЗАДАЧА)
+  // -------------------------------------------------------------
+  if (isFinishWithStateWorkflow) {
+    if (userAge < minPreRegAge) {
+      result.errors.birthMonth = ageErrorKey;
+    } else {
+      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+    }
+    return result;
+  }
+
+  // -------------------------------------------------------------
+  // ДЛЯ ВОРКФЛОУ СТАНДАРТНОЙ NVRA ФОРМЫ (ПЕРВАЯ ЗАДАЧА)
+  // -------------------------------------------------------------
+  const isPreRegState = minVrAge > minPreRegAge;
+
+  if (!isPreRegState) {
+    // Штаты БЕЗ предрегистрации
+    if (userAge >= minVrAge) {
+      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+      result.formUpdates.dob_routing_outcome = "eligible";
+      return result;
+    }
+
+    const hasReachedBuffer = hasReachedAgeWithBuffer(
+      parsed,
+      minVrAge,
+      bufferDays,
       today,
     );
-
-    if (paDob.outcome === "too_young") {
-      // "You must be 18..."
-      result.errors.birthMonth = paDob.errorMessageKey;
-      result.formUpdates.pa_preregistration_age_window = false;
+    if (!hasReachedBuffer) {
+      result.errors.birthMonth = ageErrorKey;
       return result;
-    }
-
-    if (paDob.outcome === "eligible") {
-      // >= 18 (preregistrationAgeWindow: false),
-      // And from 17.5 to 18 (preregistrationAgeWindow: true)
-      // No Error
+    } else {
       result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
-      result.formUpdates.pa_preregistration_age_window = paDob.preregistrationAgeWindow;
+      result.formUpdates.dob_routing_outcome = "under_18_election_day_ok";
       return result;
     }
-  }
+  } else {
+    // Штаты С предрегистрацией
+    if (userAge >= minVrAge) {
+      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+      result.formUpdates.dob_routing_outcome = "eligible";
+      return result;
+    }
 
-  // Default case: check general age requirement from formConfig
-  let age = today.getFullYear() - date.getFullYear();
-  const monthDiff = today.getMonth() - date.getMonth();
-  const dayDiff = today.getDate() - date.getDate();
+    if (userAge < minPreRegAge) {
+      result.errors.birthMonth = ageErrorKey;
+      return result;
+    }
 
-  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-    age--;
-  }
-
-  if (age < formConfig.validations.min_age) {
-    result.errors.birthMonth = "form_fields.age_eligibility_error";
-    return result;
+    if (userAge >= minPreRegAge && userAge < minVrAge) {
+      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+      result.formUpdates.dob_routing_outcome = "pre_registration_notice";
+      return result;
+    }
   }
 
   // Valid date, set form data

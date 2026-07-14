@@ -19,7 +19,7 @@ const Header = ({ text }: HeaderProp) => {
         <Text style={styles.title}>{text}</Text>
       </View>
     </View>
-  )
+  );
 };
 
 const getStyles = (theme: any) =>
@@ -32,7 +32,7 @@ const getStyles = (theme: any) =>
       borderBottomWidth: 1,
       borderBottomColor: theme.borderColor,
       backgroundColor: theme.white,
-      paddingHorizontal: 15,
+      paddingHorizontal: 10,
     },
     titleContainer: {
       flex: 1,

@@ -7,11 +7,6 @@ import {
   RegisterFormStateError,
 } from "utils/types";
 
-export type PaConnectedRegistrationDobResult =
-  | { outcome: "defer" }
-  | { outcome: "too_young"; errorMessageKey: string }
-  | { outcome: "eligible"; preregistrationAgeWindow: boolean };
-
 export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   partner_id: "",
   lang: "",
@@ -67,13 +62,15 @@ export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   birthDay: "",
   birthYear: "",
   date_of_birth: "",
-  pa_preregistration_age_window: "",
+  dob_routing_outcome: "",
   phone: "",
 
   issueMonth: "",
   issueDay: "",
   issueYear: "",
   date_of_issue: "",
+  military_service: "",
+  non_standard_address: "",
 
   opt_in_sms: "",
   opt_in_email: "",
@@ -98,6 +95,7 @@ export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   has_no_ssn: "",
   helper_electronic_signature_acknowledged: "",
 
+  upload: "",
   someone_helped: "",
   helper_name: "",
   helper_address: "",
@@ -110,7 +108,10 @@ export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
 
   has_mailing_address: "",
   mailing_postal_code: "",
-  mailingAddressType: "",
+  mailing_address_number: "",
+  mailing_address_street_name: "",
+  mailing_address_street_type: "",
+  mailing_address_type: "",
   age_eligibility: "",
 
   mailing_po_box_number: "",
@@ -135,7 +136,6 @@ export const validate = (
   formCongif: DataCollectionConfiguration,
   flowType: string,
   showRedirect: boolean,
-  check17andHalf?: boolean,
 ): ValidationResult => {
   const zipRegex = /^\d{5}(-\d{4})?$/;
   const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
@@ -339,12 +339,16 @@ export const validate = (
     form.birthDay,
     formCongif,
     isRequired(formCongif, "date_of_birth"),
-    check17andHalf,
+    !form.has_no_state_license,
   );
   Object.assign(errorMessage, dobValidation.errors);
   Object.assign(form, dobValidation.formUpdates);
 
-  if (isVisible(formCongif, "age_eligibility") && !form.age_eligibility) {
+  if (
+    isVisible(formCongif, "age_eligibility") &&
+    !form.age_eligibility &&
+    form.dob_routing_outcome === "pre_registration_notice"
+  ) {
     errorMessage.age_eligibility = "form_fields.age_eligibility_error";
   }
   if (!form.age_eligibility || !form.has_no_state_license) {
@@ -504,18 +508,42 @@ export const validateConnectedOvr = (
       errorMessage.home_zip_code = "form_fields.zip_code_error";
     }
     if (
-      !form.mailingAddressType.trim() &&
+      !form.mailing_address_type.trim() &&
       isRequired(formCongif, "mailing_address_type")
     ) {
-      errorMessage.mailingAddressType = "general.required";
+      errorMessage.mailing_address_type = "general.required";
     }
     if (form.has_mailing_address) {
-      if (form.mailingAddressType === "STANDARD") {
+      if (form.mailing_address_type === "STANDARD") {
         if (
-          !form.mailing_address.trim() &&
-          isRequired(formCongif, "mailing_address", form.has_mailing_address)
+          !form.mailing_address_number.trim() &&
+          isRequired(
+            formCongif,
+            "mailing_address_number",
+            form.has_mailing_address,
+          )
         ) {
-          errorMessage.mailing_address = "general.required";
+          errorMessage.mailing_address_number = "general.required";
+        }
+        if (
+          !form.mailing_address_street_name.trim() &&
+          isRequired(
+            formCongif,
+            "mailing_address_street_name",
+            form.has_mailing_address,
+          )
+        ) {
+          errorMessage.mailing_address_street_name = "general.required";
+        }
+        if (
+          !form.mailing_address_street_type.trim() &&
+          isRequired(
+            formCongif,
+            "mailing_address_street_type",
+            form.has_mailing_address,
+          )
+        ) {
+          errorMessage.mailing_address_street_type = "general.required";
         }
         if (
           !form.mailing_city.trim() &&
@@ -537,7 +565,7 @@ export const validateConnectedOvr = (
         } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
-      } else if (form.mailingAddressType === "PO_BOX") {
+      } else if (form.mailing_address_type === "PO_BOX") {
         if (
           !form.mailing_po_box_number.trim() &&
           isRequired(
@@ -568,7 +596,7 @@ export const validateConnectedOvr = (
         } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
-      } else if (form.mailingAddressType === "MILITARY") {
+      } else if (form.mailing_address_type === "MILITARY") {
         if (
           !form.mailing_box_group_type.trim() &&
           isRequired(
@@ -615,7 +643,7 @@ export const validateConnectedOvr = (
         } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
-      } else if (form.mailingAddressType === "INTERNATIONAL") {
+      } else if (form.mailing_address_type === "INTERNATIONAL") {
         if (
           !form.mailing_address_line1.trim() &&
           isRequired(
@@ -761,12 +789,6 @@ export const validateWA = (
   if (needsValidation("us_citizen", "us_citizen") && !form.us_citizen) {
     errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
   }
-  if (
-    needsValidation("will_be_18_by_election", "will_be_18_by_election") &&
-    !form.will_be_18_by_election
-  ) {
-    errorMessage.will_be_18_by_election = "washington.age_eligibility_error";
-  }
 
   if (isRequired(formCongif, "date_of_birth")) {
     if (
@@ -870,6 +892,12 @@ export const validateWA = (
   }
 
   if (isWA === "connected_WA") {
+    if (
+      needsValidation("will_be_18_by_election", "will_be_18_by_election") &&
+      !form.will_be_18_by_election
+    ) {
+      errorMessage.will_be_18_by_election = "washington.age_eligibility_error";
+    }
     if (!form.has_no_state_license) {
       const configRegex =
         formCongif.fields.state_id_number?.validations?.regexp;
@@ -963,6 +991,13 @@ export const validateWA = (
   }
 
   if (isWA === "connected_PA") {
+    if (
+      needsValidation("will_be_18_by_election", "will_be_18_by_election") &&
+      !form.will_be_18_by_election
+    ) {
+      errorMessage.will_be_18_by_election =
+        "pennsylvania.age_eligibility_error";
+    }
     if (step === 2) {
       if (!form.has_no_state_license) {
         const configRegex =

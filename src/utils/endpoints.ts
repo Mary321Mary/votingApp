@@ -19,5 +19,19 @@ export const CHECK_MI_COVR = "/api/ng/check_mi_covr";
 
 export const SUBMIT_PA_COVR = "/api/ng/submit_pa_covr";
 export const CHECK_PA_COVR = "/api/ng/check_pa_covr";
+export const SUBMIT_PA_DEVICE = "/api/ng/submit_pa_finish_on_device";
 
-export const SUBMIT_WA_COVR = "/api/ng/wa_submit";
+export const SUBMIT_WA_COVR = "/api/ng/submit_wa_covr";
+export const CHECK_WA_COVR = "/api/ng/check_wa_covr";
+
+export const SET_UNDER_18_REMINDER = "/api/ng/set_under_18_reminder";
+export const SUBMIT_FINISH_WITH_STATE = "/api/ng/submit_finished_with_state";
+export const SUBMIT_WA_DEVICE = "/api/ng/submit_wa_finish_on_device";
+
+export const SEND_DEVICE_SMS = "/api/ng/send_finish_on_device_sms";
+export const SEND_DEVICE_EMAIL = "/api/ng/send_finish_on_device_email";
+
+export const SUBMIT_CA_COVR = "/api/ng/submit_ca_covr";
+
+export const REPORT_EVENT = "/api/ng/report_event";
+export const REPORT_INTERNAL_ERROR = "/api/ng/report_internal_error";

@@ -272,7 +272,7 @@ export const ConnectedWAStep3Review = ({
           }}
         />
         <Text style={styles.declarationText}>
-          {t("pennsylvania.declaration2")}
+          {t("washington.declaration2")}
         </Text>
       </View>
       {/* Confirm */}

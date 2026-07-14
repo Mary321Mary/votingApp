@@ -74,7 +74,7 @@ export const ConnectedWAStep3LocalUpload = ({
             <RenderHTML
               contentWidth={width}
               source={{
-                html: t("washington.wdl_number_none_notice", {
+                html: t(errorMessages.signature_base64, {
                   rtv_paper_form_url: "paper-link",
                 }),
               }}
@@ -83,6 +83,7 @@ export const ConnectedWAStep3LocalUpload = ({
                   fontSize: 14,
                   lineHeight: 18,
                   marginBottom: 20,
+                  color: "red",
                 },
                 a: {
                   color: theme.link,

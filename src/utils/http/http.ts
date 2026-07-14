@@ -111,6 +111,49 @@ export class HttpClient {
           }
         }
 
+        const status = error.response?.status;
+        if (
+          !status ||
+          status === 422 ||
+          status >= 500 ||
+          error.code === "ECONNABORTED"
+        ) {
+          try {
+            const reqData = originalRequest?.data
+              ? JSON.parse(originalRequest.data)
+              : {};
+            const registrant = reqData?.registrant || {};
+
+            authService
+              .reportInternalError({
+                message: `API Failure on ${originalRequest?.method?.toUpperCase()} ${
+                  originalRequest?.url
+                }: ${error.message}`,
+                registration_uid:
+                  reqData?.registration_uid ||
+                  registrant?.registration_uid ||
+                  null,
+                voter_uid: reqData?.voter_uid || registrant?.voter_uid || null,
+                partner_id: registrant?.partner_id
+                  ? String(registrant.partner_id)
+                  : "1",
+                workflow_type: reqData?.workflow_type || null,
+                severity: "error",
+                context: {
+                  http_status: status || "NETWORK_ERROR",
+                  error_code: error.code || "UNKNOWN",
+                  response_body: error.response?.data || null,
+                },
+              })
+              .catch(err => console.error("Failed to send telemetry:", err));
+          } catch (loggingError) {
+            console.error(
+              "Failed to parse error context for telemetry:",
+              loggingError,
+            );
+          }
+        }
+
         return Promise.reject(error);
       },
     );

@@ -3,9 +3,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultLayout from "@/layout/DefaultLayout";
 import {
   CheckRegistrationStatus,
+  DataCollectionConfiguration,
   RegisterFormState,
   StateData,
+  SubmitEmailZipResponse,
   SubmitEmailZipResponseProps,
+  UserData,
 } from "@/utils/types";
 import HomeScreen from "@/screens/Home";
 import RegisterScreen from "@/screens/Register";
@@ -25,6 +28,10 @@ import LookupNotFoundScreen from "@/screens/LookupNotFound";
 import AlreadyRegisteredScreen from "@/screens/AlreadyRegistered";
 import ApiErrorScreen from "@/screens/ApiError";
 import { Under18Screen } from "@/screens/Under18Screen";
+import PreRegisterScreen from "@/screens/PreRegister";
+import FinishWithStateScreen from "@/screens/FinishWithState";
+import FailCAScreen from "@/screens/FailCA";
+import AfterDeadlineScreen from "@/screens/AfterDeadline";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -52,7 +59,12 @@ export type RootStackParamList = {
     state: StateData;
     form: RegisterFormState;
   };
-  ZipError: { text: string; header?: string; showImage?: boolean };
+  ZipError: {
+    text: string;
+    header?: string;
+    showImage?: boolean;
+    user: UserData | null;
+  };
   NotParticipating: { state: StateData };
   Print: {
     form: RegisterFormState;
@@ -75,6 +87,12 @@ export type RootStackParamList = {
     form: RegisterFormState;
   };
   SuccessWA: { state: StateData };
+  FailCA: {
+    state: StateData;
+    zip: string;
+    email: string;
+    form: RegisterFormState;
+  };
   FailWA: {
     state: StateData;
     zip: string;
@@ -82,6 +100,20 @@ export type RootStackParamList = {
     form: RegisterFormState;
   };
   Under18: {
+    state: StateData;
+  };
+  PreRegister: {
+    state: StateData;
+    form: RegisterFormState;
+    workflow_type: string;
+    formCongif: DataCollectionConfiguration;
+  };
+  AfterDeadline: {
+    response: SubmitEmailZipResponse;
+    zip: string;
+    email: string;
+  };
+  FinishWithState: {
     state: StateData;
   };
   ApiError: { state: StateData; title?: string };
@@ -149,9 +181,22 @@ function Navigation({}) {
         component={withDefaultLayout(SuccessWAScreen)}
       />
       <Stack.Screen name="FailWA" component={withDefaultLayout(FailWAScreen)} />
+      <Stack.Screen name="FailCA" component={withDefaultLayout(FailCAScreen)} />
       <Stack.Screen
         name="Under18"
         component={withDefaultLayout(Under18Screen)}
+      />
+      <Stack.Screen
+        name="PreRegister"
+        component={withDefaultLayout(PreRegisterScreen)}
+      />
+      <Stack.Screen
+        name="AfterDeadline"
+        component={withDefaultLayout(AfterDeadlineScreen)}
+      />
+      <Stack.Screen
+        name="FinishWithState"
+        component={withDefaultLayout(FinishWithStateScreen)}
       />
       <Stack.Screen
         name="ApiError"

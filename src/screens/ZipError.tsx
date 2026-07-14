@@ -5,10 +5,16 @@ import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import logo from "assets/images/warning-zone.jpg";
+import { UserData } from "@/utils/types";
 
 interface ZipErrorScreenProps {
   route: {
-    params: { text: string; header?: string; showImage?: boolean };
+    params: {
+      text: string;
+      header?: string;
+      showImage?: boolean;
+      user: UserData | null;
+    };
   };
 }
 
@@ -33,14 +39,23 @@ export default function ZipErrorScreen({ route }: ZipErrorScreenProps) {
 
       <View style={styles.content}>
         <Text style={styles.text}>{text}</Text>
+        {state.user && (
+          <View>
+            <Text>Address {state.user.address}</Text>
+            <Text>City: {state.user.city}</Text>
+            <Text>Zip: {state.user.zip}</Text>
+            <Text>Date of birth: {state.user.date_of_birth}</Text>
+            <Text>Email: {state.user.email}</Text>
+          </View>
+        )}
         {showImage && <Image source={logo} style={styles.logo} />}
       </View>
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => navigation.replace("Home")}
       >
-        <Text style={styles.buttonText}>{t("restart")}</Text>
+        <Text style={styles.buttonText}>{t("general.restart_test")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -57,6 +72,7 @@ const getStyles = (theme: any) =>
       paddingHorizontal: 20,
       paddingTop: 30,
       gap: 12,
+      alignItems: "center",
     },
 
     text: {

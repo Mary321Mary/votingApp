@@ -35,6 +35,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
   const {
     status,
     state: regState,
+    registration_uid,
     zip,
     email,
     pageFromLookup,
@@ -57,6 +58,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
           state={regState}
           zip={zip}
           email={email}
+          registrationUid={registration_uid ?? ""}
           pageFromLookup={pageFromLookup || ""}
           workflowType={workflowType}
           showRedirectText={showRedirectText || false}

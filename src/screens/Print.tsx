@@ -7,8 +7,10 @@ import {
   Button,
   Linking,
   TouchableOpacity,
+  ScrollView,
+  useWindowDimensions,
 } from "react-native";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 
 import Header from "@/layout/Header";
@@ -19,6 +21,7 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
+import RenderHTML from "react-native-render-html";
 
 interface PrintScreenProps {
   route: {
@@ -41,6 +44,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
   const navigation = useNavigation<PrintScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { width } = useWindowDimensions();
 
   const { form, state, workflow_type, finish_with_state } = route.params;
 
@@ -93,7 +97,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
 
       <View style={styles.body}>
@@ -118,13 +122,23 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         </View>
 
         {/* Printer */}
-        <Text style={styles.title}>
-          {t("print_form_page.dont_have_printer")}
+        <Text>
+          <Trans
+            i18nKey="print_form_page.dont_have_printer"
+            components={{
+              strong: <Text style={styles.boldText} />,
+            }}
+          />
         </Text>
         <View style={styles.divider} />
         {/* Learn more */}
-        <Text style={styles.title}>
-          {t("print_form_page.have_questions_find_out")}
+        <Text>
+          <Trans
+            i18nKey="print_form_page.have_questions_find_out"
+            components={{
+              strong: <Text style={styles.boldText} />,
+            }}
+          />
         </Text>
 
         <View style={styles.section}>
@@ -157,10 +171,26 @@ export default function PrintScreen({ route }: PrintScreenProps) {
             </Text>
           </TouchableOpacity>
           {/* Footer */}
-          <Text style={styles.title}>{t("print_form_page.get_this_tool")}</Text>
+          <View>
+            <Text style={styles.title}>
+              {t("print_form_page.get_this_tool")}
+            </Text>
+            <RenderHTML
+              contentWidth={width}
+              source={{ html: t("print_form_page.send_us") }}
+              tagsStyles={{
+                p: {
+                  margin: 0,
+                  padding: 0,
+                  color: "#333",
+                  fontSize: 14,
+                },
+              }}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -180,6 +210,13 @@ const getStyles = (theme: any) =>
       marginLeft: 8,
       fontSize: 16,
     },
+    boldText: {
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 16,
+      color: "#000",
+    },
+
     divider: {
       width: "100%",
       height: 1,

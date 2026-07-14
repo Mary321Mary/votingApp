@@ -15,15 +15,28 @@ import type {
   PDFTokenResponse,
   RegisterCredentials,
   RegisterData,
+  ReportEventPayload,
+  ReportInternalData,
+  ReportInternalResponse,
+  SubmitCACovrPayload,
   SubmitEmailZipRequest,
   SubmitEmailZipResponse,
+  SubmitFinishedWithStatData,
+  SubmitFonoshedWithStateResponce,
   SubmitMICovrPayload,
   SubmitPACovrPayload,
+  SubmitVoterCAResponse,
+  SubmitVoterDeviceStatusResponse,
   SubmitVoterStatusResponse,
+  SubmitWACovrPayload,
   UIConfig,
   User,
+  VoterDeviceEmailData,
+  VoterDeviceResponse,
+  VoterDeviceSMSData,
   VoterStatusData,
   VoterStatusResponse,
+  WACovrCheckResponse,
 } from "utils/types";
 import { HttpClient } from "utils/http/http";
 import * as ENDPOINTS from "utils/endpoints";
@@ -171,6 +184,48 @@ export function checkMICovr(
   );
 }
 
+export function submitPADevice(
+  data: SubmitPACovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    SubmitPACovrPayload,
+    SubmitVoterDeviceStatusResponse
+  >(ENDPOINTS.SUBMIT_PA_DEVICE, data, headers);
+}
+
+export function submitWADevice(
+  data: SubmitWACovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    SubmitWACovrPayload,
+    SubmitVoterDeviceStatusResponse
+  >(ENDPOINTS.SUBMIT_WA_DEVICE, data, headers);
+}
+
+export function submitDeviceSMS(
+  data: VoterDeviceSMSData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<VoterDeviceSMSData, VoterDeviceResponse>(
+    ENDPOINTS.SEND_DEVICE_SMS,
+    data,
+    headers,
+  );
+}
+
+export function submitDeviceEmail(
+  data: VoterDeviceEmailData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<VoterDeviceEmailData, VoterDeviceResponse>(
+    ENDPOINTS.SEND_DEVICE_EMAIL,
+    data,
+    headers,
+  );
+}
+
 export function submitPACovr(
   data: SubmitPACovrPayload,
   headers: Record<string, string> = {},
@@ -188,6 +243,71 @@ export function checkPACovr(
 ) {
   return HttpClient.Client.post<VoterStatusData, PACovrCheckResponse>(
     ENDPOINTS.CHECK_PA_COVR,
+    data,
+    headers,
+  );
+}
+
+export function submitWACovr(
+  data: SubmitWACovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<SubmitWACovrPayload, SubmitVoterStatusResponse>(
+    ENDPOINTS.SUBMIT_WA_COVR,
+    data,
+    headers,
+  );
+}
+
+export function checkWACovr(
+  data: VoterStatusData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<VoterStatusData, WACovrCheckResponse>(
+    ENDPOINTS.CHECK_WA_COVR,
+    data,
+    headers,
+  );
+}
+
+export function submitCACovr(
+  data: SubmitCACovrPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<SubmitCACovrPayload, SubmitVoterCAResponse>(
+    ENDPOINTS.SUBMIT_CA_COVR,
+    data,
+    headers,
+  );
+}
+
+export function submitFinishedWithState(
+  data: SubmitFinishedWithStatData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    SubmitFinishedWithStatData,
+    SubmitFonoshedWithStateResponce
+  >(ENDPOINTS.SUBMIT_FINISH_WITH_STATE, data, headers);
+}
+
+export function reportEvent(
+  data: ReportEventPayload,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<ReportEventPayload, ReportInternalResponse>(
+    ENDPOINTS.REPORT_EVENT,
+    data,
+    headers,
+  );
+}
+
+export function reportInternalError(
+  data: ReportInternalData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<ReportInternalData, ReportInternalResponse>(
+    ENDPOINTS.REPORT_INTERNAL_ERROR,
     data,
     headers,
   );

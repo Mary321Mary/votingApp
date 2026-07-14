@@ -63,7 +63,7 @@ export default function ConnectedOVRStep3({
   };
 
   const renderMailingAddressFields = () => {
-    switch (value.mailingAddressType) {
+    switch (value.mailing_address_type) {
       case "STANDARD":
         return (
           <StandardMailingAddress
@@ -247,7 +247,7 @@ export default function ConnectedOVRStep3({
                   mailing_city: "",
                   mailing_state: "",
                   mailing_zip_code: "",
-                  mailingAddressType: "STANDARD",
+                  mailing_address_type: "STANDARD",
                 });
                 // Clear errors for mailing_* fields
                 const clearedErrors = { ...errorMessages };
@@ -280,9 +280,9 @@ export default function ConnectedOVRStep3({
 
               <View style={styles.pickerWrapper}>
                 <Picker
-                  selectedValue={value.mailingAddressType}
+                  selectedValue={value.mailing_address_type}
                   onValueChange={(text: string) =>
-                    updateField("mailingAddressType", text)
+                    updateField("mailing_address_type", text)
                   }
                 >
                   {MAILING_TYPE.map(
@@ -296,9 +296,9 @@ export default function ConnectedOVRStep3({
                   )}
                 </Picker>
               </View>
-              {errorMessages.mailingAddressType && (
+              {errorMessages.mailing_address_type && (
                 <Text style={styles.required}>
-                  {t(errorMessages.mailingAddressType)}
+                  {t(errorMessages.mailing_address_type)}
                 </Text>
               )}
             </View>
