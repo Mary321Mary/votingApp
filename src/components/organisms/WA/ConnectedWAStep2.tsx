@@ -41,6 +41,7 @@ export const ConnectedWAStep2 = ({
       </Text>
 
       <InputField
+        showEye
         label={t("washington.ssn4_optional")}
         value={value.last_four_ss_number}
         maxLength={4}

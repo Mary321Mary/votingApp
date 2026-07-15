@@ -253,6 +253,7 @@ export default function ConnectedOVRStep2({
       {/* SSN */}
       {isVisible(formCongif, "ssn4") && (
         <InputField
+          showEye
           value={value.last_four_ss_number}
           label={t("form_fields.ssn_last4")}
           required={isRequired(formCongif, "ssn4")}

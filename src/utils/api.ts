@@ -18,6 +18,8 @@ import type {
   ReportEventPayload,
   ReportInternalData,
   ReportInternalResponse,
+  SetUnder18ReminderRequest,
+  SetUnder18ReminderResponse,
   SubmitCACovrPayload,
   SubmitEmailZipRequest,
   SubmitEmailZipResponse,
@@ -160,6 +162,16 @@ export function submitLookup(
     CheckRegistrationStatus,
     CheckRegistrationStatusResponse
   >(ENDPOINTS.SUBMIT_LOOKUP, data, headers);
+}
+
+export function setUnder18Reminder(
+  data: SetUnder18ReminderRequest,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    SetUnder18ReminderRequest,
+    SetUnder18ReminderResponse
+  >(ENDPOINTS.SET_UNDER_18_REMINDER, data, headers);
 }
 
 export function submitMICovr(

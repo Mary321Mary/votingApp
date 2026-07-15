@@ -150,6 +150,7 @@ export const ConnectedPAStep3Upload = ({
 
           {/* SSN */}
           <InputField
+            showEye
             label={t("pennsylvania.ssn4_label")}
             value={value.last_four_ss_number}
             disabled={value.has_no_ssn === true}

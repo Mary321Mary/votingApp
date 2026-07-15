@@ -32,6 +32,7 @@ import PreRegisterScreen from "@/screens/PreRegister";
 import FinishWithStateScreen from "@/screens/FinishWithState";
 import FailCAScreen from "@/screens/FailCA";
 import AfterDeadlineScreen from "@/screens/AfterDeadline";
+import Under18ReminderScreen from "@/screens/Under18Reminder";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -101,6 +102,13 @@ export type RootStackParamList = {
   };
   Under18: {
     state: StateData;
+    form: RegisterFormState;
+    workflow_type: string;
+    registration_uid: string;
+  };
+  Under18Reminder: {
+    state: StateData;
+    form: RegisterFormState;
   };
   PreRegister: {
     state: StateData;
@@ -182,6 +190,10 @@ function Navigation({}) {
       />
       <Stack.Screen name="FailWA" component={withDefaultLayout(FailWAScreen)} />
       <Stack.Screen name="FailCA" component={withDefaultLayout(FailCAScreen)} />
+      <Stack.Screen
+        name="Under18Reminder"
+        component={withDefaultLayout(Under18ReminderScreen)}
+      />
       <Stack.Screen
         name="Under18"
         component={withDefaultLayout(Under18Screen)}

@@ -596,6 +596,18 @@ export interface SubmitEmailZipResponseProps {
   initialStep?: 1 | 2 | 3;
 }
 
+export interface SetUnder18ReminderRequest {
+  registration_uid: string;
+  remind_when_18?: boolean;
+  opt_in_email?: boolean;
+}
+
+export interface SetUnder18ReminderResponse {
+  status: { success: boolean; errors: string[] | null };
+  registration_uid: string;
+  registrant_status: string;
+}
+
 export type MediaMainResponse = Record<string, unknown>;
 
 export interface DataConfigurationRequest {

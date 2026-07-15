@@ -76,6 +76,7 @@ export const ConnectedPAStep4Signature = ({
 
       {/* SSN */}
       <InputField
+        showEye
         label={t("pennsylvania.ssn4_label")}
         value={value.last_four_ss_number}
         disabled={value.has_no_ssn === true}

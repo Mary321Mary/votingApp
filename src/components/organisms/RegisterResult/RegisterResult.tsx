@@ -886,6 +886,7 @@ export const RegisterResult = ({
       state,
       form,
       workflow_type: workflow,
+      formCongif,
     });
   };
 
@@ -931,7 +932,12 @@ export const RegisterResult = ({
           step: 2,
           event_name: "nvra_under_18",
         });
-        navigation.replace("Under18", { state });
+        navigation.replace("Under18", {
+          state,
+          form,
+          workflow_type: workflow,
+          registration_uid: registrationUid,
+        });
         return;
       }
 
@@ -978,7 +984,12 @@ export const RegisterResult = ({
             });
           } else {
             if (form.dob_routing_outcome === "under_18_election_day_ok") {
-              navigation.replace("Under18", { state });
+              navigation.replace("Under18", {
+                state,
+                form,
+                workflow_type: workflow,
+                registration_uid: registrationUid,
+              });
             } else {
               setIsSubmitting(true);
               miSubmitAbortRef.current?.abort();
@@ -1075,7 +1086,12 @@ export const RegisterResult = ({
         if (performWAValidation("connected_WA")) {
           if (!form.has_no_state_license) {
             if (form.dob_routing_outcome === "under_18_election_day_ok") {
-              navigation.replace("Under18", { state });
+              navigation.replace("Under18", {
+                state,
+                form,
+                workflow_type: workflow,
+                registration_uid: registrationUid,
+              });
             } else {
               setForm(prev => ({ ...prev, last_four_ss_number: "" }));
               setStep(2);
@@ -1089,7 +1105,12 @@ export const RegisterResult = ({
           setStep(3);
         } else if (performWAValidation("connected_WA")) {
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            navigation.replace("Under18", { state });
+            navigation.replace("Under18", {
+              state,
+              form,
+              workflow_type: workflow,
+              registration_uid: registrationUid,
+            });
           } else {
             setStep(3);
           }
@@ -1101,7 +1122,12 @@ export const RegisterResult = ({
           }
         } else if (performWAValidation("connected_WA")) {
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            navigation.replace("Under18", { state });
+            navigation.replace("Under18", {
+              state,
+              form,
+              workflow_type: workflow,
+              registration_uid: registrationUid,
+            });
           } else {
             await handleWaSubmit();
           }
@@ -1109,7 +1135,12 @@ export const RegisterResult = ({
       } else if (step === 4) {
         if (performWAValidation("connected_WA")) {
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            navigation.replace("Under18", { state });
+            navigation.replace("Under18", {
+              state,
+              form,
+              workflow_type: workflow,
+              registration_uid: registrationUid,
+            });
           } else {
             await handleWaSubmit();
           }
@@ -1130,7 +1161,12 @@ export const RegisterResult = ({
         } else {
           if (performWAValidation("connected_PA")) {
             if (form.dob_routing_outcome === "under_18_election_day_ok") {
-              navigation.replace("Under18", { state });
+              navigation.replace("Under18", {
+                state,
+                form,
+                workflow_type: workflow,
+                registration_uid: registrationUid,
+              });
             } else {
               await handlePaSubmit();
             }
@@ -1143,7 +1179,12 @@ export const RegisterResult = ({
       } else {
         if (performWAValidation("connected_PA")) {
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            navigation.replace("Under18", { state });
+            navigation.replace("Under18", {
+              state,
+              form,
+              workflow_type: workflow,
+              registration_uid: registrationUid,
+            });
           } else {
             await handlePaSubmit();
           }

@@ -164,6 +164,7 @@ export const IDSection = ({
           {value.has_no_state_license && (
             <>
               <InputField
+                showEye
                 maxLength={4}
                 value={value.last_four_ss_number}
                 errorMessage={t(errorMessages.last_four_ss_number)}

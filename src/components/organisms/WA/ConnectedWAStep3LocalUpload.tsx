@@ -103,6 +103,7 @@ export const ConnectedWAStep3LocalUpload = ({
       />
 
       <InputField
+        showEye
         label={t("washington.ssn4_required")}
         value={value.last_four_ss_number}
         disabled={value.has_no_ssn === true}
