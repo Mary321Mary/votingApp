@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,13 +7,17 @@ import {
   Linking,
   useWindowDimensions,
   Button,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import RenderHTML from "react-native-render-html";
-import Share from "react-native-share";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 type StateData = {
   name: string;
@@ -41,8 +45,10 @@ export default function Under18ReminderScreen() {
   const { width } = useWindowDimensions();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { config } = useUIConfig();
 
   const navState = route.params;
+  const [copyNotification, setCopyNotification] = useState("");
 
   useEffect(() => {
     if (!navState?.state || !navState?.form) {
@@ -51,19 +57,6 @@ export default function Under18ReminderScreen() {
   }, [navState, navigation]);
 
   const { state, form } = navState;
-
-  const handleShare = async (customUrl?: string) => {
-    const shareOptions = {
-      message: t("print_form_page.encourage"),
-      url: customUrl || state.learn_about_url || "https://rockthevote.com",
-    };
-
-    try {
-      await Share.open(shareOptions);
-    } catch (error) {
-      console.log("Sharing error: ", error);
-    }
-  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -99,29 +92,66 @@ export default function Under18ReminderScreen() {
               title={t("print_form_page.share_fb_button_text", {
                 state_abbr: form.state,
               })}
-              onPress={() => handleShare()}
+              onPress={() =>
+                Linking.openURL(config?.share?.registrations?.facebook || "")
+              }
             />
             <Button
               title={t("print_form_page.share_x_button_text", {
                 state_abbr: form.state,
               })}
-              onPress={() => handleShare()}
+              onPress={() =>
+                Linking.openURL(config?.share?.registrations?.x || "")
+              }
             />
             <Button
               title={t("print_form_page.copy_link", { state_abbr: form.state })}
-              onPress={() => handleShare()}
+              onPress={() => {
+                try {
+                  Clipboard.setString(
+                    config?.share?.registrations?.copy_link || "",
+                  );
+
+                  if (Platform.OS === "android") {
+                    ToastAndroid.show(
+                      t(`pennsylvania.link_copied`),
+                      ToastAndroid.SHORT,
+                    );
+                  } else {
+                    Alert.alert("Success", t(`pennsylvania.link_copied`));
+                  }
+                  setCopyNotification(t(`pennsylvania.link_copied`));
+                } catch (err) {
+                  console.error("Failed to copy link:", err);
+                }
+              }}
             />
+            {copyNotification && <Text>{copyNotification}</Text>}
           </View>
           <View style={styles.footerBlock}>
-            <Text style={styles.boldText}>
-              {t("print_form_page.get_this_tool")}
+            <View style={styles.divider} />
+            <Text style={styles.secondaryText}>
+              {t("general.calls_to_action.building_site")}
             </Text>
 
-            <RenderHTML
-              contentWidth={width}
-              source={{ html: t("print_form_page.send_us") }}
-              tagsStyles={htmlTagsStyles}
-            />
+            <Text>
+              <Trans
+                i18nKey="general.calls_to_action.get_tool_reg"
+                components={{
+                  a: (
+                    <Text
+                      key="email-link"
+                      style={styles.linkText}
+                      onPress={() => {
+                        Linking.openURL("mailto:civictech@rockthevote.org");
+                      }}
+                    >
+                      {0}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
           </View>
         </View>
       </View>
@@ -189,10 +219,18 @@ const getStyles = (theme: any) =>
       gap: 10,
       marginVertical: 16,
     },
+
     footerBlock: {
       alignItems: "center",
       gap: 4,
       marginTop: 16,
       width: "100%",
+    },
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
+      textDecorationLine: "underline",
     },
   });

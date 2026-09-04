@@ -49,6 +49,26 @@ export const ConnectedPAStep3Upload = ({
     }
   };
 
+  const formatPhone = (digits: string) => {
+    if (digits.length <= 3) return digits;
+
+    if (digits.length <= 6) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    }
+
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  };
+  const handlePhoneChange = (text: string) => {
+    let digits = onlyDigits(text).slice(0, 10);
+
+    if (value.phone.endsWith("-") && text.length === value.phone.length - 1) {
+      digits = digits.slice(0, -1);
+    }
+
+    const formatted = formatPhone(digits);
+    updateField("helper_phone", formatted);
+  };
+
   const goToPaper = () => {
     navigation.navigate("Register", {
       status: { success: true },
@@ -150,6 +170,7 @@ export const ConnectedPAStep3Upload = ({
 
           {/* SSN */}
           <InputField
+            name="ssn4"
             showEye
             label={t("pennsylvania.ssn4_label")}
             value={value.last_four_ss_number}
@@ -161,6 +182,7 @@ export const ConnectedPAStep3Upload = ({
 
           {/* Checkbox */}
           <Checkbox
+            name="has_no_ssn"
             value={value.has_no_ssn === true}
             label={t("pennsylvania.ssn4_none_checkbox")}
             required={isRequired(formCongif, "has_no_ssn")}
@@ -179,6 +201,7 @@ export const ConnectedPAStep3Upload = ({
 
           {/* Someone helped */}
           <Checkbox
+            name="someone_helped"
             value={value.someone_helped}
             label={t("pennsylvania.someone_helped")}
             onValueChange={handleSomeoneHelpedChange}
@@ -187,21 +210,34 @@ export const ConnectedPAStep3Upload = ({
           {value.someone_helped && (
             <>
               <InputField
+                name="helper_name"
                 label={t("pennsylvania.helper_name_label")}
-                disabled={false}
-                value=""
+                value={value.helper_name}
+                required
+                errorMessage={t(errorMessages.helper_name)}
+                onChangeText={(text: string) =>
+                  updateField("helper_name", text)
+                }
               />
 
               <InputField
+                name="helper_address"
                 label={t("pennsylvania.helper_address_label")}
-                disabled={false}
-                value=""
+                value={value.helper_name}
+                required
+                errorMessage={t(errorMessages.helper_name)}
+                onChangeText={(text: string) =>
+                  updateField("helper_address", text)
+                }
               />
 
               <InputField
+                name="helper_phone"
                 label={t("pennsylvania.helper_phone_label")}
-                disabled={false}
-                value=""
+                value={value.helper_name}
+                required
+                errorMessage={t(errorMessages.helper_name)}
+                onChangeText={handlePhoneChange}
               />
 
               <View style={styles.termsBox}>
@@ -223,6 +259,7 @@ export const ConnectedPAStep3Upload = ({
               </View>
 
               <Checkbox
+                name="helper_electronic_signature_acknowledged"
                 value={value.helper_electronic_signature_acknowledged}
                 label={t("pennsylvania.helper_terms_confirm_label")}
                 onValueChange={(checked: boolean) =>
@@ -252,11 +289,12 @@ export const ConnectedPAStep3Upload = ({
           <Button title={t("pennsylvania.send_sms")} onPress={() => {}} />
 
           <InputField
+            name="email_address"
             label={t("pennsylvania.email_me_link")}
             value={value.email_address}
             required={isRequired(formCongif, "email")}
-            onChangeText={(text: string) => updateField("email_address", text)}
             errorMessage={t(errorMessages.email_address)}
+            onChangeText={(text: string) => updateField("email_address", text)}
           />
 
           <Button title={t("pennsylvania.send_email")} onPress={() => {}} />

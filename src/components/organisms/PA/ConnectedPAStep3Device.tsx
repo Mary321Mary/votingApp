@@ -25,6 +25,7 @@ import {
   submitWADevice,
 } from "@/utils/api";
 import Clipboard from "@react-native-clipboard/clipboard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const ConnectedPAStep3Device = ({
   value,
@@ -61,8 +62,12 @@ export const ConnectedPAStep3Device = ({
 
   useEffect(() => {
     const fetchConfig = async () => {
+      const registration_uid = await AsyncStorage.getItem("registration_uid");
       if (value.state === "PA") {
-        const paPayload = mapFormStateToPACovrPayload(value);
+        const paPayload = mapFormStateToPACovrPayload(
+          value,
+          registration_uid || "",
+        );
         try {
           const response = await submitPADevice(paPayload);
           setRegistrantUid(response.data.registrant_uid || "");
@@ -74,7 +79,10 @@ export const ConnectedPAStep3Device = ({
           );
         }
       } else {
-        const waPayload = mapFormStateToWACovrPayload(value);
+        const waPayload = mapFormStateToWACovrPayload(
+          value,
+          registration_uid || "",
+        );
         try {
           const response = await submitWADevice(waPayload);
           setRegistrantUid(response.data.registrant_uid || "");
@@ -164,6 +172,7 @@ export const ConnectedPAStep3Device = ({
       {smsNotification && <Text>{smsNotification}</Text>}
 
       <InputField
+        name="email_address"
         label={t("pennsylvania.email_me_link")}
         value={value.email_address}
         required={isRequired(formCongif, "email")}

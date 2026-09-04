@@ -2,6 +2,7 @@ import {
   CheckRegistrationStatus,
   OVR_TYPE_MAP,
   RegisterFormState,
+  StateData,
 } from "./types";
 
 export function buildPAHomeAddressFromForm(form: RegisterFormState): string {
@@ -30,6 +31,16 @@ export function getFlowType(ovrType: string): string {
   return OVR_TYPE_MAP[ovrType] ?? "paper";
 }
 
+/**
+ * Paper NVRA opt-out from the finish-with-state path.
+ * Default true when the API omits the flag (older responses / most states).
+ */
+export function allowsPaperFallback(
+  state: Pick<StateData, "allow_paper_fallback"> | null | undefined,
+): boolean {
+  return state?.allow_paper_fallback !== false;
+}
+
 /** Resolves the workflow_type used for data-collection config fetches. */
 export function resolveWorkflowType(
   explicitWorkflowType: string | undefined,
@@ -39,7 +50,6 @@ export function resolveWorkflowType(
 
 export function mapRegisterFormToVrLookupPayload(
   form: RegisterFormState,
-  stateAbbreviation: string,
 ): CheckRegistrationStatus {
   return {
     partner_id: form.partner_id,
@@ -49,10 +59,10 @@ export function mapRegisterFormToVrLookupPayload(
     zip: form.home_zip_code,
     address: form.home_address,
     city: form.home_city,
-    state: form.state || stateAbbreviation,
+    aptunit: form.home_unit_type + " " + form.home_unit,
     phone: form.phone,
-    emailConsent: form.opt_in_email,
-    smsConsent: form.opt_in_sms,
+    opt_in_email: form.opt_in_email,
+    opt_in_sms: form.opt_in_sms,
     volunteer: form.volunteer,
     birthMonth: form.birthMonth,
     birthDay: form.birthDay,

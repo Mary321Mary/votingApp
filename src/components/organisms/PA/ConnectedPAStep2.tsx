@@ -38,6 +38,7 @@ export const ConnectedPAStep2 = ({
   return (
     <>
       <InputField
+        name="penn_dot_number"
         label={t("pennsylvania.penn_dot_number")}
         value={value.state_id_number}
         required
@@ -77,6 +78,7 @@ export const ConnectedPAStep2 = ({
         {t("pennsylvania.penn_dot_number_instruction")}
       </Text>
       <Checkbox
+        name="has_no_state_license"
         value={value.has_no_state_license === true}
         label={t("pennsylvania.penn_dot_number_none_checkbox")}
         required={isRequired(formCongif, "has_no_state_license")}

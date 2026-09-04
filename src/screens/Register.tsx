@@ -35,14 +35,16 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
   const {
     status,
     state: regState,
-    registration_uid,
+    counties,
     zip,
     email,
     pageFromLookup,
     workflowType,
     showRedirectText,
+    voluntaryPaperRedirect,
     form,
     initialStep,
+    isRedirectedCompressNVRA,
   } = state;
 
   const title =
@@ -58,10 +60,12 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
           state={regState}
           zip={zip}
           email={email}
-          registrationUid={registration_uid ?? ""}
+          counties={counties}
           pageFromLookup={pageFromLookup || ""}
           workflowType={workflowType}
           showRedirectText={showRedirectText || false}
+          voluntaryPaperRedirect={voluntaryPaperRedirect ?? false}
+          isRedirectedCompressNVRA={isRedirectedCompressNVRA ?? false}
           form={form}
           initialStep={initialStep}
         />

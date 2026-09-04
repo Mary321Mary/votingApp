@@ -4,6 +4,9 @@ import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { FormProps } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import QuestionsSection from "../atoms/QuestionsSection";
+import { useNavigation } from "@react-navigation/native";
+import { RegisterScreenNavigation } from "./RegisterResult/RegisterResult";
+import { allowsPaperFallback } from "../../utils/registerRouting";
 
 interface FinishWithStateProps extends FormProps {
   handleMainButtonClick: () => void;
@@ -20,6 +23,7 @@ function FinishWithState({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  const navigation = useNavigation<RegisterScreenNavigation>();
 
   return (
     <View style={styles.container}>
@@ -47,14 +51,29 @@ function FinishWithState({
           })}
           onPress={handleMainButtonClick}
         />
-        <TouchableOpacity
-          style={styles.outlineButton}
-          onPress={handleMainButtonClick}
-        >
-          <Text style={styles.outlineButtonText}>
-            {t("finish_with_state_page2.paper_button")}
-          </Text>
-        </TouchableOpacity>
+        {allowsPaperFallback(state) && (
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              navigation.navigate("Register", {
+                status: { success: true, errors: [] },
+                state,
+                zip: value.home_zip_code,
+                email: value.email_address,
+                form: value,
+                pageFromLookup: "paper",
+                workflowType: "nvra",
+                showRedirectText: true,
+                voluntaryPaperRedirect: true,
+                isRedirectedCompressNVRA: true,
+              })
+            }
+          >
+            <Text style={styles.outlineButtonText}>
+              {t("finish_with_state_page2.paper_button")}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );

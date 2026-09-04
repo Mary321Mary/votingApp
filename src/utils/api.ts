@@ -106,8 +106,15 @@ export function submitEmailZip(
   );
 }
 
-export function fetchUIConfiguration(headers: Record<string, string> = {}) {
-  return HttpClient.Client.get<UIConfig>(ENDPOINTS.UI_CONFIG, headers);
+export function fetchUIConfiguration(
+  partnerId: string = "1",
+  headers: Record<string, string> = {},
+) {
+  const params = new URLSearchParams({ partner_id: partnerId });
+  return HttpClient.Client.get<UIConfig>(
+    `${ENDPOINTS.UI_CONFIG}?${params.toString()}`,
+    headers,
+  );
 }
 
 export function fetchDataConfiguration(

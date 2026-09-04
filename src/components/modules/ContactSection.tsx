@@ -12,6 +12,7 @@ import RenderHTML from "react-native-render-html";
 
 interface ContactSectionProps extends FormProps {
   showQuestions?: boolean;
+  isRedirectedCompressNVRA?: boolean;
 }
 
 export const ContactSection = ({
@@ -19,6 +20,7 @@ export const ContactSection = ({
   formCongif,
   errorMessages,
   showQuestions = false,
+  isRedirectedCompressNVRA = false,
   onChange,
   onChangeError,
 }: ContactSectionProps) => {
@@ -42,7 +44,7 @@ export const ContactSection = ({
 
   return (
     <>
-      {showQuestions && (
+      {!isRedirectedCompressNVRA && showQuestions && (
         <QuestionsSection
           value={value}
           errorMessages={errorMessages}
@@ -51,68 +53,74 @@ export const ContactSection = ({
         />
       )}
 
-      {isVisible(formCongif, "opt_in_sms") && (
-        <Checkbox
-          label={t("general.opt_ins.sms_opt_in")}
-          value={value.opt_in_sms}
-          required={isRequired(formCongif, "opt_in_sms")}
-          errorText={t(errorMessages.opt_in_sms)}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_sms", checked)
-          }
-        />
-      )}
-      <RenderHTML
-        contentWidth={width}
-        source={{
-          html: t("general.opt_ins.sms_disclaimer", {
-            rtv_terms_url: config?.urls?.terms,
-            rtv_privacy_url: config?.urls?.privacy,
-          }),
-        }}
-        tagsStyles={{
-          body: {
-            fontSize: 14,
-            color: theme.gray,
-            lineHeight: 18,
-            marginVertical: 5,
-          },
-          a: {
-            color: theme.link,
-            textDecorationLine: "underline",
-          },
-        }}
-        renderersProps={{
-          a: {
-            onPress: (_, href) => {
-              if (href) {
-                Linking.openURL(href);
+      {!isRedirectedCompressNVRA && (
+        <>
+          {isVisible(formCongif, "opt_in_sms") && (
+            <Checkbox
+              name="opt_in_sms"
+              label={t("general.opt_ins.sms_opt_in")}
+              value={value.opt_in_sms}
+              required={isRequired(formCongif, "opt_in_sms")}
+              errorText={t(errorMessages.opt_in_sms)}
+              onValueChange={(checked: boolean) =>
+                updateField("opt_in_sms", checked)
               }
-            },
-          },
-        }}
-      />
-      {isVisible(formCongif, "opt_in_email") && (
-        <Checkbox
-          label={t("general.opt_ins.email_opt_in")}
-          value={value.opt_in_email}
-          required={isRequired(formCongif, "opt_in_email")}
-          errorText={t(errorMessages.opt_in_email)}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_email", checked)
-          }
-        />
-      )}
-      {isVisible(formCongif, "volunteer") && (
-        <Checkbox
-          label={t("general.opt_ins.volunteer")}
-          value={value.volunteer}
-          required={isRequired(formCongif, "volunteer")}
-          errorText={t(errorMessages.volunteer)}
-          onValueChange={(checked: boolean) =>
-            updateField("volunteer", checked)
-          }
-        />
+            />
+          )}
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: t("general.opt_ins.sms_disclaimer", {
+                rtv_terms_url: config?.urls?.terms,
+                rtv_privacy_url: config?.urls?.privacy,
+              }),
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 14,
+                lineHeight: 18,
+                marginVertical: 15,
+              },
+              a: {
+                color: theme.link,
+                textDecorationLine: "underline",
+              },
+            }}
+            renderersProps={{
+              a: {
+                onPress: (_, href) => {
+                  if (href) {
+                    Linking.openURL(href);
+                  }
+                },
+              },
+            }}
+          />
+          {isVisible(formCongif, "opt_in_email") && (
+            <Checkbox
+              name="opt_in_email"
+              label={t("general.opt_ins.email_opt_in")}
+              value={value.opt_in_email}
+              required={isRequired(formCongif, "opt_in_email")}
+              errorText={t(errorMessages.opt_in_email)}
+              onValueChange={(checked: boolean) =>
+                updateField("opt_in_email", checked)
+              }
+            />
+          )}
+          {isVisible(formCongif, "volunteer") && (
+            <Checkbox
+              name="volunteer"
+              label={t("general.opt_ins.volunteer")}
+              value={value.volunteer}
+              required={isRequired(formCongif, "volunteer")}
+              errorText={t(errorMessages.volunteer)}
+              onValueChange={(checked: boolean) =>
+                updateField("volunteer", checked)
+              }
+            />
+          )}
+        </>
       )}
     </>
   );

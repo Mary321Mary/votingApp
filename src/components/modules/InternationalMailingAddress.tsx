@@ -30,6 +30,7 @@ export const InternationalMailingAddress = ({
     <>
       {isVisible(formCongif, "mailing_address_line1") && (
         <InputField
+          name="mailing_address_line1"
           label={t("michigan.international.address_line_1")}
           value={value.mailing_address_line1}
           required={isRequired(formCongif, "mailing_address_line1")}
@@ -42,6 +43,7 @@ export const InternationalMailingAddress = ({
 
       {isVisible(formCongif, "mailing_address_line2") && (
         <InputField
+          name="mailing_address_line2"
           label={t("michigan.international.address_line_2")}
           value={value.mailing_address_line2}
           required={isRequired(formCongif, "mailing_address_line2")}
@@ -54,6 +56,7 @@ export const InternationalMailingAddress = ({
 
       {isVisible(formCongif, "mailing_address_line3") && (
         <InputField
+          name="mailing_address_line3"
           label={t("michigan.international.address_line_3")}
           value={value.mailing_address_line3}
           required={isRequired(formCongif, "mailing_address_line3")}
@@ -66,6 +69,7 @@ export const InternationalMailingAddress = ({
 
       {isVisible(formCongif, "mailing_postal_code") && (
         <InputField
+          name="mailing_postal_code"
           label={t("michigan.international.postal_code")}
           value={value.mailing_postal_code}
           required={isRequired(formCongif, "mailing_postal_code")}
@@ -79,6 +83,7 @@ export const InternationalMailingAddress = ({
 
       {isVisible(formCongif, "mailing_country") && (
         <InputField
+          name="mailing_country"
           label={t("michigan.international.mailing_country")}
           value={value.mailing_country}
           errorMessage={errorMessages.mailing_country}

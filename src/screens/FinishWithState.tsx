@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,15 @@ import {
   Linking,
   Dimensions,
   Button,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import Header from "@/layout/Header";
 import { StateData } from "@/utils/types";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 const { width } = Dimensions.get("window");
 
@@ -23,7 +28,10 @@ interface FinishWithStateScreenProps {
 
 const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
   const { t } = useTranslation();
+  const { config } = useUIConfig();
   const navState = route?.params ?? null;
+
+  const [copyNotification, setCopyNotification] = useState("");
 
   const handleOpenUrl = async () => {
     const targetUrl =
@@ -36,6 +44,21 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
       } else {
         console.warn(`Cannot open URL: ${targetUrl}`);
       }
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      Clipboard.setString(config?.share?.registrations?.copy_link || "");
+
+      if (Platform.OS === "android") {
+        ToastAndroid.show(t(`pennsylvania.link_copied`), ToastAndroid.SHORT);
+      } else {
+        Alert.alert("Success", t(`pennsylvania.link_copied`));
+      }
+      setCopyNotification(t(`pennsylvania.link_copied`));
+    } catch (err) {
+      console.error("Failed to copy link:", err);
     }
   };
 
@@ -67,10 +90,36 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
         </Text>
 
         <View style={styles.shareContainer}>
-          <Button title={t("finish_with_state_page3.fb_button_text")} />
-          <Button title={t("finish_with_state_page3.x_button_text")} />
-          <Button title={t("finish_with_state_page3.copy_button_text")} />
+          <Button
+            title={t("finish_with_state_page3.fb_button_text")}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.facebook || "";
+              const supported = await Linking.canOpenURL(targetUrl);
+              if (supported) {
+                await Linking.openURL(targetUrl);
+              } else {
+                console.warn(`Cannot open URL: ${targetUrl}`);
+              }
+            }}
+          />
+          <Button
+            title={t("finish_with_state_page3.x_button_text")}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.x || "";
+              const supported = await Linking.canOpenURL(targetUrl);
+              if (supported) {
+                await Linking.openURL(targetUrl);
+              } else {
+                console.warn(`Cannot open URL: ${targetUrl}`);
+              }
+            }}
+          />
+          <Button
+            title={t("finish_with_state_page3.copy_button_text")}
+            onPress={handleCopyLink}
+          />
         </View>
+        {copyNotification && <Text>{copyNotification}</Text>}
 
         <View style={styles.footerInfo}>
           <Text style={styles.boldText}>

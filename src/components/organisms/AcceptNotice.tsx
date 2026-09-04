@@ -70,19 +70,22 @@ function AcceptNotice({ state, value, handleMainButton }: AcceptNoticeProps) {
       <Text style={styles.header}>{t("california.eligible_complete_ca")}</Text>
       <ScrollView style={styles.noticeBox} nestedScrollEnabled={true}>
         {config?.disclosures?.map((htmlContent, index) => (
-          <RenderHTML
-            key={index}
-            contentWidth={width}
-            source={{ html: htmlContent }}
-            tagsStyles={{
-              p: { marginBottom: 8, color: "#333" },
-              strong: { fontWeight: "bold" },
-            }}
-          />
+          <Text>
+            <RenderHTML
+              key={index}
+              contentWidth={width}
+              source={{ html: htmlContent }}
+              tagsStyles={{
+                p: { marginBottom: 8, color: "#333" },
+                strong: { fontWeight: "bold" },
+              }}
+            />
+          </Text>
         ))}
       </ScrollView>
 
       <Checkbox
+        name="compliance_notices_checkbox"
         label={t("california.compliance_notices_checkbox")}
         value={accept}
         errorText={

@@ -274,6 +274,7 @@ export const ConnectedPAStep3HasID = ({
 
       {/* Confirm */}
       <Checkbox
+        name="you_must_confirm"
         label={t("pennsylvania.i_confirm")}
         value={confirm}
         required
@@ -284,7 +285,9 @@ export const ConnectedPAStep3HasID = ({
         title={
           isSubmitting
             ? t("michigan.submitting_button")
-            : t("pennsylvania.finish_with_pa")
+            : t("pennsylvania.submit_button", {
+                state_abbr: value.state || "PA",
+              })
         }
         disabled={isSubmitting}
         onPress={() => {

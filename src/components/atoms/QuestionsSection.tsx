@@ -64,15 +64,17 @@ const QuestionsSection = ({
       <Text style={styles.title}>{t("nvra_form_page.questions_for_you")}</Text>
 
       <InputField
+        name="survey_answer_1"
         value={value.survey_answer_1}
-        errorMessage={t(errorMessages.survey_question_1)}
+        errorMessage={t(errorMessages.survey_answer_1)}
         label={value.survey_question_1}
         onChangeText={(text: string) => updateField("survey_answer_1", text)}
       />
 
       <InputField
+        name="survey_answer_2"
         value={value.survey_answer_2}
-        errorMessage={t(errorMessages.survey_question_2)}
+        errorMessage={t(errorMessages.survey_answer_2)}
         label={value.survey_question_2}
         onChangeText={(text: string) => updateField("survey_answer_2", text)}
       />

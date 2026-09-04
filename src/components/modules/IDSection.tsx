@@ -5,13 +5,20 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 
 import InputField from "../atoms/InputField";
-import { isRequired } from "@/utils/constants";
+import {
+  DEFAULT_STATE_REQUIRED_ID,
+  fieldConfigured,
+  fieldDependsOn,
+  isRequired,
+  isVisible,
+} from "@/utils/constants";
 import { Checkbox } from "../atoms/Checkbox";
 import { Radio } from "../atoms/Radio";
 import RenderHTML from "react-native-render-html";
 
 interface IDSectionProps extends FormProps {
   showRadioButtons?: boolean;
+  showOnlySSN?: boolean;
 }
 
 export const IDSection = ({
@@ -20,6 +27,7 @@ export const IDSection = ({
   formCongif,
   errorMessages,
   showRadioButtons = false,
+  showOnlySSN = false,
   onChange,
   onChangeError,
 }: IDSectionProps) => {
@@ -41,25 +49,50 @@ export const IDSection = ({
     }
   };
 
+  const ssnLength =
+    formCongif?.fields?.last_four_ss_number?.validations?.max_length ?? 4;
+
+  const ssnGatedOnNoLicense = fieldDependsOn(
+    formCongif,
+    "last_four_ss_number",
+    "has_no_state_license",
+  );
+
+  const showSsnFields =
+    value.has_no_state_license === true ||
+    (fieldConfigured(formCongif, "last_four_ss_number") &&
+      !ssnGatedOnNoLicense);
+
+  const ssnTooltip = formCongif.fields.last_four_ss_number?.tooltip;
+  const noDriversLicenseSsnNotice =
+    showOnlySSN && !ssnTooltip
+      ? t(
+          ssnLength === 9
+            ? "nvra_form_page.no_dl_ssn9_label"
+            : "nvra_form_page.no_dl_ssn4_label",
+        )
+      : null;
+
   const onlyDigits = (text: string) => text.replace(/\D/g, "");
 
   const handleSSNChange = (text: string) => {
     const digits = onlyDigits(text);
-    const lastFour = digits.slice(-4);
-    updateField("last_four_ss_number", lastFour);
+    updateField("last_four_ss_number", digits.slice(-ssnLength));
   };
 
   return (
-    <View style={styles.section}>
+    <>
       {showRadioButtons ? (
-        <>
-          <Text style={styles.header}>
+        <View style={styles.section}>
+          <View style={styles.header}>
             <RenderHTML
               contentWidth={width}
               source={{
                 html: `
                   ${t("finish_with_state_page1.dl_id_question", {
                     state_abbr: state.abbreviation,
+                    state_required_id:
+                      state.state_required_id || DEFAULT_STATE_REQUIRED_ID,
                   })}
                   ${
                     isRequired(formCongif, "id_number_radio_button_set")
@@ -69,24 +102,38 @@ export const IDSection = ({
                 `,
               }}
               tagsStyles={{
-                body: {
-                  fontSize: 14,
-                  lineHeight: 18,
-                  marginVertical: 5,
-                },
-                strong: {
-                  fontWeight: "bold",
-                },
-                span: {
-                  color: "red",
-                  fontWeight: "bold",
-                },
+                body: { fontSize: 14, lineHeight: 18, marginVertical: 5 },
+                strong: { fontWeight: "bold" },
+                span: { color: "red", fontWeight: "bold" },
+                em: { fontStyle: "italic" },
               }}
             />
-          </Text>
+          </View>
+          <View style={styles.header}>
+            <RenderHTML
+              contentWidth={width}
+              source={{
+                html: `
+                  ${t("finish_with_state_page1.dl_id_statement", {
+                    state_abbr: state.abbreviation,
+                    state_required_id:
+                      state.state_required_id || DEFAULT_STATE_REQUIRED_ID,
+                  })}
+                `,
+              }}
+              tagsStyles={{
+                body: { fontSize: 14, lineHeight: 18 },
+                strong: { fontWeight: "bold" },
+                span: { color: "red", fontWeight: "bold" },
+                em: { fontStyle: "italic" },
+              }}
+            />
+          </View>
           <Radio
             label={t("finish_with_state_page1.dl_id_answer_yes", {
               state_abbr: state.abbreviation,
+              state_required_id:
+                state.state_required_id || DEFAULT_STATE_REQUIRED_ID,
             })}
             selected={value.has_no_state_license === false}
             onPress={() => updateField("has_no_state_license", false)}
@@ -95,119 +142,217 @@ export const IDSection = ({
             <Text style={styles.required}>
               {t("register_page.license_age_eligibility")}
             </Text>
-          ) : (
-            ""
-          )}
+          ) : null}
           <Radio
             label={t("finish_with_state_page1.dl_id_answer_no", {
               state_abbr: state.abbreviation,
+              state_required_id:
+                state.state_required_id || DEFAULT_STATE_REQUIRED_ID,
             })}
             selected={value.has_no_state_license === true}
             onPress={() => updateField("has_no_state_license", true)}
           />
           {errorMessages.has_no_state_license && (
-            <Text style={styles.required}>
-              {t(errorMessages.has_no_state_license)}
-            </Text>
+            <RenderHTML
+              contentWidth={width}
+              source={{ html: t(errorMessages.has_no_state_license) }}
+              tagsStyles={{
+                body: { color: theme.secondary || "red" },
+                strong: { fontWeight: "bold" },
+              }}
+            />
           )}
-        </>
+        </View>
       ) : (
-        <>
-          <InputField
-            label={t("form_fields.id_number")}
-            value={value.state_id_number}
-            required={isRequired(formCongif, "state_id_number")}
-            disabled={value.has_no_state_license === true}
-            maxLength={
-              formCongif.fields.state_id_number?.validations?.max_length
-            }
-            errorMessage={
-              value.has_no_state_license !== true &&
-              t(errorMessages.state_id_number, {
-                state_abbr: state.abbreviation,
-              })
-            }
-            onChangeText={(text: string) => {
-              const digits = onlyDigits(text);
-              const lastFour = digits.slice(-4);
+        <View style={styles.fieldset}>
+          <View style={styles.legendContainer}>
+            <Text style={styles.legendText}>
+              {t("nvra_form_page.section_identification")}
+              <Text style={styles.requiredStar}> *</Text>
+            </Text>
+          </View>
 
-              // Batch all updates together to prevent overwriting
-              onChange({
-                ...value,
-                state_id_number: text,
-                has_no_state_license: false,
-                last_four_ss_number: lastFour,
-              });
-
-              // Clear errors for updated fields
-              const clearedErrors = { ...errorMessages };
-              if (errorMessages.state_id_number?.length) {
-                clearedErrors.state_id_number = "";
-              }
-              if (errorMessages.last_four_ss_number?.length) {
-                clearedErrors.last_four_ss_number = "";
-              }
-              onChangeError(clearedErrors);
-            }}
-          />
-          <Text style={styles.hint}>
-            {formCongif.fields.state_id_number?.tooltip}
-          </Text>
-          <Checkbox
-            value={value.has_no_state_license === true}
-            label={t("nvra_form_page.no_license_number_label")}
-            required={isRequired(formCongif, "has_no_state_license")}
-            onValueChange={checked =>
-              updateField("has_no_state_license", checked)
-            }
-          />
-          {value.has_no_state_license && (
+          {!showOnlySSN && (
             <>
-              <InputField
-                showEye
-                maxLength={4}
-                value={value.last_four_ss_number}
-                errorMessage={t(errorMessages.last_four_ss_number)}
-                disabled={
-                  !value.has_no_state_license || value.has_no_ssn === true
-                }
-                required={
-                  !value.has_no_ssn &&
-                  isRequired(formCongif, "last_four_ss_number")
-                }
-                label={t("form_fields.ssn_last4")}
-                onChangeText={handleSSNChange}
-              />
-              <Checkbox
-                value={value.has_no_ssn === true}
-                required={isRequired(formCongif, "has_no_ssn")}
-                label={t("nvra_form_page.no_ssn_last4")}
-                onValueChange={checked => updateField("has_no_ssn", checked)}
-              />
+              {isVisible(formCongif, "state_id_number") &&
+                value.has_no_state_license !== true && (
+                  <>
+                    {formCongif.fields?.state_id_number?.tooltip && (
+                      <Text style={styles.hint}>
+                        {formCongif.fields.state_id_number?.tooltip}
+                      </Text>
+                    )}
+                    <InputField
+                      name="state_id_number"
+                      value={value.state_id_number}
+                      required={isRequired(formCongif, "state_id_number")}
+                      // minLength={
+                      //   formCongif.fields?.state_id_number?.validations
+                      //     ?.min_length
+                      // }
+                      maxLength={
+                        formCongif.fields?.state_id_number?.validations
+                          ?.max_length
+                      }
+                      errorMessage={
+                        errorMessages.state_id_number &&
+                        t(errorMessages.state_id_number, {
+                          state_abbr: state.abbreviation,
+                        })
+                      }
+                      onChangeText={(text: string) => {
+                        updateField("state_id_number", text);
+                        updateField("has_no_state_license", false);
+                      }}
+                    />
+                  </>
+                )}
+
+              {isVisible(formCongif, "has_no_state_license") && (
+                <Checkbox
+                  name="has_no_state_license"
+                  value={value.has_no_state_license === true}
+                  label={t("nvra_form_page.no_license_number_label")}
+                  onValueChange={checked => {
+                    onChange({
+                      ...value,
+                      has_no_state_license: checked,
+                      state_id_number: checked ? "" : value.state_id_number,
+                    });
+                  }}
+                />
+              )}
             </>
           )}
-        </>
+
+          {showSsnFields && (
+            <View style={styles.ssnBlock}>
+              {value.has_no_ssn !== true && (
+                <InputField
+                  name="last_four_ss_number"
+                  maxLength={ssnLength}
+                  showEye
+                  value={value.last_four_ss_number}
+                  errorMessage={
+                    errorMessages.last_four_ss_number
+                      ? t(errorMessages.last_four_ss_number)
+                      : undefined
+                  }
+                  required={
+                    !value.has_no_ssn &&
+                    isRequired(
+                      formCongif,
+                      "last_four_ss_number",
+                      ssnGatedOnNoLicense
+                        ? value.has_no_state_license === true
+                        : undefined,
+                    )
+                  }
+                  label={t(
+                    ssnLength === 9
+                      ? "form_fields.ssn"
+                      : "form_fields.ssn_last4",
+                  )}
+                  afterLabel={
+                    <>
+                      {noDriversLicenseSsnNotice && (
+                        <Text>{noDriversLicenseSsnNotice}</Text>
+                      )}
+                      {ssnTooltip && <Text>{ssnTooltip}</Text>}
+                    </>
+                  }
+                  onChangeText={handleSSNChange}
+                />
+              )}
+
+              {isVisible(formCongif, "has_no_ssn") && (
+                <Checkbox
+                  name="has_no_ssn"
+                  value={value.has_no_ssn === true}
+                  disabled={ssnGatedOnNoLicense && !value.has_no_state_license}
+                  label={t("nvra_form_page.no_ssn_last4")}
+                  onValueChange={checked => {
+                    onChange({
+                      ...value,
+                      has_no_ssn: checked,
+                      last_four_ss_number: checked
+                        ? ""
+                        : value.last_four_ss_number,
+                    });
+                  }}
+                />
+              )}
+            </View>
+          )}
+
+          {isVisible(formCongif, "has_no_ssn") &&
+            value.has_no_ssn === true &&
+            (value.has_no_state_license === true ||
+              !isVisible(formCongif, "has_no_state_license")) && (
+              <Text style={styles.statementText}>
+                {t("nvra_form_page.no_ssn_statement")}
+              </Text>
+            )}
+        </View>
       )}
-    </View>
+    </>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    section: {},
-    header: { marginVertical: 10 },
+    section: {
+      paddingTop: 10,
+    },
+    fieldset: {
+      borderWidth: 1,
+      borderColor: theme.borderColor || "#ccc",
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 15,
+      marginTop: 20,
+      marginBottom: 20,
+      position: "relative",
+    },
+    legendContainer: {
+      position: "absolute",
+      top: -10,
+      left: 12,
+      backgroundColor: theme.white || "#fff",
+      borderRadius: 5,
+      padding: 3,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    legendText: {
+      fontSize: 14,
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      color: theme.textPrimary || "#000",
+    },
+    requiredStar: {
+      color: theme.secondary || "red",
+      fontWeight: "bold",
+    },
+    header: {
+      marginVertical: 5,
+    },
     hint: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 13,
-      color: theme.gray,
-      marginTop: 8,
+      color: theme.gray || "#6c757d",
       marginBottom: 8,
       lineHeight: 18,
     },
-    strong: {
-      fontWeight: "bold",
-    },
     required: {
-      color: theme.secondary,
+      color: theme.secondary || "red",
+      marginVertical: 4,
+    },
+    ssnBlock: {
+      marginTop: 10,
+    },
+    statementText: {
+      marginTop: 10,
+      fontSize: 14,
+      color: theme.textPrimary || "#000",
     },
   });

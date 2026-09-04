@@ -71,7 +71,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.background,
     },
     linksBlock: {
-      flex: 1,
+      width: "100%",
       alignItems: "center",
     },
     linksContainer: {

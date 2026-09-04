@@ -1,17 +1,18 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 
 import InputField from "../atoms/InputField";
 import { Checkbox } from "../atoms/Checkbox";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
+import { SelectField } from "../atoms/SelectField";
 
 interface AddressSectionProps extends FormProps {
   showChangeOfAddress?: boolean;
   changedAddressLabel?: string;
+  isCompressed?: boolean;
 }
 
 export const AddressSection = ({
@@ -23,6 +24,7 @@ export const AddressSection = ({
   changedAddressLabel = "",
   onChange,
   onChangeError,
+  isCompressed = false,
 }: AddressSectionProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -43,59 +45,67 @@ export const AddressSection = ({
 
   return (
     <View style={styles.section}>
-      <View style={styles.row}>
-        {/* {isVisible(formCongif, "home_address") && ( */}
-        <InputField
-          label={t("form_fields.address")}
-          value={value.home_address}
-          helpText={t("form_fields.home_address_help")}
-          required={isRequired(formCongif, "home_address")}
-          errorMessage={t(errorMessages.home_address)}
-          onChangeText={(text: string) => updateField("home_address", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_unit") && ( */}
-        <InputField
-          label={t("form_fields.unit_lot")}
-          value={value.home_unit}
-          required={isRequired(formCongif, "home_unit")}
-          errorMessage={t(errorMessages.home_unit)}
-          onChangeText={(text: string) => updateField("home_unit", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_city") && ( */}
-        <InputField
-          label={t("form_fields.city")}
-          value={value.home_city}
-          required={isRequired(formCongif, "home_city")}
-          errorMessage={t(errorMessages.home_city)}
-          onChangeText={(text: string) => updateField("home_city", text)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_state") && ( */}
-        <InputField
-          label={t("form_fields.state")}
-          disabled
-          value={state.abbreviation}
-          required={isRequired(formCongif, "home_state")}
-          errorMessage={t(errorMessages.state)}
-        />
-        {/* )} */}
-        {/* {isVisible(formCongif, "home_zip_code") && ( */}
-        <InputField
-          label={t("form_fields.zip")}
-          disabled
-          value={value.home_zip_code}
-          required={isRequired(formCongif, "home_zip_code")}
-          errorMessage={t(errorMessages.home_zip_code)}
-        />
-        {/* )} */}
-      </View>
+      {!isCompressed && (
+        <View style={styles.row}>
+          {/* {isVisible(formCongif, "home_address") && ( */}
+          <InputField
+            name="home_address"
+            label={t("form_fields.address")}
+            value={value.home_address}
+            helpText={t("form_fields.home_address_help")}
+            required={isRequired(formCongif, "home_address")}
+            errorMessage={t(errorMessages.home_address)}
+            onChangeText={(text: string) => updateField("home_address", text)}
+          />
+          {/* )} */}
+          {/* {isVisible(formCongif, "home_unit") && ( */}
+          <InputField
+            name="home_unit"
+            label={t("form_fields.unit_lot")}
+            value={value.home_unit}
+            required={isRequired(formCongif, "home_unit")}
+            errorMessage={t(errorMessages.home_unit)}
+            onChangeText={(text: string) => updateField("home_unit", text)}
+          />
+          {/* )} */}
+          {/* {isVisible(formCongif, "home_city") && ( */}
+          <InputField
+            name="home_city"
+            label={t("form_fields.city")}
+            value={value.home_city}
+            required={isRequired(formCongif, "home_city")}
+            errorMessage={t(errorMessages.home_city)}
+            onChangeText={(text: string) => updateField("home_city", text)}
+          />
+          {/* )} */}
+          {/* {isVisible(formCongif, "home_state") && ( */}
+          <InputField
+            name="home_state"
+            label={t("form_fields.state")}
+            disabled
+            value={state.abbreviation}
+            required={isRequired(formCongif, "home_state")}
+            errorMessage={t(errorMessages.state)}
+          />
+          {/* )} */}
+          {/* {isVisible(formCongif, "home_zip_code") && ( */}
+          <InputField
+            name="home_zip_code"
+            label={t("form_fields.zip")}
+            disabled
+            value={value.home_zip_code}
+            required={isRequired(formCongif, "home_zip_code")}
+            errorMessage={t(errorMessages.home_zip_code)}
+          />
+          {/* )} */}
+        </View>
+      )}
 
       {(!value.age_eligibility || !value.has_no_state_license) &&
         showChangeOfAddress &&
         isVisible(formCongif, "has_mailing_address") && (
           <Checkbox
+            name="has_mailing_address"
             label={t("nvra_form_page.different_mail_address")}
             value={value.has_mailing_address}
             required={isRequired(formCongif, "has_mailing_address")}
@@ -131,6 +141,7 @@ export const AddressSection = ({
             <View style={styles.row}>
               {isVisible(formCongif, "mailing_address") && (
                 <InputField
+                  name="mailing_address"
                   label={t("form_fields.address")}
                   value={value.mailing_address}
                   helpText={t("form_fields.mailing_address_help")}
@@ -147,6 +158,7 @@ export const AddressSection = ({
               )}
               {isVisible(formCongif, "mailing_unit") && (
                 <InputField
+                  name="mailing_unit"
                   label={t("form_fields.unit_lot")}
                   value={value.mailing_unit}
                   errorMessage={t(errorMessages.mailing_unit)}
@@ -164,6 +176,7 @@ export const AddressSection = ({
             <View style={styles.row}>
               {isVisible(formCongif, "mailing_city") && (
                 <InputField
+                  name="mailing_city"
                   label={t("form_fields.city")}
                   value={value.mailing_city}
                   required={isRequired(
@@ -178,44 +191,25 @@ export const AddressSection = ({
                 />
               )}
               {isVisible(formCongif, "mailing_state") && (
-                <View>
-                  <Text style={styles.inputLabel}>
-                    {t("form_fields.state")}
-                    {isRequired(
-                      formCongif,
-                      "mailing_state",
-                      value.has_mailing_address,
-                    ) && <Text style={styles.required}> *</Text>}
-                  </Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      style={styles.picker}
-                      itemStyle={styles.pickerItem}
-                      selectedValue={value.mailing_state}
-                      onValueChange={itemValue =>
-                        updateField("mailing_state", itemValue)
-                      }
-                    >
-                      {STATES.map(
-                        (state_value: { value: string; name: string }) => (
-                          <Picker.Item
-                            key={state_value.name}
-                            label={state_value.name}
-                            value={state_value.value}
-                          />
-                        ),
-                      )}
-                    </Picker>
-                  </View>
-                  {errorMessages.mailing_state && (
-                    <Text style={styles.required}>
-                      {t(errorMessages.mailing_state)}
-                    </Text>
+                <SelectField
+                  name="name_title"
+                  label={t("form_fields.state")}
+                  value={value.mailing_state}
+                  options={STATES}
+                  required={isRequired(
+                    formCongif,
+                    "mailing_state",
+                    value.has_mailing_address,
                   )}
-                </View>
+                  errorMessage={errorMessages.mailing_state}
+                  onValueChange={itemValue =>
+                    updateField("mailing_state", itemValue)
+                  }
+                />
               )}
               {isVisible(formCongif, "mailing_zip_code") && (
                 <InputField
+                  name="mailing_zip_code"
                   label={t("form_fields.zip")}
                   numeric
                   value={value.mailing_zip_code}
@@ -237,6 +231,7 @@ export const AddressSection = ({
         showChangeOfAddress &&
         isVisible(formCongif, "change_of_address") && (
           <Checkbox
+            name="change_of_address"
             label={changedAddressLabel || t("nvra_form_page.changed_address")}
             value={value.change_of_address}
             helpText={t("form_fields.changed_address_help")}
@@ -273,6 +268,7 @@ export const AddressSection = ({
             <View style={styles.row}>
               {isVisible(formCongif, "prev_address") && (
                 <InputField
+                  name="prev_address"
                   label={t("form_fields.address")}
                   value={value.prev_address}
                   required={isRequired(
@@ -288,6 +284,7 @@ export const AddressSection = ({
               )}
               {isVisible(formCongif, "prev_unit") && (
                 <InputField
+                  name="prev_unit"
                   label={t("form_fields.unit_lot")}
                   value={value.prev_unit}
                   required={isRequired(
@@ -303,6 +300,7 @@ export const AddressSection = ({
               )}
               {isVisible(formCongif, "prev_city") && (
                 <InputField
+                  name="prev_city"
                   label={t("form_fields.city")}
                   value={value.prev_city}
                   required={isRequired(
@@ -317,44 +315,25 @@ export const AddressSection = ({
                 />
               )}
               {isVisible(formCongif, "prev_state") && (
-                <View>
-                  <Text style={styles.inputLabel}>
-                    {t("form_fields.state")}
-                    {isRequired(
-                      formCongif,
-                      "prev_state",
-                      value.change_of_address,
-                    ) && <Text style={styles.required}> *</Text>}
-                  </Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      style={styles.picker}
-                      itemStyle={styles.pickerItem}
-                      selectedValue={value.prev_state}
-                      onValueChange={itemValue =>
-                        updateField("prev_state", itemValue)
-                      }
-                    >
-                      {STATES.map(
-                        (state_value: { value: string; name: string }) => (
-                          <Picker.Item
-                            key={state_value.name}
-                            label={state_value.name}
-                            value={state_value.value}
-                          />
-                        ),
-                      )}
-                    </Picker>
-                  </View>
-                  {errorMessages.prev_state && (
-                    <Text style={styles.required}>
-                      {t(errorMessages.prev_state)}
-                    </Text>
+                <SelectField
+                  name="prev_state"
+                  label={t("form_fields.state")}
+                  value={value.prev_state}
+                  options={STATES}
+                  required={isRequired(
+                    formCongif,
+                    "prev_state",
+                    value.change_of_address,
                   )}
-                </View>
+                  errorMessage={errorMessages.prev_state}
+                  onValueChange={itemValue =>
+                    updateField("prev_state", itemValue)
+                  }
+                />
               )}
               {isVisible(formCongif, "prev_zip_code") && (
                 <InputField
+                  name="prev_zip_code"
                   label={t("form_fields.zip")}
                   required
                   numeric
@@ -381,31 +360,5 @@ const getStyles = (theme: any) =>
       width: "100%",
       marginBottom: 10,
       alignItems: "flex-end",
-    },
-
-    inputLabel: {
-      textTransform: "uppercase",
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      color: theme.textPrimary,
-    },
-    pickerWrapper: {
-      flexBasis: "18%",
-      minWidth: "100%",
-      height: 48,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 8,
-      justifyContent: "center",
-      backgroundColor: theme.white,
-    },
-    picker: {
-      width: "100%",
-    },
-    pickerItem: {
-      fontSize: 14,
-    },
-    required: {
-      color: theme.secondary,
     },
   });

@@ -49,40 +49,31 @@ export const ConnectedWA = ({
         formCongif={formCongif}
         errorMessages={errorMessages}
         showChangeName
-        showWillBe18ByElection
         onChange={onChange}
         onChangeError={onChangeError}
       />
 
       {isVisible(formCongif, "date_of_birth") && (
-        <>
-          <Text style={styles.label}>
-            {t("form_fields.dob")}
-            {isRequired(formCongif, "date_of_birth") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <DateRow
-            value={{
-              month: {
-                name: "birthMonth",
-                value: value.birthMonth,
-                errorText: t(errorMessages.birthMonth),
-              },
-              day: {
-                name: "birthDay",
-                value: value.birthDay,
-                errorText: t(errorMessages.birthDay),
-              },
-              year: {
-                name: "birthYear",
-                value: value.birthYear,
-                errorText: t(errorMessages.birthYear),
-              },
-            }}
-            updateField={updateField}
-          />
-        </>
+        <DateRow
+          value={{
+            month: {
+              name: "birthMonth",
+              value: value.birthMonth,
+              errorText: t(errorMessages.birthMonth),
+            },
+            day: {
+              name: "birthDay",
+              value: value.birthDay,
+              errorText: t(errorMessages.birthDay),
+            },
+            year: {
+              name: "birthYear",
+              value: value.birthYear,
+              errorText: t(errorMessages.birthYear),
+            },
+          }}
+          updateField={updateField}
+        />
       )}
       <PhoneSection
         value={value}
@@ -107,6 +98,7 @@ export const ConnectedWA = ({
       {isVisible(formCongif, "state_id_number") && (
         <>
           <InputField
+            name="state_id_number"
             label={t("washington.wdl_number")}
             value={value.state_id_number}
             required={isRequired(formCongif, "state_id_number")}
@@ -146,13 +138,9 @@ export const ConnectedWA = ({
             identifying number can be assigned to you by the Secretary of State.
           </Text>
           <Text style={styles.help}>{t("washington.wdl_help")}</Text>
-          <Text style={styles.label}>
-            {t("washington.wdl_issue_date")}
-            {value.has_no_state_license === false && (
-              <Text style={styles.required}>&#42;</Text>
-            )}
-          </Text>
           <DateRow
+            legend={t("washington.wdl_issue_date")}
+            required={value.has_no_state_license === false}
             value={{
               month: {
                 name: "issueMonth",
@@ -174,6 +162,7 @@ export const ConnectedWA = ({
             updateField={updateField}
           />
           <Checkbox
+            name="has_no_state_license"
             value={value.has_no_state_license === true}
             label={t("washington.wdl_none")}
             required={isRequired(formCongif, "has_no_state_license")}

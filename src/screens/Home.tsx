@@ -18,6 +18,7 @@ import { useUIConfig } from "@/contexts/UIConfigContext";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import i18n from "i18n";
 import RenderHTML from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -87,6 +88,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
         if (!shouldHandleReturningUser) {
           if (response.data.state?.before_vr_deadline) {
+            await AsyncStorage.setItem(
+              "registration_uid",
+              response.data.registration_uid,
+            );
+
             navigation.navigate("Register", {
               ...response.data,
               zip: zipCode,
@@ -160,6 +166,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           <Text style={styles.errorText}>{errors.general}</Text>
         )}
         <InputField
+          name="email"
           value={email}
           label={t("form_fields.email")}
           placeholder="you@example.com"
@@ -172,6 +179,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         <View style={styles.zipCodeRow}>
           <View style={{ flex: 1 }}>
             <InputField
+              name="zip"
               value={zipCode}
               label={t("form_fields.zip")}
               placeholder="12345"
@@ -246,19 +254,19 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 first_name: "",
                 last_name: "",
                 email: email,
-
-                address: "",
                 city: "",
                 zip: zipCode,
-                state: "",
+
+                aptunit: "",
+                address: "",
                 birthMonth: "",
                 birthDay: "",
                 birthYear: "",
                 date_of_birth: "",
                 phone: "",
 
-                smsConsent: false,
-                emailConsent: true,
+                opt_in_email: false,
+                opt_in_sms: true,
                 volunteer: false,
 
                 survey_question_1: "",
@@ -352,6 +360,7 @@ const getStyles = (theme: any) =>
       paddingHorizontal: 15,
       borderRadius: 5,
       marginLeft: 10,
+      marginBottom: 5,
       height: 45,
       justifyContent: "center",
     },

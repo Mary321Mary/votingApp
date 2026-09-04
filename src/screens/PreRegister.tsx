@@ -1,5 +1,13 @@
 import React, { useContext, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+  Button,
+} from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -11,6 +19,10 @@ import {
 } from "@/utils/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/components/organisms/Navigation";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import { getFlowType } from "@/utils/registerRouting";
+import { setUnder18Reminder } from "@/utils/api";
+import { newlinesToBr } from "../utils/stateCopy";
 
 interface PreRegisterScreenProps {
   route: {
@@ -19,6 +31,7 @@ interface PreRegisterScreenProps {
       form: RegisterFormState;
       workflow_type: string;
       formCongif: DataCollectionConfiguration;
+      registration_uid: string;
     };
   };
 }
@@ -28,11 +41,15 @@ type PreRegisterScreenNavigation = NativeStackNavigationProp<
   "PreRegister"
 >;
 
+const PRIMARIES_CAUCUSES_URL =
+  "https://www.rockthevote.org/how-to-vote/nationwide-voting-info/primaries-and-caucuses/";
+
 export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
   const { t } = useTranslation();
   const navigation = useNavigation<PreRegisterScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { config } = useUIConfig();
 
   const navState = route?.params ?? null;
 
@@ -46,89 +63,218 @@ export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
     return null;
   }
 
-  const { state, form, workflow_type, formCongif } = navState;
+  const { state, form, workflow_type, formCongif, registration_uid } = navState;
 
-  const handleContinue = () => {
-    if (form.mailForm) {
-      navigation.replace("Success", {
-        form,
+  const preRegCopy =
+    state.pre_registration_statement ||
+    formCongif?.eligibility?.pre_registration_statement ||
+    undefined;
+
+  const electionCenterUrl =
+    state.learn_about_url || config?.urls.election_center;
+  const primariesUrl = config?.urls.primaries ?? PRIMARIES_CAUCUSES_URL;
+
+  const copyValues = {
+    state_abbr: state.abbreviation,
+    state_name: state.name,
+    min_pre_reg_age: formCongif.eligibility.min_pre_reg_age,
+    electionCenter: electionCenterUrl,
+    rtv_primaries_url: primariesUrl,
+  };
+
+  const openLink = (url?: string) => {
+    if (url) {
+      Linking.openURL(url).catch(err =>
+        console.error("Couldn't load page", err),
+      );
+    }
+  };
+
+  const copyComponents = {
+    strong: <Text style={styles.boldText} />,
+    br: <Text>{"\n"}</Text>,
+    a: <Text style={styles.linkText} onPress={(e: any) => openLink(e?.href)} />,
+    electionCenter: (
+      <Text
+        style={styles.linkText}
+        onPress={() => openLink(electionCenterUrl)}
+      />
+    ),
+    primariesLink: (
+      <Text style={styles.linkText} onPress={() => openLink(primariesUrl)} />
+    ),
+  };
+
+  const flowType = getFlowType(state?.ovr_type || "");
+
+  const handleContinue = async () => {
+    await setUnder18Reminder({
+      registration_uid,
+      remind_when_18: true,
+      opt_in_email: form.opt_in_email,
+    });
+
+    const partnerParams = form.partner_id ? { partner: form.partner_id } : {};
+
+    if (flowType === "ovr_state") {
+      if (form.has_no_state_license) {
+        navigation.navigate("Register", {
+          status: { success: true, errors: [] },
+          state,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 2,
+          pageFromLookup: "paper",
+          workflowType: "nvra",
+          showRedirectText: true,
+          voluntaryPaperRedirect: true,
+          isRedirectedCompressNVRA: true,
+        });
+      } else {
+        navigation.navigate("Register", {
+          ...partnerParams,
+          status: { success: true, errors: [] },
+          state,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 2,
+        });
+      }
+    } else if (
+      flowType === "connected_PA" ||
+      flowType === "connected_CA" ||
+      flowType === "connected_WA"
+    ) {
+      navigation.navigate("Register", {
+        ...partnerParams,
+        status: { success: true, errors: [] },
         state,
-        workflow_type: workflow_type,
-        finish_with_state: false,
+        zip: form.home_zip_code,
+        email: form.email_address,
+        form,
+        initialStep: 2,
       });
+    } else if (flowType === "connected_ovr") {
+      if (workflow_type === "nvra") {
+        if (form.mailForm) {
+          navigation.replace("Success", {
+            form,
+            state,
+            workflow_type: workflow_type,
+            finish_with_state: false,
+          });
+        } else {
+          navigation.replace("Print", {
+            form,
+            state,
+            workflow_type: workflow_type,
+            finish_with_state: false,
+          });
+        }
+      } else {
+        navigation.navigate("Register", {
+          ...partnerParams,
+          status: { success: true, errors: [] },
+          state,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 3,
+        });
+      }
     } else {
-      navigation.replace("Print", {
-        form,
-        state,
-        workflow_type: workflow_type,
-        finish_with_state: false,
-      });
+      if (form.mailForm) {
+        navigation.replace("Success", {
+          form,
+          state,
+          workflow_type: workflow_type,
+          finish_with_state: false,
+        });
+      } else {
+        navigation.replace("Print", {
+          form,
+          state,
+          workflow_type: workflow_type,
+          finish_with_state: false,
+        });
+      }
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Header text={t("general.register_in") + state.name} />
-      <Trans
-        i18nKey="pre_register_page.top_stmt"
-        values={{
-          state_abbr: state.abbreviation,
-          min_pre_reg_age: formCongif.eligibility.min_pre_reg_age,
-        }}
-        components={{ strong: <strong /> }}
-      />
+    <ScrollView>
+      <Header text={`${t("general.register_in")} ${state.name}`} />
 
-      <TouchableOpacity style={styles.button} onPress={handleContinue}>
-        <Text style={styles.buttonText}>
-          {t("pre_register_page.continue_button_text")}
-        </Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.container}>
+        {preRegCopy && (
+          <View style={styles.copyContainer}>
+            <Text style={styles.copyText}>
+              <Trans
+                defaults={newlinesToBr(preRegCopy)}
+                values={copyValues}
+                components={copyComponents}
+              />
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.actionsContainer}>
+          <Button
+            title={t("pre_register_page.continue_button_text")}
+            onPress={handleContinue}
+          />
+
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+            style={styles.backButton}
+          >
+            <Text style={styles.backButtonText}>
+              {`< ${t("general.previous_step")}`}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: theme.white,
+      padding: 16,
     },
-
-    content: {
-      paddingHorizontal: 20,
-      paddingTop: 30,
-      gap: 12,
+    copyContainer: {
+      marginVertical: 12,
     },
-
-    text: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 16,
-      fontWeight: "regular",
+    copyText: {
+      fontSize: 15,
       lineHeight: 22,
-      color: theme.textPrimary,
     },
-
-    button: {
-      marginTop: 10,
-      marginHorizontal: 20,
-      marginBottom: 30,
-      backgroundColor: "green",
-      paddingVertical: 14,
-      borderRadius: 6,
+    boldText: {
+      fontWeight: "bold",
+    },
+    linkText: {
+      color: theme.link,
+      textDecorationLine: "underline",
+    },
+    mt3: {
+      marginTop: 16,
+    },
+    actionsContainer: {
       alignItems: "center",
+      gap: 16,
+      marginVertical: 16,
     },
-
-    buttonText: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      color: theme.textPrimary,
-      fontSize: 16,
-      fontWeight: "semibold",
+    backButton: {
+      paddingVertical: 6,
+      paddingHorizontal: 12,
     },
-
-    logo: {
-      width: 200,
-      height: 200,
-      resizeMode: "contain",
-      marginBottom: 20,
+    backButtonText: {
+      fontSize: 14,
+      fontWeight: "500",
+      textDecorationLine: "underline",
     },
   });

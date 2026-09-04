@@ -9,8 +9,10 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { useFormScroll } from "../../contexts/FormScrollContext";
 
 interface InputFieldProp {
+  name: string;
   label?: string;
   value?: string;
   placeholder?: string;
@@ -20,12 +22,14 @@ interface InputFieldProp {
   numeric?: boolean;
   maxLength?: number;
   errorMessage?: React.ReactNode;
+  afterLabel?: React.ReactNode;
   helpText?: string;
   showEye?: boolean;
   onChangeText?: (text: string) => void;
 }
 
 const InputField = ({
+  name,
   label,
   value,
   placeholder,
@@ -33,6 +37,7 @@ const InputField = ({
   secureTextEntry = false,
   disabled = false,
   errorMessage = "",
+  afterLabel = "",
   numeric = false,
   maxLength = undefined,
   helpText = "",
@@ -41,6 +46,7 @@ const InputField = ({
 }: InputFieldProp) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { registerField } = useFormScroll();
   const [isMasked, setIsMasked] = useState(true);
 
   const toggleMask = () => {
@@ -51,14 +57,18 @@ const InputField = ({
 
   return (
     <View style={styles.inputContainer}>
-      <Text style={styles.inputLabel}>
-        {label}
-        {required && <Text style={styles.requiredStar}> *</Text>}{" "}
-        {helpText && <HelpTooltip text={helpText} />}
-      </Text>
+      {!!label && (
+        <Text style={styles.inputLabel}>
+          {label}
+          {required && <Text style={styles.requiredStar}> *</Text>}{" "}
+          {helpText && <HelpTooltip text={helpText} />}
+        </Text>
+      )}
+      {afterLabel}
       {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
       <View style={styles.inputWrapper}>
         <TextInput
+          ref={registerField(name)}
           value={value ?? ""}
           style={[
             styles.textInput,
@@ -103,16 +113,15 @@ const InputField = ({
 const getStyles = (theme: any) =>
   StyleSheet.create({
     inputContainer: {
-      marginTop: 10,
+      marginVertical: 5,
       width: "100%",
     },
     inputLabel: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 14,
-      fontWeight: "600",
+      fontWeight: "bold",
       marginBottom: 5,
       color: theme.textPrimary,
-      textTransform: "uppercase",
     },
     requiredStar: {
       color: theme.secondary,

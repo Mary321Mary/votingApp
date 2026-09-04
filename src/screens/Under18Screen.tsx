@@ -6,6 +6,7 @@ import {
   Button,
   useWindowDimensions,
   Linking,
+  TouchableOpacity,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import Header from "@/layout/Header";
@@ -16,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { setUnder18Reminder } from "@/utils/api";
 import RenderHTML from "react-native-render-html";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { getFlowType } from "@/utils/registerRouting";
 
 interface Under18ScreenProps {
   route: {
@@ -38,26 +40,116 @@ export const Under18Screen = ({ route }: Under18ScreenProps) => {
   const state = route?.params ?? null;
   const navigation = useNavigation<Under18ScreenNavigation>();
   const theme = useContext(ThemeContext);
+  const { width } = useWindowDimensions();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { form, registration_uid, state: navState, workflow_type } = state;
 
-  const handleContinue = () => {
-    if (form.mailForm) {
-      navigation.replace("Success", {
-        form,
+  const flowType = getFlowType(navState?.ovr_type || "");
+  const electionCenterUrl = `https://www.rockthevote.org/how-to-vote/${navState.name
+    ?.toLowerCase()
+    ?.replace(/\s+/g, "-")}/`;
+
+  const rawCopy = t(navState?.under_18_page_copy || "", {
+    state_name: navState.name,
+    state_abbr: navState.abbreviation,
+    electionCenter: electionCenterUrl,
+  });
+
+  const htmlContent = rawCopy
+    .replace(/\n\n/g, "<br/><br/>")
+    .replace(/\n/g, "<br/>")
+    .replace(/<electionCenter>/g, `<a href="${electionCenterUrl}">`)
+    .replace(/<\/electionCenter>/g, "</a>");
+
+  const handleContinue = async () => {
+    const partnerParams = form.partner_id ? { partner: form.partner_id } : {};
+
+    if (flowType === "ovr_state") {
+      if (form.has_no_state_license) {
+        navigation.navigate("Register", {
+          status: { success: true, errors: [] },
+          state: navState,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 2,
+          pageFromLookup: "paper",
+          workflowType: "nvra",
+          showRedirectText: true,
+          voluntaryPaperRedirect: true,
+          isRedirectedCompressNVRA: true,
+        });
+      } else {
+        navigation.navigate("Register", {
+          ...partnerParams,
+          status: { success: true, errors: [] },
+          state: navState,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 2,
+        });
+      }
+    } else if (
+      flowType === "connected_PA" ||
+      flowType === "connected_CA" ||
+      flowType === "connected_WA"
+    ) {
+      navigation.navigate("Register", {
+        ...partnerParams,
+        status: { success: true, errors: [] },
         state: navState,
-        workflow_type: workflow_type,
-        finish_with_state: false,
+        zip: form.home_zip_code,
+        email: form.email_address,
+        form,
+        initialStep: 2,
       });
+    } else if (flowType === "connected_ovr") {
+      if (workflow_type === "nvra") {
+        if (form.mailForm) {
+          navigation.replace("Success", {
+            form,
+            state: navState,
+            workflow_type: workflow_type,
+            finish_with_state: false,
+          });
+        } else {
+          navigation.replace("Print", {
+            form,
+            state: navState,
+            workflow_type: workflow_type,
+            finish_with_state: false,
+          });
+        }
+      } else {
+        navigation.navigate("Register", {
+          ...partnerParams,
+          status: { success: true, errors: [] },
+          state: navState,
+          zip: form.home_zip_code,
+          email: form.email_address,
+          form,
+          initialStep: 3,
+        });
+      }
     } else {
-      navigation.replace("Print", {
-        form,
-        state: navState,
-        workflow_type: workflow_type,
-        finish_with_state: false,
-      });
+      if (form.mailForm) {
+        navigation.replace("Success", {
+          form,
+          state: navState,
+          workflow_type: workflow_type,
+          finish_with_state: false,
+        });
+      } else {
+        navigation.replace("Print", {
+          form,
+          state: navState,
+          workflow_type: workflow_type,
+          finish_with_state: false,
+        });
+      }
     }
   };
 
@@ -83,44 +175,41 @@ export const Under18Screen = ({ route }: Under18ScreenProps) => {
   return (
     <View>
       <Header text={t("general.register_in") + navState.name} />
-      <Text style={styles.description}>
-        <RenderHTML
-          contentWidth={useWindowDimensions().width}
-          source={{
-            html: t("register_18_by_election_page.top_stmt")
-              .replace(
-                "<electionCenter>",
-                `<a href="https://www.rockthevote.org/how-to-vote/${navState.name
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}/">`,
-              )
-              .replace("</electionCenter>", "</a>"),
-          }}
-          renderersProps={{
-            a: {
-              onPress: (_, href) =>
-                href && Linking.openURL(href).catch(err => console.error(err)),
-            },
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 15,
-              color: theme.textPrimary,
-              textAlign: "center",
-              lineHeight: 22,
-            },
-            a: {
-              color: theme.link,
-              textDecorationLine: "underline",
-              fontWeight: "bold",
-            },
-            strong: {
-              fontWeight: "bold",
-              color: theme.textPrimary,
-            },
-          }}
-        />
-      </Text>
+      {navState.under_18_page_copy && (
+        <Text style={styles.description}>
+          <RenderHTML
+            contentWidth={width}
+            source={{ html: htmlContent }}
+            renderersProps={{
+              a: {
+                onPress: (_, href) => {
+                  if (href) {
+                    Linking.openURL(href).catch(err =>
+                      console.error("Failed to open URL:", err),
+                    );
+                  }
+                },
+              },
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 15,
+                color: theme.textPrimary,
+                lineHeight: 22,
+              },
+              a: {
+                color: theme.link,
+                textDecorationLine: "underline",
+                fontWeight: "bold",
+              },
+              strong: {
+                fontWeight: "bold",
+                color: theme.textPrimary,
+              },
+            }}
+          />
+        </Text>
+      )}
 
       <View style={styles.buttonsContainer}>
         <Button
@@ -132,6 +221,15 @@ export const Under18Screen = ({ route }: Under18ScreenProps) => {
           disabled={isSubmitting}
           onPress={handleReminder}
         />
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>
+            {`< ${t("general.previous_step")}`}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -141,11 +239,21 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     lineHeight: 22,
-    textAlign: "center",
     margin: 10,
   },
   buttonsContainer: {
     gap: 12,
     margin: 10,
+    display: "flex",
+    alignItems: "center",
+  },
+  backButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    textDecorationLine: "underline",
   },
 });

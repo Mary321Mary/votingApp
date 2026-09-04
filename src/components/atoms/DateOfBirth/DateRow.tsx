@@ -4,20 +4,25 @@ import { useTranslation } from "react-i18next";
 import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
+import HelpTooltip from "../HelpTooltip";
 
-interface DateField {
+export interface DateField {
   name: keyof RegisterFormState;
   value: string;
   errorText?: string;
 }
-interface DateOfBirthFields {
+
+export interface DateOfBirthFields {
   day: DateField;
   month: DateField;
   year: DateField;
 }
-interface DateOfBirthProps {
+
+export interface DateOfBirthProps {
   value: DateOfBirthFields;
+  legend?: string;
   disabled?: boolean;
+  required?: boolean;
   updateField: <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K],
@@ -26,7 +31,9 @@ interface DateOfBirthProps {
 
 export const DateRow: React.FC<DateOfBirthProps> = ({
   value,
+  legend,
   disabled = false,
+  required = false,
   updateField,
 }) => {
   const { day, month, year } = value;
@@ -52,19 +59,33 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
 
   const handleDayChange = (text: string) => {
     if (/^\d*$/.test(text) && text.length <= 2) {
-      updateField(day.name, text);
+      updateField(day.name, text as any);
     }
   };
 
+  const handleYearChange = (text: string) => {
+    const formatted = text.replace(/\D/g, "").slice(0, 4);
+    updateField(year.name, formatted as any);
+  };
+
   return (
-    <>
+    <View style={styles.fieldset}>
+      <View style={styles.legendContainer}>
+        <Text style={styles.legendText}>
+          {legend || t("form_fields.dob")}
+          {required && <Text style={styles.requiredStar}> *</Text>}
+        </Text>
+        <HelpTooltip text={t("form_fields.dob_help")} />
+      </View>
+
       {year.errorText && <Text style={styles.errorText}>{year.errorText}</Text>}
       {day.errorText && <Text style={styles.errorText}>{day.errorText}</Text>}
       {month.errorText && (
         <Text style={styles.errorText}>{month.errorText}</Text>
       )}
+
       <View style={styles.dateRow}>
-        <View style={styles.inputBlock}>
+        <View style={styles.monthCol}>
           <View
             style={[
               styles.pickerWrapper,
@@ -74,55 +95,120 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             <Picker
               enabled={!disabled}
               selectedValue={month.value}
-              onValueChange={(text: string) => updateField(month.name, text)}
+              onValueChange={(text: string) =>
+                updateField(month.name, text as any)
+              }
+              dropdownIconColor={theme.textPrimary}
+              style={styles.picker}
             >
               {MONTHS.map(monthItem => (
                 <Picker.Item
                   key={monthItem.value}
                   label={monthItem.name}
                   value={monthItem.value}
+                  style={{ fontSize: 14 }}
                 />
               ))}
             </Picker>
           </View>
         </View>
-        <TextInput
-          style={[
-            styles.dateInput,
-            disabled && { backgroundColor: theme.borderColor },
-          ]}
-          placeholder="DD"
-          keyboardType="number-pad"
-          maxLength={2}
-          editable={!disabled}
-          value={day.value}
-          onChangeText={handleDayChange}
-        />
-        <TextInput
-          style={[
-            styles.dateInput,
-            disabled && { backgroundColor: theme.borderColor },
-          ]}
-          placeholder="YYYY"
-          keyboardType="number-pad"
-          maxLength={4}
-          editable={!disabled}
-          value={year.value}
-          onChangeText={(text: string) => updateField(year.name, text)}
-        />
+
+        <View style={styles.dayCol}>
+          <TextInput
+            style={[
+              styles.dateInput,
+              disabled && { backgroundColor: theme.borderColor },
+            ]}
+            placeholder="DD"
+            placeholderTextColor={theme.gray}
+            keyboardType="number-pad"
+            maxLength={2}
+            editable={!disabled}
+            value={day.value}
+            onChangeText={handleDayChange}
+          />
+        </View>
+
+        {/* Год (flex: 4) */}
+        <View style={styles.yearCol}>
+          <TextInput
+            style={[
+              styles.dateInput,
+              disabled && { backgroundColor: theme.borderColor },
+            ]}
+            placeholder="YYYY"
+            placeholderTextColor={theme.gray}
+            keyboardType="number-pad"
+            maxLength={4}
+            editable={!disabled}
+            value={year.value}
+            onChangeText={handleYearChange}
+          />
+        </View>
       </View>
-    </>
+    </View>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    inputBlock: {
-      width: "100%",
+    fieldset: {
+      borderWidth: 1,
+      borderColor: theme.borderColor || "#ccc",
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingTop: 16,
+      paddingBottom: 12,
+      marginTop: 20,
+      position: "relative",
+    },
+    legendContainer: {
+      position: "absolute",
+      top: -10,
+      left: 12,
+      backgroundColor: theme.white || "#fff",
+      borderRadius: 5,
+      padding: 3,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    legendText: {
+      fontSize: 12,
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      color: theme.textPrimary || "#000",
+    },
+    requiredStar: {
+      color: theme.danger || "red",
+      fontWeight: "bold",
     },
     dateRow: {
-      gap: 10,
-      marginBottom: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 4,
+    },
+    monthCol: {
+      flex: 5,
+    },
+    dayCol: {
+      flex: 3,
+    },
+    yearCol: {
+      flex: 4,
+    },
+    pickerWrapper: {
+      height: 45,
+      backgroundColor: theme.white,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderRadius: 5,
+      overflow: "hidden",
+      justifyContent: "center",
+    },
+    picker: {
+      height: 48,
+      width: "100%",
     },
     dateInput: {
       backgroundColor: theme.white,
@@ -130,21 +216,14 @@ const getStyles = (theme: any) =>
       borderWidth: 1,
       borderColor: theme.borderColor,
       borderRadius: 6,
-      padding: 10,
+      paddingHorizontal: 10,
+      fontSize: 14,
+      color: theme.textPrimary,
+      textAlign: "center",
     },
     errorText: {
-      color: theme.secondary,
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 12,
-      marginTop: 5,
-    },
-    pickerWrapper: {
-      height: 48,
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      overflow: "hidden",
-      justifyContent: "center",
+      color: theme.danger || "red",
+      fontSize: 11,
+      marginBottom: 4,
     },
   });

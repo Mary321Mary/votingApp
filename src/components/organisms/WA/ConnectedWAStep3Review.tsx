@@ -277,6 +277,7 @@ export const ConnectedWAStep3Review = ({
       </View>
       {/* Confirm */}
       <Checkbox
+        name="you_must_confirm"
         label={t("washington.i_confirm")}
         value={confirm}
         required

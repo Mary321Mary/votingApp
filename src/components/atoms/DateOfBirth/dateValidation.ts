@@ -80,32 +80,30 @@ function getReferenceToday(referenceDate: Date = new Date()): Date {
 }
 
 /**
- * Вычисляет точный возраст пользователя (с учетом дробных долей для Оклахомы 17.5)
+ * Calculate exact age of user (with consideration of fractional years for Oklahoma 17.5)
  */
 function calculateExactAge(parsed: ParsedBirthDate, today: Date): number {
+  const monthIndex = parsed.month;
   let age = today.getFullYear() - parsed.year;
-  const monthDiff = today.getMonth() - parsed.month;
+  const monthDiff = today.getMonth() - monthIndex;
   const dayDiff = today.getDate() - parsed.day;
 
   if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
     age--;
   }
 
-  const lastBirthday = new Date(parsed.year + age, parsed.month, parsed.day);
-  const nextBirthday = new Date(
-    parsed.year + age + 1,
-    parsed.month,
-    parsed.day,
-  );
+  const lastBirthday = new Date(parsed.year + age, monthIndex, parsed.day);
+  const nextBirthday = new Date(parsed.year + age + 1, monthIndex, parsed.day);
 
   const msInYear = nextBirthday.getTime() - lastBirthday.getTime();
   const msPassedSinceBirthday = today.getTime() - lastBirthday.getTime();
 
-  return age + msPassedSinceBirthday / msInYear;
+  const exactAge = age + msPassedSinceBirthday / msInYear;
+  return Math.round(exactAge * 10000) / 10000;
 }
 
 /**
- * Проверяет порог "возраст минус N дней буфера" для выборов
+ * Check age "age minus N days bugger" for election
  */
 function hasReachedAgeWithBuffer(
   parsed: ParsedBirthDate,
@@ -114,7 +112,7 @@ function hasReachedAgeWithBuffer(
   today: Date,
 ): boolean {
   const thresholdDate = new Date(today);
-  thresholdDate.setFullYear(thresholdDate.getFullYear() - baseAge);
+  thresholdDate.setFullYear(thresholdDate.getFullYear() - Math.floor(baseAge));
   thresholdDate.setDate(thresholdDate.getDate() + bufferDays);
   return parsed.date <= thresholdDate;
 }
@@ -131,12 +129,11 @@ export function normalizeStateAbbreviation(abbreviation?: string): string {
  * Used by validate(), validateConnectedOvr(), validateWA()
  */
 export function processDateOfBirthValidation(
-  birthYear: string,
-  birthMonth: string,
-  birthDay: string,
+  birthYear = "",
+  birthMonth = "",
+  birthDay = "",
   formConfig: DataCollectionConfiguration,
   isRequired: boolean = true,
-  isFinishWithStateWorkflow: boolean = false,
 ): DateValidationProcessingResult {
   const result: DateValidationProcessingResult = {
     errors: {},
@@ -177,89 +174,52 @@ export function processDateOfBirthValidation(
     return result;
   }
 
-  // Загружаем настройки группы "eligibility"
-  const eligibility = formConfig?.eligibility || {
-    min_pre_reg_age: 18,
-    min_vr_age: 18,
-    min_age_election_day_buffer_days: 180,
-    before_vr_deadline: true,
-  };
+  // Take config parameters (Item A)
+  const eligibility = formConfig.eligibility || {};
 
-  let minPreRegAge = eligibility.min_pre_reg_age ?? 18;
   const minVrAge = eligibility.min_vr_age ?? 18;
-  const bufferDays = eligibility.min_age_election_day_buffer_days ?? 180;
+  const allowsPreReg = eligibility.allows_pre_reg ?? false;
+  let minPreRegAge = eligibility.min_pre_reg_age ?? 18;
+  const bufferDays = eligibility.min_age_election_day_buffer_days ?? 0;
 
-  // Угловой кейс: ошибка конфигурации
-  if (minVrAge < minPreRegAge) {
-    console.error(
-      "Internal Configuration Error: min_vr_age is less than min_pre_reg_age.",
-    );
-    minPreRegAge = minVrAge;
-  }
-
+  // Calculate age
   const userAge = calculateExactAge(parsed, today);
   const ageErrorKey = "form_fields.age_eligibility_error";
 
   // -------------------------------------------------------------
-  // ДЛЯ ВОРКФЛОУ FINISH WITH STATE (ВТОРАЯ ЗАДАЧА)
+  // ITEM B (4 Result Validation DOB)
   // -------------------------------------------------------------
-  if (isFinishWithStateWorkflow) {
-    if (userAge < minPreRegAge) {
-      result.errors.birthMonth = ageErrorKey;
-    } else {
-      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
-    }
+
+  // Outcome 1: DOB valid b/c age >= min_vr_age
+  if (userAge >= minVrAge) {
+    result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+    result.formUpdates.dob_routing_outcome = "eligible";
     return result;
   }
 
-  // -------------------------------------------------------------
-  // ДЛЯ ВОРКФЛОУ СТАНДАРТНОЙ NVRA ФОРМЫ (ПЕРВАЯ ЗАДАЧА)
-  // -------------------------------------------------------------
-  const isPreRegState = minVrAge > minPreRegAge;
+  // Outcome 2: DOB valid b/c allows_pre_reg is true AND age >= min_pre_reg_age
+  if (allowsPreReg && userAge >= minPreRegAge) {
+    result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+    result.formUpdates.dob_routing_outcome = "pre_registration_notice";
+    return result;
+  }
 
-  if (!isPreRegState) {
-    // Штаты БЕЗ предрегистрации
-    if (userAge >= minVrAge) {
-      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
-      result.formUpdates.dob_routing_outcome = "eligible";
-      return result;
-    }
-
+  // Outcome 3: DOB valid b/c allows_pre_reg is false AND age > (min_vr_age - min_age_election_day_buffer_days)
+  if (!allowsPreReg) {
     const hasReachedBuffer = hasReachedAgeWithBuffer(
       parsed,
       minVrAge,
       bufferDays,
       today,
     );
-    if (!hasReachedBuffer) {
-      result.errors.birthMonth = ageErrorKey;
-      return result;
-    } else {
+    if (hasReachedBuffer) {
       result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
       result.formUpdates.dob_routing_outcome = "under_18_election_day_ok";
       return result;
     }
-  } else {
-    // Штаты С предрегистрацией
-    if (userAge >= minVrAge) {
-      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
-      result.formUpdates.dob_routing_outcome = "eligible";
-      return result;
-    }
-
-    if (userAge < minPreRegAge) {
-      result.errors.birthMonth = ageErrorKey;
-      return result;
-    }
-
-    if (userAge >= minPreRegAge && userAge < minVrAge) {
-      result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
-      result.formUpdates.dob_routing_outcome = "pre_registration_notice";
-      return result;
-    }
   }
 
-  // Valid date, set form data
-  result.formUpdates.date_of_birth = `${birthYear}-${birthMonth}-${birthDay}`;
+  // Outcome 4: None of the above is true -> Invalid DOB
+  result.errors.birthMonth = ageErrorKey;
   return result;
 }

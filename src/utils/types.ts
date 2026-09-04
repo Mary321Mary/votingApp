@@ -1,56 +1,21 @@
 import { ReactNode } from "react";
 
-export interface User {
-  id: number;
-  username: string;
-  password_hash: string;
-  email: string;
-  name: string;
-  birth_date?: string; // ISO date string
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  created_at: string; // ISO datetime string
-}
+export type ReportInternalData = {
+  message: string;
+  registration_uid: string;
+  voter_uid: string;
+  partner_id: string;
+  workflow_type: string;
+  severity: string;
+  context: {};
+};
 
-export interface AuthState {
-  user: AuthMeResponse | User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-}
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
-  user: {
-    username: string;
-    name: string;
-    email: string;
-    password: string;
-    state: string;
-    city: string;
-    address: string;
-    phone: string;
-    birth_date: string;
-    zip: string;
+export type ReportInternalResponse = {
+  status: {
+    success: boolean;
+    errors: string[];
   };
-}
-
-export interface AuthResponse {
-  user: User;
-  token: string;
-  message?: string;
-}
-
-export type AuthData = {
-  access_token: string;
-  refresh_token: string;
+  recorded: boolean;
 };
 
 export type RegisterData = {
@@ -71,37 +36,21 @@ export interface AuthMeResponse {
   zip: string;
 }
 
-// -----
-
 export interface ReportEventPayload {
   registration_uid: string;
   partner_id: string;
-  step: number;
-  event_name:
-    | "nvra_pre_reg"
-    | "nvra_under_18"
-    | "nvra_email_quest"
-    | "nvra_print_request";
+  step:
+    | "step_1"
+    | "step_2"
+    | "step_3"
+    | "step_4"
+    | "step_5"
+    | "complete"
+    | "under_18"
+    | "rejected"
+    | "";
+  event_name: string;
 }
-
-export type ReportInternalData = {
-  message: string;
-  registration_uid: string;
-  voter_uid: string;
-  partner_id: string;
-  workflow_type: string;
-  severity: string;
-  context: {};
-};
-
-export type ReportInternalResponse = {
-  status: {
-    success: boolean;
-    errors: string[];
-  };
-  recorded: boolean;
-};
-
 // ---------------------------------------------------
 
 export const OVR_TYPE_MAP: Record<string, string> = {
@@ -133,7 +82,79 @@ export interface StateData {
   show_vr_check_button?: boolean;
   recent_register_date: string;
   before_vr_deadline?: boolean;
+  vr_lookup_on_nvra_form?: boolean;
+  /** When false, finish-with-state does not offer a paper NVRA opt-out (WI). Default true. */
+  allow_paper_fallback?: boolean;
+  /** State-specific ID wording for online registration eligibility questions. */
+  state_required_id?: string | null;
+  /** State-specific same-day registration copy shown after the VR deadline. */
+  same_day_registration_statement?: string | null;
+  under_18_page_copy?: string | null;
+  pre_registration_statement?: string | null;
+  cvr_vr_id_subcopy?: string | null;
+  ssn_format?: string | null;
+  mail_in_deadline?: string | null;
+  in_person_deadline?: string | null;
 }
+
+export type CheckRegistrationStatus = {
+  partner_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  zip: string;
+
+  aptunit: string;
+  address: string;
+  city: string;
+  phone: string;
+  opt_in_email: boolean;
+  opt_in_sms: boolean;
+  volunteer: boolean;
+
+  birthMonth: string;
+  birthDay: string;
+  birthYear: string;
+  date_of_birth: string;
+
+  survey_question_1: string;
+  survey_answer_1: string;
+  survey_question_2: string;
+  survey_answer_2: string;
+};
+
+export type CheckRegistrationStatusError = {
+  partner_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  zip: string;
+
+  aptunit: string;
+  address: string;
+  city: string;
+  phone: string;
+  opt_in_email: string;
+  opt_in_sms: string;
+  volunteer: string;
+
+  birthMonth: string;
+  birthDay: string;
+  birthYear: string;
+  date_of_birth: string;
+
+  survey_question_1: string;
+  survey_answer_1: string;
+  survey_question_2: string;
+  survey_answer_2: string;
+};
+
+export type CheckRegistrationStatusResponse = {
+  status: { success: boolean; errors: string[] | null };
+  state: StateData;
+  lookup_uid: string | null;
+  found: boolean;
+};
 
 export type RegisterFormState = {
   partner_id: number;
@@ -154,7 +175,7 @@ export type RegisterFormState = {
   prev_name_suffix: string;
 
   us_citizen: boolean;
-  will_be_18_by_election: boolean;
+  will_be_18_by_election?: boolean;
   email_address: string;
 
   // ADDRESS
@@ -393,6 +414,7 @@ export type RegisterFormStateError = {
 };
 
 export type SubmitMICovrPayload = {
+  registration_uid: string;
   email: string;
   partner_id: number;
   locale: string;
@@ -448,6 +470,8 @@ export type SubmitVoterStatusResponse = {
     success: boolean;
     errors: string[] | null;
   };
+  state: StateData;
+  request_uid: string;
   registrant_uid: string | null;
   voter: {
     uid: string | null;
@@ -470,65 +494,48 @@ export type FormProps = {
   handleMainButton?: ReactNode;
 };
 
-export type CheckRegistrationStatus = {
-  partner_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  zip: string;
-  state: string;
-  address: string;
-  city: string;
-  phone: string;
-  emailConsent: boolean;
-  smsConsent: boolean;
-  volunteer: boolean;
+// Ready-to-use share targets for one tool's finish screen. facebook/x are
+// share-intent URLs (drop straight into an href); copy_link is the raw link to
+// copy; text/hashtags are building blocks for any other share channel.
+export interface ShareLinks {
+  facebook: string;
+  x: string;
+  copy_link: string;
+  text: string;
+  hashtags: string[];
+}
 
-  birthMonth: string;
-  birthDay: string;
-  birthYear: string;
-  date_of_birth: string;
-
-  survey_question_1: string;
-  survey_answer_1: string;
-  survey_question_2: string;
-  survey_answer_2: string;
-};
-export type CheckRegistrationStatusError = {
-  partner_id: string;
-  first_name: string;
-  last_name: string;
-  state: string;
-  address: string;
-  city: string;
-  phone: string;
-  zip: string;
-  email: string;
-  emailConsent: string;
-  smsConsent: string;
-  volunteer: string;
-
-  birthMonth: string;
-  birthDay: string;
-  birthYear: string;
-  date_of_birth: string;
-
-  survey_question_1: string;
-  survey_answer_1: string;
-  survey_question_2: string;
-  survey_answer_2: string;
-};
-export type CheckRegistrationStatusResponse = {
-  status: { success: boolean; errors: string[] | null };
-  found: boolean;
-};
-
-// zip
+// The tools that can have a share/finish screen. Keys match the `share` block
+// returned by fetch_ui_configuration.
+export type ShareTool =
+  | "registrations"
+  | "lookup"
+  | "pledge"
+  | "absentee"
+  | "myballot"
+  | "trackballot"
+  | "location";
 
 export interface UIConfig {
   display_locale_switcher: boolean;
   supported_locales: string[];
   powered_by_logo_url?: string;
+  // Partner's custom header logo; falls back to the bundled default when absent.
+  header_logo_url?: string;
+  // Whether the partner is whitelabeled (branding customizations active).
+  whitelabeled?: boolean;
+  // Approved partner theme stylesheet (partner-ng.css); applied when whitelabeled.
+  partner_css_url?: string;
+  // Optional partner-owned GA4 Measurement ID (from portal /tools). Loaded
+  // alongside REACT_APP_GA_MEASUREMENT_ID when present.
+  ga_measurement_id?: string;
+  // Public Maps/Places browser key from Rocky GOOGLE_MAPS_BROWSER_KEY (same
+  // value lookup_voting_locations returns as map_key). Omitted when unset.
+  google_maps_browser_key?: string;
+  // Partner pixel / Facebook (etc.) HTML/JS from rocky admin Custom Tracking.
+  // Tracking fires on each form step / route; conversion on finish/share pages.
+  external_tracking_snippet?: string;
+  external_conversion_snippet?: string;
   urls: {
     homepage: string;
     terms: string;
@@ -537,7 +544,19 @@ export interface UIConfig {
     faq: string;
     contact: string;
     about: string;
+    election_center: string;
+    primaries: string;
+    overseas_vote?: string;
+    // Partner-tracked deep links back to the standalone tools, for CTAs on
+    // terminal pages that are not the current flow. reg_tool -> the Rocky NG
+    // registration tool; abr_tool -> the classic Rocky absentee tool (only shown
+    // where the state config returns abr_available).
+    reg_tool?: string;
+    abr_tool?: string;
   };
+  // Ready-to-use share targets keyed by tool, so each finish screen shares the
+  // tool the user actually completed rather than always registration.
+  share: Record<ShareTool, ShareLinks>;
 }
 
 export interface SubmitEmailZipRequest {
@@ -579,8 +598,8 @@ export interface SubmitEmailZipResponse {
   status: { success: boolean; errors: string[] | null };
   state: StateData;
   voter: UserData;
-  registration_uid?: string;
-  counties?: string[];
+  registration_uid: string;
+  counties: string[];
 }
 
 export interface SubmitEmailZipResponseProps {
@@ -594,6 +613,9 @@ export interface SubmitEmailZipResponseProps {
   showRedirectText?: boolean;
   form?: RegisterFormState;
   initialStep?: 1 | 2 | 3;
+  counties?: string[];
+  voluntaryPaperRedirect?: boolean;
+  isRedirectedCompressNVRA?: boolean;
 }
 
 export interface SetUnder18ReminderRequest {
@@ -622,6 +644,7 @@ export interface FieldValidation {
   enforce_e164?: boolean;
   min_length?: number;
   max_length?: number;
+  min_year?: number;
 }
 
 export interface FieldConfig {
@@ -643,10 +666,20 @@ export interface DataCollectionConfiguration {
     min_age: number;
   };
   eligibility: {
+    allows_pre_reg: boolean;
     min_pre_reg_age: number;
     min_vr_age: number;
-    min_age_election_day_buffer_days: number;
+    min_age_election_day_buffer_days: number | null;
     before_vr_deadline: boolean;
+    state_required_id?: string | null;
+    same_day_registration_statement?: string | null;
+    under_18_page_copy?: string | null;
+    pre_registration_statement?: string | null;
+    mail_in_deadline?: string | null;
+    in_person_deadline?: string | null;
+    ssn_format?: string | null;
+    cvr_vr_id_subcopy?: string | null;
+    enable_finish_on_other_device?: boolean;
   };
 }
 
@@ -660,7 +693,9 @@ export interface FetchDataCollectionConfigResponse {
 
 export interface SubmitFinishedWithStatData {
   workflow_type: string;
-  registrant: Partial<RegisterFormState>;
+  registrant: Partial<RegisterFormState> & {
+    registration_uid?: string;
+  };
 }
 
 export interface SubmitFonoshedWithStateResponce {
@@ -672,10 +707,16 @@ export interface SubmitFonoshedWithStateResponce {
   voter: UserData;
 }
 
+// -------------------
+// ------- PDF -------
+// -------------------
+
 export interface PDFTokenRequest {
   workflow_type: string;
   finish_with_state: boolean;
-  registrant: RegisterFormState;
+  /** When true, mail the form ("Please mail me my form") — creates pdf_delivery / Requested Assistance */
+  pdf_assistance?: boolean;
+  registrant: RegisterFormState & { registration_uid?: string };
 }
 
 export interface PDFTokenResponse {
@@ -698,6 +739,10 @@ export interface PDFDocResponse {
   pdf_ready: boolean;
   download_url: string;
 }
+
+// -------------------------
+// ---- SurveyQuestions ----
+// -------------------------
 
 export interface DataSurveyQuestionsRequest {
   partner_id: string;
@@ -755,6 +800,7 @@ export type VoterDeviceResponse = {
 };
 
 export type SubmitPACovrPayload = {
+  registration_uid: string;
   partner_id: number;
   locale: string;
   email: string;
@@ -783,8 +829,23 @@ export type SubmitPACovrPayload = {
   mailing_city?: string;
   mailing_state?: string;
   mailing_zip_code?: string;
+
   change_of_name: boolean;
+  prev_name_title?: string;
+  prev_first_name?: string;
+  prev_middle_name?: string;
+  prev_last_name?: string;
+  prev_name_suffix?: string;
+
   change_of_address: boolean;
+  prev_address?: string;
+  prev_unit?: string;
+  prev_city?: string;
+  prev_state?: string;
+  prev_zip_code?: string;
+  prev_unit_number?: string;
+  prev_unit_type?: string;
+
   has_assistant: boolean;
   helper_name?: string;
   helper_address?: string;
@@ -795,6 +856,7 @@ export type SubmitPACovrPayload = {
 };
 
 export type SubmitWACovrPayload = RegisterFormState & {
+  registration_uid: string;
   locale: string;
   email: string;
   is_citizen: boolean;
@@ -812,6 +874,7 @@ export type SubmitWACovrPayload = RegisterFormState & {
 };
 
 export type SubmitCACovrPayload = RegisterFormState & {
+  registration_uid: string;
   locale: string;
   email: string;
 };

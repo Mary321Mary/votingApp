@@ -1,11 +1,9 @@
-import React, { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
+import { SelectField } from "../atoms/SelectField";
 
 export const StandardMailingAddress = ({
   errorMessages,
@@ -14,8 +12,6 @@ export const StandardMailingAddress = ({
   onChange,
   onChangeError,
 }: FormProps) => {
-  const theme = useContext(ThemeContext);
-  const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const updateField = <K extends keyof RegisterFormState>(
@@ -34,6 +30,7 @@ export const StandardMailingAddress = ({
   return (
     <>
       <InputField
+        name="mailing_address_number"
         label={t("michigan.mailing_street.number")}
         value={value.mailing_address_number}
         errorMessage={t(errorMessages.mailing_address_number)}
@@ -44,6 +41,7 @@ export const StandardMailingAddress = ({
       />
 
       <InputField
+        name="mailing_address_street_name"
         label={t("michigan.mailing_street.name")}
         value={value.mailing_address_street_name}
         errorMessage={t(errorMessages.mailing_address_street_name)}
@@ -54,6 +52,7 @@ export const StandardMailingAddress = ({
       />
 
       <InputField
+        name="mailing_address_street_type"
         label={t("michigan.mailing_street.type")}
         value={value.mailing_address_street_type}
         errorMessage={t(errorMessages.mailing_address_street_type)}
@@ -64,6 +63,7 @@ export const StandardMailingAddress = ({
 
       {isVisible(formCongif, "mailing_address") && (
         <InputField
+          name="mailing_address"
           label={t("form_fields.address")}
           value={value.mailing_address}
           required={isRequired(formCongif, "mailing_address")}
@@ -73,6 +73,7 @@ export const StandardMailingAddress = ({
       )}
 
       <InputField
+        name="mailing_unit"
         label={t("michigan.street.apt")}
         value={value.mailing_unit}
         errorMessage={t(errorMessages.mailing_unit)}
@@ -81,6 +82,7 @@ export const StandardMailingAddress = ({
 
       {isVisible(formCongif, "mailing_city") && (
         <InputField
+          name="mailing_city"
           label={t("form_fields.city")}
           value={value.mailing_city}
           required={isRequired(formCongif, "mailing_city")}
@@ -90,39 +92,20 @@ export const StandardMailingAddress = ({
       )}
 
       {isVisible(formCongif, "mailing_state") && (
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("form_fields.state")}
-            {isRequired(formCongif, "mailing_state") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.mailing_state}
-              onValueChange={(text: string) =>
-                updateField("mailing_state", text)
-              }
-            >
-              {STATES.map(state_value => (
-                <Picker.Item
-                  key={state_value.value}
-                  label={state_value.name}
-                  value={state_value.value}
-                />
-              ))}
-            </Picker>
-          </View>
-          {errorMessages.mailing_state && (
-            <Text style={styles.required}>
-              {t(errorMessages.mailing_state)}
-            </Text>
-          )}
-        </View>
+        <SelectField
+          name="state"
+          label={t("form_fields.state")}
+          value={value.mailing_state}
+          options={STATES}
+          required={isRequired(formCongif, "mailing_state")}
+          errorMessage={errorMessages.mailing_state}
+          onValueChange={itemValue => updateField("mailing_state", itemValue)}
+        />
       )}
 
       {isVisible(formCongif, "mailing_zip_code") && (
         <InputField
+          name="mailing_zip_code"
           label={t("form_fields.zip")}
           value={value.mailing_zip_code}
           required={isRequired(formCongif, "mailing_zip_code")}
@@ -134,26 +117,3 @@ export const StandardMailingAddress = ({
     </>
   );
 };
-
-const getStyles = (theme: any) =>
-  StyleSheet.create({
-    required: {
-      color: theme.secondary,
-    },
-    inputBlock: {
-      marginTop: 5,
-    },
-    label: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      marginBottom: 6,
-      textTransform: "uppercase",
-    },
-    pickerWrapper: {
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      overflow: "hidden",
-    },
-  });

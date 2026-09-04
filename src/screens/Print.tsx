@@ -8,7 +8,9 @@ import {
   Linking,
   TouchableOpacity,
   ScrollView,
-  useWindowDimensions,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -21,7 +23,8 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
-import RenderHTML from "react-native-render-html";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 interface PrintScreenProps {
   route: {
@@ -44,12 +47,13 @@ export default function PrintScreen({ route }: PrintScreenProps) {
   const navigation = useNavigation<PrintScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const { width } = useWindowDimensions();
+  const { config } = useUIConfig();
 
   const { form, state, workflow_type, finish_with_state } = route.params;
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copyNotification, setCopyNotification] = useState("");
 
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -153,40 +157,78 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
-          <TouchableOpacity style={styles.outlineButton}>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.facebook || "")
+            }
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_fb_button_text")}
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.outlineButton}>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.x || "")
+            }
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_x_button_text")}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.copy_link || "";
 
-          <TouchableOpacity style={styles.outlineButton}>
+              try {
+                Clipboard.setString(targetUrl);
+
+                if (Platform.OS === "android") {
+                  ToastAndroid.show(
+                    t(`pennsylvania.link_copied`),
+                    ToastAndroid.SHORT,
+                  );
+                } else {
+                  Alert.alert("Success", t(`pennsylvania.link_copied`));
+                }
+                setCopyNotification(t(`pennsylvania.link_copied`));
+              } catch (err) {
+                console.error("Failed to copy link:", err);
+              }
+            }}
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.copy_link")}
             </Text>
           </TouchableOpacity>
+          {copyNotification && <Text>{copyNotification}</Text>}
           {/* Footer */}
           <View>
-            <Text style={styles.title}>
-              {t("print_form_page.get_this_tool")}
+            <View style={styles.divider} />
+            <Text style={styles.secondaryText}>
+              {t("general.calls_to_action.building_site")}
             </Text>
-            <RenderHTML
-              contentWidth={width}
-              source={{ html: t("print_form_page.send_us") }}
-              tagsStyles={{
-                p: {
-                  margin: 0,
-                  padding: 0,
-                  color: "#333",
-                  fontSize: 14,
-                },
-              }}
-            />
+
+            <Text>
+              <Trans
+                i18nKey="general.calls_to_action.get_tool_reg"
+                components={{
+                  a: (
+                    <Text
+                      key="email-link"
+                      style={styles.linkText}
+                      onPress={() => {
+                        Linking.openURL("mailto:civictech@rockthevote.org");
+                      }}
+                    >
+                      {0}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
           </View>
         </View>
       </View>
@@ -238,5 +280,13 @@ const getStyles = (theme: any) =>
       color: theme.primary,
       fontSize: 16,
       fontWeight: "600",
+    },
+
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
+      textDecorationLine: "underline",
     },
   });

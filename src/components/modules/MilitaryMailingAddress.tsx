@@ -1,11 +1,9 @@
-import React, { useContext } from "react";
-import { Picker } from "@react-native-picker/picker";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
 import { isRequired, isVisible } from "@/utils/constants";
+import { SelectField } from "../atoms/SelectField";
 
 export const MilitaryMailingAddress = ({
   errorMessages,
@@ -14,8 +12,6 @@ export const MilitaryMailingAddress = ({
   onChange,
   onChangeError,
 }: FormProps) => {
-  const theme = useContext(ThemeContext);
-  const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const updateField = <K extends keyof RegisterFormState>(
@@ -31,6 +27,20 @@ export const MilitaryMailingAddress = ({
     }
   };
 
+  const AA_AE_AP = [
+    { name: "", value: "" },
+    { name: "AA", value: "aa" },
+    { name: "AE", value: "ae" },
+    { name: "AP", value: "ap" },
+  ];
+
+  const APO_FPO_DPO = [
+    { name: "", value: "" },
+    { name: "APO", value: "apo" },
+    { name: "FPO", value: "fpo" },
+    { name: "DPO", value: "dpo" },
+  ];
+
   const BOX_GROUP_TYPE = [
     { name: "", value: "" },
     { name: "UNIT", value: "unit" },
@@ -40,38 +50,21 @@ export const MilitaryMailingAddress = ({
 
   return (
     <>
-      <View style={styles.inputBlock}>
-        <Text style={styles.label}>
-          {t("michigan.military.box_group_type")}
-          <Text style={styles.required}> *</Text>
-        </Text>
-        {isVisible(formCongif, "mailing_box_group_type") && (
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.mailing_box_group_type}
-              onValueChange={(text: string) =>
-                updateField("mailing_box_group_type", text)
-              }
-            >
-              {BOX_GROUP_TYPE.map(item => (
-                <Picker.Item
-                  key={item.value}
-                  label={item.name}
-                  value={item.value}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
-        {errorMessages.mailing_box_group_type && (
-          <Text style={styles.required}>
-            {errorMessages.mailing_box_group_type}
-          </Text>
-        )}
-      </View>
+      <SelectField
+        name="box_group_type"
+        label={t("michigan.military.box_group_type")}
+        value={value.mailing_box_group_type}
+        options={BOX_GROUP_TYPE}
+        required
+        errorMessage={errorMessages.mailing_box_group_type}
+        onValueChange={itemValue =>
+          updateField("mailing_box_group_type", itemValue)
+        }
+      />
 
       {isVisible(formCongif, "mailing_box_group_number") && (
         <InputField
+          name="mailing_box_group_number"
           label={t("michigan.military.box_group_number")}
           required={isRequired(formCongif, "mailing_box_group_number")}
           value={value.mailing_box_group_number}
@@ -84,6 +77,7 @@ export const MilitaryMailingAddress = ({
 
       {isVisible(formCongif, "mailing_box_number") && (
         <InputField
+          name="mailing_box_number"
           label={t("michigan.military.box_number")}
           value={value.mailing_box_number}
           errorMessage={errorMessages.mailing_box_number}
@@ -95,57 +89,32 @@ export const MilitaryMailingAddress = ({
       )}
 
       {isVisible(formCongif, "mailing_apo") && (
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("michigan.military.apo_fpo_dpo")}
-            {isRequired(formCongif, "mailing_apo") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.mailing_apo}
-              onValueChange={(text: string) => updateField("mailing_apo", text)}
-            >
-              <Picker.Item label="" value="" />
-              <Picker.Item label="APO" value="APO" />
-              <Picker.Item label="FPO" value="FPO" />
-              <Picker.Item label="DPO" value="DPO" />
-            </Picker>
-          </View>
-          {errorMessages.mailing_apo && (
-            <Text style={styles.required}>{errorMessages.mailing_apo}</Text>
-          )}
-        </View>
+        <SelectField
+          name="apo_fpo_dpo"
+          label={t("michigan.military.apo_fpo_dpo")}
+          value={value.mailing_apo}
+          options={APO_FPO_DPO}
+          required={isRequired(formCongif, "mailing_apo")}
+          errorMessage={errorMessages.mailing_apo}
+          onValueChange={itemValue => updateField("mailing_apo", itemValue)}
+        />
       )}
 
       {isVisible(formCongif, "mailing_ap") && (
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("michigan.military.aa_ae_ap")}
-            {isRequired(formCongif, "mailing_ap") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.mailing_ap}
-              onValueChange={(text: string) => updateField("mailing_ap", text)}
-            >
-              <Picker.Item label="" value="" />
-              <Picker.Item label="AA" value="AA" />
-              <Picker.Item label="AE" value="AE" />
-              <Picker.Item label="AP" value="AP" />
-            </Picker>
-          </View>
-          {errorMessages.mailing_ap && (
-            <Text style={styles.required}>{errorMessages.mailing_ap}</Text>
-          )}
-        </View>
+        <SelectField
+          name="aa_ae_ap"
+          label={t("michigan.military.aa_ae_ap")}
+          value={value.mailing_apo}
+          options={AA_AE_AP}
+          required={isRequired(formCongif, "mailing_ap")}
+          errorMessage={errorMessages.mailing_ap}
+          onValueChange={itemValue => updateField("mailing_ap", itemValue)}
+        />
       )}
 
       {isVisible(formCongif, "mailing_zip_code") && (
         <InputField
+          name="mailing_zip_code"
           label={t("form_fields.zip")}
           value={value.mailing_zip_code}
           required={isRequired(formCongif, "mailing_zip_code")}
@@ -157,26 +126,3 @@ export const MilitaryMailingAddress = ({
     </>
   );
 };
-
-const getStyles = (theme: any) =>
-  StyleSheet.create({
-    inputBlock: {
-      marginTop: 10,
-    },
-    label: {
-      textTransform: "uppercase",
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      marginBottom: 6,
-    },
-    required: {
-      color: theme.secondary,
-    },
-    pickerWrapper: {
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      overflow: "hidden",
-    },
-  });

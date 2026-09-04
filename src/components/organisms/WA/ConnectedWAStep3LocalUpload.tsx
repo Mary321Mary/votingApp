@@ -103,6 +103,7 @@ export const ConnectedWAStep3LocalUpload = ({
       />
 
       <InputField
+        name="ssn4"
         showEye
         label={t("washington.ssn4_required")}
         value={value.last_four_ss_number}
@@ -118,6 +119,7 @@ export const ConnectedWAStep3LocalUpload = ({
       />
 
       <Checkbox
+        name="ssn4"
         value={value.has_no_ssn === true}
         label={t("washington.ssn4_none")}
         required={isRequired(formCongif, "has_no_ssn")}

@@ -5,11 +5,14 @@ import { useTranslation } from "react-i18next";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import InputField from "../atoms/InputField";
-import { isRequired, isVisible } from "@/utils/constants";
+import { isPhoneRequired, isVisible } from "@/utils/constants";
 
-interface PhoneSectionProps extends FormProps {}
+interface PhoneSectionProps extends FormProps {
+  label?: string;
+}
 
 export const PhoneSection = ({
+  label = "",
   value,
   formCongif,
   errorMessages,
@@ -59,14 +62,12 @@ export const PhoneSection = ({
     <View style={styles.row}>
       {isVisible(formCongif, "phone") && (
         <InputField
-          label={t("form_fields.phone")}
+          name="phone"
+          label={label || t("form_fields.phone")}
           helpText={t("form_fields.phone_help")}
           placeholder="###-###-####"
           value={value.phone}
-          required={
-            isRequired(formCongif, "phone", value.opt_in_sms) ||
-            value.opt_in_sms
-          }
+          required={isPhoneRequired(formCongif, value.opt_in_sms)}
           errorMessage={t(errorMessages.phone)}
           onChangeText={handlePhoneChange}
         />

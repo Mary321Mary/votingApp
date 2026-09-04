@@ -1,11 +1,16 @@
-import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
-import { SetStateAction } from "react";
-import { isRequired, isVisible } from "utils/constants";
+import {
+  fieldConfigured,
+  fieldDependsOn,
+  isRequired,
+  isVisible,
+} from "utils/constants";
 import {
   DataCollectionConfiguration,
   RegisterFormState,
   RegisterFormStateError,
 } from "utils/types";
+import { processDateOfBirthValidation } from "../../atoms/DateOfBirth/dateValidation";
+import { SetStateAction } from "react";
 
 export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   partner_id: "",
@@ -139,10 +144,11 @@ export const validate = (
 ): ValidationResult => {
   const zipRegex = /^\d{5}(-\d{4})?$/;
   const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-  const validationCfg = formCongif.fields.state_id_number?.validations;
+  const validationCfg = formCongif.fields.state_id_number.validations;
   const configRegex = validationCfg?.regexp;
   const minLen = validationCfg?.min_length;
   const maxLen = validationCfg?.max_length;
+  const PARTNER_ANSWER_REGEX = /^[\p{L}\p{M}\p{Nd}\p{Zs}.,;:'"()/\-&@#%!?+]*$/u;
 
   let finalRegex = /^.*$/;
 
@@ -200,8 +206,23 @@ export const validate = (
       errorMessage.prev_name_suffix = "general.required";
     }
   }
-  if (!form.us_citizen && isRequired(formCongif, "us_citizen")) {
+  // Attestation checkboxes can be required but not visible (AZ hides
+  // will_be_18_by_election on the NVRA set). Requiring one the registrant can
+  // never see is an unsatisfiable, invisible error, so honour visibility here —
+  // the same way the print/success payload defaults a hidden value to true.
+  if (
+    !form.us_citizen &&
+    isVisible(formCongif, "us_citizen") &&
+    isRequired(formCongif, "us_citizen")
+  ) {
     errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
+  }
+  if (
+    !form.will_be_18_by_election &&
+    isVisible(formCongif, "will_be_18_by_election") &&
+    isRequired(formCongif, "will_be_18_by_election")
+  ) {
+    errorMessage.will_be_18_by_election = "form_fields.age_eligibility_error";
   }
   if (!form.home_address.trim() && isRequired(formCongif, "home_address")) {
     errorMessage.home_address = "general.required";
@@ -291,11 +312,22 @@ export const validate = (
       errorMessage.prev_zip_code = "form_fields.zip_code_error";
     }
   }
-  if (form.has_no_state_license == null && flowType !== "paper") {
+  // FWS/OVR asks Yes/No so we can fork paper vs the state site. Honour
+  // visibility: KY/SC/TN/VA NVRA hides this field, and requiring an answer
+  // the registrant cannot see is a silent submit blocker.
+  if (
+    form.has_no_state_license == null &&
+    flowType !== "paper" &&
+    isVisible(formCongif, "has_no_state_license")
+  ) {
     errorMessage.has_no_state_license =
       "finish_with_state_page1.dl_id_answer_required";
   }
-  if (!form.has_no_state_license && (flowType === "paper" || showRedirect)) {
+  if (
+    isVisible(formCongif, "state_id_number") &&
+    !form.has_no_state_license &&
+    (flowType === "paper" || showRedirect)
+  ) {
     if (
       !form.state_id_number.trim() &&
       isRequired(formCongif, "state_id_number")
@@ -305,19 +337,40 @@ export const validate = (
       errorMessage.state_id_number = "form_fields.invalid_id_number";
     }
   }
-  if (
-    form.has_no_state_license &&
+  const ssnGatedOnNoLicense = fieldDependsOn(
+    formCongif,
+    "last_four_ss_number",
+    "has_no_state_license",
+  );
+  const shouldValidateSsn =
+    (flowType === "paper" || showRedirect) &&
     !form.has_no_ssn &&
-    (flowType === "paper" || showRedirect)
-  )
+    (form.has_no_state_license === true ||
+      (fieldConfigured(formCongif, "last_four_ss_number") &&
+        !ssnGatedOnNoLicense));
+  if (shouldValidateSsn) {
+    // Full-SSN states (ssn_format: full) send a 9-digit validation; default is 4.
+    const ssnCfg = formCongif.fields.last_four_ss_number?.validations;
+    const ssnRegex = ssnCfg?.regexp
+      ? new RegExp(`^${ssnCfg.regexp}$`)
+      : /^\d{4}$/;
+    const ssnInvalidKey =
+      ssnCfg?.max_length === 9
+        ? "form_fields.invalid_ssn9"
+        : "form_fields.invalid_ssn4";
     if (
       !form.last_four_ss_number.trim() &&
-      isRequired(formCongif, "last_four_ss_number")
+      isRequired(
+        formCongif,
+        "last_four_ss_number",
+        ssnGatedOnNoLicense ? form.has_no_state_license === true : undefined,
+      )
     ) {
       errorMessage.last_four_ss_number = "general.required";
-    } else if (!/^\d{4}$/.test(form.last_four_ss_number.trim())) {
-      errorMessage.last_four_ss_number = "form_fields.invalid_ssn4";
+    } else if (!ssnRegex.test(form.last_four_ss_number.trim())) {
+      errorMessage.last_four_ss_number = ssnInvalidKey;
     }
+  }
   if (!form.race.trim() && isRequired(formCongif, "race")) {
     errorMessage.race = "general.required";
   }
@@ -330,7 +383,7 @@ export const validate = (
     (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
   ) {
     errorMessage.birthDay = "general.required";
-  } else if (Number(form.birthYear) < 1900) {
+  } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
     errorMessage.birthMonth = "form_fields.invalid_year";
   }
   const dobValidation = processDateOfBirthValidation(
@@ -339,7 +392,6 @@ export const validate = (
     form.birthDay,
     formCongif,
     isRequired(formCongif, "date_of_birth"),
-    !form.has_no_state_license,
   );
   Object.assign(errorMessage, dobValidation.errors);
   Object.assign(form, dobValidation.formUpdates);
@@ -374,6 +426,19 @@ export const validate = (
     errorMessage.volunteer = "general.required";
   }
 
+  if (
+    form.survey_answer_1 &&
+    !PARTNER_ANSWER_REGEX.test(form.survey_answer_1)
+  ) {
+    errorMessage.survey_answer_1 = "form_fields.partner_answer_invalid";
+  }
+  if (
+    form.survey_answer_2 &&
+    !PARTNER_ANSWER_REGEX.test(form.survey_answer_2)
+  ) {
+    errorMessage.survey_answer_2 = "form_fields.partner_answer_invalid";
+  }
+
   return {
     errorMessage,
     isValid: !Object.values(errorMessage).some(value => !!value),
@@ -389,6 +454,7 @@ export const validateConnectedOvr = (
   const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
   const miIdRegex = /^[a-zA-Z]\d{12}$/i;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PARTNER_ANSWER_REGEX = /^[\p{L}\p{M}\p{Nd}\p{Zs}.,;:'"()/\-&@#%!?+]*$/u;
 
   const errorMessage = { ...EMPTY_ERROR_MESSAGES };
   if (step === 1) {
@@ -455,7 +521,7 @@ export const validateConnectedOvr = (
       (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
     ) {
       errorMessage.birthDay = "general.required";
-    } else if (Number(form.birthYear) < 1900) {
+    } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
       errorMessage.birthYear = "form_fields.invalid_year";
     }
     const dobValidation2 = processDateOfBirthValidation(
@@ -464,7 +530,6 @@ export const validateConnectedOvr = (
       form.birthDay,
       formCongif,
       isRequired(formCongif, "date_of_birth"),
-      false,
     );
     Object.assign(errorMessage, dobValidation2.errors);
     Object.assign(form, dobValidation2.formUpdates);
@@ -714,6 +779,19 @@ export const validateConnectedOvr = (
     if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
       errorMessage.volunteer = "general.required";
     }
+
+    if (
+      form.survey_answer_1 &&
+      !PARTNER_ANSWER_REGEX.test(form.survey_answer_1)
+    ) {
+      errorMessage.survey_answer_1 = "form_fields.partner_answer_invalid";
+    }
+    if (
+      form.survey_answer_2 &&
+      !PARTNER_ANSWER_REGEX.test(form.survey_answer_2)
+    ) {
+      errorMessage.survey_answer_2 = "form_fields.partner_answer_invalid";
+    }
   }
 
   return {
@@ -732,6 +810,7 @@ export const validateWA = (
   const zipRegex = /^\d{5}(-\d{4})?$/;
   const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
   const idRegex = /^[a-z0-9]{12}$/i;
+  const PARTNER_ANSWER_REGEX = /^[\p{L}\p{M}\p{Nd}\p{Zs}.,;:'"()/\-&@#%!?+]*$/u;
 
   const errorMessage = { ...EMPTY_ERROR_MESSAGES };
 
@@ -797,7 +876,7 @@ export const validateWA = (
       (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
     ) {
       errorMessage.birthDay = "general.required";
-    } else if (Number(form.birthYear) < 1900) {
+    } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
       errorMessage.birthYear = "form_fields.invalid_year";
     }
     const dobValidation3 = processDateOfBirthValidation(
@@ -806,7 +885,6 @@ export const validateWA = (
       form.birthDay,
       formCongif,
       true,
-      false,
     );
     Object.assign(errorMessage, dobValidation3.errors);
     Object.assign(form, dobValidation3.formUpdates);
@@ -902,57 +980,70 @@ export const validateWA = (
       const configRegex =
         formCongif.fields.state_id_number?.validations?.regexp;
       const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
-      if (
-        (!form.state_id_number.trim() ||
-          !regex.test(form.state_id_number.trim())) &&
-        form.state_id_number.trim() !== "NONE"
-      ) {
-        errorMessage.state_id_number = "general.required";
+      const stateIdNumber = form.state_id_number.trim();
+      if (stateIdNumber !== "NONE") {
+        // A filled-but-malformed number reported "general.required" ("Required"),
+        // which reads as though the field were empty.
+        if (!stateIdNumber) {
+          errorMessage.state_id_number = "general.required";
+        } else if (!regex.test(stateIdNumber)) {
+          errorMessage.state_id_number = "washington.wdl_number_invalid_error";
+        }
       }
-      const isYearFilled = !!form.issueYear?.trim();
-      const isMonthFilled = !!form.issueMonth?.trim();
-      const isDayFilled = !!form.issueDay?.trim();
+
+      const MIN_YEAR =
+        formCongif.fields.issue_date?.validations?.min_year || 1973;
+
+      const issueYearStr = form.issueYear?.trim() || "";
+      const issueMonthStr = form.issueMonth?.trim() || "";
+      const issueDayStr = form.issueDay?.trim() || "";
+
+      const isYearFilled = !!issueYearStr;
+      const isMonthFilled = !!issueMonthStr;
+      const isDayFilled = !!issueDayStr;
+
+      // Only the post-2018 WDL-prefixed format carries an issue date, so older
+      // numbers have none to report. Mirrors issue_date_required? in
+      // WARegistrantValidator; a partly entered date is still incomplete.
+      const isIssueDateRequired = stateIdNumber.toUpperCase().startsWith("WDL");
+      const isDateStarted = isMonthFilled || isDayFilled || isYearFilled;
 
       if (!isMonthFilled || !isDayFilled || !isYearFilled) {
-        errorMessage.issueYear = "general.required";
+        if (isIssueDateRequired || isDateStarted) {
+          errorMessage.issueYear = "general.required";
+        }
       } else {
-        if (isMonthFilled && isDayFilled) {
-          const selectedDate = new Date(
-            Number(form.issueYear),
-            Number(form.issueMonth) - 1,
-            Number(form.issueDay),
-          );
+        const year = Number(issueYearStr);
+        const month = Number(issueMonthStr) - 1;
+        const day = Number(issueDayStr);
+
+        const selectedDate = new Date(year, month, day);
+        const isInvalidDate =
+          selectedDate.getFullYear() !== year ||
+          selectedDate.getMonth() !== month ||
+          selectedDate.getDate() !== day;
+
+        if (isInvalidDate) {
+          errorMessage.issueDay = "form_fields.invalid_birth_date";
+        } else {
+          if (year < MIN_YEAR) {
+            errorMessage.issueYear = "washington.invalid_wdl_date";
+          }
 
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
           if (selectedDate > today) {
-            errorMessage.issueYear = "washington.invalid_wdl_date";
+            // Shared invalid_wdl_date told registrants a future date was "after 1972";
+            // Rails reports future and too-old separately.
+            errorMessage.issueYear = "washington.future_wdl_date";
           }
         }
       }
 
-      if (
-        form.issueYear.trim() &&
-        form.issueMonth.trim() &&
-        form.issueDay.trim()
-      ) {
-        const year = Number(form.issueYear);
-        const month = Number(form.issueMonth) - 1;
-        const day = Number(form.issueDay);
-
-        const date = new Date(year, month, day);
-        const isInvalidDate =
-          date.getFullYear() !== year ||
-          date.getMonth() !== month ||
-          date.getDate() !== day;
-
-        if (isInvalidDate) {
-          errorMessage.issueDay = "form_fields.invalid_birth_date";
-        }
+      if (isYearFilled && isMonthFilled && isDayFilled) {
+        form.date_of_issue = `${issueYearStr}-${issueMonthStr}-${issueDayStr}`;
       }
-
-      form.date_of_issue = `${form.issueYear}-${form.issueMonth}-${form.issueDay}`;
     }
 
     if (step === 2) {
@@ -990,6 +1081,18 @@ export const validateWA = (
     errorMessage.phone = "form_fields.invalid_phone";
   }
 
+  // Config-driven so every connected flow enforces the county it says it requires;
+  // WA rendered a required county dropdown that nothing validated. Limited to step 1
+  // because that is the only step rendering the field — checking it later would block
+  // submit with nothing on screen to fix.
+  if (
+    step === 1 &&
+    needsValidation("home_county", "home_county") &&
+    !form.home_county.trim()
+  ) {
+    errorMessage.home_county = "general.required";
+  }
+
   if (isWA === "connected_PA") {
     if (
       needsValidation("will_be_18_by_election", "will_be_18_by_election") &&
@@ -1001,7 +1104,7 @@ export const validateWA = (
     if (step === 2) {
       if (!form.has_no_state_license) {
         const configRegex =
-          formCongif.fields.state_id_number?.validations?.regexp;
+          formCongif.fields.state_id_number.validations?.regexp;
         const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
         if (
           !form.state_id_number.trim() &&
@@ -1050,14 +1153,13 @@ export const validateWA = (
         }
       }
     }
-    if (!form.home_county.trim()) {
-      errorMessage.home_county = "general.required";
-    }
-
     if (!form.race.trim() && isRequired(formCongif, "race")) {
       errorMessage.race = "general.required";
     }
-    if (!form.party.trim() && isRequired(formCongif, "party")) {
+    if (
+      !form.party.trim() &&
+      (isRequired(formCongif, "party") || form.changed_party)
+    ) {
       errorMessage.party = "general.required";
     }
   }
@@ -1067,6 +1169,19 @@ export const validateWA = (
 
   if (needsValidation("opt_in_email", "opt_in_email") && !form.opt_in_email) {
     errorMessage.opt_in_email = "general.required";
+  }
+
+  if (
+    form.survey_answer_1 &&
+    !PARTNER_ANSWER_REGEX.test(form.survey_answer_1)
+  ) {
+    errorMessage.survey_answer_1 = "form_fields.partner_answer_invalid";
+  }
+  if (
+    form.survey_answer_2 &&
+    !PARTNER_ANSWER_REGEX.test(form.survey_answer_2)
+  ) {
+    errorMessage.survey_answer_2 = "form_fields.partner_answer_invalid";
   }
 
   return {

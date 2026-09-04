@@ -39,7 +39,7 @@ export default function LookupNotFoundScreen({
   const { state, form } = route.params;
 
   const handleOpenLink = async () => {
-    const url = state?.online_registration_system_url;
+    const url = state?.online_status_check_url;
 
     if (url) {
       await Linking.openURL(url);
@@ -54,7 +54,7 @@ export default function LookupNotFoundScreen({
         })}
       />
       <View style={styles.content}>
-        <Text style={styles.textLi}>
+        <Text style={styles.header}>
           {form?.first_name}
           {t("lookup_not_found_page.failure_statement")}
         </Text>
@@ -100,25 +100,51 @@ export default function LookupNotFoundScreen({
             </Text>
           </View>
         </View>
-        <Button
-          title={t("lookup_not_found_page.cta_register")}
-          onPress={() => {
-            navigation.replace("Register", {
-              status: { success: true },
-              state,
-              zip: form.zip,
-              email: form.email,
-              form,
-              pageFromLookup: "paper",
-              workflowType: "nvra",
-              showRedirectText: false,
-            } as any);
-          }}
-        />
+        {state.ovr_type !== "not_participating" && (
+          <Button
+            title={t("lookup_not_found_page.cta_register")}
+            onPress={() => {
+              navigation.replace("Register", {
+                status: { success: true },
+                state,
+                zip: form.zip,
+                email: form.email,
+                form,
+                pageFromLookup: "paper",
+                workflowType: "nvra",
+                showRedirectText: false,
+              } as any);
+            }}
+          />
+        )}
         <Button
           title={t("lookup_not_found_page.cta_try_again")}
           onPress={() => navigation.goBack()}
         />
+
+        <View style={styles.divider} />
+        <Text style={styles.secondaryText}>
+          {t("general.calls_to_action.building_site")}
+        </Text>
+
+        <Text>
+          <Trans
+            i18nKey="general.calls_to_action.get_tool_reg"
+            components={{
+              a: (
+                <Text
+                  key="email-link"
+                  style={styles.linkText}
+                  onPress={() => {
+                    Linking.openURL("mailto:civictech@rockthevote.org");
+                  }}
+                >
+                  {0}
+                </Text>
+              ),
+            }}
+          />
+        </Text>
       </View>
     </ScrollView>
   );
@@ -136,6 +162,12 @@ const getStyles = (theme: any) =>
       paddingBottom: 20,
       maxWidth: "100%",
       gap: 12,
+    },
+    header: {
+      marginRight: 10,
+      fontSize: 15,
+      lineHeight: 22,
+      fontWeight: "bold",
     },
 
     text: {
@@ -182,6 +214,13 @@ const getStyles = (theme: any) =>
     link: {
       color: theme.link,
       fontSize: 15,
+      textDecorationLine: "underline",
+    },
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
       textDecorationLine: "underline",
     },
   });

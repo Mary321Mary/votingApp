@@ -115,6 +115,7 @@ export type RootStackParamList = {
     form: RegisterFormState;
     workflow_type: string;
     formCongif: DataCollectionConfiguration;
+    registration_uid: string;
   };
   AfterDeadline: {
     response: SubmitEmailZipResponse;

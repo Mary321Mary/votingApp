@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,14 +6,20 @@ import {
   ScrollView,
   Button,
   Linking,
+  TouchableOpacity,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { StateData } from "@/utils/types";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 interface SuccessMIScreenProps {
   route: {
@@ -33,8 +39,10 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
   const navigation = useNavigation<SuccessMIScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { config } = useUIConfig();
 
   const params = route.params;
+  const [copyNotification, setCopyNotification] = useState("");
 
   useEffect(() => {
     if (!params?.state) {
@@ -67,24 +75,89 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
             onPress={handleLearnAbout}
           />
           <View style={styles.buttonSpacer} />
-          <Button
-            title={t("michigan.success_button_2")}
-            color={theme.primary}
-            onPress={() => {}}
-          />
-          <View style={styles.buttonSpacer} />
-          <Button
-            title={t("michigan.success_button_3")}
-            color={theme.primary}
-            onPress={() => {}}
-          />
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.facebook || "")
+            }
+          >
+            <Text style={styles.outlineButtonText}>
+              {t("print_form_page.share_fb_button_text")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.x || "")
+            }
+          >
+            <Text style={styles.outlineButtonText}>
+              {t("print_form_page.share_x_button_text")}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.copy_link || "";
+
+              try {
+                Clipboard.setString(targetUrl);
+
+                if (Platform.OS === "android") {
+                  ToastAndroid.show(
+                    t(`pennsylvania.link_copied`),
+                    ToastAndroid.SHORT,
+                  );
+                } else {
+                  Alert.alert("Success", t(`pennsylvania.link_copied`));
+                }
+                setCopyNotification(t(`pennsylvania.link_copied`));
+              } catch (err) {
+                console.error("Failed to copy link:", err);
+              }
+            }}
+          >
+            <Text style={styles.outlineButtonText}>
+              {t("print_form_page.copy_link")}
+            </Text>
+          </TouchableOpacity>
+          {copyNotification && <Text>{copyNotification}</Text>}
+
+          {/* Footer */}
+          <View>
+            <View style={styles.divider} />
+            <Text style={styles.secondaryText}>
+              {t("general.calls_to_action.building_site")}
+            </Text>
+
+            <Text>
+              <Trans
+                i18nKey="general.calls_to_action.get_tool_reg"
+                components={{
+                  a: (
+                    <Text
+                      key="email-link"
+                      style={styles.linkText}
+                      onPress={() => {
+                        Linking.openURL("mailto:civictech@rockthevote.org");
+                      }}
+                    >
+                      {0}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
+          </View>
         </View>
       </View>
     </ScrollView>
   );
 };
 
-const getStyles = (theme: { primary: string }) =>
+const getStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -103,8 +176,36 @@ const getStyles = (theme: { primary: string }) =>
     },
     buttonGroup: {
       marginTop: 24,
+      display: "flex",
+      gap: 10,
     },
     buttonSpacer: {
       height: 12,
+    },
+
+    divider: {
+      width: "100%",
+      height: 1,
+      backgroundColor: theme.background,
+      marginVertical: 16,
+    },
+    outlineButton: {
+      borderWidth: 1,
+      borderColor: theme.primary,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    outlineButtonText: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
+      textDecorationLine: "underline",
     },
   });

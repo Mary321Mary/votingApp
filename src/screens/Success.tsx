@@ -8,7 +8,9 @@ import {
   Linking,
   TouchableOpacity,
   ScrollView,
-  useWindowDimensions,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
@@ -21,7 +23,9 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
-import RenderHTML from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 interface SuccessScreenProps {
   route: {
@@ -44,46 +48,54 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   const navigation = useNavigation<SuccessScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const { width } = useWindowDimensions();
+  const { config } = useUIConfig();
 
   const { form, state, workflow_type, finish_with_state } = route.params;
+  const hasRouteState = !!(form && state);
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copyNotification, setCopyNotification] = useState("");
 
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    isMounted.current = true;
-    abortControllerRef.current = new AbortController();
+    async function fetchData() {
+      isMounted.current = true;
+      abortControllerRef.current = new AbortController();
 
-    const cleanRegistrant = filterRegistrant(form);
-    requestNvraFormWithPolling({
-      payload: {
-        registrant: {
-          ...cleanRegistrant,
-          has_ssn: !form.has_no_ssn,
-          has_state_license: !form.has_no_state_license,
-          phone_type: "Mobile",
+      const cleanRegistrant = filterRegistrant(form);
+      const registration_uid = await AsyncStorage.getItem(`registration_uid`);
+
+      requestNvraFormWithPolling({
+        payload: {
+          registrant: {
+            ...cleanRegistrant,
+            registration_uid,
+            name_suffix: form.suffix,
+            has_no_ssn: !!form.has_no_ssn,
+            has_no_state_license: !!form.has_no_state_license,
+            phone_type: "Mobile",
+          },
+          workflow_type: workflow_type ?? "ovr",
+          finish_with_state: finish_with_state,
         },
-        workflow_type: workflow_type ?? "ovr",
-        finish_with_state: finish_with_state,
-      },
-      signal: abortControllerRef.current.signal,
-      onError: title => {
-        if (isMounted.current) {
-          navigation.replace("ApiError", { state, title });
-        }
-      },
-      onReady: downloadUrl => {
-        if (isMounted.current) {
-          setPdfUrl(downloadUrl);
-          setLoading(false);
-        }
-      },
-    });
-
+        signal: abortControllerRef.current.signal,
+        onError: title => {
+          if (isMounted.current) {
+            navigation.replace("ApiError", { state, title });
+          }
+        },
+        onReady: downloadUrl => {
+          if (isMounted.current) {
+            setPdfUrl(downloadUrl);
+            setLoading(false);
+          }
+        },
+      });
+    }
+    fetchData();
     return () => {
       isMounted.current = false;
       abortControllerRef.current?.abort();
@@ -95,19 +107,12 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
     downloadPdf(pdfUrl, "form_placeholder.pdf");
   };
 
-  if (form.state === "TN") {
+  if (!hasRouteState) {
     return (
       <View style={styles.container}>
-        <Header text={t("nvra_form_page.register_in") + `${state.name}`} />
-        <Text style={styles.bodyText}>
-          {!form.has_no_state_license
-            ? "Finish your voter registration online with TN"
-            : "Finish your voter registration with RTV"}
+        <Text style={styles.titleText}>
+          {t("print_form_page.pdf_not_supported_in_preview")}
         </Text>
-        <Button
-          title={t("general.restart_test")}
-          onPress={() => navigation.navigate("Home")}
-        />
       </View>
     );
   }
@@ -172,40 +177,80 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
         <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
-          <TouchableOpacity style={styles.outlineButton}>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.facebook || "")
+            }
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_fb_button_text")}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.outlineButton}>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={() =>
+              Linking.openURL(config?.share?.registrations?.x || "")
+            }
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_x_button_text")}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.outlineButton}>
+          <TouchableOpacity
+            style={styles.outlineButton}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.copy_link || "";
+
+              try {
+                Clipboard.setString(targetUrl);
+
+                if (Platform.OS === "android") {
+                  ToastAndroid.show(
+                    t(`pennsylvania.link_copied`),
+                    ToastAndroid.SHORT,
+                  );
+                } else {
+                  Alert.alert("Success", t(`pennsylvania.link_copied`));
+                }
+                setCopyNotification(t(`pennsylvania.link_copied`));
+              } catch (err) {
+                console.error("Failed to copy link:", err);
+              }
+            }}
+          >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.copy_link")}
             </Text>
           </TouchableOpacity>
+          {copyNotification && <Text>{copyNotification}</Text>}
           {/* Footer */}
           <View>
-            <Text style={styles.title}>
-              {t("print_form_page.get_this_tool")}
+            <View style={styles.divider} />
+            <Text style={styles.secondaryText}>
+              {t("general.calls_to_action.building_site")}
             </Text>
-            <RenderHTML
-              contentWidth={width}
-              source={{ html: t("print_form_page.send_us") }}
-              tagsStyles={{
-                p: {
-                  margin: 0,
-                  padding: 0,
-                  color: "#333",
-                  fontSize: 14,
-                },
-              }}
-            />
+
+            <Text>
+              <Trans
+                i18nKey="general.calls_to_action.get_tool_reg"
+                components={{
+                  a: (
+                    <Text
+                      key="email-link"
+                      style={styles.linkText}
+                      onPress={() => {
+                        Linking.openURL("mailto:civictech@rockthevote.org");
+                      }}
+                    >
+                      {0}
+                    </Text>
+                  ),
+                }}
+              />
+            </Text>
           </View>
         </View>
       </View>
@@ -213,9 +258,16 @@ export default function SuccessScreen({ route }: SuccessScreenProps) {
   );
 }
 
-const getStyles = (theme: { background: string; primary: string }) =>
+const getStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1, padding: 20 },
+    titleText: {
+      fontSize: 24,
+      fontWeight: "bold",
+      textAlign: "center",
+      color: "#212529",
+    },
+
     body: { marginTop: 30, alignItems: "center" },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
     bodyText: { fontSize: 18, textAlign: "center", marginVertical: 20 },
@@ -258,5 +310,12 @@ const getStyles = (theme: { background: string; primary: string }) =>
       color: theme.primary,
       fontSize: 16,
       fontWeight: "600",
+    },
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
+      textDecorationLine: "underline",
     },
   });

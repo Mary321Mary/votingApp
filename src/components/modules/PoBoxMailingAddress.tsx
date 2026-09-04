@@ -1,11 +1,9 @@
-import React, { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
 import { FormProps, RegisterFormState } from "@/utils/types";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import InputField from "../atoms/InputField";
+import { SelectField } from "../atoms/SelectField";
 
 export const PoBoxMailingAddress = ({
   errorMessages,
@@ -14,8 +12,6 @@ export const PoBoxMailingAddress = ({
   onChange,
   onChangeError,
 }: FormProps) => {
-  const theme = useContext(ThemeContext);
-  const styles = getStyles(theme);
   const { t } = useTranslation();
 
   const updateField = <K extends keyof RegisterFormState>(
@@ -35,6 +31,7 @@ export const PoBoxMailingAddress = ({
     <>
       {isVisible(formCongif, "mailing_po_box_number") && (
         <InputField
+          name="mailing_po_box_number"
           label={t("michigan.po_box_number")}
           required={isRequired(formCongif, "mailing_po_box_number")}
           value={value.mailing_po_box_number}
@@ -47,6 +44,7 @@ export const PoBoxMailingAddress = ({
 
       {isVisible(formCongif, "mailing_city") && (
         <InputField
+          name="mailing_city"
           label={t("form_fields.city")}
           value={value.mailing_city}
           required={isRequired(formCongif, "mailing_city")}
@@ -56,34 +54,20 @@ export const PoBoxMailingAddress = ({
       )}
 
       {isVisible(formCongif, "mailing_state") && (
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("form_fields.state")}
-            {isRequired(formCongif, "mailing_state") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.mailing_state}
-              onValueChange={(text: string) =>
-                updateField("mailing_state", text)
-              }
-            >
-              {STATES.map(state_value => (
-                <Picker.Item
-                  key={state_value.value}
-                  label={state_value.name}
-                  value={state_value.value}
-                />
-              ))}
-            </Picker>
-          </View>
-        </View>
+        <SelectField
+          name="mailing_state"
+          label={t("form_fields.state")}
+          value={value.mailing_state}
+          options={STATES}
+          required={isRequired(formCongif, "mailing_state")}
+          errorMessage={errorMessages.mailing_state}
+          onValueChange={itemValue => updateField("mailing_state", itemValue)}
+        />
       )}
 
       {isVisible(formCongif, "mailing_zip_code") && (
         <InputField
+          name="mailing_zip_code"
           label={t("form_fields.zip")}
           value={value.mailing_zip_code}
           required={isRequired(formCongif, "mailing_zip_code")}
@@ -95,42 +79,3 @@ export const PoBoxMailingAddress = ({
     </>
   );
 };
-
-const getStyles = (theme: any) =>
-  StyleSheet.create({
-    fieldset: {
-      marginBottom: 24,
-    },
-    sectionTitle: {
-      fontSize: 14,
-      fontWeight: "600",
-      marginTop: 24,
-      marginBottom: 8,
-      textTransform: "uppercase",
-    },
-    disclaimer: {
-      fontSize: 12,
-      marginVertical: 12,
-      color: "#555",
-    },
-
-    inputBlock: {
-      marginBottom: 16,
-    },
-    label: {
-      textTransform: "uppercase",
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      marginBottom: 6,
-    },
-    required: {
-      color: theme.secondary,
-    },
-    pickerWrapper: {
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      overflow: "hidden",
-    },
-  });

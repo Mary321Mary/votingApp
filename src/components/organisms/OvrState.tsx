@@ -1,15 +1,17 @@
 import React, { useContext } from "react";
+import { useTranslation } from "react-i18next";
+import { StyleSheet, View } from "react-native";
+
+import { isRequired, isVisible } from "@/utils/constants";
 import { FormProps, RegisterFormState } from "@/utils/types";
+
 import { NameSection } from "../modules/NameSection";
 import { AddressSection } from "../modules/AddressSection";
 import { IDSection } from "../modules/IDSection";
 import { ContactSection } from "../modules/ContactSection";
 import { RaceAndParty } from "../modules/RaceAndParty";
-import { isRequired, isVisible } from "@/utils/constants";
 import { DateRow } from "../atoms/DateOfBirth/DateRow";
 import { PhoneSection } from "../modules/PhoneSection";
-import { StyleSheet, Text } from "react-native";
-import { useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
 export const OvrState = ({
@@ -68,35 +70,36 @@ export const OvrState = ({
         onChangeError={onChangeError}
       />
       {isVisible(formCongif, "date_of_birth") && (
-        <>
-          <Text style={styles.label}>
-            {t("form_fields.dob")}
-            {isRequired(formCongif, "date_of_birth") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <DateRow
-            value={{
-              month: {
-                name: "birthMonth",
-                value: value.birthMonth,
-                errorText: t(errorMessages.birthMonth),
-              },
-              day: {
-                name: "birthDay",
-                value: value.birthDay,
-                errorText: t(errorMessages.birthDay),
-              },
-              year: {
-                name: "birthYear",
-                value: value.birthYear,
-                errorText: t(errorMessages.birthYear),
-              },
-            }}
-            updateField={updateField}
-          />
-        </>
+        <DateRow
+          value={{
+            month: {
+              name: "birthMonth",
+              value: value.birthMonth,
+              errorText: t(errorMessages.birthMonth),
+            },
+            day: {
+              name: "birthDay",
+              value: value.birthDay,
+              errorText: t(errorMessages.birthDay),
+            },
+            year: {
+              name: "birthYear",
+              value: value.birthYear,
+              errorText: t(errorMessages.birthYear),
+            },
+          }}
+          required={isRequired(formCongif, "date_of_birth")}
+          updateField={updateField}
+        />
       )}
+      <PhoneSection
+        value={value}
+        state={state}
+        formCongif={formCongif}
+        errorMessages={errorMessages}
+        onChange={onChange}
+        onChangeError={onChangeError}
+      />
       <IDSection
         value={value}
         state={state}
@@ -106,14 +109,7 @@ export const OvrState = ({
         onChange={onChange}
         onChangeError={onChangeError}
       />
-      <PhoneSection
-        value={value}
-        state={state}
-        formCongif={formCongif}
-        errorMessages={errorMessages}
-        onChange={onChange}
-        onChangeError={onChangeError}
-      />
+      <View style={styles.divider} />
       <ContactSection
         value={value}
         state={state}
@@ -129,14 +125,9 @@ export const OvrState = ({
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
-    label: {
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      fontWeight: "medium",
-      textTransform: "uppercase",
-      marginTop: 5,
-    },
-    required: {
-      color: theme.secondary,
+    divider: {
+      height: 2,
+      backgroundColor: theme.borderColor,
+      marginVertical: 5,
     },
   });

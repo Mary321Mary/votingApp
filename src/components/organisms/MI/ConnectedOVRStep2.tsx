@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../../atoms/InputField";
@@ -12,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../Navigation";
 import RenderHTML from "react-native-render-html";
+import { SelectField } from "../../atoms/SelectField";
 
 type ConnectedOVRScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -120,6 +120,7 @@ export default function ConnectedOVRStep2({
       />
       {isVisible(formCongif, "full_name") && (
         <InputField
+          name="full_name"
           value={value.full_name}
           label={t("michigan.full_name", { state: state.name })}
           required={isRequired(formCongif, "full_name")}
@@ -130,6 +131,7 @@ export default function ConnectedOVRStep2({
       )}
       {isVisible(formCongif, "state_id_number") && (
         <InputField
+          name="state_id_number"
           value={value.state_id_number}
           label={t("michigan.license_number_label", {
             state_name: state.name,
@@ -190,69 +192,45 @@ export default function ConnectedOVRStep2({
       )}
 
       {isVisible(formCongif, "date_of_birth") && (
-        <>
-          <Text style={styles.label}>
-            {t("form_fields.dob")}
-            {isRequired(formCongif, "date_of_birth") && (
-              <Text style={styles.required}> *</Text>
-            )}
-          </Text>
-          <DateRow
-            value={{
-              month: {
-                name: "birthMonth",
-                value: value.birthMonth,
-                errorText: t(errorMessages.birthMonth),
-              },
-              day: {
-                name: "birthDay",
-                value: value.birthDay,
-                errorText: t(errorMessages.birthDay),
-              },
-              year: {
-                name: "birthYear",
-                value: value.birthYear,
-                errorText: t(errorMessages.birthYear),
-              },
-            }}
-            updateField={updateField}
-          />
-        </>
+        <DateRow
+          value={{
+            month: {
+              name: "birthMonth",
+              value: value.birthMonth,
+              errorText: t(errorMessages.birthMonth),
+            },
+            day: {
+              name: "birthDay",
+              value: value.birthDay,
+              errorText: t(errorMessages.birthDay),
+            },
+            year: {
+              name: "birthYear",
+              value: value.birthYear,
+              errorText: t(errorMessages.birthYear),
+            },
+          }}
+          updateField={updateField}
+        />
       )}
 
       {/* EYE COLOR */}
       {isVisible(formCongif, "eye_color") && (
-        <View style={styles.inputBlock}>
-          <Text style={styles.label}>
-            {t("michigan.eye_color_label")}
-            {isRequired(formCongif, "eye_color") && (
-              <Text style={styles.required}>*</Text>
-            )}
-          </Text>
-
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={value.eye_color}
-              onValueChange={(text: string) => updateField("eye_color", text)}
-            >
-              {EYE_COLORS.map(option => (
-                <Picker.Item
-                  key={option.value}
-                  label={t(option.name)}
-                  value={option.value}
-                />
-              ))}
-            </Picker>
-          </View>
-          {errorMessages.eye_color.length > 0 && (
-            <Text style={styles.required}>{t(errorMessages.eye_color)}</Text>
-          )}
-        </View>
+        <SelectField
+          name="eye_color"
+          label={t("michigan.eye_color_label")}
+          value={value.eye_color}
+          options={EYE_COLORS}
+          required={isRequired(formCongif, "eye_color")}
+          errorMessage={errorMessages.eye_color}
+          onValueChange={itemValue => updateField("eye_color", itemValue)}
+        />
       )}
 
       {/* SSN */}
       {isVisible(formCongif, "ssn4") && (
         <InputField
+          name="ssn_last4"
           showEye
           value={value.last_four_ss_number}
           label={t("form_fields.ssn_last4")}
@@ -322,32 +300,6 @@ const getStyles = (theme: any) =>
       fontSize: 14,
       marginBottom: 8,
       color: theme.textPrimary,
-    },
-    linkText: {
-      color: theme.link,
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 11,
-      textDecorationLine: "underline",
-      fontWeight: "medium",
-    },
-    inputBlock: {
-      marginTop: 5,
-    },
-    label: {
-      textTransform: "uppercase",
-      fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 14,
-      marginBottom: 6,
-    },
-    required: {
-      color: theme.secondary,
-    },
-    pickerWrapper: {
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      overflow: "hidden",
     },
     buttonblock: {
       marginTop: 15,

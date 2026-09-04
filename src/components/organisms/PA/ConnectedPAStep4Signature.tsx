@@ -55,6 +55,26 @@ export const ConnectedPAStep4Signature = ({
     }
   };
 
+  const formatPhone = (digits: string) => {
+    if (digits.length <= 3) return digits;
+
+    if (digits.length <= 6) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    }
+
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+  };
+  const handlePhoneChange = (text: string) => {
+    let digits = onlyDigits(text).slice(0, 10);
+
+    if (value.phone.endsWith("-") && text.length === value.phone.length - 1) {
+      digits = digits.slice(0, -1);
+    }
+
+    const formatted = formatPhone(digits);
+    updateField("helper_phone", formatted);
+  };
+
   return (
     <View>
       <Text style={styles.paragraph}>
@@ -76,6 +96,7 @@ export const ConnectedPAStep4Signature = ({
 
       {/* SSN */}
       <InputField
+        name="ssn4"
         showEye
         label={t("pennsylvania.ssn4_label")}
         value={value.last_four_ss_number}
@@ -87,6 +108,7 @@ export const ConnectedPAStep4Signature = ({
 
       {/* Checkbox */}
       <Checkbox
+        name="has_no_ssn"
         value={value.has_no_ssn === true}
         label={t("pennsylvania.ssn4_none_checkbox")}
         required={isRequired(formCongif, "has_no_ssn")}
@@ -105,6 +127,7 @@ export const ConnectedPAStep4Signature = ({
 
       {/* Someone helped */}
       <Checkbox
+        name="someone_helped"
         value={value.someone_helped}
         label={t("pennsylvania.someone_helped")}
         onValueChange={handleSomeoneHelpedChange}
@@ -113,6 +136,7 @@ export const ConnectedPAStep4Signature = ({
       {value.someone_helped && (
         <>
           <InputField
+            name="helper_name"
             label={t("pennsylvania.helper_name_label")}
             value={value.helper_name}
             required
@@ -121,6 +145,7 @@ export const ConnectedPAStep4Signature = ({
           />
 
           <InputField
+            name="helper_address"
             label={t("pennsylvania.helper_address_label")}
             value={value.helper_address}
             required
@@ -129,11 +154,12 @@ export const ConnectedPAStep4Signature = ({
           />
 
           <InputField
+            name="helper_phone"
             label={t("pennsylvania.helper_phone_label")}
             value={value.helper_phone}
             required
             errorMessage={t(errorMessages.helper_phone)}
-            onChangeText={(text: string) => updateField("helper_phone", text)}
+            onChangeText={handlePhoneChange}
           />
 
           <View style={styles.termsBox}>
@@ -155,6 +181,7 @@ export const ConnectedPAStep4Signature = ({
           </View>
 
           <Checkbox
+            name="helper_electronic_signature_acknowledged"
             value={value.helper_electronic_signature_acknowledged}
             label={t("pennsylvania.helper_terms_confirm_label")}
             onValueChange={(checked: boolean) =>

@@ -1,8 +1,8 @@
 {
   "general": {
     "comment": "misc items for general use across all workflows. Does not include political party b/c that is state specific; does include race because it is not state specific.",
-    "copyright_rtv": "(c) Copyright {{year}}, Rock The Vote",
-    "powered_by_copyright_rtv": "Powered By Rock The Vote (c) Copyright {{year}}",
+    "copyright_rtv": "© Copyright {{year}}, Rock the Vote",
+    "powered_by_copyright_rtv": "Powered By Rock the Vote © Copyright {{year}}",
     "register_in": "Register in ",
     "restart_test": "Restart Test",
     "return": "Return",
@@ -12,12 +12,14 @@
     "no": "No",
     "previous_step": "Previous Step",
     "step": "Step:",
+    "not_available": "Service is not available at this time",
     "was_problem": "There Was A Problem",
     "was_problem_text": "You can go back to change your information and try again.",
     "error_page_text": "We encountered an issue while processing your submission. Please go back to recheck you information, or try again later.",
-    "no_thanks_continue_rtv": "No Thanks, I'll continue with Rock the Vote and send in my form later.",
+    "no_thanks_continue_rtv": "No thanks, I'll continue with Rock the Vote and mail in my form later",
     "none": "(none)",
     "required": "Required",
+    "theme_draft_banner": "Draft theme preview — not live. Submissions are not saved. Close this tab when finished.",
     "footer": {
       "faq": "FAQ",
       "privacy_policy": "PRIVACY & SECURITY",
@@ -27,10 +29,25 @@
     },
     "opt_ins": {
       "continue_privacy_ack": "By continuing, you accept Rock the Vote's <a href=\"{{rtv_privacy_url}}\">Privacy Policy</a>, and agree to receive occasional election reminder emails from Rock the Vote. You can opt out from emails at any time.",
+      "continue_privacy_ack_long": "By continuing, you accept Rock the Vote's <a href=\"{{rtv_privacy_url}}\">Privacy Policy</a>, and agree to receive occasional election reminder emails from Rock the Vote. You can opt out from emails at any time. You also consent to receive periodic text messages from Rock the Vote (788683). Message and data rates may apply. Text HELP for info or STOP to stop receiving messages. No purchase necessary. See <a href=\"{{rtv_terms_url}}\">terms and conditions</a> and <a href=\"{{rtv_privacy_url}}\">privacy policy</a>.",
       "sms_opt_in": "Send me text messages from Rock the Vote",
       "sms_disclaimer": "By signing up, you consent to receive periodic text messages from Rock the Vote (788683). Message and data rates may apply. Text HELP for info or STOP to stop receiving messages. No purchase necessary. See <a href=\"{{rtv_terms_url}}\">terms and conditions</a> and <a href=\"{{rtv_privacy_url}}\">privacy policy</a>.",
       "email_opt_in": "Receive action alerts and other email updates from Rock the Vote",
       "volunteer": "I would like to volunteer with Rock the Vote"
+    },
+    "calls_to_action": {
+      "visit_election_center": "Visit Our Election Center!",
+      "check_reg_status": "Check Your Registration Status",
+      "request_absentee_ballot": "Request Absentee Ballot",
+      "lookup_vote_locations": "Lookup Your Polling Place",
+      "lookup_ballot": "See What's On Your Ballot",
+      "share_fb": "Share on Facebook",
+      "share_x": "Share on X",
+      "copy_button_text": "Copy link to this tool",
+      "building_site": "Building a website or app?",
+      "get_tool_reg": "Get this voter registration tool on your website. <a>Send us an email at civictech@rockthevote.org</a>",
+      "cta_register": "Register to Vote",
+      "cta_try_again": "I want to try again with new information"
     },
     "titles": {
       "mr": "Mr.",
@@ -55,15 +72,13 @@
     },
     "race": {
       "title": "Race",
-      "asian": "Asian",
-      "black": "Black or African American",
-      "hispanic": "Hispanic or Latino",
-      "native_american": "Native American or Alaskan Native",
-      "pacific": "Native Hawaiian or Other Pacific Islander",
+      "asian": "Asian or Pacific Islander",
+      "black": "Black, not of Hispanic Origin",
+      "hispanic": "Hispanic",
+      "native_american": "American Indian or Alaskan Native",
       "other": "Other",
-      "multiple": "Two or More Races",
-      "white": "White",
-      "decline": "Decline to State"
+      "multiple": "Multi-racial",
+      "white": "White, not of Hispanic Origin"
     }
   },
   "form_fields": {
@@ -84,35 +99,42 @@
     "state": "State",
     "county": "County",
     "select_county": "Please select a county",
-    "zip": "ZIP CODE",
-    "id_number": "ID Number",
+    "zip": "Zip Code",
+    "id_number": "State ID Number",
+    "id_or_ssn": "State ID Number",
     "ssn_last4": "Social Security Number (Last 4 digits)",
-    "ssn_last4_number": "Last 4 digits of your social security number",
+    "ssn_last4_number": "Last 4 digits of your Social Security Number",
+    "ssn": "Social Security Number (9 digits)",
     "dob": "Date of Birth",
-    "email": "EMAIL ADDRESS",
+    "email": "Email Address",
     "race": "Race",
     "party": "Party",
     "political_party": "Political Party",
     "image": "Voter Signature Image",
     "phone": "Phone",
     "citizen_eligibility_error": "You must be a US citizen!",
-    "age_eligibility_error": "You must be 18 years old on or by election day!",
+    "age_eligibility_error": "You are not old enough to register",
     "zip_code_error": "Please provide a valid 5-digit ZIP code.",
     "email_error": "Please provide a valid email address.",
     "invalid_year": "Must be after 1900",
     "invalid_year_future": "Date must not be in the future",
-    "invalid_birth_date": "There can't be that many days in this month.",
+    "invalid_birth_date": "There aren't that many days in this month",
     "invalid_id_number": "Please enter a valid {{state_abbr}} ID number.",
     "invalid_ssn4": "Must be 4 digits",
+    "invalid_ssn9": "Must be 9 digits",
     "required_phone": "Required if receiving text messages",
     "previous_name": "Previous Name",
     "invalid_phone": "Should be ###-###-####",
-    "name_help": "Put your full name and in these boxes. Please do not use nicknames or initials. If this application is for a change of name you will be asked for your previous name in a later section. And don't forget to include your title (Mr., Mrs., Miss, Ms.). The pre-determined options for the Title field are dictated by the National Mail Voter Registration Form, and this field is required by some states. They are not reflective of Rock the Vote's views or values on gender inclusivity.",
-    "home_address_help": "Put your home address in these boxes. Do not put your mailing address here if it is different from your home address. Do not use a post office box or rural route without a box number. If you live in a rural area or do not have a street address, please show where you live using the map on the printed form.",
-    "mailing_address_help": "Put your home mailing in these boxes only if it is different from your home address. If you do not receive mail at your home address you must fill out this section to indicate where you can be reached by mail.",
+    "name_help": "Put your first, middle, and last name in these boxes. Don't use nicknames or initials. If you have recently changed your name, you will be asked for your previous name in a later section.",
+    "home_address_help": "Put your home address in these boxes. Do not put your mailing address here if it is different from your home address. Do not use a post office box or rural route without a box number. If you live in a rural area or do not have a street address, please show where you live using the map on the printed form, and input 'See Map' here.",
+    "mailing_address_help": "Put your mailing address in these boxes only if it is different from your home address. If you cannot receive mail at your home address you must fill out this section to indicate where you can be reached by mail.",
     "changed_address_help": "If you have moved since your last registration, enter your previous address.",
-    "dob_help": "On your voter registration application, you are required to indicate whether you will be 18 years old on or before election day. However, many states allow you to register before your 18th birthday, so see the rules for your state.",
-    "phone_help": "Most states ask for your telephone number in case there are questions about your application. You are not required to provide your phone number."
+    "dob_help": "Enter your date of birth. Many states may allow you to pre-register to vote when under 18. Enter your birthday to find out what options are available to you.",
+    "phone_help": "Most states ask for your telephone number in case there are questions about your application. You are not required to provide your phone number.",
+    "partner_answer_invalid": "Please limit your answer to be text, numbers, and basic punctuation.",
+    "enter_address_by_fields": "Enter address by separate fields",
+    "enter_address_single_field": "Enter address in an auto complete window",
+    "title_help": "The pre-determined options for the Title field are dictated by the National Mail Voter Registration Form, and this field is required by some states. They are not reflective of Rock the Vote's views or values on gender inclusivity."
   },
   "ovr_landing_page": {
     "comment": "strings specific to the OVR landing page; no other strings should appear on the page",
@@ -127,14 +149,14 @@
     "confirm_link_text": "Confirm your voter registration status",
     "living_abroad": "<strong>U.S. citizen living abroad or uniformed services member?</strong>",
     "overseas_vote_link_text": "Request your ballot with Overseas Vote",
-    "note_state_ovr": "<strong>Note:</strong> Some states offer online voter registration.",
-    "note_state_ovr_link_text": "Learn more."
+    "note_state_ovr": "<strong>Note:</strong>",
+    "note_state_ovr_link_text": "Some states offer online voter registration. Learn more."
   },
   "lookup_page": {
     "comment": "strings specific to the lookup page after the continue button on the OVR landing page",
-    "check_voter_registration_status": "Check Your Voter Registration Status",
+    "check_voter_registration_status": "Check Your Voter<br/>Registration Status",
     "check_voter_status": "Take one minute and verify your voter registration status.",
-    "check_voter_status_alt": "Alt text for arriving to this page from OVR landing page.",
+    "check_voter_status_alt": "Already registered to vote? Take one minute and confirm your voter registration status.",
     "look_up_button": "Look Up Your Registration"
   },
   "lookup_not_found_page": {
@@ -143,8 +165,8 @@
     "failure_body": "There are several possible reasons we couldn't match your registration.",
     "failure_body1": "<strong>You registered to vote or updated your registration recently.</strong> ",
     "failure_body1a": "If you registered more recently than ",
-    "failure_body1b": ", you can check on your registration ",
-    "failure_body1_url_text": "directly with {{state_abbr}}",
+    "failure_body1b": ", ",
+    "failure_body1_url_text": "you can check on your registration directly with {{state_abbr}}",
     "failure_body2": "You used a nickname or entered your information incorrectly. Try again with your full legal name and no abbreviations.",
     "failure_body3": "You are not registered to vote or need to update your registration information.",
     "cta_register": "Register to Vote",
@@ -169,7 +191,8 @@
   "nvra_form_page": {
     "comment": "strings in the page for the NVRA form generation page OVR workflow, also used in the paper-or-finish-with state branch of OVR workflow",
     "register_in": "Register in ",
-    "redirect_notice": "<strong>Since you don't have a valid {{state_abbr}} driver's license or {{state_abbr}} ID, you will need to register on paper.</strong> Complete the form below to generate a registration form to print, sign, and mail to {{state_name}}.",
+    "redirect_notice_no_dl": "<strong>Since you don't have a valid {{state_abbr}} driver's license or {{state_abbr}} ID, you will need to register on paper.</strong> Complete the form below to generate a registration form to print, sign, and mail to {{state_name}}.",
+    "redirect_notice_have_dl": "You can register on paper instead of finishing online. Complete the form below to generate a registration form to print, sign, and mail to {{state_name}}.",
     "changed_name": "I have changed my name.",
     "changed_name_help": "If you have changed your name since your last registration, enter your previous name.",
     "citizen": "I am a United States citizen.",
@@ -179,31 +202,34 @@
     "changed_address": "I have changed my address since the last time I registered to vote",
     "section_previous_address": "Previous Address",
     "section_identification": "Identification",
-    "no_id": "",
-    "no_license_number_label": "I do not have a state license",
-    "have_ssn_last4_label": "I have Social Security Number",
-    "no_ssn_last4": "I do not have or know my Social Security Number.",
-    "no_ssn_statement": "TBD If you don't have a state ID card or SSN, ...",
+    "section_name_and_address_details": "Name and Address Details",
+    "section_vr_details": "Voter Registration Details",
+    "no_dl_ssn4_label": "Since you told us you don't have a state ID, enter the last four digits of your SSN.",
+    "no_dl_ssn9_label": "Since you told us you don't have a state ID, enter all nine digits of your SSN.",
+    "no_license_number_label": "I do not have a state ID",
+    "no_ssn_last4": "I do not have or know my Social Security Number",
+    "no_ssn_statement": "We'll ask the state to assign you a unique ID number.",
     "questions_for_you": "Questions for you",
     "mail_form": "Please mail me my form, I can't print it right now",
     "prepare_form": "Prepare Form",
-    "print_form": "Print Form"
+    "print_form": "Print Form",
+    "redirect_notice_voluntary": "<strong>You can register on paper instead of finishing online.</strong> Complete the form below to print, sign, and mail it."
   },
   "register_18_by_election_page": {
-    "top_stmt": "Hey, it looks like you aren't 18 yet. But you can still register to vote if you will turn 18 before the next election. Visit our <electionCenter>Election Center</electionCenter> to find out when your next election is. If you're eligible, please <strong>Continue</strong> to register to vote. If not, you can choose <strong>Send Me a Reminder</strong> and we will email you a reminder on your 18th birthday.",
     "continue_button_text": "Continue",
     "remind_button_text": "Send Me a Reminder",
     "checkbox_text": "Email me at ",
-    "reminder_success": "We will send you a reminder ..."
+    "reminder_success": "Thanks for signing up. We will send you a reminder email on your 18th birthday so you can register to vote."
   },
   "pre_register_page": {
-    "top_stmt": "Hey, it looks like you aren't 18 yet. But you can still register to vote in {{state_abbr}}, once you have turned {{min_pre_reg_age}} years old -- but you cannot vote until you turn 18.  If you register now, and turn 18 by the next election, you can vote in that election. Visit our <electionCenter>Election Center</electionCenter> to find out when your next election is. You can the click the Continue button to continue your pre-registration application.",
-    "continue_button_text": "Continue"
+    "continue_button_text": "Continue with Pre-Registration"
   },
   "print_form_page": {
     "must_print_sign_mail": "You won't be registered unless you print, sign, and mail your form!",
     "print_button_text": "Print your registration form",
+    "pdf_not_supported_in_preview": "PDF not supported in preview mode.",
     "preparing_form": "Preparing Registration Form",
+    "pdf_gen_delayed": "<strong>Check Your Email</strong> It's taking a while to create your form to download, but don't worry. We'll send you an email when it's ready.",
     "dont_have_printer": "<strong>Don't have access to a printer right now?</strong> We've emailed your form to print later. You will need to print and sign your registration form and then mail or deliver it to your local elections office.",
     "have_questions_find_out": "<strong>Have questions about upcoming elections in your area?</strong> Find out about voting options, upcoming elections, and deadlines.",
     "learn_button_text": "Learn about voting in {{state_abbr}}",
@@ -212,7 +238,7 @@
     "share_x_button_text": "Share on X",
     "copy_link": "Copy link to registration tool",
     "get_this_tool": "Get this voter registration tool on your website.",
-    "send_us": "Send us an email at <a href='mailto:civictech@rockthevote.org'>civictech@rockthevote.org</a>"
+    "send_us": "<a href='mailto:civictech@rockthevote.org'>Send us an email at civictech@rockthevote.org</a>"
   },
   "mail_form_page": {
     "should_receive": "You should receive your voter registration form in the mail in about a week.",
@@ -222,15 +248,16 @@
   },
   "finish_with_state_page1": {
     "comment": "strings specific to the paper-or-finish-with state branch of OVR workflow, which also uses several strings in common with the NVRA page",
-    "dl_id_question": "<strong>Do you have a valid {{state_abbr}} driver's license or state identification card?</strong>",
-    "dl_id_statement": "If you have a valid {{state_abbr}} driver's license or state identification card, you may be eligible to register online with your state.",
-    "dl_id_answer_yes": "Yes, I have a valid {{state_abbr}} driver's license or state identification card.",
-    "dl_id_answer_no": "No, I do not have a valid {{state_abbr}} driver's license or state identification card.",
+    "dl_id_question": "<strong>Do you have a valid {{state_abbr}} {{state_required_id}}?</strong>",
+    "dl_id_statement": "If you have a valid {{state_abbr}} {{state_required_id}}, you may be eligible to register online with your state.",
+    "dl_id_answer_yes": "Yes, I have a valid {{state_abbr}} {{state_required_id}}.",
+    "dl_id_answer_no": "No, I do not have a valid {{state_abbr}} {{state_required_id}}.",
     "dl_id_answer_required": "Required: please select <strong>Yes</strong> or <strong>No</strong>."
   },
   "finish_with_state_page2": {
-    "notice": "Because you have a valid {{state_abbr}} state identification card or {{state_abbr}} driver's license, you are eligible to register online with your state. This is the recommended registration option.",
-    "notice2": "If you prefer, you can submit your registration on paper. You can fill out the form here. You'll need to print, sign, and mail your registration to complete the process.",
+    "notice": "Because you have the required ID(s), you are eligible to register online with {{state_abbr}}. This is the recommended registration option.",
+    "notice_no_id_fork": "You can register online with {{state_abbr}}. This is the recommended registration option.",
+    "notice2": "If you prefer, you can submit your registration on paper. You'll need to print, sign, and mail your registration form to complete the process.",
     "state_button": "Register online with {{state_abbr}} (recommended)",
     "paper_button": "Continue on paper and mail later",
     "question_label": "Questions for you",
@@ -238,46 +265,54 @@
     "question_2": "Who's your favorite baseball player?"
   },
   "finish_with_state_page3": {
+    "not_registered_yet": "<strong>You're not registered yet. Submit your application on {{state_abbr}}'s website!</strong> We sent you to {{state_abbr}}'s official website to finish registering. Go back to that tab, complete every step, and hit submit.",
     "have_questions": "<strong>Have questions about upcoming elections in your area?</strong> Find out about voting options, upcoming election, and deadlines.",
     "learn_about_button_text": "Learn about voting in {{state_abbr}}",
     "encourage": "Encourage your friends and family to register to vote!",
     "fb_button_text": "Share on Facebook",
     "x_button_text": "Share on X",
-    "copy_button_text": "Copy link to regsitration tool",
+    "copy_button_text": "Copy link to registration tool",
     "get this": "Get this voter registration tool on your website",
-    "send us": "Send us an email at <a href='mailto:civictech@rockthevote.org'>civictech@rockthevote.org</a>"
+    "send us": "<a href='mailto:civictech@rockthevote.org'>Send us an email at civictech@rockthevote.org</a>"
   },
-
   "michigan": {
     "comment": "strings specific to the MI connected OVR branch workflow",
     "eligibility_title": "Eligibility",
     "eligibility": {
+      "michigan_requires": "Michigan requires a few quick eligibility questions before you can register online.",
+      "confirm_eligible": "Confirm you're eligible",
       "citizen": "I am a United States citizen.",
       "age": "I am at least 16 years old and will vote only after I am 18.",
       "residency": "I am a {{state_name}} resident and will vote only after I have lived in my city or township for at least 30 days.",
+      "authorize_registration": "Authorize your registration",
+      "these_authorize": "These authorize Michigan to process your registration.",
       "cancelPrevious": "I authorize the cancellation of any previous registration.",
+      "if_registered_elsewhere": "If you're registered elsewhere, Michigan cancels that registration when it processes this one. If you've never registered, this has no effect.",
       "digitalSignature": "I authorize the Secretary of State to use my stored digital signature for voter registration.",
+      "signature_on_file": "Michigan has your signature on file from your driver's license or state ID and will use it for your registration.",
       "questions": {
+        "confirm_state_id": "Confirm your state ID information",
         "licenseUpdate": "Have you updated your driver's license or state ID address with the Secretary of State within the last 10 days?",
-        "duplicateLicense": "Have you applied for a duplicate driver's license or state ID today?"
+        "duplicateLicense": "Have you applied for a duplicate driver's license or state ID today?",
+        "these_make_sure": "These make sure you can use this website to register online. Most people select 'No' to both."
       },
       "citizen_error": "You must be a United States citizen to register to vote.",
       "age_error": "{{state_name}} law requires voters to be 17.5 before they can register. Please revisit this site when you are eligible!",
       "residency_error_1": "To register to vote in Michigan you must be a Michigan resident (at the time you register) and a resident of your city or township for at least 30 days (when you vote).",
       "residency_error_2": "If you're a college student, you may choose to register to vote either at your campus address or your previous address – whichever one you consider to be your residential address.",
       "cancel_previous_error_1": "To register to vote on this website, you must also give us permission to cancel your voter registration at any other address.",
-      "cancel_previous_error_2": "If you are not willing to authorize cancellation of your previous registration, then you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
+      "cancel_previous_error_2": "If you are not willing to authorize cancellation of your previous registration, then you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
       "digital_signature_error_1": "To register to vote using this website, you must give the Secretary of State permission to use the digital image of your signature stored during your previous Secretary of State transaction.",
-      "digital_signature_error_2": "If you are not willing to authorize use of your digital signature, then you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
+      "digital_signature_error_2": "If you are not willing to authorize use of your digital signature, then you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
       "updated_license_error_1": "You said you recently updated your driver's license or state ID address. Because it takes 11 days to update address changes in our system, we're not ready to register you to vote online.",
-      "updated_license_error_2": "If you can't wait, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
+      "updated_license_error_2": "If you can't wait, you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
       "duplicate_license_error_1": "You said you applied for a duplicate driver's license or state ID today. Because these take a day to process, we can't register you to vote online until tomorrow.",
-      "duplicate_license_error_2": "If you can't wait, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail."
+      "duplicate_license_error_2": "If you can't wait, you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail."
     },
     "section_personal_info": "Personal Information",
     "personal_info_req_1": "The personal information you use to register to vote must match the personal information on your Michigan driver's license or state ID.",
-    "personal_info_req_2": "If you do not have a Michigan driver's license or state ID, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
-    "id_empty_error": "A valid Michigan Driver's License or state ID is required for all-online voter registration. If you don't have one, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
+    "personal_info_req_2": "If you do not have both a Michigan driver's license or state ID and a Social Security number, you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
+    "id_empty_error": "A valid Michigan driver's license or state ID is required for fully online voter registration. If you don't have one, you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
     "id_format_error": "Must be one letter followed by 12 numbers.",
     "full_name": "Full Name (as printed on your Michigan driver's license or state ID)",
     "license_number_label": "{{state_name}} Driver's License or state ID number (no dashes or spaces)",
@@ -294,7 +329,7 @@
       "pink": "Pink"
     },
     "ssn_last4_label": "Social Security Number (last 4 digits)",
-    "ssn_last4_empty_error": "A social security number is required for all-online voter registration. If you don't have one, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
+    "ssn_last4_empty_error": "The last four digits of your Social Security Number are required for fully online voter registration. If you don't have one, you can <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
     "ssn_last4_invalid_error": "Please provide the last <em>four</em> digits of your Social Security Number.",
     "section_residential_address": "Residential Address",
     "residential_address_help": "Put your home address in these boxes. Do not put your mailing address here if it is different from your home address. Do not use a post office box or rural route without a box number.",
@@ -302,7 +337,10 @@
       "number": "Street Number",
       "name": "Street Name",
       "type": "Street Type",
-      "direction": "Direction",
+      "type_help": "The type of street you live on, such as Drive, Lane, Boulevard, etc.",
+      "type_hint": "e.g. Street, Ave.",
+      "direction": "Street Direction",
+      "direction_hint": "e.g. N, SE",
       "apt": "Apt/Unit"
     },
     "mailing_address_2": "Mailing address is same as residential address",
@@ -312,7 +350,7 @@
       "number": "Mailing Street Number",
       "name": "Mailing Street Name",
       "type": "Mailing Street Type",
-      "direction": "Mailing Direction",
+      "direction": "Mailing Street Direction",
       "apt": "Mailing Apt/Unit"
     },
     "mailing_address_type": {
@@ -339,8 +377,8 @@
     "phone_election": "Phone Number (for election use only)",
     "phone_election_error": "Please provide a valid phone number.",
     "email_error": "Please provide a valid email address.",
-    "submit_button": "Submit",
-    "submitting_button": "Submitting…",
+    "submit_button": "Submit to {{state_abbr}}",
+    "submitting_button": "Processing...",
     "success_title": "Success!",
     "success_text_1": "You are now registered to vote in Michigan.",
     "success_text_2": "Take another step to make sure you're ready to vote:",
@@ -348,7 +386,7 @@
     "success_button_2": "Request an absentee ballot",
     "success_button_3": "Sign up for reminders",
     "error_title": "Register in Michigan",
-    "error_text": "There was a problem with your submission....<p> Please <personalInfoLink>go back</personalInfoLink> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <paperFormLink>create</paperFormLink> a paper registration form to download, print, sign, and mail."
+    "error_text": "There was a problem with your submission.<p> Please <personalInfoLink>go back</personalInfoLink> to review your personal information again and resubmit. <p> If you've re-checked your personal information and everything is correct, you can instead <paperFormLink>create a paper registration form</paperFormLink> to download, print, sign, and mail."
   },
   "washington": {
     "comment": "strings specific to the WA connected OVR branch workflow; common field names are the rest of the strings not provided by the API",
@@ -359,11 +397,14 @@
     "wdl_help": "If issued after 2018, your driver's license number should begin with WDL.",
     "wdl_issue_date": "Issue Date",
     "wdl_number": "Washington State Driver License or ID",
+    "cvr_vr_id_subcopy": "You must provide your Washington driver’s license or ID card number. If you do not have a Washington driver's license or ID card, please check \"I do not have a Washington State Driver License or ID\" and provide the last four digits of your Social Security Number on the next page.",
     "wdl_none": "I do not have a Washington State Driver License or ID",
-    "invalid_wdl_date": "Must be a valid date",
+    "invalid_wdl_date": "Issue date must be after 1972",
+    "future_wdl_date": "Issue date cannot be in the future",
+    "wdl_number_invalid_error": "Must be 12 letters or numbers.",
     "prefer_print_myself": "I prefer to print, sign and mail or email my application myself",
     "comment_optional": "Additional/Optional Information",
-    "ssn4_optional": "Optional: Please enter the last 4 digits of your social security number.",
+    "ssn4_optional": "Optional: Please enter the last 4 digits of your Social Security Number.",
     "signature_optional": "Optional: provide an image of your signature",
     "signature_help": "Your signature will be used to verify and match your ballot",
     "local_upload_option": "Upload a local image file",
@@ -371,11 +412,11 @@
     "paper_option": "Create a paper form to print, sign, and mail",
     "upload_signature_image_help": "Upload an image of your signature image",
     "upload_signature_image_button": "Select an image to upload",
-    "wdl_number_none_notice": "Since you do not have a Washington State Driver License or ID, to complete your registration, you must provide the 4 digits of your Social Security Number (if you have one), and upload an image file of your signature. You can also choose to <a href=\"{{rtv_paper_form_url}}\">create a paper form to print, sign, and mail</a>.",
-    "wdl_number_none_error": "Required. Since you do not have a Washington driver's license, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create</a> a paper form to print, sign, and mail.",
-    "local_upload_help": "To complete your registration, select a file to upload, enter the 4 digits of your Social Security Number, if you have one.",
-    "ssn4_required": "Please enter the last 4 digits of your social security number",
-    "ssn4_none": "I don't have a social security number",
+    "wdl_number_none_notice": "Since you do not have a Washington State Driver License or ID, to complete your registration, you must provide the last 4 digits of your Social Security Number (if you have one), and upload an image file of your signature. You can also choose to create a paper form to print, sign, and mail.",
+    "wdl_number_none_error": "Required. Since you do not have a Washington driver's license, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create a paper form</a> to print, sign, and mail.",
+    "local_upload_help": "To complete your registration, select a file to upload, and enter the last 4 digits of your Social Security Number, if you have one.",
+    "ssn4_required": "Please enter the last 4 digits of your Social Security Number",
+    "ssn4_none": "I don't have a Social Security Number",
     "ssn_last4_invalid_error": "Please provide the last <em>four</em> digits of your Social Security Number.",
     "signature_required": "Provide an image of your signature",
     "signature_required_error": "You must upload an image of your signature, continue on another device, or choose to <a href=\"{{rtv_paper_form_url}}\">create a paper form to print, sign, and mail</a>.",
@@ -403,7 +444,8 @@
     "success_button_2": "Request an absentee ballot",
     "success_button_3": "Sign up for reminders",
     "error_title": "Register in Washington",
-    "error_text": "There was a problem with your submission....<p> Please <a href=\"{{wa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail."
+    "error_text": "There was a problem with your submission.<p1> Please <personalInfoLink>go back</personalInfoLink> to review your personal information again and resubmit.</p1><p2> If you've re-checked your personal information and everything is correct but you are still receiving this error, you can instead <paperFormLink>create a paper registration form</paperFormLink> to download, print, sign, and mail.</p2>",
+    "submit_button": "Submit to {{state_abbr}}"
   },
   "california": {
     "comment": "strings specific to the CA connected OVR branch workflow",
@@ -412,30 +454,30 @@
     "compliance_notices_checkbox_error": "You must confirm that you have read and agree to the terms above.",
     "finish_ca_button_text": "Finish your voter registration online with California",
     "error_title": "Register in California",
-    "error_text": "There was a problem with your submission....<p> Please <a href=\"{{ca_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail."
+    "error_text": "There was a problem with your submission.<p1> Please <personalInfoLink>go back</personalInfoLink> to review your personal information again and resubmit.</p1><p2> If you've re-checked your personal information and everything is correct but you are still receiving this error, you can instead <paperFormLink>create a paper registration form</paperFormLink> to download, print, sign, and mail.</p2>"
   },
   "pennsylvania": {
     "comment": "strings specific to the PA connected OVR branch workflow",
-    "age_eligibility_error": "You must be 18 by the next election to register to vote.",
+    "age_eligibility_error": "You are not old enough to register.",
     "penn_dot_number": "PennDOT Number",
     "penn_dot_number_instruction": "If you have a PA driver's license or PennDOT ID card number, you must use it. Your PennDOT is the 8 digit number found on the top right of a PA driver's license.",
     "penn_dot_number_none_checkbox": "I do not have a PennDOT Number",
     "penn_dot_number_invalid_error": "Should be 8 digits",
     "penn_dot_number_empty_error": "Required. If you do not have a PA driver's license or PennDOT ID card number, please select 'I do not have a PennDOT number.'",
-    "penn_dot_number_none_notice": "Since you do not have a PennDOT number, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create</a> a paper form to print, sign, and mail.",
-    "penn_dot_number_none_error": "Required. Since you do not have a PennDOT number, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create</a> a paper form to print, sign, and mail.",
-    "changed_party_checkbox": "I have changed my political party.",
-    "changed_party_review_text": "I have changed my political party.",
+    "penn_dot_number_none_notice": "Since you do not have a PennDOT number, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create a paper form</a> to print, sign, and mail.",
+    "penn_dot_number_none_error": "Required. Since you do not have a PennDOT number, you must either upload an image file of your signature, or choose to <a href=\"{{rtv_paper_form_url}}\">create a paper form</a> to print, sign, and mail.",
+    "changed_party_checkbox": "I would like to change my political party",
+    "changed_party_review_text": "I would like to change my political party",
     "upload_signature_local": "Upload signature from this device",
     "upload_signature_other_device": "Upload signature from another device",
     "print_mail": "Create a paper form",
-    "complete_with_upload": "To complete your registration, select a file to upload, enter the 4 digits of your Social Security Number (if you have one), and indicate whether someone helped you with this form",
+    "complete_with_upload": "To complete your registration, select a file to upload, enter the last 4 digits of your Social Security Number (if you have one), and indicate whether someone helped you with this form",
     "upload_signature_instruction": "Upload your signature",
     "upload_signature_button_text": "Select an image to upload",
     "signature_preview_alt": "Signature preview",
     "crop_signature_title": "Crop signature",
     "text_me_link": "Text me the link",
-    "send_sms": "Send sms",
+    "send_sms": "Send SMS",
     "email_me_link": "Email me the link",
     "send_email": "Send email",
     "continue_on_touch_device": "Or open this link on a touch-enabled device to finish your registration",
@@ -444,10 +486,10 @@
     "email_sent": "An email has been sent to {{user_email}} with a link to sign your registration on a touch-enabled device. This link will expire in 30 minutes.",
     "text_sent": "A text message has been sent to {{user_phone}} with a link to sign your registration on a touch-enabled device. This link will expire in 30 minutes.",
     "phone_placeholder": "###-###-####",
-    "ssn4_label": "Last four digits of your social security number.",
-    "ssn4_none_checkbox": "I do not know the last four digits of my social security number.",
+    "ssn4_label": "Last four digits of your Social Security Number.",
+    "ssn4_none_checkbox": "I do not know the last four digits of my Social Security Number.",
     "ssn_last4_invalid_error": "Please provide the last <em>four</em> digits of your Social Security Number.",
-    "ssn_last4_empty_error": "If you don't know you social security number, please select: I do not know the last four digits of my social security number ",
+    "ssn_last4_empty_error": "If you don't know your Social Security Number, please select: I do not know the last four digits of my Social Security Number.",
     "someone_helped": "Someone helped me with this form.",
     "helper_name_label": "Helper Name",
     "helper_address_label": "Helper Address",
@@ -458,11 +500,11 @@
     "helper_terms_bullet_2": "You agree to sign this application by electronic means and that all laws of the Commonwealth of Pennsylvania will apply.",
     "helper_terms_confirm_label": "I confirm that I have read and agree to the terms above.",
     "helper_terms_confirm_required": "You must confirm that you have read and agree to the terms above.",
-    "zoom": "Zoom in out out to ensure the signature fits with the box",
+    "zoom": "Zoom in or out to ensure the signature fits within the box",
     "remove": "Remove signature",
     "review_confirm": "Review and Confirm",
-    "declaration": "<strong>I declare that</strong><ul><li>I am a United States citizen and will have been a citizen for at least 1 month on the day of the next election.</li><li>I will be at least 18 years old on the day of the next election.</li><li>I will have lived at the address in section 5 for at least 30 days before the election.</li><li>I am legally qualified to vote.</li></ul>I affirm that this information is true. I understand that this declaration is the same as an affidavit, and, if this information is not true, I can be convicted of perjury, and fined up to $15,000, jailed for up to 7 years, or both.<br />By checking the box below, you are signing the application electronically. In doing so: <ul><li>You agree you have read and accept the terms of the declaration above.</li><li>You understand that your electronic signature on this application will constitute the legal equivalent of your signature for this voter registration application.</li><li>You agree to conduct this voter registration transaction by electronic means and that all laws of the Commonwealth of Pennsylvania will apply to this transaction.</li></ul>",
-    "declaration2": "If you provided your PA driver's license or PennDOT ID number, you understand that the signathure from the PennDOT record will constituet your signature oon your voter registration record. If you upload an image of your signature, you understand that the signature you upload will cinstitute your signature on your voter registration record. You understand that you do not have to register electronically, and may use a paper or other non-electronic from of this voter registration application.",
+    "declaration": "<strong>I declare that</strong><ul><li>I am a United States citizen and will have been a citizen for at least 1 month on the day of the next election.</li><li>I will be at least 18 years old on the day of the next election.</li><li>I will have lived at the address in the Home Address section for at least 30 days before the election.</li><li>I am legally qualified to vote.</li></ul>I affirm that this information is true. I understand that this declaration is the same as an affidavit, and, if this information is not true, I can be convicted of perjury, and fined up to $15,000, jailed for up to 7 years, or both.<br />By checking the box below, you are signing the application electronically. In doing so: <ul><li>You agree you have read and accept the terms of the declaration above.</li><li>You understand that your electronic signature on this application will constitute the legal equivalent of your signature for this voter registration application.</li><li>You agree to conduct this voter registration transaction by electronic means and that all laws of the Commonwealth of Pennsylvania will apply to this transaction.</li></ul>",
+    "declaration2": "If you provided your PA driver's license or PennDOT ID number, you understand that the signature from the PennDOT record will constitute your signature on your voter registration record. If you upload an image of your signature, you understand that the signature you upload will constitute your signature on your voter registration record. You understand that you do not have to register electronically, and may use a paper or other non-electronic form of this voter registration application.",
     "i_confirm": "I confirm that I have read and agree to the terms above.",
     "you_must_confirm": "You must confirm that you agree to the terms above.",
     "finish_with_pa": "Finish your voter registration online with PA",
@@ -473,67 +515,136 @@
     "success_button_2": "Request an absentee ballot",
     "success_button_3": "Sign up for reminders",
     "error_title": "Register in Pennsylvania",
-    "error_text": "There was a problem with your information submitted to PA.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
-    "error_text_zip": "There was a problem with your information submitted to PA. Your ZIP code might be invalid.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail.",
-    "error_text_penndot": "There was a problem with your information submitted to PA. Your PennDOT number might be invalid or expired.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information, you can <a href=\"{{rtv_paper_form_url}}\">create</a> a paper registration form to download, print, sign, and mail."
+    "error_text": "There was a problem with your submission.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information and everything is correct but you are still receiving this error, you can instead <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
+    "error_text_zip": "There was a problem with your submission. Your ZIP code might be invalid.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information and everything is correct but you are still receiving this error, you can instead <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
+    "error_text_penndot": "There was a problem with your submission. Your PennDOT number might be invalid or expired.<p> Please <a href=\"{{pa_personal_info_url}}\">go back</a> to review your personal information again and resubmit. <p> If you've re-checked your personal information and everything is correct but you are still receiving this error, you can instead <a href=\"{{rtv_paper_form_url}}\">create a paper registration form</a> to download, print, sign, and mail.",
+    "submit_button": "Submit to {{state_abbr}}"
   },
   "ballot-lookup": {
     "header": "Ballot Information Tool",
-    "subhead": "Look up what's on your ballot",
-    "button": "Show Me MyBallot",
-    "disclaimer": "This is not ..."
+    "subhead": "Find out what's on your ballot",
+    "button": "Show Me My Ballot",
+    "disclaimer": "This tool isn't your official ballot: it's a guide to help you research your choices before you vote."
   },
   "voting-place-lookup": {
     "header": "Get Ready to Vote",
-    "subhead": "What's your home address so we can look up your polling place"
+    "subhead": "Where are you registered to vote? We'll help you find your polling place."
   },
   "voting-pledge": {
     "header": "Pledge to Vote",
     "pledge_to_vote": "Pledge to vote and get personalized reminders about upcoming election dates and deadlines - never miss an election.",
-    "sign_me_up_button_text": "Sign me up!",
-    "pledge_thanks": "Thank you for joining us.",
-    "encourage_pledge_1": "Encourage your friends and family to do the same.",
-    "questions_text": "Have questions about upcoming elections in your area?",
-    "find_out_text": "Find out about voting options, upcoming elections, and deadlines.",
-    "election_center_button_text": "Visit our election center!",
-    "encourage_pledge_2": "Encourage your friends and family to pledge to vote!",
-    "fb_button_text": "Share on Facebook",
-    "x_button_text": "Share on X",
-    "copy_button_text": "Copy link to pledge tool",
-    "get this": "Get this voter registration tool on your website.",
-    "send us": "Send us an email at <0>civictech@rockthevote.org</0>"
+    "sign_me_up_button_text": "Sign me up!"
+  },
+  "voting-pledge-2": {
+    "header": "Pledge to Vote",
+    "subhead": "You're all set",
+    "body": "Thanks for pledging to vote. We'll let you know when it's time to take action for elections in your area."
   },
   "location_lookup_page1": {
-    "title": "Find Where to Vote!",
-    "subtitle": "We'll show all your options, based on your home address"
+    "title": "Find Where to Vote",
+    "subtitle": "Find all your options based on where you're registered"
   },
   "location_lookup_page2": {
     "title": "Voting Locations",
     "subtitle1": "Showing Results for: ",
+    "address_not_found": "We couldn't process that address right now. It may be entered incorrectly, or we could be having trouble reaching our address lookup service. You can double-check your address or try again later.",
+    "locations_not_found": "We don't have voting location information for your area yet. This can happen if official voting location data hasn't been published, or if there's no upcoming election currently scheduled. Check back closer to Election Day or visit your state's election website for the latest information.",
+    "try_again": "Try again with different information",
     "polling_place_title": "Election Day Polling Place",
     "early_list_header": "Early Voting Locations",
     "dropbox_list_header": "Drop Box Locations",
+    "hours": "Hours",
+    "notes": "Notes",
     "map_button_text": "Map It!",
+    "map_button_aria": "Map It for {{name}}",
+    "address_and_hours": "Address and hours for {{name}}",
+    "accordion_toggle_closed": "{{title}}. You are currently on a closed list. To open this list, press Control-Option-Space.",
+    "accordion_toggle_closed_with_count": "{{title}} ({{count}}). You are currently on a closed list. To open this list, press Control-Option-Space.",
+    "accordion_toggle_open": "{{title}}. You are currently on an open list. To close this list, press Control-Option-Space.",
+    "accordion_toggle_open_with_count": "{{title}} ({{count}}). You are currently on an open list. To close this list, press Control-Option-Space.",
+    "get_tool_reg_a11y_before": "Get this voter registration tool on your website. Send us an email at",
+    "email_link_label": "civictech@rockthevote.org",
+    "skip_map": "Skip map to location list",
+    "map_region": "Map of voting locations",
     "lookup_button_text": "Verify Your Voter Registration Status"
   },
   "ballot_lookup_page1": {
-    "title": "Find Out What's on You Ballot!",
-    "subtitle": "Based on your home address, we'll show you what is on your specific ballot in the upcoming election."
+    "title": "Look up your ballot & build your plan to vote",
+    "subtitle": "See every race and measure you'll decide on, research your choices, and send yourself a plan to take to the polls. <strong>This is a research guide — not your official ballot</strong>.",
+    "address_header": "Where you vote",
+    "name_header": "About you",
+    "opt_header": "Stay Involved (optional)",
+    "next_button_text": "See what's on your ballot"
+  },
+  "ballot_lookup_no_elections": {
+    "title": "No Election Soon",
+    "subtitle": "Looks like there is not an election coming up in your area. Please check back later to get the info on your ballot in the next election."
+  },
+  "ballot_lookup_choose_election": {
+    "title": "Look up your ballot & build your plan to vote",
+    "subtitle1": "Looks like there are a few elections coming up for you. Please select which one you want to see the ballot for.",
+    "error_text": "Required: please choose one election",
+    "not_found_text": "We don't have your sample ballot ready yet. Check back closer to Election Day, or visit your state's election website for the latest information.",
+    "try_again": "Try again with different information",
+    "continue_button_text": "Continue"
   },
   "ballot_lookup_page2": {
-    "title": "On Your Ballot",
-    "subtitle1": "Showing Results for: ",
-    "subtitle2": "Election: ",
-    "lookup_button_text": "Verify Your Voter Registration Status"
+    "title": "",
+    "subtitle1": "Showing ballot for: ",
+    "of": "of",
+    "races_reviewed": "races reviewed",
+    "disclaimer": "<strong>This is your personal research guide, not your official ballot.</strong> Explore each race, mark your picks here to remember them, then save to send yourself a copy. You'll cast your real vote at your polling place or by mail.",
+    "candidates": "Candidates",
+    "choose": "Choose",
+    "choose_up_to": "Choose up to",
+    "continue_button_text": "Save my choices",
+    "next_notice": "Next: send your choices to yourself by email or text to take along.",
+    "incumbent": "Incumbent",
+    "nonpartisan_race": "Non-partisan",
+    "parties": {
+      "democratic": "Democratic Party",
+      "republican": "Republican Party",
+      "libertarian": "Libertarian Party",
+      "green": "Green Party",
+      "independent": "Independent",
+      "independent_party": "Independent Party",
+      "nonpartisan": "Nonpartisan",
+      "no_party_preference": "No Party Preference",
+      "unaffiliated": "Unaffiliated",
+      "american_independent": "American Independent Party",
+      "peace_and_freedom": "Peace and Freedom Party",
+      "working_families": "Working Families Party",
+      "conservative": "Conservative Party",
+      "constitution": "Constitution Party",
+      "federalist": "Federalist Party"
+    }
+  },
+  "ballot_lookup_page3": {
+    "title": "Your ballot plan is ready",
+    "subtitle1": "Send yourself a copy to bring along — whether you're voting by mail or in person.",
+    "no_selections": "You have not made any ballot selections. Please go back to edit your choices.",
+    "save_button_text": "Save your choices",
+    "find_button_text": "Find where to vote",
+    "back_link_text": "Edit your choices",
+    "your_choices": "Your Choices",
+    "help_text": "Help others check their ballot"
   },
   "after_vr_deadline": {
-    "notification": "You are past the voter regsitration deadline for voter registration for the next election. But you can still register now and be ready for the next election. TBD ...",
-    "continue_button_text": "Continue to Register to Vote"
+    "notification": "<strong>The voter registration deadline for the upcoming election has passed, but you can still register now and be ready to vote in future elections.</strong><br/><br/>",
+    "continue_button_text": "Continue to Register to Vote",
+    "cta_learn_about": "Learn about voting in {{state_abbr}}"
+  },
+  "hidden_vr_lookup_found": {
+    "hvr_title": "Before You Print Your Form",
+    "hvr_statement": "<strong>Our records show you might already be registered to vote.</strong><br /><br />Here's what we found when we checked your registration:",
+    "hvr_warning": "If your name, address, or anything else has changed, continue below to update your registration. If this isn't you, you can start a new registration instead.",
+    "hvr_yes_button_text": "This is me, update my registration",
+    "hvr_no_button_text": "Not me, continue my registration"
   },
   "misc": {
     "comment": "strings that are or shortly will be not needed",
     "sorry": "Sorry",
-    "sorry_john": "We can't be sure that  you are registered to vote in your state. Your best next step is",
+    "sorry_john": "We can't be sure that you are registered to vote in your state. Your best next step is",
     "not_test_case": "Not a Test Case",
     "actions": {
       "registerOnline": "Register to Vote in {{state_name}}",
@@ -544,7 +655,6 @@
       "finishOnline": "You can finish registering to vote online in {{state_name}}.",
       "whereToSend": "Where to send your form"
     },
-    "under_18_error": "You are too young for this.",
     "provide_full_SSN": "No!!! You must provide your full Social Security number.",
     "license_age_eligibility": "You may be eligible to finish your voter registration using the Tennessee online voter registration system."
   }

@@ -51,25 +51,27 @@ export default function LookupScreen({ route }: LookupScreenProps) {
         })}
       />
       <View style={styles.content}>
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("lookup_success_page.success_statement", {
-              user_first_name: form.first_name,
-            }),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginVertical: 5,
-            },
-            strong: {
-              fontWeight: "bold",
-            },
-            br: { height: 1 },
-          }}
-        />
+        <Text>
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: t("lookup_success_page.success_statement", {
+                user_first_name: form.first_name,
+              }),
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 14,
+                lineHeight: 18,
+                marginVertical: 5,
+              },
+              strong: {
+                fontWeight: "bold",
+              },
+              br: { height: 1 },
+            }}
+          />
+        </Text>
         <Text style={styles.text}>
           {form.first_name} {form.last_name}
           {form.suffix && ` ${form.suffix}`}
@@ -91,23 +93,25 @@ export default function LookupScreen({ route }: LookupScreenProps) {
           })}
         </Text>
         <Text style={styles.textLi}>Voter Status: Active</Text>
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("lookup_success_page.success_question"),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginVertical: 5,
-            },
-            strong: {
-              fontWeight: "bold",
-            },
-            br: { height: 1 },
-          }}
-        />
+        <Text>
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: t("lookup_success_page.success_question"),
+            }}
+            tagsStyles={{
+              body: {
+                fontSize: 14,
+                lineHeight: 18,
+                marginVertical: 5,
+              },
+              strong: {
+                fontWeight: "bold",
+              },
+              br: { height: 1 },
+            }}
+          />
+        </Text>
         <Button
           title={t("lookup_success_page.cta_learn_about", {
             state_abbr: state?.abbreviation,
