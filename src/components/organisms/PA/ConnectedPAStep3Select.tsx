@@ -6,10 +6,12 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import RenderHTML from "react-native-render-html";
 import { Radio } from "@/components/atoms/Radio";
 import { useNavigation } from "@react-navigation/native";
+import { useNoLicenseUploadOptions } from "../../../utils/hooks/useNoLicenseUploadOptions";
 
 export const ConnectedPAStep3Select = ({
   state,
   value,
+  formCongif,
   errorMessages,
   onChange,
   onChangeError,
@@ -19,6 +21,11 @@ export const ConnectedPAStep3Select = ({
   const theme = useContext(ThemeContext);
   const navigation = useNavigation<any>();
   const { width } = useWindowDimensions();
+  const { showOtherDevice } = useNoLicenseUploadOptions(
+    formCongif,
+    value,
+    onChange,
+  );
 
   const goToPaper = () => {
     navigation.navigate("Register", {
@@ -78,20 +85,22 @@ export const ConnectedPAStep3Select = ({
           });
         }}
       />
-      <Radio
-        label={t("pennsylvania.upload_signature_other_device")}
-        selected={value.upload === "device"}
-        onPress={() => {
-          onChange({
-            ...value,
-            upload: "device",
-          });
-          onChangeError({
-            ...errorMessages,
-            upload: "",
-          });
-        }}
-      />
+      {showOtherDevice && (
+        <Radio
+          label={t("pennsylvania.upload_signature_other_device")}
+          selected={value.upload === "device"}
+          onPress={() => {
+            onChange({
+              ...value,
+              upload: "device",
+            });
+            onChangeError({
+              ...errorMessages,
+              upload: "",
+            });
+          }}
+        />
+      )}
       <Radio
         label={t("pennsylvania.print_mail")}
         selected={value.upload === "print"}

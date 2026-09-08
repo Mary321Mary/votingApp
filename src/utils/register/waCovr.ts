@@ -1,23 +1,28 @@
 import { isAxiosError } from "axios";
-import { checkPACovr, submitPACovr } from "./api";
+import { checkWACovr, submitWACovr } from "../api";
 import { PA_COVR_CLIENT_ERRORS } from "./paCovrErrors";
-import { PACovrCheckResponse, SubmitPACovrPayload } from "./types";
+import type {
+  SubmitWACovrPayload,
+  SubmitVoterStatusResponse,
+  WACovrCheckResponse,
+} from "../types";
 
 const POLL_INTERVAL_MS = 1000;
-const MAX_POLL_MS = 60000;
+const MAX_POLL_MS = 10000;
 
-export type PACovrOutcome = "success" | "failure";
+export type WACovrOutcome = "success" | "failure";
 
-export type SubmitAndCheckPACovrResult = {
-  outcome: PACovrOutcome;
+export type SubmitAndCheckWACovrResult = {
+  outcome: WACovrOutcome;
   registrantUid: string | null;
-  checkResponse: PACovrCheckResponse | null;
+  checkResponse: WACovrCheckResponse | null;
   errors: string[];
 };
 
-export type SubmitAndCheckPACovrOptions = {
+export type SubmitAndCheckWACovrOptions = {
   signal?: AbortSignal;
-  onCheck?: (data: PACovrCheckResponse) => void;
+  onSubmit?: (data: SubmitVoterStatusResponse) => void;
+  onCheck?: (data: WACovrCheckResponse) => void;
 };
 
 class PollAbortedError extends Error {
@@ -27,7 +32,7 @@ class PollAbortedError extends Error {
   }
 }
 
-function isTerminalStatus(status: PACovrCheckResponse["status"]): boolean {
+function isTerminalStatus(status: WACovrCheckResponse["status"]): boolean {
   return status === "success" || status === "failure";
 }
 
@@ -54,12 +59,12 @@ function isAborted(error: unknown): boolean {
   return error instanceof PollAbortedError;
 }
 
-export async function pollPACovrStatus(
+export async function pollWACovrStatus(
   registrantUid: string,
-  options?: Pick<SubmitAndCheckPACovrOptions, "signal" | "onCheck">,
+  options?: Pick<SubmitAndCheckWACovrOptions, "signal" | "onCheck">,
 ): Promise<{
-  outcome: PACovrOutcome;
-  checkResponse: PACovrCheckResponse | null;
+  outcome: WACovrOutcome;
+  checkResponse: WACovrCheckResponse | null;
   errors: string[];
 }> {
   const { signal, onCheck } = options ?? {};
@@ -75,7 +80,7 @@ export async function pollPACovrStatus(
     }
 
     try {
-      const response = await checkPACovr({ registrant_uid: registrantUid });
+      const response = await checkWACovr({ registrant_uid: registrantUid });
       const data = response.data;
       onCheck?.(data);
 
@@ -125,11 +130,11 @@ export async function pollPACovrStatus(
   };
 }
 
-export async function submitAndCheckPACovr(
-  payload: SubmitPACovrPayload,
-  options?: SubmitAndCheckPACovrOptions,
-): Promise<SubmitAndCheckPACovrResult> {
-  const { signal, onCheck } = options ?? {};
+export async function submitAndCheckWACovr(
+  payload: SubmitWACovrPayload,
+  options?: SubmitAndCheckWACovrOptions,
+): Promise<SubmitAndCheckWACovrResult> {
+  const { signal, onSubmit, onCheck } = options ?? {};
 
   if (signal?.aborted) {
     return {
@@ -140,10 +145,11 @@ export async function submitAndCheckPACovr(
     };
   }
 
-  const submitResponse = await submitPACovr(payload);
+  const submitResponse = await submitWACovr(payload);
+  onSubmit?.(submitResponse.data);
 
   const { status, registrant_uid: registrantUid } = submitResponse.data;
-  if (status?.success === false || !registrantUid) {
+  if (status?.success !== true || !registrantUid) {
     return {
       outcome: "failure",
       registrantUid: null,
@@ -152,7 +158,7 @@ export async function submitAndCheckPACovr(
     };
   }
 
-  const { outcome, checkResponse, errors } = await pollPACovrStatus(
+  const { outcome, checkResponse, errors } = await pollWACovrStatus(
     registrantUid,
     {
       signal,

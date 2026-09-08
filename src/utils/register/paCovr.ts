@@ -1,24 +1,23 @@
 import { isAxiosError } from "axios";
-import { checkWACovr, submitWACovr } from "./api";
+import { checkPACovr, submitPACovr } from "../api";
 import { PA_COVR_CLIENT_ERRORS } from "./paCovrErrors";
-import type { SubmitWACovrPayload, SubmitVoterStatusResponse, WACovrCheckResponse } from "./types";
+import { PACovrCheckResponse, SubmitPACovrPayload } from "../types";
 
 const POLL_INTERVAL_MS = 1000;
-const MAX_POLL_MS = 10000;
+const MAX_POLL_MS = 60000;
 
-export type WACovrOutcome = "success" | "failure";
+export type PACovrOutcome = "success" | "failure";
 
-export type SubmitAndCheckWACovrResult = {
-  outcome: WACovrOutcome;
+export type SubmitAndCheckPACovrResult = {
+  outcome: PACovrOutcome;
   registrantUid: string | null;
-  checkResponse: WACovrCheckResponse | null;
+  checkResponse: PACovrCheckResponse | null;
   errors: string[];
 };
 
-export type SubmitAndCheckWACovrOptions = {
+export type SubmitAndCheckPACovrOptions = {
   signal?: AbortSignal;
-  onSubmit?: (data: SubmitVoterStatusResponse) => void;
-  onCheck?: (data: WACovrCheckResponse) => void;
+  onCheck?: (data: PACovrCheckResponse) => void;
 };
 
 class PollAbortedError extends Error {
@@ -28,7 +27,7 @@ class PollAbortedError extends Error {
   }
 }
 
-function isTerminalStatus(status: WACovrCheckResponse["status"]): boolean {
+function isTerminalStatus(status: PACovrCheckResponse["status"]): boolean {
   return status === "success" || status === "failure";
 }
 
@@ -55,12 +54,12 @@ function isAborted(error: unknown): boolean {
   return error instanceof PollAbortedError;
 }
 
-export async function pollWACovrStatus(
+export async function pollPACovrStatus(
   registrantUid: string,
-  options?: Pick<SubmitAndCheckWACovrOptions, "signal" | "onCheck">,
+  options?: Pick<SubmitAndCheckPACovrOptions, "signal" | "onCheck">,
 ): Promise<{
-  outcome: WACovrOutcome;
-  checkResponse: WACovrCheckResponse | null;
+  outcome: PACovrOutcome;
+  checkResponse: PACovrCheckResponse | null;
   errors: string[];
 }> {
   const { signal, onCheck } = options ?? {};
@@ -76,7 +75,7 @@ export async function pollWACovrStatus(
     }
 
     try {
-      const response = await checkWACovr({ registrant_uid: registrantUid });
+      const response = await checkPACovr({ registrant_uid: registrantUid });
       const data = response.data;
       onCheck?.(data);
 
@@ -84,7 +83,7 @@ export async function pollWACovrStatus(
         return {
           outcome: data.status === "success" ? "success" : "failure",
           checkResponse: data,
-          errors: data.status === "failure" ? (data.submission_error ?? []) : [],
+          errors: data.status === "failure" ? data.submission_error ?? [] : [],
         };
       }
     } catch (error: unknown) {
@@ -126,11 +125,11 @@ export async function pollWACovrStatus(
   };
 }
 
-export async function submitAndCheckWACovr(
-  payload: SubmitWACovrPayload,
-  options?: SubmitAndCheckWACovrOptions,
-): Promise<SubmitAndCheckWACovrResult> {
-  const { signal, onSubmit, onCheck } = options ?? {};
+export async function submitAndCheckPACovr(
+  payload: SubmitPACovrPayload,
+  options?: SubmitAndCheckPACovrOptions,
+): Promise<SubmitAndCheckPACovrResult> {
+  const { signal, onCheck } = options ?? {};
 
   if (signal?.aborted) {
     return {
@@ -141,11 +140,10 @@ export async function submitAndCheckWACovr(
     };
   }
 
-  const submitResponse = await submitWACovr(payload);
-  onSubmit?.(submitResponse.data);
+  const submitResponse = await submitPACovr(payload);
 
   const { status, registrant_uid: registrantUid } = submitResponse.data;
-  if (status?.success !== true || !registrantUid) {
+  if (status?.success === false || !registrantUid) {
     return {
       outcome: "failure",
       registrantUid: null,
@@ -154,10 +152,12 @@ export async function submitAndCheckWACovr(
     };
   }
 
-  const { outcome, checkResponse, errors } = await pollWACovrStatus(registrantUid, {
-    signal,
-    onCheck,
-  });
+  const { outcome, checkResponse, errors } = await pollPACovrStatus(
+    registrantUid,
+    {
+      signal,
+      onCheck,
+    },
+  );
   return { outcome, registrantUid, checkResponse, errors };
 }
-

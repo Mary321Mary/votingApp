@@ -73,21 +73,21 @@ export type RootStackParamList = {
     workflow_type?: string;
     finish_with_state: boolean;
   };
-  SuccessMI: { state: StateData };
+  SuccessMI: { state: StateData; form: RegisterFormState };
   FailMI: {
     state: StateData;
     zip: string;
     email: string;
     form: RegisterFormState;
   };
-  SuccessPA: { state: StateData };
+  SuccessPA: { state: StateData; form: RegisterFormState };
   FailPA: {
     state: StateData;
     zip: string;
     email: string;
     form: RegisterFormState;
   };
-  SuccessWA: { state: StateData };
+  SuccessWA: { state: StateData; form: RegisterFormState };
   FailCA: {
     state: StateData;
     zip: string;
@@ -124,6 +124,7 @@ export type RootStackParamList = {
   };
   FinishWithState: {
     state: StateData;
+    form: RegisterFormState;
   };
   ApiError: { state: StateData; title?: string };
 };

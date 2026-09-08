@@ -13,7 +13,7 @@ import { ConnectedOVR } from "../MI/ConnectedOVR";
 import { Button } from "react-native";
 import ConnectedOVRStep2 from "../MI/ConnectedOVRStep2";
 import ConnectedOVRStep3 from "../MI/ConnectedOVRStep3";
-import { ConnectedWA } from "../ConnectedWA";
+import { ConnectedWA } from "../WA/ConnectedWA";
 import { ConnectedWAStep2Select } from "../WA/ConnectedWAStep2Select";
 import { useNavigation } from "@react-navigation/native";
 import { RegisterScreenNavigation } from "./RegisterResult";
@@ -31,6 +31,9 @@ import AcceptNotice from "../AcceptNotice";
 import { PaperOVR } from "../PaperOVR";
 import { OvrState } from "../OvrState";
 import FinishWithState from "../FinishWithState";
+import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
+import { allowsPaperFallback } from "../../../utils/register/registerRouting";
+import { isFinishOnOtherDeviceEnabled } from "../../../utils/constants";
 
 interface RegisterFlowContentProps {
   state: StateData;
@@ -67,6 +70,27 @@ const RegisterFlowContent = ({
   const navigation = useNavigation<RegisterScreenNavigation>();
 
   useEffect(() => {
+    if (!form.has_no_state_license || form.upload !== "device") return;
+    if (isFinishOnOtherDeviceEnabled(formCongif)) return;
+
+    if (flowType === "connected_WA" && step === 3) {
+      setForm(prev => ({ ...prev, upload: "" }));
+      setStep(2);
+    } else if (flowType === "connected_PA" && step === 4) {
+      setForm(prev => ({ ...prev, upload: "" }));
+      setStep(3);
+    }
+  }, [
+    flowType,
+    step,
+    form.has_no_state_license,
+    form.upload,
+    formCongif,
+    setForm,
+    setStep,
+  ]);
+
+  useEffect(() => {
     const sendStepAnalytics = async () => {
       const registration_uid =
         (await AsyncStorage.getItem(`registration_uid`)) || "";
@@ -78,7 +102,7 @@ const RegisterFlowContent = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString() || "1",
-              step: "step_1",
+              step: REPORT_EVENT_STEPS.STEP_1,
               event_name: "MI covr eligibility",
             });
           }
@@ -87,7 +111,7 @@ const RegisterFlowContent = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString() || "1",
-              step: "step_1",
+              step: REPORT_EVENT_STEPS.STEP_1,
               event_name: "MI covr personal info",
             });
           }
@@ -96,10 +120,11 @@ const RegisterFlowContent = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString() || "1",
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "MI covr address info",
             });
           }
+          return;
         }
 
         switch (flowType) {
@@ -109,7 +134,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "WA covr personal info",
               });
             }
@@ -120,7 +145,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_2",
+                  step: REPORT_EVENT_STEPS.STEP_2,
                   event_name: "WA covr additional required",
                 });
               } else {
@@ -128,7 +153,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_2",
+                  step: REPORT_EVENT_STEPS.STEP_2,
                   event_name: "WA covr additional optional",
                 });
               }
@@ -140,7 +165,7 @@ const RegisterFlowContent = ({
                   await reportEvent({
                     registration_uid,
                     partner_id: form.partner_id.toString() || "1",
-                    step: "step_3",
+                    step: REPORT_EVENT_STEPS.STEP_3,
                     event_name: "WA download image",
                   });
                 } else {
@@ -148,7 +173,7 @@ const RegisterFlowContent = ({
                   await reportEvent({
                     registration_uid,
                     partner_id: form.partner_id.toString() || "1",
-                    step: "step_3",
+                    step: REPORT_EVENT_STEPS.STEP_3,
                     event_name: "WA finish on another device",
                   });
                 }
@@ -157,7 +182,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_4",
+                  step: REPORT_EVENT_STEPS.STEP_4,
                   event_name: "WA covr review",
                 });
               }
@@ -167,7 +192,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_4",
+                step: REPORT_EVENT_STEPS.STEP_4,
                 event_name: "WA covr review",
               });
             }
@@ -178,7 +203,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "PA covr personal info",
               });
             }
@@ -187,7 +212,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_2",
+                step: REPORT_EVENT_STEPS.STEP_2,
                 event_name: "PA covr PennDot info",
               });
             }
@@ -197,7 +222,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_2",
+                  step: REPORT_EVENT_STEPS.STEP_2,
                   event_name: "PA covr no PennDot options",
                 });
               } else {
@@ -205,7 +230,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_4",
+                  step: REPORT_EVENT_STEPS.STEP_4,
                   event_name: "PA covr review",
                 });
               }
@@ -213,11 +238,10 @@ const RegisterFlowContent = ({
             if (step === 4) {
               if (form.upload === "signature") {
                 // ConnectedPAStep4Signature
-
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_3",
+                  step: REPORT_EVENT_STEPS.STEP_3,
                   event_name: "PA download image",
                 });
               } else {
@@ -225,7 +249,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_3",
+                  step: REPORT_EVENT_STEPS.STEP_3,
                   event_name: "PA finish on another device",
                 });
               }
@@ -235,7 +259,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_4",
+                step: REPORT_EVENT_STEPS.STEP_4,
                 event_name: "PA covr review",
               });
             }
@@ -246,7 +270,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "CA covr personal info",
               });
             }
@@ -255,7 +279,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_2",
+                step: REPORT_EVENT_STEPS.STEP_2,
                 event_name: "CA covr option to finish with CA",
               });
             }
@@ -264,7 +288,7 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "redirect to NVRA form step 1",
               });
             }
@@ -275,17 +299,17 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "finish with state personal info",
               });
             }
             if (step === 2) {
-              if (form.has_no_state_license) {
+              if (form.has_no_state_license && allowsPaperFallback(state)) {
                 // PaperOVR
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_1",
+                  step: REPORT_EVENT_STEPS.STEP_1,
                   event_name: "redirect to NVRA form step 1",
                 });
               } else {
@@ -293,7 +317,7 @@ const RegisterFlowContent = ({
                 await reportEvent({
                   registration_uid,
                   partner_id: form.partner_id.toString() || "1",
-                  step: "step_2",
+                  step: REPORT_EVENT_STEPS.STEP_2,
                   event_name: "option to finish with state",
                 });
               }
@@ -308,14 +332,14 @@ const RegisterFlowContent = ({
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "redirect to NVRA form step 1",
               });
             } else {
               await reportEvent({
                 registration_uid,
                 partner_id: form.partner_id.toString() || "1",
-                step: "step_1",
+                step: REPORT_EVENT_STEPS.STEP_1,
                 event_name: "NVRA form step 1",
               });
             }

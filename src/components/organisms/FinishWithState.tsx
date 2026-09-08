@@ -6,7 +6,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import QuestionsSection from "../atoms/QuestionsSection";
 import { useNavigation } from "@react-navigation/native";
 import { RegisterScreenNavigation } from "./RegisterResult/RegisterResult";
-import { allowsPaperFallback } from "../../utils/registerRouting";
+import { allowsPaperFallback } from "../../utils/register/registerRouting";
 
 interface FinishWithStateProps extends FormProps {
   handleMainButtonClick: () => void;

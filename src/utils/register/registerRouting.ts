@@ -3,7 +3,7 @@ import {
   OVR_TYPE_MAP,
   RegisterFormState,
   StateData,
-} from "./types";
+} from "../types";
 
 export function buildPAHomeAddressFromForm(form: RegisterFormState): string {
   const line2 = form.address_line_2?.trim();

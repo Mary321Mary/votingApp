@@ -25,6 +25,10 @@ import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Clipboard from "@react-native-clipboard/clipboard";
+import { INTERNAL_ERRORS } from "../utils/internal-errors";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { reportEvent } from "../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface PrintScreenProps {
   route: {
@@ -77,7 +81,14 @@ export default function PrintScreen({ route }: PrintScreenProps) {
       signal: abortControllerRef.current.signal,
       onError: title => {
         if (isMounted.current) {
-          navigation.replace("ApiError", { state, title });
+          if (title === INTERNAL_ERRORS.GET_NVRA_FORM_TIMEOUT) {
+            navigation.replace("ApiError", {
+              state,
+              title: t("print_form_page.pdf_gen_delayed"),
+            });
+          } else {
+            navigation.replace("ApiError", { state, title });
+          }
         }
       },
       onReady: downloadUrl => {
@@ -94,10 +105,33 @@ export default function PrintScreen({ route }: PrintScreenProps) {
     };
   }, []);
 
+  useEffect(() => {
+    async function fetchData() {
+      const registration_uid =
+        (await AsyncStorage.getItem(`registration_uid`)) || "";
+      await reportEvent({
+        registration_uid,
+        partner_id: form.partner_id.toString() || "1",
+        step: REPORT_EVENT_STEPS.STEP_2,
+        event_name: "NVRA print",
+      });
+    }
+    fetchData();
+  }, []);
+
   const handleDownload = async () => {
     if (!pdfUrl) return;
 
     downloadPdf(pdfUrl, "form_placeholder.pdf");
+
+    const registration_uid =
+      (await AsyncStorage.getItem(`registration_uid`)) || "";
+    await reportEvent({
+      registration_uid,
+      partner_id: form.partner_id.toString() || "1",
+      step: REPORT_EVENT_STEPS.STEP_5,
+      event_name: "NVRA form download",
+    });
   };
 
   return (
@@ -150,7 +184,18 @@ export default function PrintScreen({ route }: PrintScreenProps) {
             title={t("print_form_page.learn_button_text", {
               state_abbr: form.state,
             })}
-            onPress={() => Linking.openURL(state.learn_about_url || "")}
+            onPress={async () => {
+              Linking.openURL(state.learn_about_url || "");
+
+              const registration_uid =
+                (await AsyncStorage.getItem(`registration_uid`)) || "";
+              await reportEvent({
+                registration_uid,
+                partner_id: form.partner_id.toString(),
+                step: REPORT_EVENT_STEPS.EMPTY,
+                event_name: "CTA clicked: " + state?.learn_about_url,
+              });
+            }}
           />
         </View>
 
@@ -159,9 +204,19 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         <View style={styles.shareButtons}>
           <TouchableOpacity
             style={styles.outlineButton}
-            onPress={() =>
-              Linking.openURL(config?.share?.registrations?.facebook || "")
-            }
+            onPress={async () => {
+              Linking.openURL(config?.share?.registrations?.facebook || "");
+
+              const registration_uid =
+                (await AsyncStorage.getItem(`registration_uid`)) || "";
+              await reportEvent({
+                registration_uid,
+                partner_id: form.partner_id.toString(),
+                step: REPORT_EVENT_STEPS.EMPTY,
+                event_name:
+                  "CTA clicked: " + config?.share?.registrations?.facebook,
+              });
+            }}
           >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_fb_button_text")}
@@ -169,9 +224,18 @@ export default function PrintScreen({ route }: PrintScreenProps) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.outlineButton}
-            onPress={() =>
-              Linking.openURL(config?.share?.registrations?.x || "")
-            }
+            onPress={async () => {
+              Linking.openURL(config?.share?.registrations?.x || "");
+
+              const registration_uid =
+                (await AsyncStorage.getItem(`registration_uid`)) || "";
+              await reportEvent({
+                registration_uid,
+                partner_id: form.partner_id.toString(),
+                step: REPORT_EVENT_STEPS.EMPTY,
+                event_name: "CTA clicked: " + config?.share?.registrations?.x,
+              });
+            }}
           >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_x_button_text")}
@@ -194,6 +258,17 @@ export default function PrintScreen({ route }: PrintScreenProps) {
                   Alert.alert("Success", t(`pennsylvania.link_copied`));
                 }
                 setCopyNotification(t(`pennsylvania.link_copied`));
+
+                const registration_uid =
+                  (await AsyncStorage.getItem(`registration_uid`)) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name:
+                    "CTA clicked: copy link " +
+                    config?.share?.registrations?.copy_link,
+                });
               } catch (err) {
                 console.error("Failed to copy link:", err);
               }

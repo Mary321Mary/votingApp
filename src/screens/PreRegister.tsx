@@ -20,9 +20,10 @@ import {
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { getFlowType } from "@/utils/registerRouting";
-import { setUnder18Reminder } from "@/utils/api";
+import { getFlowType } from "@/utils/register/registerRouting";
+import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { newlinesToBr } from "../utils/stateCopy";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
 
 interface PreRegisterScreenProps {
   route: {
@@ -58,6 +59,18 @@ export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
       navigation.replace("Home");
     }
   }, [navState, navigation]);
+
+  useEffect(() => {
+    async function fetchData() {
+      await reportEvent({
+        registration_uid,
+        partner_id: navState?.form.partner_id.toString() || "1",
+        step: REPORT_EVENT_STEPS.UNDER_18,
+        event_name: "pre-reg notification",
+      });
+    }
+    fetchData();
+  }, []);
 
   if (!navState?.state || !navState?.form) {
     return null;

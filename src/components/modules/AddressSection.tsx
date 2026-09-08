@@ -8,6 +8,8 @@ import InputField from "../atoms/InputField";
 import { Checkbox } from "../atoms/Checkbox";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
 import { SelectField } from "../atoms/SelectField";
+import { submitEmailZip } from "../../utils/api";
+import i18n from "../../i18n";
 
 interface AddressSectionProps extends FormProps {
   showChangeOfAddress?: boolean;
@@ -40,6 +42,34 @@ export const AddressSection = ({
         ...errorMessages,
         [key]: "",
       });
+    }
+  };
+
+  const handleZipValidation = async (zipValue: string) => {
+    if (zipValue && zipValue.length === 5) {
+      try {
+        const response = await submitEmailZip({
+          email: value.email_address,
+          zip: zipValue,
+          locale: i18n.language,
+          partner_id: value.partner_id.toString(),
+        });
+
+        if (response && response.data.state?.abbreviation !== "WA") {
+          onChangeError({
+            ...errorMessages,
+            prev_zip_code: "washington.previous_address_zip_error",
+          });
+        } else {
+          onChangeError({ ...errorMessages, prev_zip_code: "" });
+        }
+      } catch (error) {
+        console.error("ZIP validation failed", error);
+        onChangeError({
+          ...errorMessages,
+          prev_zip_code: "washington.previous_address_zip_error",
+        });
+      }
     }
   };
 
@@ -339,9 +369,13 @@ export const AddressSection = ({
                   numeric
                   value={value.prev_zip_code}
                   errorMessage={t(errorMessages.prev_zip_code)}
-                  onChangeText={(text: string) =>
-                    updateField("prev_zip_code", text)
-                  }
+                  onChangeText={(text: string) => {
+                    updateField("prev_zip_code", text);
+
+                    if (text.length === 5) {
+                      handleZipValidation(text);
+                    }
+                  }}
                 />
               )}
             </View>

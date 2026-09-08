@@ -17,14 +17,18 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
-import { StateData } from "@/utils/types";
+import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Clipboard from "@react-native-clipboard/clipboard";
+import { reportEvent } from "../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
 
 interface SuccessMIScreenProps {
   route: {
     params?: {
       state: StateData;
+      form: RegisterFormState;
     };
   };
 }
@@ -50,16 +54,39 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
     }
   }, [navigation, params]);
 
+  useEffect(() => {
+    async function fetchData() {
+      const registration_uid =
+        (await AsyncStorage.getItem(`registration_uid`)) || "";
+      await reportEvent({
+        registration_uid,
+        partner_id: params?.form.partner_id.toString() || "1",
+        step: REPORT_EVENT_STEPS.STEP_5,
+        event_name: "MI covr success",
+      });
+    }
+    fetchData();
+  }, []);
+
   if (!params?.state) {
     return null;
   }
 
-  const { state } = params;
+  const { state, form } = params;
 
-  const handleLearnAbout = () => {
+  const handleLearnAbout = async () => {
     if (state.learn_about_url) {
       Linking.openURL(state.learn_about_url);
     }
+
+    const registration_uid =
+      (await AsyncStorage.getItem(`registration_uid`)) || "";
+    await reportEvent({
+      registration_uid,
+      partner_id: form.partner_id.toString(),
+      step: REPORT_EVENT_STEPS.EMPTY,
+      event_name: "CTA clicked: " + state.learn_about_url,
+    });
   };
 
   return (
@@ -77,9 +104,19 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
           <View style={styles.buttonSpacer} />
           <TouchableOpacity
             style={styles.outlineButton}
-            onPress={() =>
-              Linking.openURL(config?.share?.registrations?.facebook || "")
-            }
+            onPress={async () => {
+              Linking.openURL(config?.share?.registrations?.facebook || "");
+
+              const registration_uid =
+                (await AsyncStorage.getItem(`registration_uid`)) || "";
+              await reportEvent({
+                registration_uid,
+                partner_id: form.partner_id.toString(),
+                step: REPORT_EVENT_STEPS.EMPTY,
+                event_name:
+                  "CTA clicked: " + config?.share?.registrations?.facebook,
+              });
+            }}
           >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_fb_button_text")}
@@ -88,9 +125,18 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
 
           <TouchableOpacity
             style={styles.outlineButton}
-            onPress={() =>
-              Linking.openURL(config?.share?.registrations?.x || "")
-            }
+            onPress={async () => {
+              Linking.openURL(config?.share?.registrations?.x || "");
+
+              const registration_uid =
+                (await AsyncStorage.getItem(`registration_uid`)) || "";
+              await reportEvent({
+                registration_uid,
+                partner_id: form.partner_id.toString(),
+                step: REPORT_EVENT_STEPS.EMPTY,
+                event_name: "CTA clicked: " + config?.share?.registrations?.x,
+              });
+            }}
           >
             <Text style={styles.outlineButtonText}>
               {t("print_form_page.share_x_button_text")}
@@ -114,6 +160,17 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
                   Alert.alert("Success", t(`pennsylvania.link_copied`));
                 }
                 setCopyNotification(t(`pennsylvania.link_copied`));
+
+                const registration_uid =
+                  (await AsyncStorage.getItem(`registration_uid`)) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name:
+                    "CTA clicked: copy link " +
+                    config?.share?.registrations?.copy_link,
+                });
               } catch (err) {
                 console.error("Failed to copy link:", err);
               }
@@ -140,9 +197,9 @@ export const SuccessMIScreen = ({ route }: SuccessMIScreenProps) => {
                     <Text
                       key="email-link"
                       style={styles.linkText}
-                      onPress={() => {
-                        Linking.openURL("mailto:civictech@rockthevote.org");
-                      }}
+                      onPress={() =>
+                        Linking.openURL("mailto:civictech@rockthevote.org")
+                      }
                     >
                       {0}
                     </Text>

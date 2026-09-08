@@ -15,11 +15,13 @@ import {
   SubmitVoterCAResponse,
 } from "../../utils/types";
 import { Checkbox } from "../atoms/Checkbox";
-import { submitCACovr } from "@/utils/api";
+import { reportEvent, submitCACovr } from "@/utils/api";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./Navigation";
 import { useNavigation } from "@react-navigation/native";
 import RenderHTML from "react-native-render-html";
+import { REPORT_EVENT_STEPS } from "../../utils/report/eventReporting";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface AcceptNoticeProps {
   state: StateData;
@@ -44,8 +46,11 @@ function AcceptNotice({ state, value, handleMainButton }: AcceptNoticeProps) {
 
   useEffect(() => {
     const fetchCA = async () => {
+      const registration_uid =
+        (await AsyncStorage.getItem(`registration_uid`)) || "";
       const response = await submitCACovr({
         ...value,
+        registration_uid,
         locale: value.lang,
         email: value.email_address,
       });
@@ -99,11 +104,21 @@ function AcceptNotice({ state, value, handleMainButton }: AcceptNoticeProps) {
 
       <Button
         title={t("california.finish_ca_button_text")}
-        onPress={() => {
+        onPress={async () => {
           if (accept) {
             if (config?.redirect_url)
               Linking.openURL(config?.redirect_url || "");
-            navigation.navigate("FinishWithState", { state });
+
+            const registration_uid =
+              (await AsyncStorage.getItem(`registration_uid`)) || "";
+            await reportEvent({
+              registration_uid,
+              partner_id: value.partner_id.toString() || "1",
+              step: REPORT_EVENT_STEPS.STEP_5,
+              event_name: "finish with CA selected",
+            });
+
+            navigation.navigate("FinishWithState", { state, form: value });
           } else {
             setShowErrorAccept(true);
           }

@@ -39,14 +39,14 @@ import {
   getFlowType,
   mapRegisterFormToVrLookupPayload,
   resolveWorkflowType,
-} from "@/utils/registerRouting";
+} from "@/utils/register/registerRouting";
 import {
   fetchDataConfiguration,
   reportEvent,
   submitFinishedWithState,
   submitLookup,
 } from "@/utils/api";
-import { submitAndCheckMICovr } from "@/utils/miCovr";
+import { submitAndCheckMICovr } from "@/utils/register/miCovr";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "../Navigation";
 
@@ -56,15 +56,16 @@ import {
   validateConnectedOvr,
   validateWA,
 } from "./validation";
-import { submitAndCheckPACovr } from "@/utils/paCovr";
+import { submitAndCheckPACovr } from "@/utils/register/paCovr";
 import {
   classifyPACovrErrors,
   getPACovrFailNavigationExtras,
-} from "@/utils/paCovrErrors";
-import { submitAndCheckWACovr } from "@/utils/waCovr";
+} from "@/utils/register/paCovrErrors";
+import { submitAndCheckWACovr } from "@/utils/register/waCovr";
 import RegisterFlowContent from "./RegisterFlowContent";
 import { getInitialFormState } from "./initFormState";
 import { useFormScroll } from "../../../contexts/FormScrollContext";
+import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
 
 export type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -185,14 +186,14 @@ export const RegisterResult = ({
         await reportEvent({
           registration_uid,
           partner_id: form.partner_id.toString() || "1",
-          step: "rejected",
+          step: REPORT_EVENT_STEPS.REJECTED,
           event_name: "failed eligibility checks",
         });
       } else {
         await reportEvent({
           registration_uid,
           partner_id: form.partner_id.toString() || "1",
-          step: "rejected",
+          step: REPORT_EVENT_STEPS.REJECTED,
           event_name: "finish with state form: failed eligibility checks",
         });
       }
@@ -221,7 +222,7 @@ export const RegisterResult = ({
       await reportEvent({
         registration_uid,
         partner_id: form.partner_id.toString() || "1",
-        step: "rejected",
+        step: REPORT_EVENT_STEPS.REJECTED,
         event_name: "MI covr: failed eligibility checks",
       });
     }
@@ -248,7 +249,7 @@ export const RegisterResult = ({
         await reportEvent({
           registration_uid,
           partner_id: form.partner_id.toString() || "1",
-          step: "rejected",
+          step: REPORT_EVENT_STEPS.REJECTED,
           event_name: "WA covr: failed eligibility checks",
         });
       }
@@ -260,7 +261,7 @@ export const RegisterResult = ({
         await reportEvent({
           registration_uid,
           partner_id: form.partner_id.toString() || "1",
-          step: "rejected",
+          step: REPORT_EVENT_STEPS.REJECTED,
           event_name: "PA covr: failed eligibility checks",
         });
       }
@@ -272,7 +273,7 @@ export const RegisterResult = ({
         await reportEvent({
           registration_uid,
           partner_id: form.partner_id.toString() || "1",
-          step: "rejected",
+          step: REPORT_EVENT_STEPS.REJECTED,
           event_name: "CA covr: failed eligibility checks",
         });
       }
@@ -321,7 +322,7 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${paPayload.first_name} ${paPayload.last_name}`.trim(),
         );
-        navigation.replace("SuccessPA", { state });
+        navigation.replace("SuccessPA", { state, form });
         return;
       }
 
@@ -383,7 +384,7 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${waPayload.first_name} ${waPayload.last_name}`.trim(),
         );
-        navigation.navigate("SuccessWA", { state });
+        navigation.replace("SuccessWA", { state, form });
       } else {
         // Check returning a documented failure should route to the WA fail screen
         // (retry / paper form prompt), but still be treated as an error.
@@ -472,7 +473,7 @@ export const RegisterResult = ({
           await reportEvent({
             registration_uid,
             partner_id: form.partner_id.toString(),
-            step: "step_2",
+            step: REPORT_EVENT_STEPS.STEP_2,
             event_name: "nvra_pre_reg",
           });
           navigateToPreRegister();
@@ -483,7 +484,7 @@ export const RegisterResult = ({
           await reportEvent({
             registration_uid,
             partner_id: form.partner_id.toString(),
-            step: "step_2",
+            step: REPORT_EVENT_STEPS.STEP_2,
             event_name: "nvra_under_18",
           });
           navigation.replace("Under18", {
@@ -503,7 +504,7 @@ export const RegisterResult = ({
       await reportEvent({
         registration_uid,
         partner_id: form.partner_id.toString(),
-        step: "step_2",
+        step: REPORT_EVENT_STEPS.STEP_2,
         event_name: eventName,
       });
       navigateToNvraPrintOrSuccess();
@@ -534,7 +535,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_pre_reg",
             });
             navigateToPreRegister();
@@ -545,7 +546,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_under_18",
             });
             navigation.replace("Under18", {
@@ -594,7 +595,7 @@ export const RegisterResult = ({
                   "rtv_voter_name",
                   miPayload.full_name,
                 );
-                navigation.replace("SuccessMI", { state });
+                navigation.replace("SuccessMI", { state, form });
               } else {
                 navigation.navigate("FailMI", { state, zip, email, form });
               }
@@ -620,7 +621,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_pre_reg",
             });
             navigateToPreRegister();
@@ -631,7 +632,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_under_18",
             });
             navigation.replace("Under18", {
@@ -682,10 +683,10 @@ export const RegisterResult = ({
               if (state?.online_registration_system_url)
                 Linking.openURL(state.online_registration_system_url);
 
-              navigation.replace("FinishWithState", { state });
+              navigation.replace("FinishWithState", { state, form });
             } catch (error: any) {
               console.log("Error", error);
-              navigation.replace("FinishWithState", { state });
+              navigation.replace("FinishWithState", { state, form });
             }
           }
         }
@@ -697,7 +698,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_pre_reg",
             });
             navigateToPreRegister();
@@ -708,7 +709,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_under_18",
             });
             navigation.replace("Under18", {
@@ -748,7 +749,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_pre_reg",
             });
             navigateToPreRegister();
@@ -759,7 +760,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_under_18",
             });
             navigation.replace("Under18", {
@@ -801,7 +802,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_pre_reg",
             });
             navigateToPreRegister();
@@ -812,7 +813,7 @@ export const RegisterResult = ({
             await reportEvent({
               registration_uid,
               partner_id: form.partner_id.toString(),
-              step: "step_2",
+              step: REPORT_EVENT_STEPS.STEP_2,
               event_name: "nvra_under_18",
             });
             navigation.replace("Under18", {

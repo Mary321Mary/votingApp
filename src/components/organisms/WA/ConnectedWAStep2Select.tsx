@@ -6,10 +6,12 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import RenderHTML from "react-native-render-html";
 import { Radio } from "@/components/atoms/Radio";
 import { useNavigation } from "@react-navigation/native";
+import { useNoLicenseUploadOptions } from "../../../utils/hooks/useNoLicenseUploadOptions";
 
 export const ConnectedWAStep2Select = ({
   state,
   value,
+  formCongif,
   errorMessages,
   onChange,
   onChangeError,
@@ -19,6 +21,11 @@ export const ConnectedWAStep2Select = ({
   const theme = useContext(ThemeContext);
   const navigation = useNavigation<any>();
   const { width } = useWindowDimensions();
+  const { showOtherDevice } = useNoLicenseUploadOptions(
+    formCongif,
+    value,
+    onChange,
+  );
 
   const goToPaper = () => {
     navigation.navigate("Register", {
@@ -69,17 +76,19 @@ export const ConnectedWAStep2Select = ({
           });
         }}
       />
-      <Radio
-        label={t("washington.other_device_option")}
-        selected={value.upload === "device"}
-        onPress={() => {
-          onChange({ ...value, upload: "device" });
-          onChangeError({
-            ...errorMessages,
-            upload: "",
-          });
-        }}
-      />
+      {showOtherDevice && (
+        <Radio
+          label={t("washington.other_device_option")}
+          selected={value.upload === "device"}
+          onPress={() => {
+            onChange({ ...value, upload: "device" });
+            onChangeError({
+              ...errorMessages,
+              upload: "",
+            });
+          }}
+        />
+      )}
       <Radio
         label={t("washington.paper_option")}
         selected={value.upload === "print"}

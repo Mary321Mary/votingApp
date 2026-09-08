@@ -1,7 +1,7 @@
 import {
   buildPAHomeAddressFromForm,
   buildPAMailingAddressFromForm,
-} from "./registerRouting";
+} from "./register/registerRouting";
 import {
   DataCollectionConfiguration,
   RegisterFormState,

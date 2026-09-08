@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,10 @@ import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { reportEvent, submitEmailZip } from "../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n from "../i18n";
 
 type LookupNotFoundScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -45,6 +49,20 @@ export default function LookupNotFoundScreen({
       await Linking.openURL(url);
     }
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      const registration_uid =
+        (await AsyncStorage.getItem(`registration_uid`)) || "";
+      await reportEvent({
+        registration_uid,
+        partner_id: form.partner_id.toString() || "1",
+        step: REPORT_EVENT_STEPS.EMPTY,
+        event_name: "Voter Lookup no found",
+      });
+    }
+    fetchData();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -103,7 +121,25 @@ export default function LookupNotFoundScreen({
         {state.ovr_type !== "not_participating" && (
           <Button
             title={t("lookup_not_found_page.cta_register")}
-            onPress={() => {
+            onPress={async () => {
+              const response = await submitEmailZip({
+                email: form.email,
+                zip: form.zip,
+                locale: i18n.language,
+                partner_id: form.partner_id.toString(),
+              });
+              await AsyncStorage.setItem(
+                "registration_uid",
+                response.data.registration_uid,
+              );
+
+              await reportEvent({
+                registration_uid: response.data.registration_uid ?? "",
+                partner_id: form.partner_id.toString() || "1",
+                step: REPORT_EVENT_STEPS.STEP_1,
+                event_name: "redirect from lookup to OV",
+              });
+
               navigation.replace("Register", {
                 status: { success: true },
                 state,

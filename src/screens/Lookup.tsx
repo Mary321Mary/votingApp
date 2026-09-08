@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,17 +7,29 @@ import {
   Linking,
   Button,
   ScrollView,
+  Platform,
+  ToastAndroid,
+  Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
 import RenderHTML from "react-native-render-html";
+import { reportEvent, submitEmailZip } from "../utils/api";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n from "../i18n";
+import { useUIConfig } from "../contexts/UIConfigContext";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../components/organisms/Navigation";
 
-// type LookupScreenNavigation = NativeStackNavigationProp<
-//   RootStackParamList,
-//   "Lookup"
-// >;
+type LookupScreenNavigation = NativeStackNavigationProp<
+  RootStackParamList,
+  "Lookup"
+>;
 
 interface LookupScreenProps {
   route: {
@@ -34,6 +46,9 @@ export default function LookupScreen({ route }: LookupScreenProps) {
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
   const { state, form } = route.params;
+  const { config } = useUIConfig();
+  const [copyNotification, setCopyNotification] = useState("");
+  const navigation = useNavigation<LookupScreenNavigation>();
 
   const handleOpenLink = async () => {
     const url = state?.online_registration_system_url;
@@ -42,6 +57,35 @@ export default function LookupScreen({ route }: LookupScreenProps) {
       await Linking.openURL(url);
     }
   };
+
+  const handleCopyLink = async () => {
+    try {
+      Clipboard.setString(config?.share?.registrations?.copy_link || "");
+
+      if (Platform.OS === "android") {
+        ToastAndroid.show(t(`pennsylvania.link_copied`), ToastAndroid.SHORT);
+      } else {
+        Alert.alert("Success", t(`pennsylvania.link_copied`));
+      }
+      setCopyNotification(t(`pennsylvania.link_copied`));
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      const registration_uid =
+        (await AsyncStorage.getItem(`registration_uid`)) || "";
+      await reportEvent({
+        registration_uid,
+        partner_id: form.partner_id.toString(),
+        step: REPORT_EVENT_STEPS.STEP_5,
+        event_name: "Voter Lookup success",
+      });
+    }
+    fetchData();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -92,7 +136,9 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             year: "numeric",
           })}
         </Text>
-        <Text style={styles.textLi}>Voter Status: Active</Text>
+        <Text style={styles.textLi}>
+          {t("lookup_success_page.voter_status")}
+        </Text>
         <Text>
           <RenderHTML
             contentWidth={width}
@@ -116,8 +162,67 @@ export default function LookupScreen({ route }: LookupScreenProps) {
           title={t("lookup_success_page.cta_learn_about", {
             state_abbr: state?.abbreviation,
           })}
-          onPress={() => Linking.openURL(state?.learn_about_url || "")}
+          onPress={async () => {
+            Linking.openURL(state?.learn_about_url || "");
+
+            const response = await submitEmailZip({
+              email: form.email_address,
+              zip: form.home_zip_code,
+              locale: i18n.language,
+              partner_id: form.partner_id.toString(),
+            });
+            await AsyncStorage.setItem(
+              "registration_uid",
+              response.data.registration_uid,
+            );
+
+            await reportEvent({
+              registration_uid: response.data.registration_uid ?? "",
+              partner_id: form.partner_id.toString() || "1",
+              step: REPORT_EVENT_STEPS.EMPTY,
+              event_name: "CTA clicked: " + state.learn_about_url,
+            });
+          }}
         />
+        <Button
+          title={t("general.calls_to_action.request_absentee_ballot")}
+          onPress={() => Linking.openURL(config?.urls.abr_tool || "")}
+        />
+        <Button
+          title={t("finish_with_state_page3.fb_button_text")}
+          onPress={async () => {
+            Linking.openURL(config?.share?.lookup?.facebook || "");
+
+            const registration_uid =
+              (await AsyncStorage.getItem(`registration_uid`)) || "";
+            await reportEvent({
+              registration_uid,
+              partner_id: form.partner_id.toString(),
+              step: REPORT_EVENT_STEPS.EMPTY,
+              event_name: "CTA clicked: " + config?.share?.lookup?.facebook,
+            });
+          }}
+        />
+        <Button
+          title={t("finish_with_state_page3.x_button_text")}
+          onPress={async () => {
+            Linking.openURL(config?.share?.lookup?.x || "");
+
+            const registration_uid =
+              (await AsyncStorage.getItem(`registration_uid`)) || "";
+            await reportEvent({
+              registration_uid,
+              partner_id: form.partner_id.toString(),
+              step: REPORT_EVENT_STEPS.EMPTY,
+              event_name: "CTA clicked: " + config?.share?.lookup?.x,
+            });
+          }}
+        />
+        <Button
+          title={t("finish_with_state_page3.copy_button_text")}
+          onPress={handleCopyLink}
+        />
+        {copyNotification && <Text>{copyNotification}</Text>}
         <Text style={styles.bold}>
           {t("lookup_success_page.something_wrong")}
         </Text>
@@ -126,8 +231,6 @@ export default function LookupScreen({ route }: LookupScreenProps) {
         <View style={styles.list}>
           {/* Item 1 */}
           <View style={styles.listItem}>
-            <Text style={styles.number}>1.</Text>
-
             <Text style={styles.textLi}>
               <Trans
                 i18nKey="lookup_not_found_page.failure_body1"
@@ -148,8 +251,6 @@ export default function LookupScreen({ route }: LookupScreenProps) {
 
           {/* Item 2 */}
           <View style={styles.listItem}>
-            <Text style={styles.number}>2.</Text>
-
             <Text style={styles.textLi}>
               {t("lookup_not_found_page.failure_body2")}
             </Text>
@@ -157,13 +258,46 @@ export default function LookupScreen({ route }: LookupScreenProps) {
 
           {/* Item 3 */}
           <View style={styles.listItem}>
-            <Text style={styles.number}>3.</Text>
-
             <Text style={styles.textLi}>
               {t("lookup_not_found_page.failure_body3")}
             </Text>
           </View>
         </View>
+        {state.ovr_type !== "not_participating" && (
+          <Button
+            title={t("lookup_not_found_page.cta_register")}
+            onPress={async () => {
+              const response = await submitEmailZip({
+                email: form.email_address,
+                zip: form.home_zip_code,
+                locale: i18n.language,
+                partner_id: form.partner_id.toString(),
+              });
+              await AsyncStorage.setItem(
+                "registration_uid",
+                response.data.registration_uid,
+              );
+
+              await reportEvent({
+                registration_uid: response.data.registration_uid ?? "",
+                partner_id: form.partner_id.toString() || "1",
+                step: REPORT_EVENT_STEPS.STEP_1,
+                event_name: "redirect from lookup to OV",
+              });
+
+              navigation.replace("Register", {
+                status: { success: true },
+                state,
+                zip: form.home_zip_code,
+                email: form.email_address,
+                form,
+                pageFromLookup: "paper",
+                workflowType: "nvra",
+                showRedirectText: false,
+              } as any);
+            }}
+          />
+        )}
       </View>
     </ScrollView>
   );
@@ -206,24 +340,11 @@ const getStyles = (theme: any) =>
       flexDirection: "row",
       alignItems: "flex-start",
     },
-    number: {
-      width: 24,
-      fontSize: 16,
-    },
-
     textLi: {
       marginRight: 10,
       fontSize: 15,
       lineHeight: 22,
     },
-
-    linkRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 8,
-      gap: 4,
-    },
-
     link: {
       color: theme.link,
       fontSize: 15,

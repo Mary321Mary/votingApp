@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
 import { FormProps, RegisterFormState } from "@/utils/types";
-import { NameSection } from "../modules/NameSection";
-import { AddressSection } from "../modules/AddressSection";
+import { NameSection } from "../../modules/NameSection";
+import { AddressSection } from "../../modules/AddressSection";
 import { isRequired, isVisible } from "@/utils/constants";
-import { DateRow } from "../atoms/DateOfBirth/DateRow";
-import { PhoneSection } from "../modules/PhoneSection";
+import { DateRow } from "../../atoms/DateOfBirth/DateRow";
+import { PhoneSection } from "../../modules/PhoneSection";
 import { useTranslation } from "react-i18next";
-import { ContactSection } from "../modules/ContactSection";
-import InputField from "../atoms/InputField";
+import { ContactSection } from "../../modules/ContactSection";
+import InputField from "../../atoms/InputField";
 import { StyleSheet, Text } from "react-native";
-import { Checkbox } from "../atoms/Checkbox";
+import { Checkbox } from "../../atoms/Checkbox";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
 export const ConnectedWA = ({

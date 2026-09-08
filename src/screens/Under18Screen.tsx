@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,10 +14,11 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { useNavigation } from "@react-navigation/native";
-import { setUnder18Reminder } from "@/utils/api";
+import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import RenderHTML from "react-native-render-html";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { getFlowType } from "@/utils/registerRouting";
+import { getFlowType } from "@/utils/register/registerRouting";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
 
 interface Under18ScreenProps {
   route: {
@@ -171,6 +172,18 @@ export const Under18Screen = ({ route }: Under18ScreenProps) => {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    async function fetchData() {
+      await reportEvent({
+        registration_uid,
+        partner_id: form.partner_id.toString() || "1",
+        step: REPORT_EVENT_STEPS.UNDER_18,
+        event_name: "under-18 notification",
+      });
+    }
+    fetchData();
+  }, []);
 
   return (
     <View>

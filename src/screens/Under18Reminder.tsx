@@ -18,15 +18,10 @@ import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Clipboard from "@react-native-clipboard/clipboard";
-
-type StateData = {
-  name: string;
-  learn_about_url?: string;
-};
-
-type RegisterFormState = {
-  state: string;
-};
+import { reportEvent } from "../utils/api";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { RegisterFormState, StateData } from "../utils/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type RouteParams = {
   state: StateData;
@@ -80,9 +75,18 @@ export default function Under18ReminderScreen() {
               title={t("print_form_page.learn_button_text", {
                 state_abbr: form.state,
               })}
-              onPress={() => {
+              onPress={async () => {
                 if (state.learn_about_url)
                   Linking.openURL(state.learn_about_url);
+
+                const registration_uid =
+                  (await AsyncStorage.getItem("registration_uid")) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: navState.form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name: "CTA clicked: " + state.learn_about_url,
+                });
               }}
             />
           </View>
@@ -92,21 +96,40 @@ export default function Under18ReminderScreen() {
               title={t("print_form_page.share_fb_button_text", {
                 state_abbr: form.state,
               })}
-              onPress={() =>
-                Linking.openURL(config?.share?.registrations?.facebook || "")
-              }
+              onPress={async () => {
+                Linking.openURL(config?.share?.registrations?.facebook || "");
+
+                const registration_uid =
+                  (await AsyncStorage.getItem("registration_uid")) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: navState.form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name:
+                    "CTA clicked: " + config?.share?.registrations?.facebook,
+                });
+              }}
             />
             <Button
               title={t("print_form_page.share_x_button_text", {
                 state_abbr: form.state,
               })}
-              onPress={() =>
-                Linking.openURL(config?.share?.registrations?.x || "")
-              }
+              onPress={async () => {
+                Linking.openURL(config?.share?.registrations?.x || "");
+
+                const registration_uid =
+                  (await AsyncStorage.getItem("registration_uid")) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: navState.form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name: "CTA clicked: " + config?.share?.registrations?.x,
+                });
+              }}
             />
             <Button
               title={t("print_form_page.copy_link", { state_abbr: form.state })}
-              onPress={() => {
+              onPress={async () => {
                 try {
                   Clipboard.setString(
                     config?.share?.registrations?.copy_link || "",
@@ -121,6 +144,17 @@ export default function Under18ReminderScreen() {
                     Alert.alert("Success", t(`pennsylvania.link_copied`));
                   }
                   setCopyNotification(t(`pennsylvania.link_copied`));
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem("registration_uid")) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: copy link " +
+                      config?.share?.registrations?.copy_link,
+                  });
                 } catch (err) {
                   console.error("Failed to copy link:", err);
                 }

@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View, Text, ScrollView, Button } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import Header from "@/layout/Header";
+import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { reportEvent } from "../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type RouteParams = {
   response: {
@@ -26,6 +29,20 @@ export default function AfterDeadlineScreen() {
   const route = useRoute<AfterDeadlineScreenRouteProp>();
 
   const { response, zip, email } = route.params || {};
+
+  useEffect(() => {
+    async function fetchData() {
+      const registration_uid =
+        (await AsyncStorage.getItem("registration_uid")) || "";
+      await reportEvent({
+        registration_uid,
+        partner_id: "1",
+        step: REPORT_EVENT_STEPS.EMPTY,
+        event_name: "after deadline notification",
+      });
+    }
+    fetchData();
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
