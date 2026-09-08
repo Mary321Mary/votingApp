@@ -66,6 +66,7 @@ import RegisterFlowContent from "./RegisterFlowContent";
 import { getInitialFormState } from "./initFormState";
 import { useFormScroll } from "../../../contexts/FormScrollContext";
 import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
+import { apiTimeoutMethodFromPollErrors } from "../../../utils/report/covrFailReporting";
 
 export type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -334,6 +335,10 @@ export const RegisterResult = ({
         email,
         form,
         ...navigationExtras,
+        apiTimeoutMethod: apiTimeoutMethodFromPollErrors(
+          result.errors,
+          "check_pa_covr",
+        ),
       };
 
       navigation.navigate("FailPA", failState);
@@ -391,7 +396,17 @@ export const RegisterResult = ({
         if (result.errors?.length) {
           console.error("WA check failed:", result.errors);
         }
-        navigation.navigate("FailWA", { state, zip, email, form });
+        navigation.navigate("FailWA", {
+          state,
+          zip,
+          email,
+          form,
+
+          apiTimeoutMethod: apiTimeoutMethodFromPollErrors(
+            result.errors,
+            "check_wa_covr",
+          ),
+        });
       }
     } catch (error) {
       console.error("WA submit failed:", error);
@@ -597,7 +612,16 @@ export const RegisterResult = ({
                 );
                 navigation.replace("SuccessMI", { state, form });
               } else {
-                navigation.navigate("FailMI", { state, zip, email, form });
+                navigation.navigate("FailMI", {
+                  state,
+                  zip,
+                  email,
+                  form,
+                  apiTimeoutMethod: apiTimeoutMethodFromPollErrors(
+                    result.errors,
+                    "check_mi_covr",
+                  ),
+                });
               }
             } catch (error) {
               console.error("MI COVR submit failed:", error);

@@ -4,17 +4,24 @@ import { useTranslation } from "react-i18next";
 import InputField from "./InputField";
 import i18n from "@/i18n";
 import { getSurveyQuestions } from "@/utils/api";
-import { RegisterFormState, RegisterFormStateError } from "@/utils/types";
+import {
+  RegisterFormState,
+  RegisterFormStateError,
+  StateData,
+} from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { allowsPaperFallback } from "../../utils/register/registerRouting";
 
 interface Props {
   value: any;
   errorMessages: any;
   onChange: (value: RegisterFormState) => void;
   onChangeError: (value: RegisterFormStateError) => void;
+  state?: StateData;
 }
 
 const QuestionsSection = ({
+  state,
   value,
   errorMessages,
   onChange,
@@ -61,7 +68,9 @@ const QuestionsSection = ({
   return (
     <>
       <View style={styles.divider} />
-      <Text style={styles.title}>{t("nvra_form_page.questions_for_you")}</Text>
+      <Text style={allowsPaperFallback(state) ? styles.text : styles.title}>
+        {t("nvra_form_page.questions_for_you")}
+      </Text>
 
       <InputField
         name="survey_answer_1"
@@ -100,7 +109,13 @@ const getStyles = (theme: any) =>
       fontSize: 16,
       lineHeight: 22,
       fontWeight: "600",
-      color: "#111827",
+      marginBottom: 5,
+    },
+
+    text: {
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: "500",
       marginBottom: 5,
     },
   });

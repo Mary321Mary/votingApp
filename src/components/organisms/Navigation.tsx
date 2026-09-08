@@ -33,6 +33,7 @@ import FinishWithStateScreen from "@/screens/FinishWithState";
 import FailCAScreen from "@/screens/FailCA";
 import AfterDeadlineScreen from "@/screens/AfterDeadline";
 import Under18ReminderScreen from "@/screens/Under18Reminder";
+import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -79,6 +80,7 @@ export type RootStackParamList = {
     zip: string;
     email: string;
     form: RegisterFormState;
+    apiTimeoutMethod?: CovrCheckMethodName;
   };
   SuccessPA: { state: StateData; form: RegisterFormState };
   FailPA: {
@@ -86,6 +88,7 @@ export type RootStackParamList = {
     zip: string;
     email: string;
     form: RegisterFormState;
+    apiTimeoutMethod?: CovrCheckMethodName;
   };
   SuccessWA: { state: StateData; form: RegisterFormState };
   FailCA: {
@@ -99,6 +102,7 @@ export type RootStackParamList = {
     zip: string;
     email: string;
     form: RegisterFormState;
+    apiTimeoutMethod?: CovrCheckMethodName;
   };
   Under18: {
     state: StateData;

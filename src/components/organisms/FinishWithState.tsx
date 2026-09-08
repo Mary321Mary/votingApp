@@ -33,11 +33,14 @@ function FinishWithState({
         })}
       </Text>
 
-      <Text style={styles.description}>
-        {t("finish_with_state_page2.notice2")}
-      </Text>
+      {allowsPaperFallback(state) && (
+        <Text style={styles.description}>
+          {t("finish_with_state_page2.notice2")}
+        </Text>
+      )}
 
       <QuestionsSection
+        state={state}
         value={value}
         errorMessages={errorMessages}
         onChange={onChange}

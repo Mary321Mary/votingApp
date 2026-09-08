@@ -7,11 +7,16 @@ import React, {
 } from "react";
 import { fetchUIConfiguration } from "utils/api";
 import { UIConfig } from "utils/types";
+import {
+  isServerUnreachable,
+  setApiDownHandler,
+} from "../utils/http/isServerUnreachable";
 
 interface UIConfigContextType {
   config: UIConfig | null;
   isLoading: boolean;
   error: string | null;
+  isApiDown: boolean;
 }
 
 const UIConfigContext = createContext<UIConfigContextType | undefined>(
@@ -24,6 +29,12 @@ export const UIConfigProvider: React.FC<{ children: ReactNode }> = ({
   const [config, setConfig] = useState<UIConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isApiDown, setIsApiDown] = useState(false);
+
+  useEffect(() => {
+    setApiDownHandler(() => setIsApiDown(true));
+    return () => setApiDownHandler(null);
+  }, []);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -34,7 +45,11 @@ export const UIConfigProvider: React.FC<{ children: ReactNode }> = ({
         setError(null);
       } catch (err) {
         console.error("Failed to fetch UI configuration:", err);
-        setError("Failed to load configuration");
+        setError(
+          isServerUnreachable(err)
+            ? "Failed to load configuration: server not responding"
+            : "Failed to load configuration",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -44,7 +59,7 @@ export const UIConfigProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   return (
-    <UIConfigContext.Provider value={{ config, isLoading, error }}>
+    <UIConfigContext.Provider value={{ config, isLoading, error, isApiDown }}>
       {children}
     </UIConfigContext.Provider>
   );

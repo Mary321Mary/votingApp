@@ -7,6 +7,8 @@ import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/organisms/Navigation";
 import { RegisterFormState, StateData } from "@/utils/types";
+import { useCovrFailReportEvent } from "../utils/hooks/useCovrFailReportEvent";
+import { CovrCheckMethodName } from "../utils/report/covrFailReporting";
 
 interface FailMIScreenProps {
   route: {
@@ -15,6 +17,7 @@ interface FailMIScreenProps {
       zip: string;
       email: string;
       form: RegisterFormState;
+      apiTimeoutMethod?: CovrCheckMethodName;
     };
   };
 }
@@ -30,6 +33,12 @@ export default function FailMIScreen({ route }: FailMIScreenProps) {
   const { t } = useTranslation();
   const navigation = useNavigation<FailMIScreenNavigation>();
   const params = route.params;
+
+  useCovrFailReportEvent(
+    "MI covr error",
+    params?.form,
+    params?.apiTimeoutMethod,
+  );
 
   useEffect(() => {
     if (!params?.state || !params?.form) {

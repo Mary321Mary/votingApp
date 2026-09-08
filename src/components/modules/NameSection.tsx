@@ -37,13 +37,9 @@ export const NameSection = ({
     { name: t("general.none"), value: "" },
     { name: "Jr.", value: "Jr." },
     { name: "Sr.", value: "Sr." },
-    { name: "I", value: "I" },
     { name: "II", value: "II" },
     { name: "III", value: "III" },
     { name: "IV", value: "IV" },
-    { name: "V", value: "V" },
-    { name: "VI", value: "VI" },
-    { name: "VII", value: "VII" },
   ];
 
   const updateField = <K extends keyof RegisterFormState>(
@@ -63,31 +59,30 @@ export const NameSection = ({
     <View style={styles.section}>
       {!isCompressed && (
         <View style={styles.row}>
-          {/* {isVisible(formCongif, "name_title") && ( */}
-          <SelectField
-            name="name_title"
-            label={t("form_fields.name_title")}
-            value={value.name_title}
-            options={SUFFIX}
-            required={isRequired(formCongif, "name_title")}
-            errorMessage={errorMessages.name_title}
-            onValueChange={itemValue => updateField("name_title", itemValue)}
-          />
-          {/* )} */}
+          {isVisible(formCongif, "name_title") && (
+            <SelectField
+              name="name_title"
+              label={t("form_fields.name_title")}
+              value={value.name_title}
+              options={SUFFIX}
+              required={isRequired(formCongif, "name_title")}
+              errorMessage={errorMessages.name_title}
+              onValueChange={itemValue => updateField("name_title", itemValue)}
+            />
+          )}
 
-          {/* {isVisible(formCongif, "first_name") && ( */}
-          <InputField
-            name="first_name"
-            label={t("form_fields.first_name")}
-            required={isRequired(formCongif, "first_name")}
-            value={value.first_name}
-            errorMessage={t(errorMessages.first_name)}
-            helpText={t("form_fields.name_help")}
-            onChangeText={(text: string) => updateField("first_name", text)}
-          />
-          {/* )} */}
-          {(!value.age_eligibility || !value.has_no_state_license) && (
-            // isVisible(formCongif, "middle_name") && (
+          {isVisible(formCongif, "first_name") && (
+            <InputField
+              name="first_name"
+              label={t("form_fields.first_name")}
+              required={isRequired(formCongif, "first_name")}
+              value={value.first_name}
+              errorMessage={t(errorMessages.first_name)}
+              helpText={t("form_fields.name_help")}
+              onChangeText={(text: string) => updateField("first_name", text)}
+            />
+          )}
+          {isVisible(formCongif, "middle_name") && (
             <InputField
               name="middle_name"
               label={t("form_fields.middle_name")}
@@ -97,38 +92,38 @@ export const NameSection = ({
               onChangeText={(text: string) => updateField("middle_name", text)}
             />
           )}
-          {/* {isVisible(formCongif, "last_name") && ( */}
-          <InputField
-            name="last_name"
-            label={t("form_fields.last_name")}
-            value={value.last_name}
-            errorMessage={t(errorMessages.last_name)}
-            required={isRequired(formCongif, "last_name")}
-            onChangeText={(text: string) => updateField("last_name", text)}
-          />
-          {/* )} */}
+          {isVisible(formCongif, "last_name") && (
+            <InputField
+              name="last_name"
+              label={t("form_fields.last_name")}
+              value={value.last_name}
+              errorMessage={t(errorMessages.last_name)}
+              required={isRequired(formCongif, "last_name")}
+              onChangeText={(text: string) => updateField("last_name", text)}
+            />
+          )}
 
-          {/* {isVisible(formCongif, "name_suffix") && ( */}
-          <SelectField
-            name="prev_name_suffix"
-            label={t("form_fields.name_suffix")}
-            value={value.prev_name_suffix}
-            options={SUFFIX}
-            required={isRequired(
-              formCongif,
-              "prev_name_suffix",
-              value.change_of_name,
-            )}
-            errorMessage={
-              errorMessages.prev_name_suffix
-                ? t(errorMessages.prev_name_suffix)
-                : undefined
-            }
-            onValueChange={itemValue =>
-              updateField("prev_name_suffix", itemValue)
-            }
-          />
-          {/* )} */}
+          {isVisible(formCongif, "name_suffix") && (
+            <SelectField
+              name="prev_name_suffix"
+              label={t("form_fields.name_suffix")}
+              value={value.prev_name_suffix}
+              options={SUFFIX}
+              required={isRequired(
+                formCongif,
+                "prev_name_suffix",
+                value.change_of_name,
+              )}
+              errorMessage={
+                errorMessages.prev_name_suffix
+                  ? t(errorMessages.prev_name_suffix)
+                  : undefined
+              }
+              onValueChange={itemValue =>
+                updateField("prev_name_suffix", itemValue)
+              }
+            />
+          )}
         </View>
       )}
 

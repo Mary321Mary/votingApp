@@ -107,11 +107,14 @@ export const CheckVoterStatusScreen = ({
           form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
         const responseLookup = await submitLookup({ ...form });
 
-        if (responseLookup.data.lookup_uid)
+        if (responseLookup.data.lookup_uid) {
           await AsyncStorage.setItem(
             "registration_uid",
             responseLookup.data.lookup_uid,
           );
+        } else {
+          await AsyncStorage.setItem("registration_uid", "");
+        }
 
         if (responseLookup.data.state?.abbreviation === "ND") {
           navigation.navigate("NotParticipating", {

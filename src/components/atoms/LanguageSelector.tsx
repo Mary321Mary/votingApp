@@ -2,7 +2,6 @@ import React, { useContext } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { loadRemoteTranslations } from "@/i18n/loader";
 
 const LanguageSelector: React.FC = () => {
   const theme = useContext(ThemeContext);
@@ -11,7 +10,6 @@ const LanguageSelector: React.FC = () => {
   const changeLanguage = async (lang: string) => {
     if (i18n.language === lang) return;
 
-    await loadRemoteTranslations(lang);
     await i18n.changeLanguage(lang);
   };
 

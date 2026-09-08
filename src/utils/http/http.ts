@@ -4,15 +4,20 @@ import axios, {
   type AxiosError,
   type InternalAxiosRequestConfig,
 } from "axios";
-import {
-  getToken,
-  getRefreshToken,
-  setToken,
-  setRefreshToken,
-  removeTokens,
-} from "utils/localStorage";
 import * as authService from "utils/api";
 import Config from "react-native-config";
+import {
+  apiMethodFromUrl,
+  fireApiTimeoutReport,
+  isCovrCheckEndpoint,
+  isTelemetryEndpoint,
+  parseRequestData,
+  registrationContextFromRequestBody,
+  resolvePartnerId,
+} from "../report/apiTimeoutHelpers";
+import { isNetworkFailure, notifyApiUnreachable } from "./isServerUnreachable";
+
+const DEFAULT_AXIOS_TIMEOUT_MS = 60000;
 
 // Extend the AxiosRequestConfig to include _retry property
 interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -33,17 +38,14 @@ export class HttpClient {
 
     this.client = axios.create({
       baseURL: BASE_URL,
+      timeout: DEFAULT_AXIOS_TIMEOUT_MS,
       headers: {
         "Content-type": "application/json",
       },
     });
 
     this.client.interceptors.request.use(
-      async config => {
-        const token = await getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
+      config => {
         return config;
       },
       error => {
@@ -69,25 +71,7 @@ export class HttpClient {
           originalRequest._retry = true;
           this.isRefreshing = true;
 
-          const refreshTokenValue = await getRefreshToken();
-          if (!refreshTokenValue) {
-            this.isRefreshing = false;
-            await removeTokens();
-            return Promise.reject(error);
-          }
-
           try {
-            const response = await authService.refreshToken(refreshTokenValue);
-            const { access_token, refresh_token } = response.data;
-
-            await setToken(access_token);
-            await setRefreshToken(refresh_token);
-
-            // Update the original request with new token
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${access_token}`;
-            }
-
             // Process queued requests
             this.failedQueue.forEach(({ resolve }) => {
               resolve();
@@ -99,7 +83,6 @@ export class HttpClient {
           } catch (refreshError) {
             console.error("Refresh token error:", refreshError);
             this.isRefreshing = false;
-            await removeTokens();
 
             // Reject queued requests
             this.failedQueue.forEach(({ reject }) => {
@@ -111,32 +94,50 @@ export class HttpClient {
           }
         }
 
+        const originalUrl = originalRequest?.url;
+        // Telemetry failures must not re-enter this interceptor: reporting
+        // report_internal_error while offline used to recurse forever.
+        if (isTelemetryEndpoint(originalUrl)) {
+          return Promise.reject(error);
+        }
+
         const status = error.response?.status;
-        if (
-          !status ||
-          status === 422 ||
-          status >= 500 ||
-          error.code === "ECONNABORTED"
-        ) {
+        const isAborted = error.code === "ECONNABORTED";
+        const reportTimeout = isAborted && !isCovrCheckEndpoint(originalUrl);
+        const reportInternal =
+          !isAborted && (status === 422 || (status != null && status >= 500));
+
+        if (isNetworkFailure(error)) {
+          notifyApiUnreachable();
+        }
+
+        if (reportTimeout || reportInternal) {
           try {
-            const reqData = originalRequest?.data
-              ? JSON.parse(originalRequest.data)
-              : {};
-            const registrant = reqData?.registrant || {};
+            const reqData = parseRequestData(originalRequest?.data);
+            const { registration_uid: registrationUid, partner_id: partnerId } =
+              registrationContextFromRequestBody(reqData);
+            const partnerIdStr = resolvePartnerId(partnerId);
+
+            if (reportTimeout) {
+              fireApiTimeoutReport(
+                authService.reportEvent,
+                apiMethodFromUrl(originalUrl),
+                {
+                  registration_uid: registrationUid || "",
+                  partner_id: partnerIdStr,
+                },
+              );
+            }
 
             authService
               .reportInternalError({
                 message: `API Failure on ${originalRequest?.method?.toUpperCase()} ${
                   originalRequest?.url
                 }: ${error.message}`,
-                registration_uid:
-                  reqData?.registration_uid ||
-                  registrant?.registration_uid ||
-                  null,
-                voter_uid: reqData?.voter_uid || registrant?.voter_uid || null,
-                partner_id: registrant?.partner_id
-                  ? String(registrant.partner_id)
-                  : "1",
+                registration_uid: registrationUid || "",
+                voter_uid:
+                  reqData?.voter_uid || reqData?.registrant?.voter_uid || null,
+                partner_id: partnerIdStr,
                 workflow_type: reqData?.workflow_type || null,
                 severity: "error",
                 context: {

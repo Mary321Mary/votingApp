@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { useWindowDimensions } from "react-native";
+import { Text, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 import { FormProps } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -42,28 +42,7 @@ export const ConnectedWAStep2Select = ({
 
   return (
     <>
-      <RenderHTML
-        contentWidth={width}
-        source={{
-          html: t("washington.wdl_number_none_notice", {
-            rtv_paper_form_url: "paper-link",
-          }),
-        }}
-        tagsStyles={{
-          body: {
-            fontSize: 14,
-            lineHeight: 18,
-            marginBottom: 20,
-          },
-          a: {
-            color: theme.link,
-            textDecorationLine: "underline",
-          },
-        }}
-        renderersProps={{
-          a: { onPress: goToPaper },
-        }}
-      />
+      <Text>{t("washington.wdl_number_none_notice")}</Text>
 
       <Radio
         label={t("washington.local_upload_option")}

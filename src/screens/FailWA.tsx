@@ -12,6 +12,8 @@ import {
   StateData,
   SubmitEmailZipResponseProps,
 } from "@/utils/types";
+import { CovrCheckMethodName } from "../utils/report/covrFailReporting";
+import { useCovrFailReportEvent } from "../utils/hooks/useCovrFailReportEvent";
 
 const PERSONAL_INFO_LINK = "app://personal-info-link/";
 const PAPER_FORM_LINK = "app://paper-link/";
@@ -23,6 +25,7 @@ interface FailWAScreenProps {
       zip: string;
       email: string;
       form: RegisterFormState;
+      apiTimeoutMethod?: CovrCheckMethodName;
     };
   };
 }
@@ -40,6 +43,12 @@ export default function FailWAScreen({ route }: FailWAScreenProps) {
   const styles = getStyles();
 
   const params = route.params;
+
+  useCovrFailReportEvent(
+    "WA covr error",
+    params?.form,
+    params?.apiTimeoutMethod,
+  );
 
   useEffect(() => {
     if (!params?.state || !params?.form) {

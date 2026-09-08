@@ -764,7 +764,7 @@ const RegisterFlowContent = ({
           />
         );
       if (step === 2) {
-        if (form.has_no_state_license) {
+        if (form.has_no_state_license && allowsPaperFallback(state)) {
           return (
             <PaperOVR
               isRedirectedCompressNVRA

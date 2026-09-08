@@ -77,57 +77,57 @@ export const AddressSection = ({
     <View style={styles.section}>
       {!isCompressed && (
         <View style={styles.row}>
-          {/* {isVisible(formCongif, "home_address") && ( */}
-          <InputField
-            name="home_address"
-            label={t("form_fields.address")}
-            value={value.home_address}
-            helpText={t("form_fields.home_address_help")}
-            required={isRequired(formCongif, "home_address")}
-            errorMessage={t(errorMessages.home_address)}
-            onChangeText={(text: string) => updateField("home_address", text)}
-          />
-          {/* )} */}
-          {/* {isVisible(formCongif, "home_unit") && ( */}
-          <InputField
-            name="home_unit"
-            label={t("form_fields.unit_lot")}
-            value={value.home_unit}
-            required={isRequired(formCongif, "home_unit")}
-            errorMessage={t(errorMessages.home_unit)}
-            onChangeText={(text: string) => updateField("home_unit", text)}
-          />
-          {/* )} */}
-          {/* {isVisible(formCongif, "home_city") && ( */}
-          <InputField
-            name="home_city"
-            label={t("form_fields.city")}
-            value={value.home_city}
-            required={isRequired(formCongif, "home_city")}
-            errorMessage={t(errorMessages.home_city)}
-            onChangeText={(text: string) => updateField("home_city", text)}
-          />
-          {/* )} */}
-          {/* {isVisible(formCongif, "home_state") && ( */}
-          <InputField
-            name="home_state"
-            label={t("form_fields.state")}
-            disabled
-            value={state.abbreviation}
-            required={isRequired(formCongif, "home_state")}
-            errorMessage={t(errorMessages.state)}
-          />
-          {/* )} */}
-          {/* {isVisible(formCongif, "home_zip_code") && ( */}
-          <InputField
-            name="home_zip_code"
-            label={t("form_fields.zip")}
-            disabled
-            value={value.home_zip_code}
-            required={isRequired(formCongif, "home_zip_code")}
-            errorMessage={t(errorMessages.home_zip_code)}
-          />
-          {/* )} */}
+          {isVisible(formCongif, "home_address") && (
+            <InputField
+              name="home_address"
+              label={t("form_fields.address")}
+              value={value.home_address}
+              helpText={t("form_fields.home_address_help")}
+              required={isRequired(formCongif, "home_address")}
+              errorMessage={t(errorMessages.home_address)}
+              onChangeText={(text: string) => updateField("home_address", text)}
+            />
+          )}
+          {isVisible(formCongif, "home_unit") && (
+            <InputField
+              name="home_unit"
+              label={t("form_fields.unit_lot")}
+              value={value.home_unit}
+              required={isRequired(formCongif, "home_unit")}
+              errorMessage={t(errorMessages.home_unit)}
+              onChangeText={(text: string) => updateField("home_unit", text)}
+            />
+          )}
+          {isVisible(formCongif, "home_city") && (
+            <InputField
+              name="home_city"
+              label={t("form_fields.city")}
+              value={value.home_city}
+              required={isRequired(formCongif, "home_city")}
+              errorMessage={t(errorMessages.home_city)}
+              onChangeText={(text: string) => updateField("home_city", text)}
+            />
+          )}
+          {isVisible(formCongif, "home_state") && (
+            <InputField
+              name="home_state"
+              label={t("form_fields.state")}
+              disabled
+              value={state.abbreviation}
+              required={isRequired(formCongif, "home_state")}
+              errorMessage={t(errorMessages.state)}
+            />
+          )}
+          {isVisible(formCongif, "home_zip_code") && (
+            <InputField
+              name="home_zip_code"
+              label={t("form_fields.zip")}
+              disabled
+              value={value.home_zip_code}
+              required={isRequired(formCongif, "home_zip_code")}
+              errorMessage={t(errorMessages.home_zip_code)}
+            />
+          )}
         </View>
       )}
 
