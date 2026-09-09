@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { useTranslation } from "react-i18next";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { FormProps, RegisterFormState } from "@/utils/types";
@@ -8,12 +8,14 @@ import { SelectField } from "../atoms/SelectField";
 
 interface IDSectionProps extends FormProps {
   showRadioButtons?: boolean;
+  isCompressed?: boolean;
 }
 
 export const RaceAndParty = ({
   value,
   formCongif,
   errorMessages,
+  isCompressed,
   onChange,
   onChangeError,
 }: IDSectionProps) => {
@@ -35,43 +37,52 @@ export const RaceAndParty = ({
   };
 
   return (
-    <View style={styles.section}>
-      {(!value.age_eligibility || !value.has_no_state_license) &&
-        isVisible(formCongif, "race") && (
-          <SelectField
-            name="race"
-            label={t("form_fields.race")}
-            value={value.race}
-            options={
-              formCongif.fields.race.options?.map((option: string) => ({
-                name: option,
-                value: option,
-              })) || []
-            }
-            required={isRequired(formCongif, "race")}
-            errorMessage={errorMessages.race}
-            helpText={formCongif?.fields?.race?.tooltip}
-            onValueChange={itemValue => updateField("race", itemValue)}
-          />
-        )}
-      {(!value.age_eligibility || !value.has_no_state_license) &&
-        isVisible(formCongif, "party") && (
-          <SelectField
-            name="party"
-            label={t("form_fields.party")}
-            value={value.party}
-            options={
-              formCongif.fields.party.options?.map((option: string) => ({
-                name: option,
-                value: option,
-              })) || []
-            }
-            required={isRequired(formCongif, "party")}
-            errorMessage={errorMessages.party}
-            helpText={formCongif?.fields?.party?.tooltip}
-            onValueChange={itemValue => updateField("party", itemValue)}
-          />
-        )}
+    <View style={isCompressed ? styles.fieldset : styles.section}>
+      {isCompressed && (
+        <View style={styles.legendContainer}>
+          <Text style={styles.legendText}>
+            {t("nvra_form_page.voter_reg_details_header")}
+          </Text>
+        </View>
+      )}
+      <View style={styles.section}>
+        {(!value.age_eligibility || !value.has_no_state_license) &&
+          isVisible(formCongif, "race") && (
+            <SelectField
+              name="race"
+              label={t("form_fields.race")}
+              value={value.race}
+              options={
+                formCongif.fields.race.options?.map((option: string) => ({
+                  name: option,
+                  value: option,
+                })) || []
+              }
+              required={isRequired(formCongif, "race")}
+              errorMessage={errorMessages.race}
+              helpText={formCongif?.fields?.race?.tooltip}
+              onValueChange={itemValue => updateField("race", itemValue)}
+            />
+          )}
+        {(!value.age_eligibility || !value.has_no_state_license) &&
+          isVisible(formCongif, "party") && (
+            <SelectField
+              name="party"
+              label={t("form_fields.party")}
+              value={value.party}
+              options={
+                formCongif.fields.party.options?.map((option: string) => ({
+                  name: option,
+                  value: option,
+                })) || []
+              }
+              required={isRequired(formCongif, "party")}
+              errorMessage={errorMessages.party}
+              helpText={formCongif?.fields?.party?.tooltip}
+              onValueChange={itemValue => updateField("party", itemValue)}
+            />
+          )}
+      </View>
     </View>
   );
 };
@@ -79,6 +90,33 @@ export const RaceAndParty = ({
 const getStyles = (theme: any) =>
   StyleSheet.create({
     section: {},
+
+    fieldset: {
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 15,
+      marginTop: 20,
+      marginBottom: 20,
+      position: "relative",
+    },
+    legendContainer: {
+      position: "absolute",
+      top: -10,
+      left: 12,
+      backgroundColor: theme.white,
+      borderRadius: 5,
+      padding: 3,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    legendText: {
+      fontSize: 14,
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      color: theme.textPrimary,
+    },
     inputLabel: {
       textTransform: "uppercase",
       marginVertical: 5,

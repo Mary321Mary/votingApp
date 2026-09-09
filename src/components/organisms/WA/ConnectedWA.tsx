@@ -72,6 +72,7 @@ export const ConnectedWA = ({
               errorText: t(errorMessages.birthYear),
             },
           }}
+          required={isRequired(formCongif, "date_of_birth")}
           updateField={updateField}
         />
       )}
@@ -139,6 +140,7 @@ export const ConnectedWA = ({
           </Text>
           <Text style={styles.help}>{t("washington.wdl_help")}</Text>
           <DateRow
+            name="issue_date"
             legend={t("washington.wdl_issue_date")}
             required={value.has_no_state_license === false}
             value={{

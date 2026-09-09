@@ -67,6 +67,7 @@ import { getInitialFormState } from "./initFormState";
 import { useFormScroll } from "../../../contexts/FormScrollContext";
 import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
 import { apiTimeoutMethodFromPollErrors } from "../../../utils/report/covrFailReporting";
+import Spinner from "../../atoms/Spinner";
 
 export type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -138,6 +139,7 @@ export const RegisterResult = ({
   const [errMsg, setErrMsg] =
     useState<RegisterFormStateError>(EMPTY_ERROR_MESSAGES);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
 
   const [form, setForm] = useState<RegisterFormState>(() =>
     getInitialFormState(initform, "1", state, zip, email),
@@ -879,6 +881,7 @@ export const RegisterResult = ({
 
   useEffect(() => {
     const fetchConfig = async () => {
+      setIsLoadingConfig(true);
       try {
         const response = await fetchDataConfiguration({
           partner_id: "1",
@@ -909,6 +912,8 @@ export const RegisterResult = ({
         }));
       } catch (err) {
         console.error("Failed to fetch Data configuration:", err);
+      } finally {
+        setIsLoadingConfig(false);
       }
     };
 
@@ -948,6 +953,10 @@ export const RegisterResult = ({
       ?.getScrollResponder()
       ?.scrollTo({ y: 0, animated: true });
   }, [step, scrollViewRef]);
+
+  if (isLoadingConfig) {
+    return <Spinner />;
+  }
 
   const noticeI18nKey = voluntaryPaperRedirect
     ? "nvra_form_page.redirect_notice_voluntary"

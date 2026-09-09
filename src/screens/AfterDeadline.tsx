@@ -1,11 +1,19 @@
 import React, { useEffect } from "react";
-import { StyleSheet, View, Text, ScrollView, Button } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  Button,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import Header from "@/layout/Header";
 import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
 import { reportEvent } from "../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import RenderHTML from "react-native-render-html";
 
 type RouteParams = {
   response: {
@@ -27,6 +35,7 @@ export default function AfterDeadlineScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const route = useRoute<AfterDeadlineScreenRouteProp>();
+  const { width } = useWindowDimensions();
 
   const { response, zip, email } = route.params || {};
 
@@ -50,22 +59,30 @@ export default function AfterDeadlineScreen() {
         text={`${t("general.register_in")}${response?.state?.name || ""}`}
       />
       <View style={styles.container}>
-        <Text style={styles.notificationText}>
-          {t("after_vr_deadline.notification")}
-        </Text>
+        <RenderHTML
+          contentWidth={width}
+          source={{ html: t("after_vr_deadline.notification") }}
+          tagsStyles={{
+            body: {
+              fontSize: 14,
+              lineHeight: 18,
+              marginVertical: 5,
+            },
+            strong: { fontWeight: "bold" },
+            br: { height: 1 },
+          }}
+        />
 
-        <View style={styles.buttonContainer}>
-          <Button
-            title={t("after_vr_deadline.continue_button_text")}
-            onPress={() => {
-              navigation.replace("Register", {
-                ...response,
-                zip,
-                email,
-              });
-            }}
-          />
-        </View>
+        <Button
+          title={t("after_vr_deadline.continue_button_text")}
+          onPress={() => {
+            navigation.replace("Register", {
+              ...response,
+              zip,
+              email,
+            });
+          }}
+        />
       </View>
     </ScrollView>
   );
@@ -78,20 +95,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 10,
+    padding: 10,
     width: "100%",
-  },
-  notificationText: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#333333",
-    marginVertical: 24,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-    gap: 8,
-    marginVertical: 16,
   },
 });

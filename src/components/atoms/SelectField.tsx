@@ -75,6 +75,12 @@ export const SelectField = ({
     setSearchQuery("");
   };
 
+  const handleOpenModal = () => {
+    if (!disabled) {
+      setModalVisible(true);
+    }
+  };
+
   return (
     <View>
       {/* Label */}
@@ -87,7 +93,7 @@ export const SelectField = ({
       {errorMessage && <Text style={styles.required}>{t(errorMessage)}</Text>}
 
       <TouchableOpacity
-        ref={registerField(name)}
+        ref={registerField(name, handleOpenModal)}
         disabled={disabled}
         style={[
           styles.pickerWrapper,

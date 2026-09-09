@@ -306,7 +306,7 @@ const getStyles = (theme: any) =>
     },
     fieldset: {
       borderWidth: 1,
-      borderColor: theme.borderColor || "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       paddingHorizontal: 12,
       paddingVertical: 15,
@@ -318,7 +318,7 @@ const getStyles = (theme: any) =>
       position: "absolute",
       top: -10,
       left: 12,
-      backgroundColor: theme.white || "#fff",
+      backgroundColor: theme.white,
       borderRadius: 5,
       padding: 3,
       flexDirection: "row",
@@ -328,7 +328,7 @@ const getStyles = (theme: any) =>
       fontSize: 14,
       fontWeight: "bold",
       textTransform: "uppercase",
-      color: theme.textPrimary || "#000",
+      color: theme.textPrimary,
     },
     requiredStar: {
       color: theme.secondary || "red",

@@ -27,6 +27,7 @@ import { getSurveyQuestions, submitLookup } from "@/utils/api";
 import i18n from "@/i18n";
 import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isRequired } from "../utils/constants";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -322,6 +323,7 @@ export const CheckVoterStatusScreen = ({
               errorText: t(errMsg.birthYear),
             },
           }}
+          required
           updateField={updateField}
         />
 

@@ -6,6 +6,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 import HelpTooltip from "../HelpTooltip";
 
+
 export interface DateField {
   name: keyof RegisterFormState;
   value: string;
@@ -23,6 +24,7 @@ export interface DateOfBirthProps {
   legend?: string;
   disabled?: boolean;
   required?: boolean;
+  name?: string;
   updateField: <K extends keyof RegisterFormState>(
     key: K,
     fieldValue: RegisterFormState[K],
@@ -30,6 +32,7 @@ export interface DateOfBirthProps {
 }
 
 export const DateRow: React.FC<DateOfBirthProps> = ({
+  name = "date_of_birth",
   value,
   legend,
   disabled = false,
@@ -40,6 +43,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  
 
   const MONTHS = [
     { value: "", name: t("general.months.month") },
@@ -154,29 +158,29 @@ const getStyles = (theme: any) =>
   StyleSheet.create({
     fieldset: {
       borderWidth: 1,
-      borderColor: theme.borderColor || "#ccc",
+      borderColor: theme.borderColor,
       borderRadius: 8,
       paddingHorizontal: 12,
-      paddingTop: 16,
-      paddingBottom: 12,
+      paddingVertical: 15,
       marginTop: 20,
+      marginBottom: 20,
       position: "relative",
     },
     legendContainer: {
       position: "absolute",
       top: -10,
       left: 12,
-      backgroundColor: theme.white || "#fff",
+      backgroundColor: theme.white,
       borderRadius: 5,
       padding: 3,
       flexDirection: "row",
       alignItems: "center",
     },
     legendText: {
-      fontSize: 12,
+      fontSize: 14,
       fontWeight: "bold",
       textTransform: "uppercase",
-      color: theme.textPrimary || "#000",
+      color: theme.textPrimary,
     },
     requiredStar: {
       color: theme.danger || "red",

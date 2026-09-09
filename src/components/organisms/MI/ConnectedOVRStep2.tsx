@@ -210,6 +210,7 @@ export default function ConnectedOVRStep2({
               errorText: t(errorMessages.birthYear),
             },
           }}
+          required={isRequired(formCongif, "date_of_birth")}
           updateField={updateField}
         />
       )}

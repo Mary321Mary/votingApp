@@ -3,7 +3,7 @@ import { FormProps, RegisterFormState } from "@/utils/types";
 import { NameSection } from "../modules/NameSection";
 import { AddressSection } from "../modules/AddressSection";
 import { ContactSection } from "../modules/ContactSection";
-import { isVisible } from "@/utils/constants";
+import { isRequired, isVisible } from "@/utils/constants";
 import { DateRow } from "../atoms/DateOfBirth/DateRow";
 import { useTranslation } from "react-i18next";
 
@@ -72,6 +72,7 @@ export const ConnectedCA = ({
               errorText: t(errorMessages.birthYear),
             },
           }}
+          required={isRequired(formCongif, "date_of_birth")}
           updateField={updateField}
         />
       )}

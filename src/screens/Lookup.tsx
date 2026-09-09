@@ -237,7 +237,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
                 components={{
                   strong: <Text style={styles.bold} />,
                 }}
-              />{" "}
+              />
               {t("lookup_not_found_page.failure_body1a")}{" "}
               <Text style={styles.bold}>{state?.recent_register_date}</Text>{" "}
               {t("lookup_not_found_page.failure_body1b")}

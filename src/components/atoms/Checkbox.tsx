@@ -1,5 +1,5 @@
-import React, { useContext, useRef } from "react";
-import { StyleSheet, Switch, Text, View } from "react-native";
+import React, { useContext } from "react";
+import { Text, Switch, StyleSheet, View } from "react-native";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import HelpTooltip from "./HelpTooltip";
 import { useFormScroll } from "../../contexts/FormScrollContext";
@@ -27,22 +27,20 @@ export const Checkbox = ({
 }: CheckboxProps) => {
   const theme = useContext(ThemeContext);
   const { registerField } = useFormScroll();
-  const switchRef = useRef<Switch | null>(null);
-
   const styles = getStyles(theme);
 
-  if (!name) {
-    return null;
-  }
+  if (!name) return null;
+
+  const handleToggle = () => {
+    if (!disabled) {
+      onValueChange(!value);
+    }
+  };
 
   return (
     <>
-      <View
-        ref={registerField(name, () => switchRef.current?.focus())}
-        style={styles.checkbox}
-      >
+      <View ref={registerField(name, handleToggle)} style={styles.checkbox}>
         <Switch
-          ref={switchRef}
           value={value}
           disabled={disabled}
           onValueChange={onValueChange}

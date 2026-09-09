@@ -12,6 +12,8 @@ import { useTranslation } from "react-i18next";
 import { PhoneSection } from "../modules/PhoneSection";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { PrevNameSection } from "../modules/PrevNameSection";
+import { PrevAddressSection } from "../modules/PrevAddressSection";
 
 interface PropsPaperOVR extends FormProps {
   counties: string[];
@@ -123,27 +125,58 @@ export const PaperOVR = ({
         />
       )}
 
-      <NameSection
-        value={value}
-        state={state}
-        formCongif={formCongif}
-        errorMessages={errorMessages}
-        showChangeName
-        isCompressed={isCompressed}
-        onChange={onChange}
-        onChangeError={onChangeError}
-      />
+      {!isCompressed && (
+        <NameSection
+          value={value}
+          state={state}
+          formCongif={formCongif}
+          errorMessages={errorMessages}
+          showChangeName
+          onChange={onChange}
+          onChangeError={onChangeError}
+        />
+      )}
 
-      <AddressSection
-        value={value}
-        state={state}
-        formCongif={formCongif}
-        errorMessages={errorMessages}
-        showChangeOfAddress
-        isCompressed={isCompressed}
-        onChange={onChange}
-        onChangeError={onChangeError}
-      />
+      {!isCompressed && (
+        <AddressSection
+          value={value}
+          state={state}
+          formCongif={formCongif}
+          errorMessages={errorMessages}
+          showChangeOfAddress
+          isCompressed={isCompressed}
+          onChange={onChange}
+          onChangeError={onChangeError}
+        />
+      )}
+
+      {isCompressed && (
+        <View style={styles.fieldset}>
+          {isCompressed && (
+            <View style={styles.legendContainer}>
+              <Text style={styles.legendText}>
+                {t("nvra_form_page.name_address_details_header")}
+              </Text>
+            </View>
+          )}
+          <PrevNameSection
+            value={value}
+            formCongif={formCongif}
+            errorMessages={errorMessages}
+            onChange={onChange}
+            onChangeError={onChangeError}
+          />
+          <PrevAddressSection
+            value={value}
+            state={state}
+            formCongif={formCongif}
+            errorMessages={errorMessages}
+            showChangeOfAddress
+            onChange={onChange}
+            onChangeError={onChangeError}
+          />
+        </View>
+      )}
 
       {!isCompressed && (
         <IDSection
@@ -161,6 +194,7 @@ export const PaperOVR = ({
         state={state}
         formCongif={formCongif}
         errorMessages={errorMessages}
+        isCompressed={isCompressed}
         onChange={onChange}
         onChangeError={onChangeError}
       />
@@ -252,7 +286,6 @@ const getStyles = (theme: any) =>
     },
     infoText: {
       fontSize: 14,
-      color: "#212529",
       lineHeight: 20,
     },
     boldText: {
@@ -262,8 +295,35 @@ const getStyles = (theme: any) =>
       padding: 4,
     },
     editButtonText: {
-      color: "#0d6efd", // variant="link" / text-primary
+      color: theme.primary, // variant="link" / text-primary
       fontWeight: "600", // fw-semibold
       fontSize: 14,
+    },
+
+    fieldset: {
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 15,
+      marginTop: 20,
+      marginBottom: 20,
+      position: "relative",
+    },
+    legendContainer: {
+      position: "absolute",
+      top: -10,
+      left: 12,
+      backgroundColor: theme.white,
+      borderRadius: 5,
+      padding: 3,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    legendText: {
+      fontSize: 14,
+      fontWeight: "bold",
+      textTransform: "uppercase",
+      color: theme.textPrimary,
     },
   });
