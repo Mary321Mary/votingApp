@@ -9,6 +9,7 @@ import { isRequired, isVisible } from "@/utils/constants";
 import { PrevAddressSection } from "./PrevAddressSection";
 
 interface AddressSectionProps extends FormProps {
+  checkZipValidation?: boolean;
   showChangeOfAddress?: boolean;
   changedAddressLabel?: string;
   isCompressed?: boolean;
@@ -21,6 +22,7 @@ export const AddressSection = ({
   errorMessages,
   showChangeOfAddress = false,
   changedAddressLabel = "",
+  checkZipValidation = false,
   onChange,
   onChangeError,
 }: AddressSectionProps) => {
@@ -104,6 +106,7 @@ export const AddressSection = ({
         errorMessages={errorMessages}
         showChangeOfAddress={showChangeOfAddress}
         changedAddressLabel={changedAddressLabel}
+        checkZipValidation={checkZipValidation}
         onChange={onChange}
         onChangeError={onChangeError}
       />

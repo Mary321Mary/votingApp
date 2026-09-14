@@ -12,6 +12,7 @@ import { submitEmailZip } from "../../utils/api";
 import i18n from "../../i18n";
 
 interface PrevAddressSectionProps extends FormProps {
+  checkZipValidation?: boolean;
   showChangeOfAddress?: boolean;
   changedAddressLabel?: string;
 }
@@ -21,6 +22,7 @@ export const PrevAddressSection = ({
   formCongif,
   errorMessages,
   showChangeOfAddress = false,
+  checkZipValidation = false,
   changedAddressLabel = "",
   onChange,
   onChangeError,
@@ -300,7 +302,7 @@ export const PrevAddressSection = ({
               onChangeText={(text: string) => {
                 updateField("prev_zip_code", text);
 
-                if (text.length === 5) {
+                if (text.length === 5 && checkZipValidation) {
                   handleZipValidation(text);
                 }
               }}

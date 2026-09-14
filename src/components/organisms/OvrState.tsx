@@ -57,6 +57,9 @@ export const OvrState = ({
         state={state}
         formCongif={formCongif}
         errorMessages={errorMessages}
+        showChangeOfAddress={
+          !value.age_eligibility || !value.has_no_state_license
+        }
         onChange={onChange}
         onChangeError={onChangeError}
       />

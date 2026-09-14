@@ -92,6 +92,7 @@ export const ConnectedWA = ({
         formCongif={formCongif}
         errorMessages={errorMessages}
         showChangeOfAddress
+        checkZipValidation
         changedAddressLabel={t("washington.prev_address_statement")}
         onChange={onChange}
         onChangeError={onChangeError}
