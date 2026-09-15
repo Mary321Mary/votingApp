@@ -8,7 +8,6 @@ import { Checkbox } from "../atoms/Checkbox";
 import { isRequired, isVisible } from "@/utils/constants";
 import { SelectField } from "../atoms/SelectField";
 import { PrevNameSection } from "./PrevNameSection";
-import { FormFieldWrapper } from "../atoms/FormFieldWrapper";
 
 interface NameSectionProps extends FormProps {
   showChangeName?: boolean;

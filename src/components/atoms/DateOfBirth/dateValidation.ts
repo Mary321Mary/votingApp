@@ -141,12 +141,24 @@ export function processDateOfBirthValidation(
   };
 
   // Check if fields are required but not filled
-  if (
-    (!birthMonth.trim() || !birthDay.trim() || !birthYear.trim()) &&
-    isRequired
-  ) {
-    result.errors.birthDay = "general.required";
-    return result;
+  if (isRequired) {
+    if (!birthMonth.trim()) {
+      result.errors.birthMonth = "general.required";
+    }
+    if (!birthDay.trim()) {
+      result.errors.birthDay = "general.required";
+    }
+    if (!birthYear.trim()) {
+      result.errors.birthYear = "general.required";
+    }
+
+    if (
+      result.errors.birthMonth ||
+      result.errors.birthDay ||
+      result.errors.birthYear
+    ) {
+      return result;
+    }
   }
 
   // Early return if not all fields filled (but not required)

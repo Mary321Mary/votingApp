@@ -480,7 +480,11 @@ export const RegisterResult = ({
         }
 
         if (responseLookup.data.found) {
-          navigation.replace("AlreadyRegistered", { state, form });
+          navigation.replace("AlreadyRegistered", {
+            state,
+            form,
+            workflow_type: workflow,
+          });
           return;
         }
       }
@@ -685,6 +689,7 @@ export const RegisterResult = ({
               await submitFinishedWithState({
                 workflow_type: workflow,
                 registrant: {
+                  registration_uid,
                   name_title: form.name_title,
                   first_name: form.first_name,
                   last_name: form.last_name,

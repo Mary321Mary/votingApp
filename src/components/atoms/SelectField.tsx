@@ -42,7 +42,7 @@ export const SelectField = ({
   errorMessage,
   helpText = "",
   searchable = false,
-  placeholder = "Select an option...",
+  placeholder = "",
   disabled = false,
   onValueChange,
 }: SelectFieldProps) => {

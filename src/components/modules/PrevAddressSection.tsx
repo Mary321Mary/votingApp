@@ -107,7 +107,7 @@ export const PrevAddressSection = ({
         />
       )}
 
-      {value.has_mailing_address && (
+      {showChangeOfAddress && value.has_mailing_address && (
         <>
           <View style={styles.row}>
             {isVisible(formCongif, "mailing_address") && (
@@ -232,7 +232,7 @@ export const PrevAddressSection = ({
           }}
         />
       )}
-      {value.change_of_address && (
+      {showChangeOfAddress && value.change_of_address && (
         <View style={styles.row}>
           {isVisible(formCongif, "prev_address") && (
             <InputField

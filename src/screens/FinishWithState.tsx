@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,13 +11,15 @@ import {
   Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Clipboard from "@react-native-clipboard/clipboard";
+
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import Clipboard from "@react-native-clipboard/clipboard";
 import { reportEvent } from "../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { ThemeContext } from "../styles/ThemeProvider";
 
 const { width } = Dimensions.get("window");
 
@@ -34,6 +36,8 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
   const { t } = useTranslation();
   const { config } = useUIConfig();
   const navState = route?.params ?? null;
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
 
   const [copyNotification, setCopyNotification] = useState("");
 
@@ -106,6 +110,18 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
       />
 
       <View style={styles.content}>
+        <Text>
+          <Trans
+            i18nKey="finish_with_state_page3.not_registered_yet"
+            values={{ state_abbr: navState.state.abbreviation }}
+            components={{
+              strong: <Text style={styles.boldText} />,
+            }}
+          />
+        </Text>
+
+        <View style={styles.divider} />
+
         <Text>
           <Trans
             i18nKey="finish_with_state_page3.have_questions"
@@ -190,44 +206,50 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    paddingVertical: 15,
-    alignSelf: "center",
-    width: "100%",
-    maxWidth: 600,
-  },
-  content: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 24,
-    marginTop: 15,
-    marginHorizontal: 10,
-  },
-  textCenter: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "#333",
-  },
-  boldText: {
-    fontWeight: "bold",
-    textAlign: "center",
-    fontSize: 16,
-    color: "#000",
-  },
-  shareContainer: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 10,
-    width: width * 0.75,
-  },
-  footerInfo: {
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 4,
-  },
-});
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      paddingVertical: 15,
+      alignSelf: "center",
+      width: "100%",
+      maxWidth: 600,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: theme.gray,
+      marginVertical: 16,
+    },
+    content: {
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 24,
+      marginTop: 15,
+      marginHorizontal: 10,
+    },
+    textCenter: {
+      textAlign: "center",
+      fontSize: 16,
+      color: "#333",
+    },
+    boldText: {
+      fontWeight: "bold",
+      textAlign: "center",
+      fontSize: 16,
+      color: "#000",
+    },
+    shareContainer: {
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 10,
+      width: width * 0.75,
+    },
+    footerInfo: {
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 4,
+    },
+  });
 
 export default FinishWithStateScreen;

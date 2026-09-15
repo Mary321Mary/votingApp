@@ -156,6 +156,7 @@ export default function ConnectedOVRStep3({
           name="street_type"
           label={t("michigan.street.type")}
           value={value.street_type}
+          placeholder={t("michigan.street.type_hint")}
           options={streetTypeOptions}
           required={isRequired(formCongif, "street_type")}
           errorMessage={errorMessages.street_type}
@@ -169,6 +170,7 @@ export default function ConnectedOVRStep3({
           name="street_direction"
           label={t("michigan.street.direction")}
           value={value.street_direction}
+          placeholder={t("michigan.street.direction_hint")}
           options={
             formCongif.fields.street_direction.options?.map(
               (option: string) => ({

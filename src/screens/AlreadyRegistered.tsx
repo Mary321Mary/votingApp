@@ -4,29 +4,32 @@ import {
   Text,
   StyleSheet,
   useWindowDimensions,
-  Linking,
   Button,
   ScrollView,
 } from "react-native";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
-import RenderHTML from "react-native-render-html";
 import type { RootStackParamList } from "@/components/organisms/Navigation";
 
 interface AlreadyRegisteredScreenProps {
   route: {
-    params?: {
-      state?: StateData;
-      form?: RegisterFormState;
+    params: {
+      state: StateData;
+      form: RegisterFormState;
+      workflow_type: string;
     };
   };
 }
 
-export default function AlreadyRegisteredScreen({ route }: AlreadyRegisteredScreenProps) {
+export default function AlreadyRegisteredScreen({
+  route,
+}: AlreadyRegisteredScreenProps) {
   const { t } = useTranslation();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -42,28 +45,18 @@ export default function AlreadyRegisteredScreen({ route }: AlreadyRegisteredScre
     }
   }, [state, form, navigation]);
 
-  const handleOpenLink = async () => {
-    const url = state?.online_status_check_url;
-
-    if (url) {
-      await Linking.openURL(url);
-    }
-  };
-
   if (!state || !form) {
     return null;
   }
 
   return (
     <ScrollView style={styles.container}>
-      <Header text={t("nvra_form_page.register_in") + state.name} />
+      <Header text={t("hidden_vr_lookup_found.hvr_title")} />
       <View style={styles.content}>
         <RenderHTML
           contentWidth={width}
           source={{
-            html: t("lookup_success_page.success_statement", {
-              user_first_name: form.first_name,
-            }),
+            html: t("hidden_vr_lookup_found.hvr_statement"),
           }}
           tagsStyles={{
             body: {
@@ -97,67 +90,55 @@ export default function AlreadyRegisteredScreen({ route }: AlreadyRegisteredScre
             year: "numeric",
           })}
         </Text>
-        <Text style={styles.textLi}>{t("lookup_success_page.voter_status")}</Text>
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("lookup_success_page.success_question"),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginVertical: 5,
-            },
-            strong: {
-              fontWeight: "bold",
-            },
-            br: { height: 1 },
+        <Text style={styles.textLi}>
+          {t("lookup_success_page.voter_status")}
+        </Text>
+        <View style={styles.container_yellow}>
+          <Text style={styles.text_yellow}>
+            {t("hidden_vr_lookup_found.hvr_warning")}
+          </Text>
+        </View>
+
+        <Button
+          title={t("hidden_vr_lookup_found.hvr_yes_button_text")}
+          onPress={() => {
+            if (form.mailForm) {
+              navigation.replace("Success", {
+                form,
+                state,
+                workflow_type: route.params.workflow_type,
+                finish_with_state: false,
+              });
+            } else {
+              navigation.replace("Print", {
+                form,
+                state,
+                workflow_type: route.params.workflow_type,
+                finish_with_state: false,
+              });
+            }
           }}
         />
         <Button
-          title={t("lookup_success_page.cta_learn_about", {
-            state_abbr: state?.abbreviation,
-          })}
-          onPress={() => Linking.openURL(state?.learn_about_url || "")}
+          title={t("hidden_vr_lookup_found.hvr_no_button_text")}
+          onPress={() => {
+            if (form.mailForm) {
+              navigation.replace("Success", {
+                form,
+                state,
+                workflow_type: route.params.workflow_type,
+                finish_with_state: false,
+              });
+            } else {
+              navigation.replace("Print", {
+                form,
+                state,
+                workflow_type: route.params.workflow_type,
+                finish_with_state: false,
+              });
+            }
+          }}
         />
-        <Text style={styles.bold}>{t("lookup_success_page.something_wrong")}</Text>
-        <View style={styles.divider} />
-        <Text>{t("lookup_not_found_page.failure_body")}</Text>
-        <View style={styles.list}>
-          <View style={styles.listItem}>
-            <Text style={styles.number}>1.</Text>
-
-            <Text style={styles.textLi}>
-              <Trans
-                i18nKey="lookup_not_found_page.failure_body1"
-                components={{
-                  strong: <Text style={styles.bold} />,
-                }}
-              />{" "}
-              {t("lookup_not_found_page.failure_body1a")}{" "}
-              <Text style={styles.bold}>{state?.recent_register_date}</Text>{" "}
-              {t("lookup_not_found_page.failure_body1b")}
-              <Text style={styles.link} onPress={handleOpenLink}>
-                {t("lookup_not_found_page.failure_body1_url_text", {
-                  state_abbr: state?.abbreviation,
-                })}
-              </Text>
-            </Text>
-          </View>
-
-          <View style={styles.listItem}>
-            <Text style={styles.number}>2.</Text>
-
-            <Text style={styles.textLi}>{t("lookup_not_found_page.failure_body2")}</Text>
-          </View>
-
-          <View style={styles.listItem}>
-            <Text style={styles.number}>3.</Text>
-
-            <Text style={styles.textLi}>{t("lookup_not_found_page.failure_body3")}</Text>
-          </View>
-        </View>
       </View>
     </ScrollView>
   );
@@ -209,6 +190,18 @@ const getStyles = (theme: any) =>
       marginRight: 10,
       fontSize: 15,
       lineHeight: 22,
+    },
+    container_yellow: {
+      backgroundColor: "#fff3cd", // bg-warning-subtle
+      borderLeftWidth: 4, // border-start border-4
+      borderLeftColor: "#ffc107", // border-warning
+      borderTopRightRadius: 6, // rounded-end
+      borderBottomRightRadius: 6, // rounded-end
+      padding: 12, // p-3
+    },
+    text_yellow: {
+      color: "#212529", // text-dark
+      fontSize: 14,
     },
 
     link: {

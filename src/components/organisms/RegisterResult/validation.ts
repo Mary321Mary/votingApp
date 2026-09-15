@@ -1,6 +1,7 @@
 import {
   fieldConfigured,
   fieldDependsOn,
+  isPhoneRequired,
   isRequired,
   isVisible,
 } from "utils/constants";
@@ -11,6 +12,20 @@ import {
 } from "utils/types";
 import { processDateOfBirthValidation } from "../../atoms/DateOfBirth/dateValidation";
 import { SetStateAction } from "react";
+import {
+  EMAIL_REGEX,
+  ZIP_CODE_REGEX,
+  isValidPhoneNumber,
+} from "../../../utils/validationRegex";
+
+/*
+ * Zip format is enforced client-side with ZIP_CODE_REGEX (/^[\d]{5}$/), matching
+ * fetch_data_collection_configuration validations.regexp `[\d]{5}`.
+ * API configs should set that regexp on: home_zip_code, mailing_zip_code,
+ * prev_zip_code, and MI home key zip_code when missing.
+ * Exception: mailing_postal_code (MI international) is NOT a zip_code field —
+ * leave it unrestricted (no [\d]{5} regexp) for letters, numbers, and longer codes.
+ */
 
 export const EMPTY_ERROR_MESSAGES: RegisterFormStateError = {
   partner_id: "",
@@ -138,13 +153,11 @@ interface ValidationResult {
 
 export const validate = (
   form: RegisterFormState,
-  formCongif: DataCollectionConfiguration,
+  formConfig: DataCollectionConfiguration,
   flowType: string,
   showRedirect: boolean,
 ): ValidationResult => {
-  const zipRegex = /^\d{5}(-\d{4})?$/;
-  const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-  const validationCfg = formCongif.fields.state_id_number.validations;
+  const validationCfg = formConfig.fields.state_id_number?.validations;
   const configRegex = validationCfg?.regexp;
   const minLen = validationCfg?.min_length;
   const maxLen = validationCfg?.max_length;
@@ -159,49 +172,49 @@ export const validate = (
   }
 
   const errorMessage = { ...EMPTY_ERROR_MESSAGES };
-  if (!form.name_title.trim() && isRequired(formCongif, "name_title")) {
+  if (!form.name_title.trim() && isRequired(formConfig, "name_title")) {
     errorMessage.name_title = "general.required";
   }
-  if (!form.first_name.trim() && isRequired(formCongif, "first_name")) {
+  if (!form.first_name.trim() && isRequired(formConfig, "first_name")) {
     errorMessage.first_name = "general.required";
   }
-  if (!form.middle_name.trim() && isRequired(formCongif, "middle_name")) {
+  if (!form.middle_name.trim() && isRequired(formConfig, "middle_name")) {
     errorMessage.middle_name = "general.required";
   }
-  if (!form.last_name.trim() && isRequired(formCongif, "last_name")) {
+  if (!form.last_name.trim() && isRequired(formConfig, "last_name")) {
     errorMessage.last_name = "general.required";
   }
-  if (!form.suffix.trim() && isRequired(formCongif, "name_suffix")) {
+  if (!form.suffix.trim() && isRequired(formConfig, "name_suffix")) {
     errorMessage.suffix = "general.required";
   }
-  if (form.change_of_name || isRequired(formCongif, "change_of_name")) {
+  if (form.change_of_name || isRequired(formConfig, "change_of_name")) {
     if (
       !form.prev_name_title.trim() &&
-      isRequired(formCongif, "prev_name_title", form.change_of_name)
+      isRequired(formConfig, "prev_name_title", form.change_of_name)
     ) {
       errorMessage.prev_name_title = "general.required";
     }
     if (
       !form.prev_first_name.trim() &&
-      isRequired(formCongif, "prev_first_name", form.change_of_name)
+      isRequired(formConfig, "prev_first_name", form.change_of_name)
     ) {
       errorMessage.prev_first_name = "general.required";
     }
     if (
       !form.prev_middle_name.trim() &&
-      isRequired(formCongif, "prev_middle_name", form.change_of_name)
+      isRequired(formConfig, "prev_middle_name", form.change_of_name)
     ) {
       errorMessage.prev_middle_name = "general.required";
     }
     if (
       !form.prev_last_name.trim() &&
-      isRequired(formCongif, "prev_last_name", form.change_of_name)
+      isRequired(formConfig, "prev_last_name", form.change_of_name)
     ) {
       errorMessage.prev_last_name = "general.required";
     }
     if (
       !form.prev_name_suffix.trim() &&
-      isRequired(formCongif, "prev_name_suffix", form.change_of_name)
+      isRequired(formConfig, "prev_name_suffix", form.change_of_name)
     ) {
       errorMessage.prev_name_suffix = "general.required";
     }
@@ -212,103 +225,103 @@ export const validate = (
   // the same way the print/success payload defaults a hidden value to true.
   if (
     !form.us_citizen &&
-    isVisible(formCongif, "us_citizen") &&
-    isRequired(formCongif, "us_citizen")
+    isVisible(formConfig, "us_citizen") &&
+    isRequired(formConfig, "us_citizen")
   ) {
     errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
   }
   if (
     !form.will_be_18_by_election &&
-    isVisible(formCongif, "will_be_18_by_election") &&
-    isRequired(formCongif, "will_be_18_by_election")
+    isVisible(formConfig, "will_be_18_by_election") &&
+    isRequired(formConfig, "will_be_18_by_election")
   ) {
     errorMessage.will_be_18_by_election = "form_fields.age_eligibility_error";
   }
-  if (!form.home_address.trim() && isRequired(formCongif, "home_address")) {
+  if (!form.home_address.trim() && isRequired(formConfig, "home_address")) {
     errorMessage.home_address = "general.required";
   }
-  if (!form.home_unit.trim() && isRequired(formCongif, "home_unit")) {
+  if (!form.home_unit.trim() && isRequired(formConfig, "home_unit")) {
     errorMessage.home_unit = "general.required";
   }
-  if (!form.home_city.trim() && isRequired(formCongif, "home_city")) {
+  if (!form.home_city.trim() && isRequired(formConfig, "home_city")) {
     errorMessage.home_city = "general.required";
   }
-  if (!form.state.trim() && isRequired(formCongif, "home_state")) {
+  if (!form.state.trim() && isRequired(formConfig, "home_state")) {
     errorMessage.state = "general.required";
   }
-  if (!form.home_zip_code.trim() && isRequired(formCongif, "home_zip_code")) {
+  if (!form.home_zip_code.trim() && isRequired(formConfig, "home_zip_code")) {
     errorMessage.home_zip_code = "general.required";
-  } else if (!zipRegex.test(form.home_zip_code.trim())) {
+  } else if (!ZIP_CODE_REGEX.test(form.home_zip_code.trim())) {
     errorMessage.home_zip_code = "form_fields.zip_code_error";
   }
   if (
     form.has_mailing_address ||
-    isRequired(formCongif, "has_mailing_address")
+    isRequired(formConfig, "has_mailing_address")
   ) {
     if (
       !form.mailing_address.trim() &&
-      isRequired(formCongif, "mailing_address", form.has_mailing_address)
+      isRequired(formConfig, "mailing_address", form.has_mailing_address)
     ) {
       errorMessage.mailing_address = "general.required";
     }
     if (
       !form.mailing_unit.trim() &&
-      isRequired(formCongif, "mailing_unit", form.has_mailing_address)
+      isRequired(formConfig, "mailing_unit", form.has_mailing_address)
     ) {
       errorMessage.mailing_unit = "general.required";
     }
     if (
       !form.mailing_city.trim() &&
-      isRequired(formCongif, "mailing_city", form.has_mailing_address)
+      isRequired(formConfig, "mailing_city", form.has_mailing_address)
     ) {
       errorMessage.mailing_city = "general.required";
     }
     if (
       !form.mailing_state.trim() &&
-      isRequired(formCongif, "mailing_state", form.has_mailing_address)
+      isRequired(formConfig, "mailing_state", form.has_mailing_address)
     ) {
       errorMessage.mailing_state = "general.required";
     }
     if (
       !form.mailing_zip_code.trim() &&
-      isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
+      isRequired(formConfig, "mailing_zip_code", form.has_mailing_address)
     ) {
       errorMessage.mailing_zip_code = "general.required";
-    } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+    } else if (!ZIP_CODE_REGEX.test(form.mailing_zip_code.trim())) {
       errorMessage.mailing_zip_code = "form_fields.zip_code_error";
     }
   }
-  if (form.change_of_address || isRequired(formCongif, "change_of_address")) {
+  if (form.change_of_address || isRequired(formConfig, "change_of_address")) {
     if (
       !form.prev_address.trim() &&
-      isRequired(formCongif, "prev_address", form.change_of_address)
+      isRequired(formConfig, "prev_address", form.change_of_address)
     ) {
       errorMessage.prev_address = "general.required";
     }
     if (
       !form.prev_unit.trim() &&
-      isRequired(formCongif, "prev_unit", form.change_of_address)
+      isRequired(formConfig, "prev_unit", form.change_of_address)
     ) {
       errorMessage.prev_unit = "general.required";
     }
     if (
       !form.prev_city.trim() &&
-      isRequired(formCongif, "prev_city", form.change_of_address)
+      isRequired(formConfig, "prev_city", form.change_of_address)
     ) {
       errorMessage.prev_city = "general.required";
     }
     if (
       !form.prev_state.trim() &&
-      isRequired(formCongif, "prev_state", form.change_of_address)
+      isRequired(formConfig, "prev_state", form.change_of_address)
     ) {
       errorMessage.prev_state = "general.required";
     }
     if (
       !form.prev_zip_code.trim() &&
-      isRequired(formCongif, "prev_zip_code", form.change_of_address)
+      isRequired(formConfig, "prev_zip_code", form.change_of_address)
     ) {
       errorMessage.prev_zip_code = "general.required";
-    } else if (!zipRegex.test(form.prev_zip_code.trim())) {
+    } else if (!ZIP_CODE_REGEX.test(form.prev_zip_code.trim())) {
       errorMessage.prev_zip_code = "form_fields.zip_code_error";
     }
   }
@@ -318,19 +331,19 @@ export const validate = (
   if (
     form.has_no_state_license == null &&
     flowType !== "paper" &&
-    isVisible(formCongif, "has_no_state_license")
+    isVisible(formConfig, "has_no_state_license")
   ) {
     errorMessage.has_no_state_license =
       "finish_with_state_page1.dl_id_answer_required";
   }
   if (
-    isVisible(formCongif, "state_id_number") &&
+    isVisible(formConfig, "state_id_number") &&
     !form.has_no_state_license &&
     (flowType === "paper" || showRedirect)
   ) {
     if (
       !form.state_id_number.trim() &&
-      isRequired(formCongif, "state_id_number")
+      isRequired(formConfig, "state_id_number")
     ) {
       errorMessage.state_id_number = "general.required";
     } else if (!finalRegex.test(form.state_id_number.trim())) {
@@ -338,7 +351,7 @@ export const validate = (
     }
   }
   const ssnGatedOnNoLicense = fieldDependsOn(
-    formCongif,
+    formConfig,
     "last_four_ss_number",
     "has_no_state_license",
   );
@@ -346,11 +359,11 @@ export const validate = (
     (flowType === "paper" || showRedirect) &&
     !form.has_no_ssn &&
     (form.has_no_state_license === true ||
-      (fieldConfigured(formCongif, "last_four_ss_number") &&
+      (fieldConfigured(formConfig, "last_four_ss_number") &&
         !ssnGatedOnNoLicense));
   if (shouldValidateSsn) {
     // Full-SSN states (ssn_format: full) send a 9-digit validation; default is 4.
-    const ssnCfg = formCongif.fields.last_four_ss_number?.validations;
+    const ssnCfg = formConfig.fields.last_four_ss_number?.validations;
     const ssnRegex = ssnCfg?.regexp
       ? new RegExp(`^${ssnCfg.regexp}$`)
       : /^\d{4}$/;
@@ -361,7 +374,7 @@ export const validate = (
     if (
       !form.last_four_ss_number.trim() &&
       isRequired(
-        formCongif,
+        formConfig,
         "last_four_ss_number",
         ssnGatedOnNoLicense ? form.has_no_state_license === true : undefined,
       )
@@ -371,58 +384,46 @@ export const validate = (
       errorMessage.last_four_ss_number = ssnInvalidKey;
     }
   }
-  if (!form.race.trim() && isRequired(formCongif, "race")) {
+  if (!form.race.trim() && isRequired(formConfig, "race")) {
     errorMessage.race = "general.required";
   }
-  if (!form.party.trim() && isRequired(formCongif, "party")) {
+  if (!form.party.trim() && isRequired(formConfig, "party")) {
     errorMessage.party = "general.required";
-  }
-  if (
-    (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
-    (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
-    (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
-  ) {
-    errorMessage.birthDay = "general.required";
-  } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
-    errorMessage.birthMonth = "form_fields.invalid_year";
   }
   const dobValidation = processDateOfBirthValidation(
     form.birthYear,
     form.birthMonth,
     form.birthDay,
-    formCongif,
-    isRequired(formCongif, "date_of_birth"),
+    formConfig,
+    isRequired(formConfig, "date_of_birth"),
   );
   Object.assign(errorMessage, dobValidation.errors);
   Object.assign(form, dobValidation.formUpdates);
 
   if (
-    isVisible(formCongif, "age_eligibility") &&
+    isVisible(formConfig, "age_eligibility") &&
     !form.age_eligibility &&
     form.dob_routing_outcome === "pre_registration_notice"
   ) {
     errorMessage.age_eligibility = "form_fields.age_eligibility_error";
   }
   if (!form.age_eligibility || !form.has_no_state_license) {
-    if (!form.race.trim() && isRequired(formCongif, "race")) {
+    if (!form.race.trim() && isRequired(formConfig, "race")) {
       errorMessage.race = "general.required";
     }
-    if (!form.party.trim() && isRequired(formCongif, "party")) {
+    if (!form.party.trim() && isRequired(formConfig, "party")) {
       errorMessage.party = "general.required";
     }
   }
-  if (
-    !form.phone.trim() &&
-    (isRequired(formCongif, "phone", form.opt_in_sms) || form.opt_in_sms)
-  ) {
+  if (!form.phone.trim() && isPhoneRequired(formConfig, form.opt_in_sms)) {
     errorMessage.phone = "form_fields.required_phone";
-  } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
+  } else if (form.phone.trim() && !isValidPhoneNumber(form.phone)) {
     errorMessage.phone = "form_fields.invalid_phone";
   }
-  if (form.opt_in_email && isRequired(formCongif, "opt_in_email")) {
+  if (form.opt_in_email && isRequired(formConfig, "opt_in_email")) {
     errorMessage.opt_in_email = "general.required";
   }
-  if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
+  if (form.volunteer && isRequired(formConfig, "opt_in_volunteer")) {
     errorMessage.volunteer = "general.required";
   }
 
@@ -447,66 +448,63 @@ export const validate = (
 
 export const validateConnectedOvr = (
   form: RegisterFormState,
-  formCongif: DataCollectionConfiguration,
+  formConfig: DataCollectionConfiguration,
   step: SetStateAction<1 | 2 | 3 | 4 | 5>,
 ): ValidationResult => {
-  const zipRegex = /^\d{5}(-\d{4})?$/;
-  const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
   const miIdRegex = /^[a-zA-Z]\d{12}$/i;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const PARTNER_ANSWER_REGEX = /^[\p{L}\p{M}\p{Nd}\p{Zs}.,;:'"()/\-&@#%!?+]*$/u;
 
   const errorMessage = { ...EMPTY_ERROR_MESSAGES };
   if (step === 1) {
-    if (!form.us_citizen && isRequired(formCongif, "us_citizen")) {
+    if (!form.us_citizen && isRequired(formConfig, "us_citizen")) {
       errorMessage.us_citizen = "michigan.eligibility.citizen_error";
     }
     if (
       !form.will_be_18_by_election &&
-      isRequired(formCongif, "will_be_18_by_election")
+      isRequired(formConfig, "will_be_18_by_election")
     ) {
       errorMessage.will_be_18_by_election = "michigan.eligibility.age_error";
     }
     if (
       !form.residency_duration_ack &&
-      isRequired(formCongif, "residency_duration_ack")
+      isRequired(formConfig, "residency_duration_ack")
     ) {
       errorMessage.residency_duration_ack = "show";
     }
     if (
       !form.cancel_previous_registration_ack &&
-      isRequired(formCongif, "cancel_previous_registration_ack")
+      isRequired(formConfig, "cancel_previous_registration_ack")
     ) {
       errorMessage.cancel_previous_registration_ack = "show";
     }
     if (
       !form.use_stored_signature_ack &&
-      isRequired(formCongif, "use_stored_signature_ack")
+      isRequired(formConfig, "use_stored_signature_ack")
     ) {
       errorMessage.use_stored_signature_ack = "show";
     }
     if (
       form.updated_dln_recently !== "no" &&
-      isRequired(formCongif, "updated_dln_recently")
+      isRequired(formConfig, "updated_dln_recently")
     ) {
       errorMessage.updated_dln_recently = "show";
     }
     if (
       form.request_duplicate_dln_today !== "no" &&
-      isRequired(formCongif, "request_duplicate_dln_today")
+      isRequired(formConfig, "request_duplicate_dln_today")
     ) {
       errorMessage.request_duplicate_dln_today = "show";
     }
   } else if (step === 2) {
-    if (!form.full_name.trim() && isRequired(formCongif, "full_name")) {
+    if (!form.full_name.trim() && isRequired(formConfig, "full_name")) {
       errorMessage.full_name = "general.required";
     }
-    if (!form.eye_color.trim() && isRequired(formCongif, "eye_color")) {
+    if (!form.eye_color.trim() && isRequired(formConfig, "eye_color")) {
       errorMessage.eye_color = "general.required";
     }
     if (
       !form.state_id_number.trim() &&
-      isRequired(formCongif, "state_id_number")
+      isRequired(formConfig, "state_id_number")
     ) {
       errorMessage.state_id_number = "michigan.id_empty_error";
     } else if (
@@ -515,21 +513,12 @@ export const validateConnectedOvr = (
     ) {
       errorMessage.state_id_number = "michigan.id_format_error";
     }
-    if (
-      (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
-      (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
-      (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
-    ) {
-      errorMessage.birthDay = "general.required";
-    } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = "form_fields.invalid_year";
-    }
     const dobValidation2 = processDateOfBirthValidation(
       form.birthYear,
       form.birthMonth,
       form.birthDay,
-      formCongif,
-      isRequired(formCongif, "date_of_birth"),
+      formConfig,
+      isRequired(formConfig, "date_of_birth"),
     );
     Object.assign(errorMessage, dobValidation2.errors);
     Object.assign(form, dobValidation2.formUpdates);
@@ -543,38 +532,38 @@ export const validateConnectedOvr = (
       errorMessage.last_four_ss_number = "michigan.ssn_last4_invalid_error";
     }
   } else if (step === 3) {
-    if (!form.street_number.trim() && isRequired(formCongif, "street_number")) {
+    if (!form.street_number.trim() && isRequired(formConfig, "street_number")) {
       errorMessage.street_number = "general.required";
     }
-    if (!form.street_name.trim() && isRequired(formCongif, "street_name")) {
+    if (!form.street_name.trim() && isRequired(formConfig, "street_name")) {
       errorMessage.street_name = "general.required";
     }
-    if (!form.street_type.trim() && isRequired(formCongif, "street_type")) {
+    if (!form.street_type.trim() && isRequired(formConfig, "street_type")) {
       errorMessage.street_type = "general.required";
     }
     if (
       !form.street_direction.trim() &&
-      isRequired(formCongif, "street_direction")
+      isRequired(formConfig, "street_direction")
     ) {
       errorMessage.street_direction = "general.required";
     }
-    if (!form.home_unit.trim() && isRequired(formCongif, "street_apt_unit")) {
+    if (!form.home_unit.trim() && isRequired(formConfig, "street_apt_unit")) {
       errorMessage.home_unit = "general.required";
     }
-    if (!form.home_city.trim() && isRequired(formCongif, "city")) {
+    if (!form.home_city.trim() && isRequired(formConfig, "city")) {
       errorMessage.home_city = "general.required";
     }
-    if (!form.state.trim() && isRequired(formCongif, "state")) {
+    if (!form.state.trim() && isRequired(formConfig, "state")) {
       errorMessage.state = "general.required";
     }
-    if (!form.home_zip_code.trim() && isRequired(formCongif, "zip_code")) {
+    if (!form.home_zip_code.trim() && isRequired(formConfig, "zip_code")) {
       errorMessage.home_zip_code = "general.required";
-    } else if (!zipRegex.test(form.home_zip_code.trim())) {
+    } else if (!ZIP_CODE_REGEX.test(form.home_zip_code.trim())) {
       errorMessage.home_zip_code = "form_fields.zip_code_error";
     }
     if (
       !form.mailing_address_type.trim() &&
-      isRequired(formCongif, "mailing_address_type")
+      isRequired(formConfig, "mailing_address_type")
     ) {
       errorMessage.mailing_address_type = "general.required";
     }
@@ -583,7 +572,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_address_number.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_number",
             form.has_mailing_address,
           )
@@ -593,7 +582,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_address_street_name.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_street_name",
             form.has_mailing_address,
           )
@@ -603,7 +592,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_address_street_type.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_street_type",
             form.has_mailing_address,
           )
@@ -612,29 +601,29 @@ export const validateConnectedOvr = (
         }
         if (
           !form.mailing_city.trim() &&
-          isRequired(formCongif, "mailing_city", form.has_mailing_address)
+          isRequired(formConfig, "mailing_city", form.has_mailing_address)
         ) {
           errorMessage.mailing_city = "general.required";
         }
         if (
           !form.mailing_state.trim() &&
-          isRequired(formCongif, "mailing_state", form.has_mailing_address)
+          isRequired(formConfig, "mailing_state", form.has_mailing_address)
         ) {
           errorMessage.mailing_state = "general.required";
         }
         if (
           !form.mailing_zip_code.trim() &&
-          isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
+          isRequired(formConfig, "mailing_zip_code", form.has_mailing_address)
         ) {
           errorMessage.mailing_zip_code = "general.required";
-        } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+        } else if (!ZIP_CODE_REGEX.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
       } else if (form.mailing_address_type === "PO_BOX") {
         if (
           !form.mailing_po_box_number.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_po_box_number",
             form.has_mailing_address,
           )
@@ -643,29 +632,29 @@ export const validateConnectedOvr = (
         }
         if (
           !form.mailing_city.trim() &&
-          isRequired(formCongif, "mailing_city", form.has_mailing_address)
+          isRequired(formConfig, "mailing_city", form.has_mailing_address)
         ) {
           errorMessage.mailing_city = "general.required";
         }
         if (
           !form.mailing_state.trim() &&
-          isRequired(formCongif, "mailing_state", form.has_mailing_address)
+          isRequired(formConfig, "mailing_state", form.has_mailing_address)
         ) {
           errorMessage.mailing_state = "general.required";
         }
         if (
           !form.mailing_zip_code.trim() &&
-          isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
+          isRequired(formConfig, "mailing_zip_code", form.has_mailing_address)
         ) {
           errorMessage.mailing_zip_code = "general.required";
-        } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+        } else if (!ZIP_CODE_REGEX.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
       } else if (form.mailing_address_type === "MILITARY") {
         if (
           !form.mailing_box_group_type.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_box_group_type",
             form.has_mailing_address,
           )
@@ -675,7 +664,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_box_group_number.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_box_group_number",
             form.has_mailing_address,
           )
@@ -684,35 +673,35 @@ export const validateConnectedOvr = (
         }
         if (
           !form.mailing_box_number.trim() &&
-          isRequired(formCongif, "mailing_box_number", form.has_mailing_address)
+          isRequired(formConfig, "mailing_box_number", form.has_mailing_address)
         ) {
           errorMessage.mailing_box_number = "general.required";
         }
         if (
           !form.mailing_apo.trim() &&
-          isRequired(formCongif, "mailing_apo", form.has_mailing_address)
+          isRequired(formConfig, "mailing_apo", form.has_mailing_address)
         ) {
           errorMessage.mailing_apo = "general.required";
         }
         if (
           !form.mailing_ap.trim() &&
-          isRequired(formCongif, "mailing_ap", form.has_mailing_address)
+          isRequired(formConfig, "mailing_ap", form.has_mailing_address)
         ) {
           errorMessage.mailing_ap = "general.required";
         }
         if (
           !form.mailing_zip_code.trim() &&
-          isRequired(formCongif, "mailing_zip_code", form.has_mailing_address)
+          isRequired(formConfig, "mailing_zip_code", form.has_mailing_address)
         ) {
           errorMessage.mailing_zip_code = "general.required";
-        } else if (!zipRegex.test(form.mailing_zip_code.trim())) {
+        } else if (!ZIP_CODE_REGEX.test(form.mailing_zip_code.trim())) {
           errorMessage.mailing_zip_code = "form_fields.zip_code_error";
         }
       } else if (form.mailing_address_type === "INTERNATIONAL") {
         if (
           !form.mailing_address_line1.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_line1",
             form.has_mailing_address,
           )
@@ -722,7 +711,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_address_line2.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_line2",
             form.has_mailing_address,
           )
@@ -732,7 +721,7 @@ export const validateConnectedOvr = (
         if (
           !form.mailing_address_line3.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_address_line3",
             form.has_mailing_address,
           )
@@ -741,14 +730,14 @@ export const validateConnectedOvr = (
         }
         if (
           !form.mailing_country.trim() &&
-          isRequired(formCongif, "mailing_country", form.has_mailing_address)
+          isRequired(formConfig, "mailing_country", form.has_mailing_address)
         ) {
           errorMessage.mailing_country = "general.required";
         }
         if (
           !form.mailing_postal_code.trim() &&
           isRequired(
-            formCongif,
+            formConfig,
             "mailing_postal_code",
             form.has_mailing_address,
           )
@@ -757,26 +746,23 @@ export const validateConnectedOvr = (
         }
       }
     }
-    if (
-      !form.phone.trim() &&
-      (isRequired(formCongif, "phone", form.opt_in_sms) || form.opt_in_sms)
-    ) {
+    if (!form.phone.trim() && isPhoneRequired(formConfig, form.opt_in_sms)) {
       errorMessage.phone = "michigan.phone_election_error";
-    } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
+    } else if (form.phone.trim() && !isValidPhoneNumber(form.phone)) {
       errorMessage.phone = "form_fields.invalid_phone";
     }
-    if (form.opt_in_sms && isRequired(formCongif, "opt_in_sms")) {
+    if (form.opt_in_sms && isRequired(formConfig, "opt_in_sms")) {
       errorMessage.opt_in_sms = "general.required";
     }
-    if (!form.email_address.trim() && isRequired(formCongif, "email")) {
+    if (!form.email_address.trim() && isRequired(formConfig, "email")) {
       errorMessage.email_address = "general.required";
-    } else if (!emailRegex.test(form.email_address.trim())) {
+    } else if (!EMAIL_REGEX.test(form.email_address.trim())) {
       errorMessage.email_address = "form_fields.email_error";
     }
-    if (form.opt_in_email && isRequired(formCongif, "opt_in_email")) {
+    if (form.opt_in_email && isRequired(formConfig, "opt_in_email")) {
       errorMessage.opt_in_email = "general.required";
     }
-    if (form.volunteer && isRequired(formCongif, "opt_in_volunteer")) {
+    if (form.volunteer && isRequired(formConfig, "opt_in_volunteer")) {
       errorMessage.volunteer = "general.required";
     }
 
@@ -802,13 +788,11 @@ export const validateConnectedOvr = (
 
 export const validateWA = (
   form: RegisterFormState,
-  formCongif: DataCollectionConfiguration,
+  formConfig: DataCollectionConfiguration,
   step: SetStateAction<1 | 2 | 3 | 4 | 5>,
   isWA: string = "",
   upload: string = "signature",
 ): ValidationResult => {
-  const zipRegex = /^\d{5}(-\d{4})?$/;
-  const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
   const idRegex = /^[a-z0-9]{12}$/i;
   const PARTNER_ANSWER_REGEX = /^[\p{L}\p{M}\p{Nd}\p{Zs}.,;:'"()/\-&@#%!?+]*$/u;
 
@@ -819,12 +803,12 @@ export const validateWA = (
     stateKey: keyof RegisterFormState,
     dependentValue?: boolean,
   ) => {
-    const isFieldVisible = isVisible(formCongif, configKey);
+    const isFieldVisible = isVisible(formConfig, configKey);
     const hasStateValue = form[stateKey] !== undefined;
     return (
       isFieldVisible &&
       hasStateValue &&
-      isRequired(formCongif, configKey, dependentValue)
+      isRequired(formConfig, configKey, dependentValue)
     );
   };
 
@@ -869,21 +853,12 @@ export const validateWA = (
     errorMessage.us_citizen = "form_fields.citizen_eligibility_error";
   }
 
-  if (isRequired(formCongif, "date_of_birth")) {
-    if (
-      (!form.birthMonth.trim() && isRequired(formCongif, "date_of_birth")) ||
-      (!form.birthDay.trim() && isRequired(formCongif, "date_of_birth")) ||
-      (!form.birthYear.trim() && isRequired(formCongif, "date_of_birth"))
-    ) {
-      errorMessage.birthDay = "general.required";
-    } else if (form.birthYear.trim() && Number(form.birthYear) < 1900) {
-      errorMessage.birthYear = "form_fields.invalid_year";
-    }
+  if (isRequired(formConfig, "date_of_birth")) {
     const dobValidation3 = processDateOfBirthValidation(
       form.birthYear,
       form.birthMonth,
       form.birthDay,
-      formCongif,
+      formConfig,
       true,
     );
     Object.assign(errorMessage, dobValidation3.errors);
@@ -919,14 +894,14 @@ export const validateWA = (
   if (needsValidation("home_zip_code", "home_zip_code")) {
     if (!form.home_zip_code?.trim()) {
       errorMessage.home_zip_code = "general.required";
-    } else if (!zipRegex.test(form.home_zip_code.trim())) {
+    } else if (!ZIP_CODE_REGEX.test(form.home_zip_code.trim())) {
       errorMessage.home_zip_code = "form_fields.zip_code_error";
     }
   }
 
   if (
     form.has_mailing_address ||
-    isRequired(formCongif, "has_mailing_address")
+    isRequired(formConfig, "has_mailing_address")
   ) {
     const mailFields: (keyof RegisterFormState)[] = [
       "mailing_address",
@@ -946,9 +921,15 @@ export const validateWA = (
         errorMessage[field] = "general.required";
       }
     });
+    if (
+      form.mailing_zip_code?.trim() &&
+      !ZIP_CODE_REGEX.test(form.mailing_zip_code.trim())
+    ) {
+      errorMessage.mailing_zip_code = "form_fields.zip_code_error";
+    }
   }
 
-  if (form.change_of_address || isRequired(formCongif, "change_of_address")) {
+  if (form.change_of_address || isRequired(formConfig, "change_of_address")) {
     const mailFields: (keyof RegisterFormState)[] = [
       "prev_address",
       "prev_unit",
@@ -967,6 +948,12 @@ export const validateWA = (
         errorMessage[field] = "general.required";
       }
     });
+    if (
+      form.prev_zip_code?.trim() &&
+      !ZIP_CODE_REGEX.test(form.prev_zip_code.trim())
+    ) {
+      errorMessage.prev_zip_code = "form_fields.zip_code_error";
+    }
   }
 
   if (isWA === "connected_WA") {
@@ -978,7 +965,7 @@ export const validateWA = (
     }
     if (!form.has_no_state_license) {
       const configRegex =
-        formCongif.fields.state_id_number?.validations?.regexp;
+        formConfig.fields.state_id_number?.validations?.regexp;
       const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
       const stateIdNumber = form.state_id_number.trim();
       if (stateIdNumber !== "NONE") {
@@ -990,9 +977,6 @@ export const validateWA = (
           errorMessage.state_id_number = "washington.wdl_number_invalid_error";
         }
       }
-
-      const MIN_YEAR =
-        formCongif.fields.issue_date?.validations?.min_year || 1973;
 
       const issueYearStr = form.issueYear?.trim() || "";
       const issueMonthStr = form.issueMonth?.trim() || "";
@@ -1026,16 +1010,10 @@ export const validateWA = (
         if (isInvalidDate) {
           errorMessage.issueDay = "form_fields.invalid_birth_date";
         } else {
-          if (year < MIN_YEAR) {
-            errorMessage.issueYear = "washington.invalid_wdl_date";
-          }
-
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
           if (selectedDate > today) {
-            // Shared invalid_wdl_date told registrants a future date was "after 1972";
-            // Rails reports future and too-old separately.
             errorMessage.issueYear = "washington.future_wdl_date";
           }
         }
@@ -1073,11 +1051,14 @@ export const validateWA = (
     }
   }
 
-  const phoneReq =
-    isRequired(formCongif, "phone", form.opt_in_sms) || form.opt_in_sms;
-  if (phoneReq && !form.phone?.trim()) {
+  // Phone is collected on step 1 only (same rationale as home_county below).
+  if (
+    step === 1 &&
+    isPhoneRequired(formConfig, form.opt_in_sms) &&
+    !form.phone?.trim()
+  ) {
     errorMessage.phone = "form_fields.required_phone";
-  } else if (form.phone?.trim() && !fullPhoneRegex.test(form.phone.trim())) {
+  } else if (form.phone?.trim() && !isValidPhoneNumber(form.phone)) {
     errorMessage.phone = "form_fields.invalid_phone";
   }
 
@@ -1104,11 +1085,11 @@ export const validateWA = (
     if (step === 2) {
       if (!form.has_no_state_license) {
         const configRegex =
-          formCongif.fields.state_id_number.validations?.regexp;
+          formConfig.fields.state_id_number.validations?.regexp;
         const regex = configRegex ? new RegExp(`^${configRegex}$`) : idRegex;
         if (
           !form.state_id_number.trim() &&
-          isRequired(formCongif, "state_id_number")
+          isRequired(formConfig, "state_id_number")
         ) {
           errorMessage.state_id_number =
             "pennsylvania.penn_dot_number_empty_error";
@@ -1153,17 +1134,17 @@ export const validateWA = (
         }
       }
     }
-    if (!form.race.trim() && isRequired(formCongif, "race")) {
+    if (!form.race.trim() && isRequired(formConfig, "race")) {
       errorMessage.race = "general.required";
     }
     if (
       !form.party.trim() &&
-      (isRequired(formCongif, "party") || form.changed_party)
+      (isRequired(formConfig, "party") || form.changed_party)
     ) {
       errorMessage.party = "general.required";
     }
   }
-  if (form.volunteer && isRequired(formCongif, "volunteer")) {
+  if (form.volunteer && isRequired(formConfig, "volunteer")) {
     errorMessage.volunteer = "general.required";
   }
 

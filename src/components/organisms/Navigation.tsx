@@ -60,6 +60,7 @@ export type RootStackParamList = {
   AlreadyRegistered: {
     state: StateData;
     form: RegisterFormState;
+    workflow_type: string;
   };
   ZipError: {
     text: string;
