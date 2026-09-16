@@ -6,22 +6,23 @@ import {
   ScrollView,
   Linking,
   useWindowDimensions,
-  Button,
   Platform,
   ToastAndroid,
   Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import RenderHTML from "react-native-render-html";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Clipboard from "@react-native-clipboard/clipboard";
+
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { reportEvent } from "../utils/api";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
-import { RegisterFormState, StateData } from "../utils/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { reportEvent } from "@/utils/api";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { RegisterFormState, StateData } from "@/utils/types";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 type RouteParams = {
   state: StateData;
@@ -71,7 +72,7 @@ export default function Under18ReminderScreen() {
             tagsStyles={htmlTagsStyles}
           />
           <View style={styles.buttonWrapper}>
-            <Button
+            <CustomButton
               title={t("print_form_page.learn_button_text", {
                 state_abbr: form.state,
               })}
@@ -92,7 +93,7 @@ export default function Under18ReminderScreen() {
           </View>
           <Text style={styles.boldText}>{t("print_form_page.encourage")}</Text>
           <View style={styles.shareButtonsGroup}>
-            <Button
+            <CustomButton
               title={t("print_form_page.share_fb_button_text", {
                 state_abbr: form.state,
               })}
@@ -110,7 +111,7 @@ export default function Under18ReminderScreen() {
                 });
               }}
             />
-            <Button
+            <CustomButton
               title={t("print_form_page.share_x_button_text", {
                 state_abbr: form.state,
               })}
@@ -127,7 +128,7 @@ export default function Under18ReminderScreen() {
                 });
               }}
             />
-            <Button
+            <CustomButton
               title={t("print_form_page.copy_link", { state_abbr: form.state })}
               onPress={async () => {
                 try {

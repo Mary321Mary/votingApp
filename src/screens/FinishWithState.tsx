@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Linking,
   Dimensions,
-  Button,
   Platform,
   ToastAndroid,
   Alert,
@@ -17,9 +16,10 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { reportEvent } from "../utils/api";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { reportEvent } from "@/utils/api";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { ThemeContext } from "../styles/ThemeProvider";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 const { width } = Dimensions.get("window");
 
@@ -131,7 +131,7 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
           />
         </Text>
 
-        <Button
+        <CustomButton
           title={t("finish_with_state_page3.learn_about_button_text", {
             state_abbr: navState.state?.abbreviation,
           })}
@@ -143,7 +143,7 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
         </Text>
 
         <View style={styles.shareContainer}>
-          <Button
+          <CustomButton
             title={t("finish_with_state_page3.fb_button_text")}
             onPress={async () => {
               const targetUrl = config?.share?.registrations?.facebook || "";
@@ -165,7 +165,7 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
               }
             }}
           />
-          <Button
+          <CustomButton
             title={t("finish_with_state_page3.x_button_text")}
             onPress={async () => {
               const targetUrl = config?.share?.registrations?.x || "";
@@ -186,7 +186,7 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
               }
             }}
           />
-          <Button
+          <CustomButton
             title={t("finish_with_state_page3.copy_button_text")}
             onPress={handleCopyLink}
           />

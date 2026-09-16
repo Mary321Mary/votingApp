@@ -4,26 +4,26 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Linking,
-  Button,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
+import { useUIConfig } from "@/contexts/UIConfigContext";
 import {
   DataCollectionConfiguration,
   RegisterFormState,
   StateData,
 } from "@/utils/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { useUIConfig } from "@/contexts/UIConfigContext";
 import { getFlowType } from "@/utils/register/registerRouting";
 import { reportEvent, setUnder18Reminder } from "@/utils/api";
-import { newlinesToBr } from "../utils/stateCopy";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { newlinesToBr } from "@/utils/stateCopy";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface PreRegisterScreenProps {
   route: {
@@ -217,7 +217,7 @@ export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
   };
 
   return (
-    <ScrollView>
+    <View>
       <Header text={`${t("general.register_in")} ${state.name}`} />
 
       <View style={styles.container}>
@@ -234,7 +234,7 @@ export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
         )}
 
         <View style={styles.actionsContainer}>
-          <Button
+          <CustomButton
             title={t("pre_register_page.continue_button_text")}
             onPress={handleContinue}
           />
@@ -250,7 +250,7 @@ export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 

@@ -4,9 +4,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  Button,
   Linking,
-  TouchableOpacity,
   ScrollView,
   Platform,
   ToastAndroid,
@@ -14,21 +12,22 @@ import {
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Clipboard from "@react-native-clipboard/clipboard";
 
 import Header from "@/layout/Header";
-import { filterRegistrant } from "@/utils/constants";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { RegisterFormState, StateData } from "@/utils/types";
+import { useUIConfig } from "@/contexts/UIConfigContext";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { filterRegistrant } from "@/utils/constants";
+import { RegisterFormState, StateData } from "@/utils/types";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
-import { useUIConfig } from "@/contexts/UIConfigContext";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { INTERNAL_ERRORS } from "../utils/internal-errors";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
-import { reportEvent } from "../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { INTERNAL_ERRORS } from "@/utils/internal-errors";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { reportEvent } from "@/utils/api";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface PrintScreenProps {
   route: {
@@ -151,7 +150,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
               <Text style={styles.loadingText}>Loading your form...</Text>
             </View>
           ) : (
-            <Button
+            <CustomButton
               title={t("print_form_page.print_button_text")}
               disabled={!pdfUrl}
               onPress={handleDownload}
@@ -180,7 +179,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         </Text>
 
         <View style={styles.section}>
-          <Button
+          <CustomButton
             title={t("print_form_page.learn_button_text", {
               state_abbr: form.state,
             })}
@@ -202,8 +201,9 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
-          <TouchableOpacity
-            style={styles.outlineButton}
+          <CustomButton
+            title={t("print_form_page.share_fb_button_text")}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(config?.share?.registrations?.facebook || "");
 
@@ -217,13 +217,10 @@ export default function PrintScreen({ route }: PrintScreenProps) {
                   "CTA clicked: " + config?.share?.registrations?.facebook,
               });
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.share_fb_button_text")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.outlineButton}
+          />
+          <CustomButton
+            title={t("print_form_page.share_x_button_text")}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(config?.share?.registrations?.x || "");
 
@@ -236,13 +233,10 @@ export default function PrintScreen({ route }: PrintScreenProps) {
                 event_name: "CTA clicked: " + config?.share?.registrations?.x,
               });
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.share_x_button_text")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.outlineButton}
+          />
+          <CustomButton
+            title={t("print_form_page.copy_link")}
+            variant="outline-primary"
             onPress={async () => {
               const targetUrl = config?.share?.registrations?.copy_link || "";
 
@@ -273,11 +267,7 @@ export default function PrintScreen({ route }: PrintScreenProps) {
                 console.error("Failed to copy link:", err);
               }
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.copy_link")}
-            </Text>
-          </TouchableOpacity>
+          />
           {copyNotification && <Text>{copyNotification}</Text>}
           {/* Footer */}
           <View>
@@ -314,25 +304,12 @@ export default function PrintScreen({ route }: PrintScreenProps) {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     container: { flex: 1 },
-    body: { padding: 10, alignItems: "center" },
+    body: { padding: 10 },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
-    section: {
-      marginVertical: 16,
-    },
-    loadingContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    loadingText: {
-      marginLeft: 8,
-      fontSize: 16,
-    },
-    boldText: {
-      fontWeight: "bold",
-      textAlign: "center",
-      fontSize: 16,
-      color: "#000",
-    },
+    section: { marginVertical: 16 },
+    loadingContainer: { flexDirection: "row" },
+    loadingText: { marginLeft: 8, fontSize: 16 },
+    boldText: { fontWeight: "bold", fontSize: 16 },
 
     divider: {
       width: "100%",
@@ -340,28 +317,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.gray,
       marginVertical: 16,
     },
-    shareButtons: {
-      marginTop: 16,
-      gap: 12,
-    },
-    outlineButton: {
-      borderWidth: 1,
-      borderColor: theme.primary,
-      height: 40,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    outlineButtonText: {
-      color: theme.primary,
-      fontSize: 16,
-      fontWeight: "600",
-    },
-
-    secondaryText: {
-      marginBottom: 8,
-    },
-    linkText: {
-      color: theme.link,
-      textDecorationLine: "underline",
-    },
+    shareButtons: { marginTop: 16, gap: 12 },
+    secondaryText: { marginBottom: 8 },
+    linkText: { color: theme.link, textDecorationLine: "underline" },
   });

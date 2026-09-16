@@ -5,29 +5,29 @@ import {
   StyleSheet,
   ScrollView,
   useWindowDimensions,
-  Button,
   Linking,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import i18n from "@/i18n";
 
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { Checkbox } from "@/components/atoms/Checkbox";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
+import { CustomButton } from "@/components/atoms/CustomButton";
+
+import { ThemeContext } from "@/styles/ThemeProvider";
 import {
   CheckRegistrationStatus,
   CheckRegistrationStatusError,
 } from "@/utils/types";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
-import RenderHTML from "react-native-render-html";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { getSurveyQuestions, submitLookup } from "@/utils/api";
-import i18n from "@/i18n";
-import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isRequired } from "../utils/constants";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -130,7 +130,7 @@ export const CheckVoterStatusScreen = ({
             state: responseLookup.data.state,
           });
         } else {
-          navigation.navigate("LookupNotFound", {
+          navigation.navigate("Lookup", {
             form,
             state: responseLookup.data.state,
           });
@@ -428,7 +428,7 @@ export const CheckVoterStatusScreen = ({
         />
 
         {/* Continue */}
-        <Button
+        <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
           disabled={isLoading}
           onPress={onContinue}

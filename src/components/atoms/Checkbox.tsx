@@ -39,13 +39,13 @@ export const Checkbox = ({
 
   return (
     <>
-      <View ref={registerField(name, handleToggle)} style={styles.checkbox}>
+      <View ref={registerField(name)} style={styles.checkbox}>
         <Switch
           value={value}
           disabled={disabled}
           onValueChange={onValueChange}
         />
-        <Text style={styles.checkboxText} onPress={() => onValueChange(!value)}>
+        <Text style={styles.checkboxText} onPress={handleToggle}>
           {label} {required && <Text style={styles.required}>*</Text>}{" "}
           {helpText && <HelpTooltip text={helpText} />}
         </Text>

@@ -4,9 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Button,
   Linking,
-  TouchableOpacity,
   Platform,
   ToastAndroid,
   Alert,
@@ -14,15 +12,17 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import Header from "@/layout/Header";
-import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Clipboard from "@react-native-clipboard/clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { reportEvent } from "../utils/api";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+
+import Header from "@/layout/Header";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { RegisterFormState, StateData } from "@/utils/types";
+import { reportEvent } from "@/utils/api";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface SuccessPAScreenProps {
   route: {
@@ -96,14 +96,14 @@ export const SuccessPAScreen = ({ route }: SuccessPAScreenProps) => {
         <Text style={styles.bodyText}>{t("pennsylvania.success_text_1")}</Text>
         <Text style={styles.bodyText}>{t("pennsylvania.success_text_2")}</Text>
         <View style={styles.buttonGroup}>
-          <Button
+          <CustomButton
             title={t("pennsylvania.success_button_1")}
-            color={theme.primary}
             onPress={handleLearnAbout}
           />
           <View style={styles.buttonSpacer} />
-          <TouchableOpacity
-            style={styles.outlineButton}
+          <CustomButton
+            title={t("print_form_page.share_fb_button_text")}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(config?.share?.registrations?.facebook || "");
 
@@ -117,13 +117,10 @@ export const SuccessPAScreen = ({ route }: SuccessPAScreenProps) => {
                   "CTA clicked: " + config?.share?.registrations?.facebook,
               });
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.share_fb_button_text")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.outlineButton}
+          />
+          <CustomButton
+            title={t("print_form_page.share_x_button_text")}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(config?.share?.registrations?.x || "");
 
@@ -136,13 +133,10 @@ export const SuccessPAScreen = ({ route }: SuccessPAScreenProps) => {
                 event_name: "CTA clicked: " + config?.share?.registrations?.x,
               });
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.share_x_button_text")}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.outlineButton}
+          />
+          <CustomButton
+            title={t("print_form_page.copy_link")}
+            variant="outline-primary"
             onPress={async () => {
               const targetUrl = config?.share?.registrations?.copy_link || "";
 
@@ -173,11 +167,7 @@ export const SuccessPAScreen = ({ route }: SuccessPAScreenProps) => {
                 console.error("Failed to copy link:", err);
               }
             }}
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("print_form_page.copy_link")}
-            </Text>
-          </TouchableOpacity>{" "}
+          />
           {copyNotification && <Text>{copyNotification}</Text>}
           {/* Footer */}
           <View>
@@ -245,18 +235,6 @@ const getStyles = (theme: any) =>
     shareButtons: {
       marginTop: 16,
       gap: 12,
-    },
-    outlineButton: {
-      borderWidth: 1,
-      borderColor: theme.primary,
-      height: 40,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    outlineButtonText: {
-      color: theme.primary,
-      fontSize: 16,
-      fontWeight: "600",
     },
     secondaryText: {
       marginBottom: 8,

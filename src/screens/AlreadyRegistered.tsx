@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   useWindowDimensions,
-  Button,
   ScrollView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -16,6 +15,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
 import type { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface AlreadyRegisteredScreenProps {
   route: {
@@ -70,7 +70,7 @@ export default function AlreadyRegisteredScreen({
             br: { height: 1 },
           }}
         />
-        <Text style={styles.text}>
+        <Text style={styles.bold}>
           {form.first_name} {form.last_name}
           {form.suffix && ` ${form.suffix}`}
         </Text>
@@ -99,7 +99,7 @@ export default function AlreadyRegisteredScreen({
           </Text>
         </View>
 
-        <Button
+        <CustomButton
           title={t("hidden_vr_lookup_found.hvr_yes_button_text")}
           onPress={() => {
             if (form.mailForm) {
@@ -119,8 +119,9 @@ export default function AlreadyRegisteredScreen({
             }
           }}
         />
-        <Button
+        <CustomButton
           title={t("hidden_vr_lookup_found.hvr_no_button_text")}
+          variant="outline-primary"
           onPress={() => {
             if (form.mailForm) {
               navigation.replace("Success", {
@@ -167,6 +168,11 @@ const getStyles = (theme: any) =>
       textTransform: "uppercase",
     },
     bold: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      lineHeight: 22,
+      color: theme.textPrimary,
+      textTransform: "uppercase",
       fontWeight: "bold",
     },
     divider: {
@@ -200,7 +206,6 @@ const getStyles = (theme: any) =>
       padding: 12, // p-3
     },
     text_yellow: {
-      color: "#212529", // text-dark
       fontSize: 14,
     },
 

@@ -3,22 +3,23 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   useWindowDimensions,
   Linking,
   TouchableOpacity,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import Header from "@/layout/Header";
-import { RegisterFormState, StateData } from "@/utils/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/components/organisms/Navigation";
-import { useNavigation } from "@react-navigation/native";
-import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import RenderHTML from "react-native-render-html";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+
+import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { RegisterFormState, StateData } from "@/utils/types";
+import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { getFlowType } from "@/utils/register/registerRouting";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface Under18ScreenProps {
   route: {
@@ -225,11 +226,11 @@ export const Under18Screen = ({ route }: Under18ScreenProps) => {
       )}
 
       <View style={styles.buttonsContainer}>
-        <Button
+        <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
           onPress={handleContinue}
         />
-        <Button
+        <CustomButton
           title={t("register_18_by_election_page.remind_button_text")}
           disabled={isSubmitting}
           onPress={handleReminder}

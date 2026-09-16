@@ -2,25 +2,25 @@ import React, { useEffect } from "react";
 import {
   StyleSheet,
   View,
-  Text,
   ScrollView,
-  Button,
   useWindowDimensions,
+  Linking,
+  Text,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import Header from "@/layout/Header";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
-import { reportEvent } from "../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import RenderHTML from "react-native-render-html";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import Header from "@/layout/Header";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { reportEvent } from "@/utils/api";
+import { interpolateStateCopy } from "@/utils/stateCopy";
+import { SubmitEmailZipResponse } from "@/utils/types";
 
 type RouteParams = {
-  response: {
-    state?: {
-      name: string;
-    };
-  };
+  response: SubmitEmailZipResponse;
   zip: string;
   email: string;
   partner?: string;
@@ -38,6 +38,13 @@ export default function AfterDeadlineScreen() {
   const { width } = useWindowDimensions();
 
   const { response, zip, email } = route.params || {};
+  const stateData = response?.state;
+  const sameDayCopy = stateData?.same_day_registration_statement
+    ? interpolateStateCopy(stateData.same_day_registration_statement, {
+        state_name: stateData.name,
+        state_abbr: stateData.abbreviation,
+      })
+    : null;
 
   useEffect(() => {
     async function fetchData() {
@@ -54,7 +61,7 @@ export default function AfterDeadlineScreen() {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView>
       <Header
         text={`${t("general.register_in")}${response?.state?.name || ""}`}
       />
@@ -66,14 +73,14 @@ export default function AfterDeadlineScreen() {
             body: {
               fontSize: 14,
               lineHeight: 18,
-              marginVertical: 5,
             },
             strong: { fontWeight: "bold" },
             br: { height: 1 },
           }}
         />
+        <Text>{sameDayCopy}</Text>
 
-        <Button
+        <CustomButton
           title={t("after_vr_deadline.continue_button_text")}
           onPress={() => {
             navigation.replace("Register", {
@@ -83,19 +90,24 @@ export default function AfterDeadlineScreen() {
             });
           }}
         />
+        <CustomButton
+          title={t("after_vr_deadline.cta_learn_about", {
+            state_abbr: stateData?.abbreviation,
+          })}
+          variant="outline-primary"
+          onPress={() => {
+            if (stateData?.learn_about_url) {
+              Linking.openURL(stateData.learn_about_url);
+            }
+          }}
+        />
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {},
   container: {
-    flex: 1,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 10,
-    width: "100%",
   },
 });

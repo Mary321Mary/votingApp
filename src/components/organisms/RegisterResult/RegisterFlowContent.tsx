@@ -10,7 +10,6 @@ import {
   StateData,
 } from "utils/types";
 import { ConnectedOVR } from "../MI/ConnectedOVR";
-import { Button } from "react-native";
 import ConnectedOVRStep2 from "../MI/ConnectedOVRStep2";
 import ConnectedOVRStep3 from "../MI/ConnectedOVRStep3";
 import { ConnectedWA } from "../WA/ConnectedWA";
@@ -34,6 +33,7 @@ import FinishWithState from "../FinishWithState";
 import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
 import { allowsPaperFallback } from "../../../utils/register/registerRouting";
 import { isFinishOnOtherDeviceEnabled } from "../../../utils/constants";
+import { CustomButton } from "../../atoms/CustomButton";
 
 interface RegisterFlowContentProps {
   state: StateData;
@@ -363,7 +363,7 @@ const RegisterFlowContent = ({
           onChange={setForm}
           onChangeError={setErrMsg}
           handleMainButton={
-            <Button
+            <CustomButton
               title={t("ovr_landing_page.next_button")}
               onPress={handleMainButtonClick}
             />
@@ -380,7 +380,7 @@ const RegisterFlowContent = ({
           onChange={setForm}
           onChangeError={setErrMsg}
           handleMainButton={
-            <Button
+            <CustomButton
               title={t("ovr_landing_page.next_button")}
               onPress={handleMainButtonClick}
             />
@@ -397,7 +397,7 @@ const RegisterFlowContent = ({
           onChange={setForm}
           onChangeError={setErrMsg}
           handleMainButton={
-            <Button
+            <CustomButton
               title={
                 isSubmitting
                   ? t("michigan.submitting_button")
@@ -425,7 +425,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -444,7 +444,7 @@ const RegisterFlowContent = ({
               onChange={setForm}
               onChangeError={setErrMsg}
               handleMainButton={
-                <Button
+                <CustomButton
                   title={t("ovr_landing_page.next_button")}
                   onPress={() => {
                     if (form.upload === "print") {
@@ -484,7 +484,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -504,7 +504,7 @@ const RegisterFlowContent = ({
                 onChange={setForm}
                 onChangeError={setErrMsg}
                 handleMainButton={
-                  <Button
+                  <CustomButton
                     title={t("ovr_landing_page.next_button")}
                     onPress={handleMainButtonClick}
                   />
@@ -521,7 +521,7 @@ const RegisterFlowContent = ({
               onChange={setForm}
               onChangeError={setErrMsg}
               handleMainButton={
-                <Button
+                <CustomButton
                   title={t("ovr_landing_page.next_button")}
                   onPress={handleMainButtonClick}
                 />
@@ -560,7 +560,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -577,7 +577,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -595,7 +595,7 @@ const RegisterFlowContent = ({
               onChange={setForm}
               onChangeError={setErrMsg}
               handleMainButton={
-                <Button
+                <CustomButton
                   title={t("ovr_landing_page.next_button")}
                   onPress={() => {
                     if (form.upload === "print") {
@@ -652,7 +652,7 @@ const RegisterFlowContent = ({
               onChange={setForm}
               onChangeError={setErrMsg}
               handleMainButton={
-                <Button
+                <CustomButton
                   title={t("ovr_landing_page.next_button")}
                   onPress={handleMainButtonClick}
                 />
@@ -669,7 +669,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -700,7 +700,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -714,8 +714,9 @@ const RegisterFlowContent = ({
             value={form}
             onChange={setForm}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={"< " + t("general.no_thanks_continue_rtv")}
+                variant="outline-primary"
                 onPress={handleMainButtonClick}
               />
             }
@@ -733,7 +734,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
                 disabled={isSubmitting}
@@ -756,7 +757,7 @@ const RegisterFlowContent = ({
             onChange={setForm}
             onChangeError={setErrMsg}
             handleMainButton={
-              <Button
+              <CustomButton
                 title={t("ovr_landing_page.next_button")}
                 onPress={handleMainButtonClick}
               />
@@ -778,7 +779,7 @@ const RegisterFlowContent = ({
               onChange={setForm}
               onChangeError={setErrMsg}
               handleMainButton={
-                <Button
+                <CustomButton
                   title={t("nvra_form_page.print_form")}
                   onPress={handleMainButtonClick}
                   disabled={isSubmitting}
@@ -814,7 +815,7 @@ const RegisterFlowContent = ({
           onChange={setForm}
           onChangeError={setErrMsg}
           handleMainButton={
-            <Button
+            <CustomButton
               title={t("nvra_form_page.prepare_form")}
               onPress={handleMainButtonClick}
               disabled={isSubmitting}

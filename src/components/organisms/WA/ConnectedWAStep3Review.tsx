@@ -1,6 +1,5 @@
 import React, { SetStateAction, useContext, useState } from "react";
 import {
-  Button,
   Image,
   StyleSheet,
   Text,
@@ -8,10 +7,12 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
+
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
-import RenderHTML from "react-native-render-html";
 import { Checkbox } from "@/components/atoms/Checkbox";
+import { CustomButton } from "../../atoms/CustomButton";
 
 interface ConnectedWAStep3ReviewProps {
   value: RegisterFormState;
@@ -48,7 +49,10 @@ export const ConnectedWAStep3Review = ({
 
         <View style={styles.contentWrapper}>
           {content}
-          <Button title={t("general.edit")} onPress={() => goBack?.(step)} />
+          <CustomButton
+            title={t("general.edit")}
+            onPress={() => goBack?.(step)}
+          />
         </View>
       </View>
       <View style={styles.divider} />
@@ -285,7 +289,7 @@ export const ConnectedWAStep3Review = ({
         onValueChange={() => setConfirm(prev => !prev)}
       />
 
-      <Button
+      <CustomButton
         title={
           isSubmitting
             ? t("michigan.submitting_button")

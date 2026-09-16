@@ -5,7 +5,7 @@ import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 import HelpTooltip from "../HelpTooltip";
-
+import { useFormScroll } from "@/contexts/FormScrollContext";
 
 export interface DateField {
   name: keyof RegisterFormState;
@@ -43,7 +43,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  
+  const { registerField } = useFormScroll();
 
   const MONTHS = [
     { value: "", name: t("general.months.month") },
@@ -82,12 +82,6 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
         <HelpTooltip text={t("form_fields.dob_help")} />
       </View>
 
-      {year.errorText && <Text style={styles.errorText}>{year.errorText}</Text>}
-      {day.errorText && <Text style={styles.errorText}>{day.errorText}</Text>}
-      {month.errorText && (
-        <Text style={styles.errorText}>{month.errorText}</Text>
-      )}
-
       <View style={styles.dateRow}>
         <View style={styles.monthCol}>
           <View
@@ -97,6 +91,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             ]}
           >
             <Picker
+              ref={registerField(month.name)}
               enabled={!disabled}
               selectedValue={month.value}
               onValueChange={(text: string) =>
@@ -115,10 +110,14 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
               ))}
             </Picker>
           </View>
+          {month.errorText && (
+            <Text style={styles.errorText}>{month.errorText}</Text>
+          )}
         </View>
 
         <View style={styles.dayCol}>
           <TextInput
+            ref={registerField(day.name)}
             style={[
               styles.dateInput,
               disabled && { backgroundColor: theme.borderColor },
@@ -131,11 +130,15 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             value={day.value}
             onChangeText={handleDayChange}
           />
+          {day.errorText && (
+            <Text style={styles.errorText}>{day.errorText}</Text>
+          )}
         </View>
 
         {/* Год (flex: 4) */}
         <View style={styles.yearCol}>
           <TextInput
+            ref={registerField(year.name)}
             style={[
               styles.dateInput,
               disabled && { backgroundColor: theme.borderColor },
@@ -148,6 +151,9 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             value={year.value}
             onChangeText={handleYearChange}
           />
+          {year.errorText && (
+            <Text style={styles.errorText}>{year.errorText}</Text>
+          )}
         </View>
       </View>
     </View>

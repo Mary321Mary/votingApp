@@ -7,6 +7,7 @@ import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../atoms/InputField";
 import { isRequired, isVisible } from "@/utils/constants";
 import { PrevAddressSection } from "./PrevAddressSection";
+import { SelectField } from "../atoms/SelectField";
 
 interface AddressSectionProps extends FormProps {
   checkZipValidation?: boolean;
@@ -29,6 +30,13 @@ export const AddressSection = ({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  const COUNTY_OPTIONS = [
+    { name: "", value: "" },
+    ...(formCongif.fields.home_county?.options?.map((option: string) => ({
+      name: option,
+      value: option,
+    })) || []),
+  ];
 
   const updateField = <K extends keyof RegisterFormState>(
     key: K,
@@ -95,6 +103,26 @@ export const AddressSection = ({
             value={value.home_zip_code}
             required={isRequired(formCongif, "home_zip_code")}
             errorMessage={t(errorMessages.home_zip_code)}
+          />
+        )}
+
+        {isVisible(formCongif, "home_county") && (
+          <SelectField
+            name="home_county"
+            label={t("form_fields.county")}
+            value={value.home_county}
+            options={[
+              { name: "", value: "" },
+              ...(formCongif.fields.home_county?.options?.map(
+                (option: string) => ({
+                  name: option,
+                  value: option,
+                }),
+              ) ?? COUNTY_OPTIONS),
+            ]}
+            required={isRequired(formCongif, "home_county")}
+            errorMessage={errorMessages.home_county}
+            onValueChange={itemValue => updateField("home_county", itemValue)}
           />
         )}
       </View>

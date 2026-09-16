@@ -5,26 +5,27 @@ import {
   StyleSheet,
   useWindowDimensions,
   Linking,
-  Button,
   ScrollView,
   Platform,
   ToastAndroid,
   Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
-import RenderHTML from "react-native-render-html";
-import { reportEvent, submitEmailZip } from "../utils/api";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import i18n from "../i18n";
-import { useUIConfig } from "../contexts/UIConfigContext";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../components/organisms/Navigation";
+import { reportEvent, submitEmailZip } from "@/utils/api";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import i18n from "@/i18n";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 type LookupScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -158,7 +159,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             }}
           />
         </Text>
-        <Button
+        <CustomButton
           title={t("lookup_success_page.cta_learn_about", {
             state_abbr: state?.abbreviation,
           })}
@@ -184,12 +185,14 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             });
           }}
         />
-        <Button
+        <CustomButton
           title={t("general.calls_to_action.request_absentee_ballot")}
+          variant="outline-primary"
           onPress={() => Linking.openURL(config?.urls.abr_tool || "")}
         />
-        <Button
+        <CustomButton
           title={t("finish_with_state_page3.fb_button_text")}
+          variant="outline-primary"
           onPress={async () => {
             Linking.openURL(config?.share?.lookup?.facebook || "");
 
@@ -203,8 +206,9 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             });
           }}
         />
-        <Button
+        <CustomButton
           title={t("finish_with_state_page3.x_button_text")}
+          variant="outline-primary"
           onPress={async () => {
             Linking.openURL(config?.share?.lookup?.x || "");
 
@@ -218,8 +222,9 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             });
           }}
         />
-        <Button
+        <CustomButton
           title={t("finish_with_state_page3.copy_button_text")}
+          variant="outline-primary"
           onPress={handleCopyLink}
         />
         {copyNotification && <Text>{copyNotification}</Text>}
@@ -231,6 +236,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
         <View style={styles.list}>
           {/* Item 1 */}
           <View style={styles.listItem}>
+            <Text style={styles.number}>1.</Text>
             <Text style={styles.textLi}>
               <Trans
                 i18nKey="lookup_not_found_page.failure_body1"
@@ -251,6 +257,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
 
           {/* Item 2 */}
           <View style={styles.listItem}>
+            <Text style={styles.number}>2.</Text>
             <Text style={styles.textLi}>
               {t("lookup_not_found_page.failure_body2")}
             </Text>
@@ -258,14 +265,16 @@ export default function LookupScreen({ route }: LookupScreenProps) {
 
           {/* Item 3 */}
           <View style={styles.listItem}>
+            <Text style={styles.number}>3.</Text>
             <Text style={styles.textLi}>
               {t("lookup_not_found_page.failure_body3")}
             </Text>
           </View>
         </View>
         {state.ovr_type !== "not_participating" && (
-          <Button
+          <CustomButton
             title={t("lookup_not_found_page.cta_register")}
+            variant="outline-primary"
             onPress={async () => {
               const response = await submitEmailZip({
                 email: form.email_address,
@@ -298,6 +307,34 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             }}
           />
         )}
+        <CustomButton
+          title={t("lookup_not_found_page.cta_try_again")}
+          variant="outline-primary"
+          onPress={() => navigation.goBack()}
+        />
+        <View style={styles.divider} />
+        <Text style={styles.secondaryText}>
+          {t("general.calls_to_action.building_site")}
+        </Text>
+
+        <Text>
+          <Trans
+            i18nKey="general.calls_to_action.get_tool_reg"
+            components={{
+              a: (
+                <Text
+                  key="email-link"
+                  style={styles.linkText}
+                  onPress={() => {
+                    Linking.openURL("mailto:civictech@rockthevote.org");
+                  }}
+                >
+                  {0}
+                </Text>
+              ),
+            }}
+          />
+        </Text>
       </View>
     </ScrollView>
   );
@@ -340,6 +377,10 @@ const getStyles = (theme: any) =>
       flexDirection: "row",
       alignItems: "flex-start",
     },
+    number: {
+      width: 24,
+      fontSize: 16,
+    },
     textLi: {
       marginRight: 10,
       fontSize: 15,
@@ -348,6 +389,13 @@ const getStyles = (theme: any) =>
     link: {
       color: theme.link,
       fontSize: 15,
+      textDecorationLine: "underline",
+    },
+    secondaryText: {
+      marginBottom: 8,
+    },
+    linkText: {
+      color: theme.link,
       textDecorationLine: "underline",
     },
   });

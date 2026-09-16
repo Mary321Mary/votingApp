@@ -1,6 +1,5 @@
 import React, { SetStateAction, useContext, useState } from "react";
 import {
-  Button,
   Image,
   StyleSheet,
   Text,
@@ -9,11 +8,13 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
+import { Eye, EyeOff } from "lucide-react-native";
+
 import { RegisterFormState } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { Checkbox } from "@/components/atoms/Checkbox";
-import RenderHTML from "react-native-render-html";
-import { Eye, EyeOff } from "lucide-react-native";
+import { CustomButton } from "../../atoms/CustomButton";
 
 interface ConnectedPAStep3HasIDProps {
   value: RegisterFormState;
@@ -66,7 +67,10 @@ export const ConnectedPAStep3HasID = ({
 
         <View style={styles.contentWrapper}>
           {content}
-          <Button title={t("general.edit")} onPress={() => goBack?.(step)} />
+          <CustomButton
+            title={t("general.edit")}
+            onPress={() => goBack?.(step)}
+          />
         </View>
       </View>
       <View style={styles.divider} />
@@ -281,7 +285,7 @@ export const ConnectedPAStep3HasID = ({
         errorText={showErrorConfirm && t("pennsylvania.you_must_confirm")}
         onValueChange={() => setConfirm(prev => !prev)}
       />
-      <Button
+      <CustomButton
         title={
           isSubmitting
             ? t("michigan.submitting_button")

@@ -451,11 +451,34 @@ export const RegisterResult = ({
   const navigateToPreRegister = async () => {
     const registration_uid =
       (await AsyncStorage.getItem(`registration_uid`)) || "";
-    navigation.replace("PreRegister", {
+    await reportEvent({
+      registration_uid,
+      partner_id: form.partner_id.toString(),
+      step: REPORT_EVENT_STEPS.STEP_2,
+      event_name: "nvra_pre_reg",
+    });
+    navigation.navigate("PreRegister", {
       state,
       form,
       workflow_type: workflow,
       formCongif,
+      registration_uid,
+    });
+  };
+
+  const navigateToUnde18Register = async () => {
+    const registration_uid =
+      (await AsyncStorage.getItem(`registration_uid`)) || "";
+    await reportEvent({
+      registration_uid,
+      partner_id: form.partner_id.toString(),
+      step: REPORT_EVENT_STEPS.STEP_2,
+      event_name: "nvra_under_18",
+    });
+    navigation.navigate("Under18", {
+      state,
+      form,
+      workflow_type: workflow,
       registration_uid,
     });
   };
@@ -491,29 +514,12 @@ export const RegisterResult = ({
 
       if (checkDOB) {
         if (form.dob_routing_outcome === "pre_registration_notice") {
-          await reportEvent({
-            registration_uid,
-            partner_id: form.partner_id.toString(),
-            step: REPORT_EVENT_STEPS.STEP_2,
-            event_name: "nvra_pre_reg",
-          });
           navigateToPreRegister();
           return;
         }
 
         if (form.dob_routing_outcome === "under_18_election_day_ok") {
-          await reportEvent({
-            registration_uid,
-            partner_id: form.partner_id.toString(),
-            step: REPORT_EVENT_STEPS.STEP_2,
-            event_name: "nvra_under_18",
-          });
-          navigation.replace("Under18", {
-            state,
-            form,
-            workflow_type: workflow,
-            registration_uid,
-          });
+          navigateToUnde18Register();
           return;
         }
       }
@@ -553,29 +559,12 @@ export const RegisterResult = ({
       } else if (step === 2) {
         if (await performConnectedOvrValidation()) {
           if (form.dob_routing_outcome === "pre_registration_notice") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_pre_reg",
-            });
             navigateToPreRegister();
             return;
           }
 
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_under_18",
-            });
-            navigation.replace("Under18", {
-              state,
-              form,
-              workflow_type: workflow,
-              registration_uid,
-            });
+            navigateToUnde18Register();
             return;
           }
           setStep(3);
@@ -648,29 +637,12 @@ export const RegisterResult = ({
       if (step === 1) {
         if (await performValidation()) {
           if (form.dob_routing_outcome === "pre_registration_notice") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_pre_reg",
-            });
             navigateToPreRegister();
             return;
           }
 
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_under_18",
-            });
-            navigation.replace("Under18", {
-              state,
-              form,
-              workflow_type: workflow,
-              registration_uid,
-            });
+            navigateToUnde18Register();
             return;
           }
 
@@ -726,29 +698,12 @@ export const RegisterResult = ({
       if (step === 1) {
         if (await performWAValidation("connected_WA")) {
           if (form.dob_routing_outcome === "pre_registration_notice") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_pre_reg",
-            });
             navigateToPreRegister();
             return;
           }
 
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_under_18",
-            });
-            navigation.replace("Under18", {
-              state,
-              form,
-              workflow_type: workflow,
-              registration_uid,
-            });
+            navigateToUnde18Register();
             return;
           }
 
@@ -777,29 +732,12 @@ export const RegisterResult = ({
       if (step === 1) {
         if (await performWAValidation("connected_PA")) {
           if (form.dob_routing_outcome === "pre_registration_notice") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_pre_reg",
-            });
             navigateToPreRegister();
             return;
           }
 
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_under_18",
-            });
-            navigation.replace("Under18", {
-              state,
-              form,
-              workflow_type: workflow,
-              registration_uid,
-            });
+            navigateToUnde18Register();
             return;
           }
 
@@ -830,29 +768,12 @@ export const RegisterResult = ({
       if (step === 1) {
         if (await performWAValidation()) {
           if (form.dob_routing_outcome === "pre_registration_notice") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_pre_reg",
-            });
             navigateToPreRegister();
             return;
           }
 
           if (form.dob_routing_outcome === "under_18_election_day_ok") {
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.STEP_2,
-              event_name: "nvra_under_18",
-            });
-            navigation.replace("Under18", {
-              state,
-              form,
-              workflow_type: workflow,
-              registration_uid,
-            });
+            navigateToUnde18Register();
             return;
           }
 
@@ -867,7 +788,7 @@ export const RegisterResult = ({
       } else {
         await finalizeNvraRegistration(false);
       }
-    } else navigation.navigate("Home");
+    } else navigation.replace("Home");
   };
 
   useEffect(() => {

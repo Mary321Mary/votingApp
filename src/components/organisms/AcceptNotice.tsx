@@ -3,25 +3,26 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   Linking,
   ScrollView,
   useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import RenderHTML from "react-native-render-html";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+
 import {
   RegisterFormState,
   StateData,
   SubmitVoterCAResponse,
-} from "../../utils/types";
+} from "@/utils/types";
 import { Checkbox } from "../atoms/Checkbox";
 import { reportEvent, submitCACovr } from "@/utils/api";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "./Navigation";
-import { useNavigation } from "@react-navigation/native";
-import RenderHTML from "react-native-render-html";
-import { REPORT_EVENT_STEPS } from "../../utils/report/eventReporting";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { CustomButton } from "../atoms/CustomButton";
 
 interface AcceptNoticeProps {
   state: StateData;
@@ -102,7 +103,7 @@ function AcceptNotice({ state, value, handleMainButton }: AcceptNoticeProps) {
         }}
       />
 
-      <Button
+      <CustomButton
         title={t("california.finish_ca_button_text")}
         onPress={async () => {
           if (accept) {

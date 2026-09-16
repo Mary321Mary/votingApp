@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   Alert,
-  Button,
   Platform,
   StyleSheet,
   Text,
@@ -9,6 +8,9 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import Clipboard from "@react-native-clipboard/clipboard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { FormProps, RegisterFormState } from "@/utils/types";
 import InputField from "../../atoms/InputField";
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -24,8 +26,7 @@ import {
   submitPADevice,
   submitWADevice,
 } from "@/utils/api";
-import Clipboard from "@react-native-clipboard/clipboard";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CustomButton } from "../../atoms/CustomButton";
 
 export const ConnectedPAStep3Device = ({
   value,
@@ -168,7 +169,10 @@ export const ConnectedPAStep3Device = ({
         onChangeError={onChangeError}
       />
 
-      <Button title={t("pennsylvania.send_sms")} onPress={handleSmsSend} />
+      <CustomButton
+        title={t("pennsylvania.send_sms")}
+        onPress={handleSmsSend}
+      />
       {smsNotification && <Text>{smsNotification}</Text>}
 
       <InputField
@@ -180,14 +184,20 @@ export const ConnectedPAStep3Device = ({
         errorMessage={t(errorMessages.email_address)}
       />
 
-      <Button title={t("pennsylvania.send_email")} onPress={handleEmailSend} />
+      <CustomButton
+        title={t("pennsylvania.send_email")}
+        onPress={handleEmailSend}
+      />
       {emailNotification && <Text>{emailNotification}</Text>}
 
       <Text style={styles.paragraph}>
         {t("pennsylvania.continue_on_touch_device")}
       </Text>
 
-      <Button title={t("pennsylvania.copy_link")} onPress={handleCopyLink} />
+      <CustomButton
+        title={t("pennsylvania.copy_link")}
+        onPress={handleCopyLink}
+      />
       {copyNotification && <Text>{copyNotification}</Text>}
     </View>
   );

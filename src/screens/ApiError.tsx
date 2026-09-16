@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -7,6 +7,7 @@ import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import type { RootStackParamList } from "@/components/organisms/Navigation";
 import { StateData } from "@/utils/types";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface ApiErrorScreenProps {
   route: {
@@ -32,7 +33,7 @@ export default function ApiErrorScreen({ route }: ApiErrorScreenProps) {
         <Text style={styles.errorText}>
           Something went wrong or page under construction.
         </Text>
-        <Button
+        <CustomButton
           title={t("general.restart_test")}
           onPress={() => navigation.navigate("Home" as never)}
         />

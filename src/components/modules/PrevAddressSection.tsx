@@ -163,7 +163,7 @@ export const PrevAddressSection = ({
             )}
             {isVisible(formCongif, "mailing_state") && (
               <SelectField
-                name="name_title"
+                name="mailing_state"
                 label={t("form_fields.state")}
                 value={value.mailing_state}
                 options={STATES}

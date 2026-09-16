@@ -1,20 +1,15 @@
 import React, { useContext } from "react";
-import { StateData } from "@/utils/types";
-import {
-  Button,
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { ThemeContext } from "@/styles/ThemeProvider";
+import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import RenderHTML from "react-native-render-html";
 import { useTranslation } from "react-i18next";
-import Header from "@/layout/Header";
 import { useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "@/components/organisms/Navigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+import { StateData } from "@/utils/types";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import Header from "@/layout/Header";
+import { RootStackParamList } from "@/components/organisms/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 type NotParticipatingScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -65,7 +60,7 @@ export const NotParticipatingScreen = ({
         </Text>
         <RenderHTML source={{ html: state.sos_address || "" }} />
         <RenderHTML source={{ html: state.sos_phone || "" }} />
-        <Button
+        <CustomButton
           title={t("not_participating_page.learn_about_btn_text", {
             state_abbr: state.abbreviation,
           })}
@@ -77,7 +72,7 @@ export const NotParticipatingScreen = ({
         />
 
         {state?.show_vr_check_button && (
-          <Button
+          <CustomButton
             title={t("not_participating_page.check_btn_text")}
             onPress={() => navigation.navigate("Lookup", {})}
           />

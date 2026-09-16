@@ -1,23 +1,18 @@
 import React, { useContext, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Linking,
-  ScrollView,
-  Button,
-} from "react-native";
+import { View, Text, StyleSheet, Linking, ScrollView } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { CheckRegistrationStatus, StateData } from "@/utils/types";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { reportEvent, submitEmailZip } from "@/utils/api";
+import i18n from "@/i18n";
 import { RootStackParamList } from "@/components/organisms/Navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
-import { REPORT_EVENT_STEPS } from "../utils/report/eventReporting";
-import { reportEvent, submitEmailZip } from "../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import i18n from "../i18n";
+import { CustomButton } from "@/components/atoms/CustomButton";
 
 type LookupNotFoundScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -119,7 +114,7 @@ export default function LookupNotFoundScreen({
           </View>
         </View>
         {state.ovr_type !== "not_participating" && (
-          <Button
+          <CustomButton
             title={t("lookup_not_found_page.cta_register")}
             onPress={async () => {
               const response = await submitEmailZip({
@@ -153,8 +148,9 @@ export default function LookupNotFoundScreen({
             }}
           />
         )}
-        <Button
+        <CustomButton
           title={t("lookup_not_found_page.cta_try_again")}
+          variant="outline-primary"
           onPress={() => navigation.goBack()}
         />
 

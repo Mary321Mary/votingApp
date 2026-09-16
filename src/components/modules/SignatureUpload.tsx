@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View, Text, Image, StyleSheet, Button } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import ImagePicker from "react-native-image-crop-picker";
+import { CustomButton } from "../atoms/CustomButton";
 
 interface SignatureUploadProps {
   initialValue?: string;
@@ -52,7 +53,7 @@ export default function SignatureUpload({
     <View>
       {!image ? (
         <>
-          <Button
+          <CustomButton
             title={
               selectButtonTextKey
                 ? t(selectButtonTextKey)
@@ -72,7 +73,10 @@ export default function SignatureUpload({
               accessibilityLabel={t("pennsylvania.signature_preview_alt")}
             />
           </View>
-          <Button title={t("pennsylvania.remove")} onPress={handleRemove} />
+          <CustomButton
+            title={t("pennsylvania.remove")}
+            onPress={handleRemove}
+          />
         </>
       )}
     </View>

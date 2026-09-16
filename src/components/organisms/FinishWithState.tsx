@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
 import { FormProps } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import QuestionsSection from "../atoms/QuestionsSection";
-import { useNavigation } from "@react-navigation/native";
 import { RegisterScreenNavigation } from "./RegisterResult/RegisterResult";
-import { allowsPaperFallback } from "../../utils/register/registerRouting";
+import { allowsPaperFallback } from "@/utils/register/registerRouting";
+import { CustomButton } from "../atoms/CustomButton";
 
 interface FinishWithStateProps extends FormProps {
   handleMainButtonClick: () => void;
@@ -48,15 +50,16 @@ function FinishWithState({
       />
 
       <View style={styles.buttons}>
-        <Button
+        <CustomButton
           title={t("finish_with_state_page2.state_button", {
             state_abbr: state.abbreviation,
           })}
           onPress={handleMainButtonClick}
         />
         {allowsPaperFallback(state) && (
-          <TouchableOpacity
-            style={styles.outlineButton}
+          <CustomButton
+            title={t("finish_with_state_page2.paper_button")}
+            variant="outline-primary"
             onPress={() =>
               navigation.navigate("Register", {
                 status: { success: true, errors: [] },
@@ -71,11 +74,7 @@ function FinishWithState({
                 isRedirectedCompressNVRA: true,
               })
             }
-          >
-            <Text style={styles.outlineButtonText}>
-              {t("finish_with_state_page2.paper_button")}
-            </Text>
-          </TouchableOpacity>
+          />
         )}
       </View>
     </View>
@@ -87,7 +86,6 @@ const getStyles = (theme: any) =>
     container: {
       width: "100%",
     },
-
     notice: {
       fontSize: 16,
       lineHeight: 24,
@@ -95,42 +93,14 @@ const getStyles = (theme: any) =>
       color: theme.textColor,
       marginBottom: 16,
     },
-
     description: {
       fontSize: 14,
       lineHeight: 22,
       color: theme.textColor,
     },
-
-    questionLabel: {
-      fontSize: 16,
-      lineHeight: 22,
-      fontWeight: "700",
-      color: theme.textColor,
-      marginBottom: 16,
-    },
-
-    inputs: {
-      gap: 16,
-      marginBottom: 32,
-    },
-
     buttons: {
       gap: 16,
       alignItems: "center",
-    },
-    outlineButton: {
-      borderWidth: 1,
-      borderColor: theme.primary,
-      height: 40,
-      justifyContent: "center",
-      alignItems: "center",
-      paddingHorizontal: 10,
-    },
-    outlineButtonText: {
-      color: theme.primary,
-      fontSize: 16,
-      fontWeight: "600",
     },
   });
 
