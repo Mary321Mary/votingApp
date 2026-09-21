@@ -19,7 +19,6 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import i18n from "i18n";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ONBOARDING_COMPLETED_KEY } from "../utils/constants";
 
 type HomeScreenProps = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -71,7 +70,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "false");
     const validationErrors = validate();
     setErrors(validationErrors);
 
