@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultLayout from "@/layout/DefaultLayout";
 import {
@@ -34,9 +35,15 @@ import FailCAScreen from "@/screens/FailCA";
 import AfterDeadlineScreen from "@/screens/AfterDeadline";
 import Under18ReminderScreen from "@/screens/Under18Reminder";
 import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
+import WelcomeScreen from "../../screens/Welcome";
+import { ONBOARDING_COMPLETED_KEY } from "../../utils/constants";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
+  Welcome: {
+    header: string;
+    text: string;
+  }; // or { id: string }
   Register: SubmitEmailZipResponseProps; // or { id: string }
   Success: {
     form: RegisterFormState;
@@ -145,11 +152,33 @@ const withDefaultLayout = (Component: React.ComponentType<any>) => {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function Navigation({}) {
+  const [initialRouteName, setInitialRouteName] = useState<
+    "Welcome" | "ZipError" | null
+  >(null);
+
+  useEffect(() => {
+    const loadInitialRoute = async () => {
+      const onboardingCompleted = await AsyncStorage.getItem(
+        ONBOARDING_COMPLETED_KEY,
+      );
+      setInitialRouteName(
+        onboardingCompleted === "true" ? "ZipError" : "Welcome",
+      );
+    };
+
+    loadInitialRoute().catch(() => setInitialRouteName("Welcome"));
+  }, []);
+
+  if (!initialRouteName) {
+    return null;
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName={initialRouteName}
       screenOptions={{ headerShown: false }}
     >
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Home" component={withDefaultLayout(HomeScreen)} />
       <Stack.Screen
         name="Register"
@@ -175,6 +204,11 @@ function Navigation({}) {
       <Stack.Screen
         name="ZipError"
         component={withDefaultLayout(ZipErrorScreen)}
+        initialParams={{
+          header: "Welcome back",
+          text: "Welcome back. Your best next step are ...",
+          user: null,
+        }}
       />
       <Stack.Screen name="Print" component={withDefaultLayout(PrintScreen)} />
       <Stack.Screen

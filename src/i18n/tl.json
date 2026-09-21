@@ -400,6 +400,12 @@
       "finishOnline": "Maaari mong tapusin ang pagpaparehistro para bumoto online sa {{state}}.",
       "whereToSend": "Kung saan ipapadala ang iyong form"
     },
+    "welcome": {
+      "header": "Maligayang pagdating sa RockTheVote!",
+      "get_started": "Magsimula",
+      "description1": "Nandito kami upang tulungan ka sa lahat ng hakbang para maging handa sa pagboto, at upang tulungan din ang iyong mga kaibigan at pamilya.",
+      "description2": "Maaari mong piliin ang kagustuhang wika, at pagkatapos ay <strong>Magsimula</strong> na sa pag-set up ng iyong profile at mga tool sa pagboto."
+    },
     "under_18_error": "Masyado ka pang bata para rito.",
     "license_age_eligibility": "Maaaring karapat-dapat kang tapusin ang iyong pagpaparehistro gamit ang Tennessee online voter registration system.",
     "provide_full_SSN": "Dapat mong ibigay ang iyong buong Social Security number."

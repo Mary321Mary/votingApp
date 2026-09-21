@@ -14,6 +14,8 @@ import {
 export const DEFAULT_STATE_REQUIRED_ID =
   "driver's license or state identification card";
 
+export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
+
 export const isVisible = (
   formConfig: DataCollectionConfiguration | undefined,
   key: string,

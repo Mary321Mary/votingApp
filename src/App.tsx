@@ -27,7 +27,6 @@ function App() {
 
 function AppContent() {
   return (
-    // <AuthProvider>
     <UIConfigProvider>
       <ThemeProvider>
         <FormScrollProvider>
@@ -37,7 +36,6 @@ function AppContent() {
         </FormScrollProvider>
       </ThemeProvider>
     </UIConfigProvider>
-    // </AuthProvider>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import i18n from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -6,31 +6,56 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 const LanguageSelector: React.FC = () => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    i18n.language.split("-")[0],
+  );
+
+  useEffect(() => {
+    const handleLanguageChanged = (language: string) => {
+      setSelectedLanguage(language.split("-")[0]);
+    };
+
+    i18n.on("languageChanged", handleLanguageChanged);
+    return () => {
+      i18n.off("languageChanged", handleLanguageChanged);
+    };
+  }, []);
 
   const changeLanguage = async (lang: string) => {
-    if (i18n.language === lang) return;
+    if (selectedLanguage === lang) return;
 
     await i18n.changeLanguage(lang);
   };
 
   const getOptionStyle = (langCode: string) => [
     styles.option,
-    i18n.language === langCode ? styles.activeOption : styles.inactiveOption,
+    selectedLanguage === langCode
+      ? styles.activeOption
+      : styles.inactiveOption,
+  ];
+
+  const languages = [
+    { code: "en", label: "English" },
+    { code: "es", label: "Español" },
+    { code: "tl", label: "Tagalog" },
+  ];
+  const orderedLanguages = [
+    ...languages.filter(language => language.code === selectedLanguage),
+    ...languages.filter(language => language.code !== selectedLanguage),
   ];
 
   return (
     // <View style={styles.container}>
     <>
       <View style={styles.block}>
-        <TouchableOpacity onPress={() => changeLanguage("en")}>
-          <Text style={getOptionStyle("en")}>English</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => changeLanguage("es")}>
-          <Text style={getOptionStyle("es")}>Español</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => changeLanguage("tl")}>
-          <Text style={getOptionStyle("tl")}>Tagalog</Text>
-        </TouchableOpacity>
+        {orderedLanguages.map(language => (
+          <TouchableOpacity
+            key={language.code}
+            onPress={() => changeLanguage(language.code)}
+          >
+            <Text style={getOptionStyle(language.code)}>{language.label}</Text>
+          </TouchableOpacity>
+        ))}
         {/* <Picker
           selectedValue={i18n.language}
           style={styles.picker}

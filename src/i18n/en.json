@@ -659,6 +659,12 @@
       "finishOnline": "You can finish registering to vote online in {{state_name}}.",
       "whereToSend": "Where to send your form"
     },
+    "welcome": {
+      "header": "Welcome to RockTheVote!",
+      "get_started": "Get Started",
+      "description1": "We're here to help you through all the steps to get ready to vote, and to help your friends and family too.",
+      "description2": "You can select language preference, and then let's <strong>Get Started</strong> setting up your profile and voter tools."
+    },
     "provide_full_SSN": "No!!! You must provide your full Social Security number.",
     "license_age_eligibility": "You may be eligible to finish your voter registration using the Tennessee online voter registration system."
   }
