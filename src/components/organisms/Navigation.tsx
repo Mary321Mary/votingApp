@@ -37,6 +37,7 @@ import Under18ReminderScreen from "@/screens/Under18Reminder";
 import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
 import WelcomeScreen from "../../screens/Welcome";
 import { ONBOARDING_COMPLETED_KEY } from "../../utils/constants";
+import WelcomeBackScreen from "../../screens/WelcomeBack";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -44,6 +45,10 @@ export type RootStackParamList = {
     header: string;
     text: string;
   }; // or { id: string }
+  WelcomeBack: {
+    header: string;
+    text: string;
+  };
   Register: SubmitEmailZipResponseProps; // or { id: string }
   Success: {
     form: RegisterFormState;
@@ -153,7 +158,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function Navigation({}) {
   const [initialRouteName, setInitialRouteName] = useState<
-    "Welcome" | "ZipError" | null
+    "Welcome" | "WelcomeBack" | null
   >(null);
 
   useEffect(() => {
@@ -162,7 +167,7 @@ function Navigation({}) {
         ONBOARDING_COMPLETED_KEY,
       );
       setInitialRouteName(
-        onboardingCompleted === "true" ? "ZipError" : "Welcome",
+        onboardingCompleted === "true" ? "WelcomeBack" : "Welcome",
       );
     };
 
@@ -202,13 +207,16 @@ function Navigation({}) {
         component={withDefaultLayout(AlreadyRegisteredScreen)}
       />
       <Stack.Screen
-        name="ZipError"
-        component={withDefaultLayout(ZipErrorScreen)}
+        name="WelcomeBack"
+        component={withDefaultLayout(WelcomeBackScreen)}
         initialParams={{
           header: "Welcome back",
           text: "Welcome back. Your best next step are ...",
-          user: null,
         }}
+      />
+      <Stack.Screen
+        name="ZipError"
+        component={withDefaultLayout(ZipErrorScreen)}
       />
       <Stack.Screen name="Print" component={withDefaultLayout(PrintScreen)} />
       <Stack.Screen

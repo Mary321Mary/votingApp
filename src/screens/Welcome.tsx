@@ -5,14 +5,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   useWindowDimensions,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CustomButton } from "../components/atoms/CustomButton";
-import Header from "../layout/Header";
-import { ONBOARDING_COMPLETED_KEY } from "../utils/constants";
-import { ThemeContext } from "../styles/ThemeProvider";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import black_logo from "@/assets/images/mobile_black_logo.png";
+import { ONBOARDING_COMPLETED_KEY } from "@/utils/constants";
+import { ThemeContext } from "@/styles/ThemeProvider";
 import { Globe } from "lucide-react-native";
 import RenderHTML from "react-native-render-html";
 
@@ -88,7 +89,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Header text={"Rock the vote"} />
+      <Image source={black_logo} style={styles.logo} resizeMode="contain" />
 
       <View style={styles.content}>
         <Text style={styles.header}>{t("misc.welcome.header")}</Text>
@@ -102,7 +103,7 @@ export default function WelcomeScreen() {
           }}
           tagsStyles={{
             body: {
-              fontSize: 16,
+              fontSize: 18,
               color: theme.textPrimary,
             },
             strong: {
@@ -166,13 +167,19 @@ const getStyles = (theme: any) =>
       gap: 12,
       alignItems: "center",
       padding: 20,
+      marginTop: 20,
+    },
+    logo: {
+      width: "100%",
+      height: 80,
+      backgroundColor: "#000",
     },
     header: {
       fontSize: 22,
       fontWeight: "bold",
     },
     text: {
-      fontSize: 16,
+      fontSize: 18,
     },
     localeSelectorContainer: {
       alignSelf: "flex-end",
