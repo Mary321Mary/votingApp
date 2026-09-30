@@ -400,12 +400,6 @@
       "finishOnline": "Puede completar su registro para votar en línea en {{state}}.",
       "whereToSend": "Dónde enviar su formulario"
     },
-    "welcome": {
-      "header": "¡Bienvenido a RockTheVote!",
-      "get_started": "Comenzar",
-      "description1": "Estamos aquí para ayudarte en todos los pasos para prepararte para votar, y también para ayudar a tus amigos y familiares.",
-      "description2": "Puedes seleccionar tu preferencia de idioma y luego <strong>comenzar</strong> a configurar tu perfil y herramientas de votante."
-    },
     "under_18_error": "Es demasiado joven para esto.",
     "license_age_eligibility": "Es posible que sea elegible para completar su registro de votante utilizando el sistema de registro de votantes en línea de Tennessee.",
     "provide_full_SSN": "Debe proporcionar su número de Seguro Social completo."

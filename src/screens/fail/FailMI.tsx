@@ -5,10 +5,10 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { RegisterFormState, StateData } from "@/utils/types";
-import { useCovrFailReportEvent } from "../utils/hooks/useCovrFailReportEvent";
-import { CovrCheckMethodName } from "../utils/report/covrFailReporting";
+import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
+import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
 
 interface FailMIScreenProps {
   route: {

@@ -2,11 +2,16 @@ import i18n, { ModuleType } from "i18next";
 import { initReactI18next } from "react-i18next";
 import * as RNLocalize from "react-native-localize";
 
-import en from "./en.json";
-import es from "./es.json";
-import tl from "./tl.json";
+import en from "./en/en.json";
+import es from "./es/es.json";
+import tl from "./tl/tl.json";
 
-const SUPPORTED_LANGS = ['en', 'es', 'tl'];
+// mobile
+import enMobile from "./en/mobile.json";
+import esMobile from "./es/mobile.json";
+import tlMobile from "./tl/mobile.json";
+
+const SUPPORTED_LANGS = ["en", "es", "tl"];
 
 const languageDetector = {
   type: "languageDetector" as ModuleType,
@@ -20,13 +25,11 @@ const languageDetector = {
 
     const deviceLang = locales[0].languageCode;
 
-    return SUPPORTED_LANGS.includes(deviceLang)
-      ? deviceLang
-      : "en";
+    return SUPPORTED_LANGS.includes(deviceLang) ? deviceLang : "en";
   },
 
-  init: () => { },
-  cacheUserLanguage: () => { },
+  init: () => {},
+  cacheUserLanguage: () => {},
 };
 
 i18n
@@ -34,9 +37,9 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: en },
-      es: { translation: es },
-      tl: { translation: tl },
+      en: { translation: { ...en, ...enMobile } },
+      es: { translation: { ...es, ...esMobile } },
+      tl: { translation: { ...tl, ...tlMobile } },
     },
     fallbackLng: "en",
     interpolation: {

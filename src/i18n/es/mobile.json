@@ -1,0 +1,39 @@
+{
+  "native_local": {
+    "welcome": {
+      "header": "¡Bienvenido a RockTheVote!",
+      "get_started": "Comenzar",
+      "description1": "Estamos aquí para ayudarte en todos los pasos para prepararte para votar, y también para ayudar a tus amigos y familiares.",
+      "description2": "Puedes seleccionar tu preferencia de idioma y luego <strong>comenzar</strong> a configurar tu perfil y herramientas de votante."
+    },
+    "splash_page": {},
+    "initial_profile_page": {
+      "title": "Sobre usted y el registro de votantes",
+      "retry_body": "Para intentar nuevamente la búsqueda de su registro de votante, corrija cualquier información a continuación. Si la información ya parece correcta, seleccione Registrarse para votar a continuación.",
+      "some_data_body": "El registro de votantes es el primer paso para emitir su voto. Su estado de registro de votante es el núcleo de su perfil de votante y de sus preferencias para las acciones en las que podemos ayudarle. <p>Si no está seguro de estar registrado, lo averiguaremos. Si se ha registrado antes, nos aseguraremos de que siga registrado y actualizado. Así que comencemos su perfil buscando su registro: por favor confirme, corrija o complete la siguiente información sobre usted.",
+      "no_data_body": "El registro de votantes es el primer paso para emitir su voto. Su estado de registro de votante es el núcleo de su perfil de votante y de sus preferencias para las acciones en las que podemos ayudarle. <p>Si no está seguro de estar registrado, lo averiguaremos. Si se ha registrado antes, nos aseguraremos de que siga registrado y actualizado. Así que comencemos su perfil recopilando alguna información básica para buscar su registro."
+    },
+    "onboarding2": {
+      "title": "Complete su perfil de votante",
+      "body": "Solo quedan unos pocos elementos para completar su perfil.",
+      "comm_preferences_header": "Preferencias de comunicación",
+      "comm_preferences_body1": "Puede recibir tres tipos de notificaciones y personalizar cuáles desea recibir.",
+      "comm_preferences_type1": "Cambios en el estado de su registro de votante y disponibilidad de la papeleta de muestra e información sobre el centro de votación.",
+      "comm_preferences_type2": "Próximas fechas y plazos electorales sobre los que podría necesitar actuar.",
+      "comm_preferences_type3": "Otras alertas informativas y acciones para ayudarle a asistir a amigos y familiares.",
+      "comm_preferences_body2": "Recibirá las notificaciones seleccionadas a través de las notificaciones de esta aplicación en la pantalla de notificaciones de su dispositivo. También puede elegir:",
+      "comm_preferences_option_email": "Recibir notificaciones también por correo electrónico",
+      "comm_preferences_option_sms": "Recibir notificaciones también por mensajes de texto",
+      "about_you_header": "Sobre usted"
+    },
+    "dashboard": {
+      "title": "Su panel de estado de votante",
+      "returning": "¡Bienvenido de nuevo, <firstname>! A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
+      "finished_onboarding": "¡Gracias, <firstname>! A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
+      "upcoming_election": "Próxima elección: ",
+      "reg_status_pending": "Estado del registro de votante: Pendiente",
+      "reg_status_active": "Estado del registro de votante: Activo"
+    },
+    "header_links": {}
+  }
+}

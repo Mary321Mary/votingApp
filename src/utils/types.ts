@@ -112,6 +112,10 @@ export type CheckRegistrationStatus = {
   opt_in_sms: boolean;
   volunteer: boolean;
 
+  prefType1: boolean;
+  prefType2: boolean;
+  prefType3: boolean;
+
   birthMonth: string;
   birthDay: string;
   birthYear: string;
@@ -155,6 +159,179 @@ export type CheckRegistrationStatusResponse = {
   lookup_uid: string | null;
   found: boolean;
 };
+
+// --------------
+// --- Ballot ---
+// --------------
+
+export type GetElectionsData = {
+  first_name: string;
+  last_name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  email: string;
+
+  birthMonth?: string;
+  birthDay?: string;
+  birthYear?: string;
+  date_of_birth?: string;
+};
+
+export type SubmitElectionsResponse = {
+  status: {
+    success: boolean;
+    errors: string[] | null;
+  };
+  state: StateData;
+  request_uid: string;
+  elections: {
+    id: number;
+    type: string;
+    date: string;
+    description: string;
+  }[];
+};
+
+export type GetBallotData = {
+  id: number;
+};
+
+export interface Person {
+  id: number;
+  name: string;
+  url?: string;
+}
+
+export interface Candidate {
+  id: number;
+  race?: number;
+  is_incumbent: boolean;
+  person: Person;
+  party_affiliation?: Array<{
+    name: string;
+  }>;
+}
+
+export interface Office {
+  id: number;
+  name: string;
+  level: "Federal" | "State" | "County" | "Local" | string;
+  is_partisan?: string;
+}
+
+export interface Race {
+  id: number;
+  office: Office;
+  office_district?: number;
+  number_of_seats: number;
+  candidates?: Candidate[];
+}
+
+export interface BallotMeasure {
+  id: number;
+  name: string;
+  type: string;
+  district: number;
+  yes_vote: string;
+  no_vote: string;
+  official_title?: string;
+  election_date: string;
+  url?: string;
+  status?: string;
+  yes_votes_total?: number | null;
+  no_votes_total?: number | null;
+}
+
+export interface District {
+  id: number;
+  name: string;
+  type?: "County" | "State" | "Local" | string;
+  precise_boundary?: boolean;
+  ballot_measures?: BallotMeasure[] | null;
+  races?: Race[];
+}
+
+export interface Election {
+  date: string;
+  candidate_lists_complete: boolean;
+  districts: District[];
+}
+
+export type GetBallotResponse = {
+  status: {
+    success: boolean;
+    errors: string[] | null;
+  };
+  ballot: {
+    longitude: number;
+    latitude: number;
+    elections: Election[];
+  };
+};
+
+// ----------------
+// --- Location ---
+// ----------------
+
+interface LocationAddress {
+  locationName: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
+export interface LocationItem {
+  address: LocationAddress;
+  notes?: string;
+  pollingHours?: string;
+  startDate?: string;
+  endDate?: string;
+  map_url?: string;
+  url_encoded_address?: string;
+  map_data?: MapData;
+}
+
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+export type LocationType = "electionday" | "earlyvote" | "dropoff";
+
+export interface MapData {
+  LatLng?: LatLng[];
+  type?: LocationType;
+  placeName?: string;
+  ElectionType?: string;
+  placeLine1?: string;
+  placeCity?: string;
+  placeState?: string;
+  placeZip?: string;
+  placeHours?: string;
+  placeNotes?: string;
+}
+
+export interface LocationsData {
+  map_key: string;
+  map_center: LatLng;
+  pollingLocations: LocationItem[];
+  earlyVoteSites: LocationItem[];
+  dropOffLocations: LocationItem[];
+}
+
+export interface LookupVotingLocationsResponse {
+  status: {
+    success: boolean;
+    errors: string[] | null;
+  };
+  state: StateData;
+  request_uid: string;
+  locations: LocationsData;
+}
 
 export type RegisterFormState = {
   partner_id: number;

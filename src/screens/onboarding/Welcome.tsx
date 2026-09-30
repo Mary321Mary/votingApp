@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import black_logo from "@/assets/images/mobile_black_logo.png";
-import { ONBOARDING_COMPLETED_KEY } from "@/utils/constants";
+import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { Globe } from "lucide-react-native";
 import RenderHTML from "react-native-render-html";
@@ -58,7 +58,7 @@ export default function WelcomeScreen() {
   };
 
   const handleGetStarted = async () => {
-    await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+    await AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true");
     navigation.replace("CheckVoterStatus", {
       zip: "",
       email: "",
@@ -113,7 +113,7 @@ export default function WelcomeScreen() {
         />
 
         <CustomButton
-          title={t("misc.welcome.get_started")}
+          title={t("native_local.welcome.get_started")}
           variant="outline-primary"
           onPress={handleGetStarted}
         />

@@ -9,7 +9,7 @@ import { DateRow } from "../../atoms/DateOfBirth/DateRow";
 import { isRequired, isVisible } from "@/utils/constants";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../Navigation";
+import { RootStackParamList } from "../../Navigation";
 import RenderHTML from "react-native-render-html";
 import { SelectField } from "../../atoms/SelectField";
 

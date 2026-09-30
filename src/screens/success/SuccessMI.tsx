@@ -21,7 +21,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState, StateData } from "@/utils/types";
 import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface SuccessMIScreenProps {

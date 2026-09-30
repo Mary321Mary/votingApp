@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { reportEvent } from "@/utils/api";

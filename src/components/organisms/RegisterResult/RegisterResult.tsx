@@ -48,7 +48,7 @@ import {
 } from "@/utils/api";
 import { submitAndCheckMICovr } from "@/utils/register/miCovr";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "../Navigation";
+import { RootStackParamList } from "../../Navigation";
 
 import {
   EMPTY_ERROR_MESSAGES,

@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { RegisterResult } from "@/components/organisms/RegisterResult/RegisterResult";
 import { SubmitEmailZipResponseProps } from "@/utils/types";
 

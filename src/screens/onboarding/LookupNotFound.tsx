@@ -11,7 +11,7 @@ import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 type LookupNotFoundScreenNavigation = NativeStackNavigationProp<
@@ -154,7 +154,7 @@ export default function LookupNotFoundScreen({
           onPress={() => navigation.goBack()}
         />
 
-        <View style={styles.divider} />
+        {/* <View style={styles.divider} />
         <Text style={styles.secondaryText}>
           {t("general.calls_to_action.building_site")}
         </Text>
@@ -176,7 +176,7 @@ export default function LookupNotFoundScreen({
               ),
             }}
           />
-        </Text>
+        </Text> */}
       </View>
     </ScrollView>
   );

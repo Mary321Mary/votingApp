@@ -22,7 +22,7 @@ import { useUIConfig } from "@/contexts/UIConfigContext";
 import { filterRegistrant } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { RegisterFormState, StateData } from "@/utils/types";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";

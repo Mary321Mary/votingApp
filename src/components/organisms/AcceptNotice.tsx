@@ -20,7 +20,7 @@ import {
 } from "@/utils/types";
 import { Checkbox } from "../atoms/Checkbox";
 import { reportEvent, submitCACovr } from "@/utils/api";
-import { RootStackParamList } from "./Navigation";
+import { RootStackParamList } from "../Navigation";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { CustomButton } from "../atoms/CustomButton";
 

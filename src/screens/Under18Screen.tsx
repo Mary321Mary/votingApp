@@ -18,7 +18,7 @@ import { RegisterFormState, StateData } from "@/utils/types";
 import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { getFlowType } from "@/utils/register/registerRouting";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface Under18ScreenProps {

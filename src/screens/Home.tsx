@@ -10,7 +10,7 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import InputField from "@/components/atoms/InputField";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { submitEmailZip } from "@/utils/api";
 import Header from "@/layout/Header";
 import Config from "react-native-config";
@@ -273,6 +273,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 survey_answer_1: "",
                 survey_question_2: "",
                 survey_answer_2: "",
+
+                prefType1: true,
+                prefType2: true,
+                prefType3: true,
               },
             });
           }}

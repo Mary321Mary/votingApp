@@ -22,7 +22,7 @@ import { getFlowType } from "@/utils/register/registerRouting";
 import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { newlinesToBr } from "@/utils/stateCopy";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface PreRegisterScreenProps {

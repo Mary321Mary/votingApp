@@ -14,6 +14,11 @@ export const GET_PDF = "/api/ng/get_nvra_form";
 export const GET_SERVEY_QUESTIONS = "/api/ng/get_survey_questions?";
 export const SUBMIT_LOOKUP = "/api/ng/submit_vr_lookup";
 
+export const SUBMIT_ELECTIONS_LOOKUP = "/api/ng/submit_elections_lookup";
+export const SUBMIT_BALLOT_LOOKUP = "/api/ng/submit_ballot_lookup";
+
+export const GET_LOATIONS = "/api/ng/lookup_voting_locations";
+
 export const SUBMIT_MI_COVR = "/api/ng/submit_mi_covr";
 export const CHECK_MI_COVR = "/api/ng/check_mi_covr";
 

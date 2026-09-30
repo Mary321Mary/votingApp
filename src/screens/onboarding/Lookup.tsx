@@ -16,15 +16,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { InAppBrowser } from "react-native-inappbrowser-reborn";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { RegisterFormState, StateData } from "@/utils/types";
+import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import i18n from "@/i18n";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 type LookupScreenNavigation = NativeStackNavigationProp<
@@ -36,7 +37,7 @@ interface LookupScreenProps {
   route: {
     params: {
       state: StateData;
-      form: RegisterFormState;
+      form: CheckRegistrationStatus;
     };
   };
 }
@@ -71,6 +72,35 @@ export default function LookupScreen({ route }: LookupScreenProps) {
       setCopyNotification(t(`pennsylvania.link_copied`));
     } catch (err) {
       console.error("Failed to copy link:", err);
+    }
+  };
+
+  const openInAppUrl = async (url: string) => {
+    if (!url) return;
+    try {
+      if (await InAppBrowser.isAvailable()) {
+        await InAppBrowser.open(url, {
+          // iOS settings
+          dismissButtonStyle: "close",
+          preferredBarTintColor: "#ffffff",
+          preferredControlTintColor: "#000000",
+          readerMode: false,
+          animated: true,
+          modalEnabled: true,
+          // Android settings
+          showTitle: true,
+          toolbarColor: "#ffffff",
+          secondaryToolbarColor: "black",
+          navigationBarColor: "black",
+          enableUrlBarHiding: true,
+          enableDefaultShare: false,
+        });
+      } else {
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      console.error(error);
+      await Linking.openURL(url);
     }
   };
 
@@ -119,11 +149,10 @@ export default function LookupScreen({ route }: LookupScreenProps) {
         </Text>
         <Text style={styles.text}>
           {form.first_name} {form.last_name}
-          {form.suffix && ` ${form.suffix}`}
         </Text>
-        <Text style={styles.text}>{form.home_address}</Text>
+        <Text style={styles.text}>{form.address}</Text>
         <Text style={styles.text}>
-          {form.home_city}, {state?.abbreviation} {form.home_zip_code}
+          {form.city}, {state?.abbreviation} {form.zip}
         </Text>
         <Text style={styles.textLi}>
           {t("lookup_success_page.birth_date")}
@@ -164,14 +193,16 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             state_abbr: state?.abbreviation,
           })}
           onPress={async () => {
-            Linking.openURL(state?.learn_about_url || "");
+            const url = state?.learn_about_url || "";
+            if (url) openInAppUrl(url);
 
             const response = await submitEmailZip({
-              email: form.email_address,
-              zip: form.home_zip_code,
+              email: form.email,
+              zip: form.zip,
               locale: i18n.language,
               partner_id: form.partner_id.toString(),
             });
+
             await AsyncStorage.setItem(
               "registration_uid",
               response.data.registration_uid,
@@ -181,20 +212,32 @@ export default function LookupScreen({ route }: LookupScreenProps) {
               registration_uid: response.data.registration_uid ?? "",
               partner_id: form.partner_id.toString() || "1",
               step: REPORT_EVENT_STEPS.EMPTY,
-              event_name: "CTA clicked: " + state.learn_about_url,
+              event_name: "CTA clicked: " + url,
             });
           }}
         />
         <CustomButton
           title={t("general.calls_to_action.request_absentee_ballot")}
           variant="outline-primary"
-          onPress={() => Linking.openURL(config?.urls.abr_tool || "")}
+          onPress={async () => {
+            const url = config?.urls.abr_tool || "";
+            if (url) openInAppUrl(url);
+          }}
         />
         <CustomButton
+          title={t("register_18_by_election_page.continue_button_text")}
+          onPress={() => {
+            navigation.navigate("Onboarding2", {
+              form,
+            });
+          }}
+        />
+        {/* <CustomButton
           title={t("finish_with_state_page3.fb_button_text")}
           variant="outline-primary"
           onPress={async () => {
-            Linking.openURL(config?.share?.lookup?.facebook || "");
+            const url = config?.share?.lookup?.facebook || "";
+            if (url) openInAppUrl(url);
 
             const registration_uid =
               (await AsyncStorage.getItem(`registration_uid`)) || "";
@@ -202,7 +245,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
               registration_uid,
               partner_id: form.partner_id.toString(),
               step: REPORT_EVENT_STEPS.EMPTY,
-              event_name: "CTA clicked: " + config?.share?.lookup?.facebook,
+              event_name: "CTA clicked: " + url,
             });
           }}
         />
@@ -210,7 +253,8 @@ export default function LookupScreen({ route }: LookupScreenProps) {
           title={t("finish_with_state_page3.x_button_text")}
           variant="outline-primary"
           onPress={async () => {
-            Linking.openURL(config?.share?.lookup?.x || "");
+            const url = config?.share?.lookup?.x || "";
+            if (url) openInAppUrl(url);
 
             const registration_uid =
               (await AsyncStorage.getItem(`registration_uid`)) || "";
@@ -218,7 +262,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
               registration_uid,
               partner_id: form.partner_id.toString(),
               step: REPORT_EVENT_STEPS.EMPTY,
-              event_name: "CTA clicked: " + config?.share?.lookup?.x,
+              event_name: "CTA clicked: " + url,
             });
           }}
         />
@@ -226,7 +270,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
           title={t("finish_with_state_page3.copy_button_text")}
           variant="outline-primary"
           onPress={handleCopyLink}
-        />
+        /> */}
         {copyNotification && <Text>{copyNotification}</Text>}
         <Text style={styles.bold}>
           {t("lookup_success_page.something_wrong")}
@@ -277,8 +321,8 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             variant="outline-primary"
             onPress={async () => {
               const response = await submitEmailZip({
-                email: form.email_address,
-                zip: form.home_zip_code,
+                email: form.email,
+                zip: form.zip,
                 locale: i18n.language,
                 partner_id: form.partner_id.toString(),
               });
@@ -297,8 +341,8 @@ export default function LookupScreen({ route }: LookupScreenProps) {
               navigation.replace("Register", {
                 status: { success: true },
                 state,
-                zip: form.home_zip_code,
-                email: form.email_address,
+                zip: form.zip,
+                email: form.email,
                 form,
                 pageFromLookup: "paper",
                 workflowType: "nvra",
@@ -312,7 +356,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
           variant="outline-primary"
           onPress={() => navigation.goBack()}
         />
-        <View style={styles.divider} />
+        {/* <View style={styles.divider} />
         <Text style={styles.secondaryText}>
           {t("general.calls_to_action.building_site")}
         </Text>
@@ -334,7 +378,7 @@ export default function LookupScreen({ route }: LookupScreenProps) {
               ),
             }}
           />
-        </Text>
+        </Text> */}
       </View>
     </ScrollView>
   );

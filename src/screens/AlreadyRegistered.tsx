@@ -14,7 +14,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
-import type { RootStackParamList } from "@/components/organisms/Navigation";
+import type { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
 interface AlreadyRegisteredScreenProps {

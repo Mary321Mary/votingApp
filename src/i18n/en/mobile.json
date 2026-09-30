@@ -1,0 +1,39 @@
+{
+  "native_local": {
+    "welcome": {
+      "header": "Welcome to RockTheVote!",
+      "get_started": "Get Started",
+      "description1": "We're here to help you through all the steps to get ready to vote, and to help your friends and family too.",
+      "description2": "You can select language preference, and then let's <strong>Get Started</strong> setting up your profile and voter tools."
+    },
+    "splash_page": {},
+    "initial_profile_page": {
+      "title": "About You and Voter Registration",
+      "retry_body": "To re-try your voter registration lookup, correct any of the information below. If the information already looks right, choose Register to Vote below.",
+      "some_data_body": "Voter registration is the first of the steps towards casting a ballot. Your voter registration status is the core of your voter profile and your preferences for the actions we can help you with. <p>If you’re not sure whether you are registered, we’ll get sure. If you have registered before, we’ll make sure you are still registered and up to date. So let’s start your profile by looking up your registration: please confirm, correct, or complete the below information about you",
+      "no_data_body": "Voter registration is the first of the steps towards casting a ballot. Your voter registration status is the core of your voter profile and your preferences for the actions we can help you with. <p>If you’re not sure whether you are registered, we’ll get sure. If you have registered before, we’ll make sure you are still registered and up to date. So let’s start your profile by collecting some basic info to use to look up your registration."
+    },
+    "onboarding2": {
+      "title": "Finish Your Voter Profile",
+      "body": "There are just a few more items to complete your profile.",
+      "comm_preferences_header": "Communication Preferences",
+      "comm_preferences_body1": "You can receive notifications of three kinds, and customize which ones.",
+      "comm_preferences_type1": "Changes to your voter registration status, and availability of sample ballot and voting place information.",
+      "comm_preferences_type2": "Upcoming election dates and deadlines that you might need to act on.",
+      "comm_preferences_type3": "Other information alerts and actions to help you assist friends and family.",
+      "comm_preferences_body2": "You will receive your selected notifications via this app’s notifications on your device’s notification screen . You can also choose:",
+      "comm_preferences_option_email": "Receive notifications also via email",
+      "comm_preferences_option_sms": "Receive notifications also via text messages",
+      "about_you_header": "About You"
+    },
+    "dashboard": {
+      "title": "Your Voter Status Dashboard",
+      "returning": "Welcome back, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
+      "finished_onboarding": "Thanks, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
+      "upcoming_election": "Upcoming Election: ",
+      "reg_status_pending": "Voter Registration Status: Pending",
+      "reg_status_active": "Voter Registration Status: Active"
+    },
+    "header_links": {}
+  }
+}

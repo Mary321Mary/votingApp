@@ -1,45 +1,59 @@
 import React, { useContext, useEffect } from "react";
-import { StyleSheet, ScrollView, useWindowDimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  useWindowDimensions,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import RenderHTML from "react-native-render-html";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import {
   RegisterFormState,
   StateData,
   SubmitEmailZipResponseProps,
 } from "@/utils/types";
+import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
+import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
 
-const PERSONAL_INFO_LINK = "app://personal-info-link/";
-const PAPER_FORM_LINK = "app://paper-link/";
+const PERSONAL_INFO_LINK = "app://personal-info/";
+const PAPER_FORM_LINK = "app://paper-form/";
 
-interface FailCAScreenProps {
+interface FailPAScreenProps {
   route: {
     params?: {
       state: StateData;
       zip: string;
       email: string;
       form: RegisterFormState;
+      apiTimeoutMethod?: CovrCheckMethodName;
     };
   };
 }
 
-type FailCAScreenNavigation = NativeStackNavigationProp<
+type FailPAScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
-  "FailCA"
+  "FailPA"
 >;
 
-export default function FailCAScreen({ route }: FailCAScreenProps) {
+export default function FailPAScreen({ route }: FailPAScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<FailCAScreenNavigation>();
+  const navigation = useNavigation<FailPAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const { width } = useWindowDimensions();
   const styles = getStyles();
 
   const params = route.params;
+
+  useCovrFailReportEvent(
+    "PA covr error",
+    params?.form,
+    params?.apiTimeoutMethod,
+  );
 
   useEffect(() => {
     if (!params?.state || !params?.form) {
@@ -76,26 +90,31 @@ export default function FailCAScreen({ route }: FailCAScreenProps) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Header text={t("california.error_title")} />
-      <RenderHTML
-        contentWidth={width}
-        baseStyle={styles.bodyText}
-        source={{
-          html: t("california.error_text", {
-            ca_personal_info_url: PERSONAL_INFO_LINK,
-            rtv_paper_form_url: PAPER_FORM_LINK,
-          }),
-        }}
-        tagsStyles={{
-          a: {
-            color: theme.link,
-            textDecorationLine: "underline",
-          },
-        }}
-        renderersProps={{
-          a: { onPress: handleLinkPress },
-        }}
-      />
+      <Header text={t("pennsylvania.error_title")} />
+      <View style={styles.bodyWrapper}>
+        <RenderHTML
+          contentWidth={width}
+          source={{
+            html: t("pennsylvania.error_text", {
+              pa_personal_info_url: PERSONAL_INFO_LINK,
+              rtv_paper_form_url: PAPER_FORM_LINK,
+            }),
+          }}
+          tagsStyles={{
+            body: {
+              fontSize: 16,
+              lineHeight: 24,
+            },
+            a: {
+              color: theme.link,
+              textDecorationLine: "underline",
+            },
+          }}
+          renderersProps={{
+            a: { onPress: handleLinkPress },
+          }}
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -108,10 +127,8 @@ const getStyles = () =>
     content: {
       paddingBottom: 24,
     },
-    bodyText: {
+    bodyWrapper: {
       paddingHorizontal: 20,
-      fontSize: 16,
-      lineHeight: 24,
       marginTop: 16,
     },
   });

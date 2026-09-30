@@ -6,14 +6,14 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import RenderHTML from "react-native-render-html";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "@/components/organisms/Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 import {
   RegisterFormState,
   StateData,
   SubmitEmailZipResponseProps,
 } from "@/utils/types";
-import { CovrCheckMethodName } from "../utils/report/covrFailReporting";
-import { useCovrFailReportEvent } from "../utils/hooks/useCovrFailReportEvent";
+import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
+import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
 
 const PERSONAL_INFO_LINK = "app://personal-info-link/";
 const PAPER_FORM_LINK = "app://paper-link/";

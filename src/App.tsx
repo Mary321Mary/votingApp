@@ -11,7 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { UIConfigProvider } from "./contexts/UIConfigContext";
 import { ThemeProvider } from "./styles/ThemeProvider";
-import Navigation from "./components/organisms/Navigation";
+import Navigation from "./components/Navigation";
 import { FormScrollProvider } from "./contexts/FormScrollContext";
 
 function App() {

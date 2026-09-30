@@ -1,26 +1,25 @@
 import type {
-  AuthData,
-  AuthMeResponse,
   CheckRegistrationStatus,
   CheckRegistrationStatusResponse,
   DataConfigurationRequest,
   DataSurveyQuestionsRequest,
   FetchDataCollectionConfigResponse,
   FetchDataSurveyQuestionsResponse,
-  LoginCredentials,
+  GetBallotData,
+  GetBallotResponse,
+  LookupVotingLocationsResponse,
   PACovrCheckResponse,
   PDFDocRequest,
   PDFDocResponse,
   PDFTokenRequest,
   PDFTokenResponse,
-  RegisterCredentials,
-  RegisterData,
   ReportEventPayload,
   ReportInternalData,
   ReportInternalResponse,
   SetUnder18ReminderRequest,
   SetUnder18ReminderResponse,
   SubmitCACovrPayload,
+  SubmitElectionsResponse,
   SubmitEmailZipRequest,
   SubmitEmailZipResponse,
   SubmitFinishedWithStatData,
@@ -32,7 +31,6 @@ import type {
   SubmitVoterStatusResponse,
   SubmitWACovrPayload,
   UIConfig,
-  User,
   VoterDeviceEmailData,
   VoterDeviceResponse,
   VoterDeviceSMSData,
@@ -42,56 +40,6 @@ import type {
 } from "utils/types";
 import { HttpClient } from "utils/http/http";
 import * as ENDPOINTS from "utils/endpoints";
-
-// need to check and fix
-
-export function login(
-  credentials: LoginCredentials,
-  headers: Record<string, string> = {},
-) {
-  return HttpClient.Client.post<LoginCredentials, AuthData>(
-    ENDPOINTS.AUTH_LOGIN,
-    credentials,
-    headers,
-  );
-}
-
-export function register(
-  credentials: RegisterCredentials,
-  headers: Record<string, string> = {},
-) {
-  return HttpClient.Client.post<RegisterCredentials, RegisterData>(
-    ENDPOINTS.AUTH_REGISTER,
-    credentials,
-    headers,
-  );
-}
-
-export function refreshToken(
-  refreshTokenValue: string,
-  headers: Record<string, string> = {},
-) {
-  return HttpClient.Client.post<{ refresh_token: string }, AuthData>(
-    ENDPOINTS.AUTH_REFRESH,
-    { refresh_token: refreshTokenValue },
-    headers,
-  );
-}
-
-export function me(headers: Record<string, string> = {}) {
-  return HttpClient.Client.get<AuthMeResponse>(ENDPOINTS.AUTH_ME, headers);
-}
-
-export function updateMe(
-  data: Partial<User>,
-  headers: Record<string, string> = {},
-) {
-  return HttpClient.Client.patch<Partial<User>, User>(
-    ENDPOINTS.AUTH_UPDATE_ME,
-    data,
-    headers,
-  );
-}
 
 // need to check EMAIL_ZIP and UI_CONFIG
 
@@ -169,6 +117,37 @@ export function submitLookup(
     CheckRegistrationStatus,
     CheckRegistrationStatusResponse
   >(ENDPOINTS.SUBMIT_LOOKUP, data, headers);
+}
+
+export function submitElectionsLookup(
+  data: CheckRegistrationStatus,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    CheckRegistrationStatus,
+    SubmitElectionsResponse
+  >(ENDPOINTS.SUBMIT_ELECTIONS_LOOKUP, data, headers);
+}
+
+export function submitBallotLookup(
+  data: GetBallotData,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<GetBallotData, GetBallotResponse>(
+    ENDPOINTS.SUBMIT_BALLOT_LOOKUP,
+    data,
+    headers,
+  );
+}
+
+export function getLocations(
+  data: CheckRegistrationStatus,
+  headers: Record<string, string> = {},
+) {
+  return HttpClient.Client.post<
+    CheckRegistrationStatus,
+    LookupVotingLocationsResponse
+  >(ENDPOINTS.GET_LOATIONS, data, headers);
 }
 
 export function setUnder18Reminder(
