@@ -7,9 +7,9 @@ import es from "./es/es.json";
 import tl from "./tl/tl.json";
 
 // mobile
-import enMobile from "./en/mobile.json";
-import esMobile from "./es/mobile.json";
-import tlMobile from "./tl/mobile.json";
+import enMobile from "./en/mobileEN.json";
+import esMobile from "./es/mobileES.json";
+import tlMobile from "./tl/mobileTL.json";
 
 const SUPPORTED_LANGS = ["en", "es", "tl"];
 

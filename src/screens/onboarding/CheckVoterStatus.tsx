@@ -5,13 +5,14 @@ import {
   ScrollView,
   useWindowDimensions,
   Linking,
+  Alert,
+  Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Contacts, { Contact } from "react-native-contacts";
-import { Alert, PermissionsAndroid, Platform } from "react-native";
 
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
@@ -131,7 +132,7 @@ export const CheckVoterStatusScreen = ({
             const postalAddress = myCard.postalAddresses[0];
             const address = postalAddress?.street || "";
             const city = postalAddress?.city || "";
-            const zip = postalAddress?.postcode || "";
+            const zip = postalAddress?.postCode || "";
 
             let birthYear = form.birthYear;
             let birthMonth = form.birthMonth;

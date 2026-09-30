@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,11 @@ import {
   useWindowDimensions,
   Linking,
   ScrollView,
-  Platform,
-  ToastAndroid,
-  Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import Clipboard from "@react-native-clipboard/clipboard";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { InAppBrowser } from "react-native-inappbrowser-reborn";
 
@@ -49,7 +45,6 @@ export default function LookupScreen({ route }: LookupScreenProps) {
   const { width } = useWindowDimensions();
   const { state, form } = route.params;
   const { config } = useUIConfig();
-  const [copyNotification, setCopyNotification] = useState("");
   const navigation = useNavigation<LookupScreenNavigation>();
 
   const handleOpenLink = async () => {
@@ -57,21 +52,6 @@ export default function LookupScreen({ route }: LookupScreenProps) {
 
     if (url) {
       await Linking.openURL(url);
-    }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      Clipboard.setString(config?.share?.registrations?.copy_link || "");
-
-      if (Platform.OS === "android") {
-        ToastAndroid.show(t(`pennsylvania.link_copied`), ToastAndroid.SHORT);
-      } else {
-        Alert.alert("Success", t(`pennsylvania.link_copied`));
-      }
-      setCopyNotification(t(`pennsylvania.link_copied`));
-    } catch (err) {
-      console.error("Failed to copy link:", err);
     }
   };
 
@@ -232,46 +212,6 @@ export default function LookupScreen({ route }: LookupScreenProps) {
             });
           }}
         />
-        {/* <CustomButton
-          title={t("finish_with_state_page3.fb_button_text")}
-          variant="outline-primary"
-          onPress={async () => {
-            const url = config?.share?.lookup?.facebook || "";
-            if (url) openInAppUrl(url);
-
-            const registration_uid =
-              (await AsyncStorage.getItem(`registration_uid`)) || "";
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.EMPTY,
-              event_name: "CTA clicked: " + url,
-            });
-          }}
-        />
-        <CustomButton
-          title={t("finish_with_state_page3.x_button_text")}
-          variant="outline-primary"
-          onPress={async () => {
-            const url = config?.share?.lookup?.x || "";
-            if (url) openInAppUrl(url);
-
-            const registration_uid =
-              (await AsyncStorage.getItem(`registration_uid`)) || "";
-            await reportEvent({
-              registration_uid,
-              partner_id: form.partner_id.toString(),
-              step: REPORT_EVENT_STEPS.EMPTY,
-              event_name: "CTA clicked: " + url,
-            });
-          }}
-        />
-        <CustomButton
-          title={t("finish_with_state_page3.copy_button_text")}
-          variant="outline-primary"
-          onPress={handleCopyLink}
-        /> */}
-        {copyNotification && <Text>{copyNotification}</Text>}
         <Text style={styles.bold}>
           {t("lookup_success_page.something_wrong")}
         </Text>
@@ -433,13 +373,6 @@ const getStyles = (theme: any) =>
     link: {
       color: theme.link,
       fontSize: 15,
-      textDecorationLine: "underline",
-    },
-    secondaryText: {
-      marginBottom: 8,
-    },
-    linkText: {
-      color: theme.link,
       textDecorationLine: "underline",
     },
   });

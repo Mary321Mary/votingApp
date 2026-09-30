@@ -153,30 +153,6 @@ export default function LookupNotFoundScreen({
           variant="outline-primary"
           onPress={() => navigation.goBack()}
         />
-
-        {/* <View style={styles.divider} />
-        <Text style={styles.secondaryText}>
-          {t("general.calls_to_action.building_site")}
-        </Text>
-
-        <Text>
-          <Trans
-            i18nKey="general.calls_to_action.get_tool_reg"
-            components={{
-              a: (
-                <Text
-                  key="email-link"
-                  style={styles.linkText}
-                  onPress={() => {
-                    Linking.openURL("mailto:civictech@rockthevote.org");
-                  }}
-                >
-                  {0}
-                </Text>
-              ),
-            }}
-          />
-        </Text> */}
       </View>
     </ScrollView>
   );
@@ -235,24 +211,9 @@ const getStyles = (theme: any) =>
       fontSize: 15,
       lineHeight: 22,
     },
-
-    linkRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 8,
-      gap: 4,
-    },
-
     link: {
       color: theme.link,
       fontSize: 15,
-      textDecorationLine: "underline",
-    },
-    secondaryText: {
-      marginBottom: 8,
-    },
-    linkText: {
-      color: theme.link,
       textDecorationLine: "underline",
     },
   });

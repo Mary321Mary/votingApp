@@ -40,6 +40,7 @@ export default function WelcomeScreen() {
       try {
         throw new Error("API not available yet");
       } catch (error) {
+        console.error("Failed to load data:", error);
         setRemoteContent(null);
       }
     };
