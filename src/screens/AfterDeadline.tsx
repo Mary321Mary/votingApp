@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Header from "@/layout/Header";
@@ -17,24 +16,19 @@ import { CustomButton } from "@/components/atoms/CustomButton";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { interpolateStateCopy } from "@/utils/stateCopy";
-import { SubmitEmailZipResponse } from "@/utils/types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../components/Navigation";
 
-type RouteParams = {
-  response: SubmitEmailZipResponse;
-  zip: string;
-  email: string;
-  partner?: string;
-};
-
-type AfterDeadlineScreenRouteProp = RouteProp<
-  { AfterDeadlinePage: RouteParams },
-  "AfterDeadlinePage"
+type AfterDeadlineScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "AfterDeadline"
 >;
 
-export default function AfterDeadlineScreen() {
+export default function AfterDeadlineScreen({
+  route,
+  navigation,
+}: AfterDeadlineScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
-  const route = useRoute<AfterDeadlineScreenRouteProp>();
   const { width } = useWindowDimensions();
 
   const { response, zip, email } = route.params || {};

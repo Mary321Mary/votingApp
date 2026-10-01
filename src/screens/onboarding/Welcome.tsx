@@ -7,15 +7,17 @@ import {
   useWindowDimensions,
   Image,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CustomButton } from "@/components/atoms/CustomButton";
-import black_logo from "@/assets/images/mobile_black_logo.png";
-import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { Globe } from "lucide-react-native";
 import RenderHTML from "react-native-render-html";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import black_logo from "@/assets/images/mobile_black_logo.png";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { RootStackParamList } from "@/components/Navigation";
 
 const ALL_LOCALES = [
   { code: "en", label: "English" },
@@ -23,8 +25,9 @@ const ALL_LOCALES = [
   { code: "tl", label: "Tagalog" },
 ];
 
-export default function WelcomeScreen() {
-  const navigation = useNavigation<any>();
+type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, "Welcome">;
+
+export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
@@ -61,8 +64,6 @@ export default function WelcomeScreen() {
   const handleGetStarted = async () => {
     await AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true");
     navigation.replace("CheckVoterStatus", {
-      zip: "",
-      email: "",
       form: {
         partner_id: 1,
         first_name: "",
@@ -93,14 +94,16 @@ export default function WelcomeScreen() {
       <Image source={black_logo} style={styles.logo} resizeMode="contain" />
 
       <View style={styles.content}>
-        <Text style={styles.header}>{t("misc.welcome.header")}</Text>
+        <Text style={styles.header}>{t("native_local.welcome.header")}</Text>
 
-        <Text style={styles.text}>{t("misc.welcome.description1")}</Text>
+        <Text style={styles.text}>
+          {t("native_local.welcome.description1")}
+        </Text>
 
         <RenderHTML
           contentWidth={width}
           source={{
-            html: t("misc.welcome.description2"),
+            html: t("native_local.welcome.description2"),
           }}
           tagsStyles={{
             body: {

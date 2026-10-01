@@ -1,37 +1,19 @@
 import React, { useContext, useEffect } from "react";
 import { Text, StyleSheet, ScrollView } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-import { RegisterFormState, StateData } from "@/utils/types";
-import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
-import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
+import { useCovrFailReportEvent } from "@/utils/hooks/useCovrFailReportEvent";
 
-interface FailMIScreenProps {
-  route: {
-    params?: {
-      state: StateData;
-      zip: string;
-      email: string;
-      form: RegisterFormState;
-      apiTimeoutMethod?: CovrCheckMethodName;
-    };
-  };
-}
+type FailMIScreenProps = NativeStackScreenProps<RootStackParamList, "FailMI">;
 
-type FailMIScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "FailMI"
->;
-
-export default function FailMIScreen({ route }: FailMIScreenProps) {
+export default function FailMIScreen({ route, navigation }: FailMIScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  const navigation = useNavigation<FailMIScreenNavigation>();
   const params = route.params;
 
   useCovrFailReportEvent(

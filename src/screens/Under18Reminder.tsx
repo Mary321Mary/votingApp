@@ -12,32 +12,28 @@ import {
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Clipboard from "@react-native-clipboard/clipboard";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { RegisterFormState, StateData } from "@/utils/types";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { RootStackParamList } from "@/components/Navigation";
 
-type RouteParams = {
-  state: StateData;
-  form: RegisterFormState;
-};
-
-type Under18ReminderScreenRouteProp = RouteProp<
-  { Under18ReminderPage: RouteParams },
-  "Under18ReminderPage"
+type Under18ReminderProps = NativeStackScreenProps<
+  RootStackParamList,
+  "Under18Reminder"
 >;
 
-export default function Under18ReminderScreen() {
+export default function Under18ReminderScreen({
+  route,
+  navigation,
+}: Under18ReminderProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
-  const route = useRoute<Under18ReminderScreenRouteProp>();
   const { width } = useWindowDimensions();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);

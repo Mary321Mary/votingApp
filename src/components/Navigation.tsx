@@ -13,42 +13,43 @@ import {
 } from "@/utils/types";
 import HomeScreen from "@/screens/Home";
 import RegisterScreen from "@/screens/Register";
-import SuccessScreen from "@/screens/success/Success";
-import LookupScreen from "@/screens/onboarding/Lookup";
 import ZipErrorScreen from "@/screens/ZipError";
-import { CheckVoterStatusScreen } from "@/screens/onboarding/CheckVoterStatus";
-import PrintScreen from "@/screens/Print";
 import { NotParticipatingScreen } from "@/screens/NotParticipating";
-import { SuccessMIScreen } from "@/screens/success/SuccessMI";
-import FailMIScreen from "@/screens/fail/FailMI";
-import { SuccessPAScreen } from "@/screens/success/SuccessPA";
-import FailPAScreen from "@/screens/fail/FailPA";
-import { SuccessWAScreen } from "@/screens/success/SuccessWA";
-import FailWAScreen from "@/screens/fail/FailWA";
+
+import LookupScreen from "@/screens/onboarding/Lookup";
+import { CheckVoterStatusScreen } from "@/screens/onboarding/CheckVoterStatus";
 import LookupNotFoundScreen from "@/screens/onboarding/LookupNotFound";
+import WelcomeScreen from "@/screens/onboarding/Welcome";
+import WelcomeBackScreen from "@/screens/onboarding/WelcomeBack";
+import Onboarding2Screen from "@/screens/onboarding/Onboarding2";
+
+import PrintScreen from "@/screens/success/Print";
+import SuccessScreen from "@/screens/success/Success";
+import { SuccessMIScreen } from "@/screens/success/SuccessMI";
+import { SuccessPAScreen } from "@/screens/success/SuccessPA";
+import { SuccessWAScreen } from "@/screens/success/SuccessWA";
+import FinishWithStateScreen from "@/screens/success/FinishWithState";
+import FailWAScreen from "@/screens/fail/FailWA";
+import FailCAScreen from "@/screens/fail/FailCA";
+import FailMIScreen from "@/screens/fail/FailMI";
+import FailPAScreen from "@/screens/fail/FailPA";
+
 import AlreadyRegisteredScreen from "@/screens/AlreadyRegistered";
 import ApiErrorScreen from "@/screens/ApiError";
 import { Under18Screen } from "@/screens/Under18Screen";
 import PreRegisterScreen from "@/screens/PreRegister";
-import FinishWithStateScreen from "@/screens/FinishWithState";
-import FailCAScreen from "@/screens/fail/FailCA";
 import AfterDeadlineScreen from "@/screens/AfterDeadline";
 import Under18ReminderScreen from "@/screens/Under18Reminder";
-import { CovrCheckMethodName } from "../utils/report/covrFailReporting";
-import WelcomeScreen from "../screens/onboarding/Welcome";
-import { FIRST_TIME_COMPLETED_KEY } from "../utils/constants";
-import WelcomeBackScreen from "../screens/onboarding/WelcomeBack";
-import Onboarding2Screen from "../screens/onboarding/Onboarding2";
-import NotificationsScreen from "../screens/NotificationsScreen";
-import ProfileScreen from "../screens/ProfileScreen";
-import SettingsScreen from "../screens/Settings";
+import NotificationsScreen from "@/screens/NotificationsScreen";
+import ProfileScreen from "@/screens/ProfileScreen";
+import SettingsScreen from "@/screens/Settings";
+
+import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
+import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
-  Welcome: {
-    header: string;
-    text: string;
-  }; // or { id: string }
+  Welcome: undefined; // or { id: string }
   WelcomeBack: undefined;
   Onboarding2: {
     form: CheckRegistrationStatus;
@@ -62,15 +63,15 @@ export type RootStackParamList = {
     state: StateData;
     workflow_type?: string;
     finish_with_state: boolean;
+    onboardingFlow?: boolean;
   }; // or { id: string }
   CheckVoterStatus: {
-    email: string;
-    zip: string;
     form: CheckRegistrationStatus;
+    afterNotFound?: boolean;
   };
   Lookup: {
-    state?: StateData;
-    form?: CheckRegistrationStatus;
+    state: StateData;
+    form: CheckRegistrationStatus;
   };
   LookupNotFound: {
     state: StateData;
@@ -93,8 +94,13 @@ export type RootStackParamList = {
     state: StateData;
     workflow_type?: string;
     finish_with_state: boolean;
+    onboardingFlow?: boolean;
   };
-  SuccessMI: { state: StateData; form: RegisterFormState };
+  SuccessMI: {
+    state: StateData;
+    form: RegisterFormState;
+    onboardingFlow?: boolean;
+  };
   FailMI: {
     state: StateData;
     zip: string;
@@ -102,7 +108,11 @@ export type RootStackParamList = {
     form: RegisterFormState;
     apiTimeoutMethod?: CovrCheckMethodName;
   };
-  SuccessPA: { state: StateData; form: RegisterFormState };
+  SuccessPA: {
+    state: StateData;
+    form: RegisterFormState;
+    onboardingFlow?: boolean;
+  };
   FailPA: {
     state: StateData;
     zip: string;
@@ -110,7 +120,11 @@ export type RootStackParamList = {
     form: RegisterFormState;
     apiTimeoutMethod?: CovrCheckMethodName;
   };
-  SuccessWA: { state: StateData; form: RegisterFormState };
+  SuccessWA: {
+    state: StateData;
+    form: RegisterFormState;
+    onboardingFlow?: boolean;
+  };
   FailCA: {
     state: StateData;
     zip: string;
@@ -149,6 +163,7 @@ export type RootStackParamList = {
   FinishWithState: {
     state: StateData;
     form: RegisterFormState;
+    onboardingFlow?: boolean;
   };
   ApiError: { state: StateData; title?: string };
 };

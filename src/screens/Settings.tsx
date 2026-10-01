@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -23,10 +22,16 @@ import { VOTER_FORM_STORAGE_KEY } from "../utils/constants";
 import { Checkbox } from "../components/atoms/Checkbox";
 import InputField from "../components/atoms/InputField";
 import RenderHTML from "react-native-render-html";
+import { RootStackParamList } from "../components/Navigation";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-export default function SettingsScreen() {
+type SettingsScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "Settings"
+>;
+
+export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();

@@ -1,29 +1,25 @@
 import React, { useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
 import { RegisterResult } from "@/components/organisms/RegisterResult/RegisterResult";
-import { SubmitEmailZipResponseProps } from "@/utils/types";
 
-interface RegisterScreenProps {
-  route: { params: SubmitEmailZipResponseProps };
-}
-
-type RegisterScreenNavigation = NativeStackNavigationProp<
+type RegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "Register"
 >;
 
-export default function RegisterScreen({ route }: RegisterScreenProps) {
+export default function RegisterScreen({
+  route,
+  navigation,
+}: RegisterScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
-  const navigation = useNavigation<RegisterScreenNavigation>();
 
   const state = route?.params ?? null;
 
@@ -45,6 +41,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
     form,
     initialStep,
     isRedirectedCompressNVRA,
+    onboardingFlow,
   } = state;
 
   const title =
@@ -68,6 +65,7 @@ export default function RegisterScreen({ route }: RegisterScreenProps) {
           isRedirectedCompressNVRA={isRedirectedCompressNVRA ?? false}
           form={form}
           initialStep={initialStep}
+          onboardingFlow={onboardingFlow}
         />
       ) : (
         <View>

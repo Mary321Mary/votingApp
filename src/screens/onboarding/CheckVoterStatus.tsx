@@ -7,6 +7,7 @@ import {
   Linking,
   Alert,
   Platform,
+  Text,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
@@ -27,13 +28,19 @@ import {
 } from "@/utils/types";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { getLocations, submitElectionsLookup, submitLookup } from "@/utils/api";
+import {
+  getLocations,
+  submitElectionsLookup,
+  submitEmailZip,
+  submitLookup,
+} from "@/utils/api";
 import {
   ONBOARDING_COMPLETED_KEY,
   VOTER_ELECTIONS_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_POOLING_KEY,
-} from "../../utils/constants";
+} from "@/utils/constants";
+import i18n from "i18n";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -71,7 +78,7 @@ export const CheckVoterStatusScreen = ({
   route,
   navigation,
 }: CheckVoterStatusScreenProps) => {
-  const { form: initialForm } = route.params;
+  const { form: initialForm, afterNotFound } = route.params;
   const { config } = useUIConfig();
   const { width } = useWindowDimensions();
 
@@ -82,6 +89,7 @@ export const CheckVoterStatusScreen = ({
   const [errMsg, setErrMsg] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
+  const [autofill, setAutofill] = useState(false);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -121,6 +129,7 @@ export const CheckVoterStatusScreen = ({
           }
 
           if (myCard) {
+            setAutofill(true);
             const firstName = myCard.givenName || "";
             const lastName = myCard.familyName || "";
             const email = myCard.emailAddresses[0]?.email || "";
@@ -384,6 +393,19 @@ export const CheckVoterStatusScreen = ({
     <ScrollView>
       <Header text={t("lookup_page.check_voter_registration_status")} />
       <View style={styles.box}>
+        {afterNotFound ? (
+          <Text>{t("native_local.initial_profile_page.retry_body")}</Text>
+        ) : (
+          <RenderHTML
+            contentWidth={width}
+            source={{
+              html: autofill
+                ? t("native_local.initial_profile_page.no_data_body")
+                : t("native_local.initial_profile_page.some_data_body"),
+            }}
+            baseStyle={styles.text}
+          />
+        )}
         {Platform.OS === "ios" && (
           <CustomButton
             title="Autofill data from you device"
@@ -485,6 +507,37 @@ export const CheckVoterStatusScreen = ({
           disabled={isLoading}
           onPress={onContinue}
         />
+        {/* Register */}
+        {afterNotFound && (
+          <CustomButton
+            title={t("general.calls_to_action.cta_register")}
+            disabled={isLoading}
+            onPress={async () => {
+              const response = await submitEmailZip({
+                email: form.email,
+                zip: form.zip,
+                locale: i18n.language,
+                partner_id: form.partner_id.toString(),
+              });
+              await AsyncStorage.setItem(
+                "registration_uid",
+                response.data.registration_uid,
+              );
+
+              navigation.replace("Register", {
+                status: { success: true, errors: [] },
+                state: response.data.state,
+                zip: form.zip,
+                email: form.email,
+                form: form as any,
+                pageFromLookup: "paper",
+                workflowType: "nvra",
+                showRedirectText: false,
+                onboardingFlow: true,
+              });
+            }}
+          />
+        )}
         <RenderHTML
           contentWidth={width}
           source={{
@@ -522,5 +575,10 @@ const getStyles = (theme: any) =>
   StyleSheet.create({
     box: {
       paddingHorizontal: 10,
+    },
+    text: {
+      fontSize: 14,
+      lineHeight: 20,
+      color: theme.textPrimary,
     },
   });

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,32 +14,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Clipboard from "@react-native-clipboard/clipboard";
 
 import Header from "@/layout/Header";
-import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { ThemeContext } from "../styles/ThemeProvider";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { ThemeContext } from "../../styles/ThemeProvider";
+import { RootStackParamList } from "../../components/Navigation";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { mapRegisterFormToVrLookupPayload } from "../../utils/register/registerRouting";
+import { ONBOARDING_COMPLETED_KEY } from "../../utils/constants";
 
 const { width } = Dimensions.get("window");
 
-interface FinishWithStateScreenProps {
-  route: {
-    params: {
-      state: StateData;
-      form: RegisterFormState;
-    };
-  };
-}
+type FinishWithStateScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "FinishWithState"
+>;
 
-const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
+const FinishWithStateScreen = ({
+  route,
+  navigation,
+}: FinishWithStateScreenProps) => {
   const { t } = useTranslation();
   const { config } = useUIConfig();
   const navState = route?.params ?? null;
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-
-  const [copyNotification, setCopyNotification] = useState("");
 
   const handleOpenUrl = async () => {
     const targetUrl =
@@ -73,7 +73,6 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
       } else {
         Alert.alert("Success", t(`pennsylvania.link_copied`));
       }
-      setCopyNotification(t(`pennsylvania.link_copied`));
 
       const registration_uid =
         (await AsyncStorage.getItem("registration_uid")) || "";
@@ -142,56 +141,68 @@ const FinishWithStateScreen = ({ route }: FinishWithStateScreenProps) => {
           {t("finish_with_state_page3.encourage")}
         </Text>
 
-        <View style={styles.shareContainer}>
+        {navState.onboardingFlow ? (
           <CustomButton
-            title={t("finish_with_state_page3.fb_button_text")}
+            title={t("register_18_by_election_page.continue_button_text")}
             onPress={async () => {
-              const targetUrl = config?.share?.registrations?.facebook || "";
-              const supported = await Linking.canOpenURL(targetUrl);
-              if (supported) {
-                await Linking.openURL(targetUrl);
-
-                const registration_uid =
-                  (await AsyncStorage.getItem("registration_uid")) || "";
-                await reportEvent({
-                  registration_uid,
-                  partner_id: navState.form.partner_id.toString(),
-                  step: REPORT_EVENT_STEPS.EMPTY,
-                  event_name:
-                    "CTA clicked: " + config?.share?.registrations?.facebook,
-                });
-              } else {
-                console.warn(`Cannot open URL: ${targetUrl}`);
-              }
+              await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+              navigation.navigate("Onboarding2", {
+                form: mapRegisterFormToVrLookupPayload(navState.form),
+              });
             }}
           />
-          <CustomButton
-            title={t("finish_with_state_page3.x_button_text")}
-            onPress={async () => {
-              const targetUrl = config?.share?.registrations?.x || "";
-              const supported = await Linking.canOpenURL(targetUrl);
-              if (supported) {
-                await Linking.openURL(targetUrl);
+        ) : (
+          <View style={styles.shareContainer}>
+            <CustomButton
+              title={t("finish_with_state_page3.fb_button_text")}
+              onPress={async () => {
+                const targetUrl = config?.share?.registrations?.facebook || "";
+                const supported = await Linking.canOpenURL(targetUrl);
+                if (supported) {
+                  await Linking.openURL(targetUrl);
 
-                const registration_uid =
-                  (await AsyncStorage.getItem("registration_uid")) || "";
-                await reportEvent({
-                  registration_uid,
-                  partner_id: navState.form.partner_id.toString(),
-                  step: REPORT_EVENT_STEPS.EMPTY,
-                  event_name: "CTA clicked: " + config?.share?.registrations?.x,
-                });
-              } else {
-                console.warn(`Cannot open URL: ${targetUrl}`);
-              }
-            }}
-          />
-          <CustomButton
-            title={t("finish_with_state_page3.copy_button_text")}
-            onPress={handleCopyLink}
-          />
-        </View>
-        {copyNotification && <Text>{copyNotification}</Text>}
+                  const registration_uid =
+                    (await AsyncStorage.getItem("registration_uid")) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: navState.form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.facebook,
+                  });
+                } else {
+                  console.warn(`Cannot open URL: ${targetUrl}`);
+                }
+              }}
+            />
+            <CustomButton
+              title={t("finish_with_state_page3.x_button_text")}
+              onPress={async () => {
+                const targetUrl = config?.share?.registrations?.x || "";
+                const supported = await Linking.canOpenURL(targetUrl);
+                if (supported) {
+                  await Linking.openURL(targetUrl);
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem("registration_uid")) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: navState.form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.x,
+                  });
+                } else {
+                  console.warn(`Cannot open URL: ${targetUrl}`);
+                }
+              }}
+            />
+            <CustomButton
+              title={t("finish_with_state_page3.copy_button_text")}
+              onPress={handleCopyLink}
+            />
+          </View>
+        )}
 
         <View style={styles.footerInfo}>
           <Text style={styles.boldText}>

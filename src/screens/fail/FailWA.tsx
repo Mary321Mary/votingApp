@@ -1,43 +1,22 @@
 import React, { useContext, useEffect } from "react";
 import { StyleSheet, ScrollView, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import RenderHTML from "react-native-render-html";
+
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-import {
-  RegisterFormState,
-  StateData,
-  SubmitEmailZipResponseProps,
-} from "@/utils/types";
-import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
-import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
+import { SubmitEmailZipResponseProps } from "@/utils/types";
+import { useCovrFailReportEvent } from "@/utils/hooks/useCovrFailReportEvent";
 
 const PERSONAL_INFO_LINK = "app://personal-info-link/";
 const PAPER_FORM_LINK = "app://paper-link/";
 
-interface FailWAScreenProps {
-  route: {
-    params?: {
-      state: StateData;
-      zip: string;
-      email: string;
-      form: RegisterFormState;
-      apiTimeoutMethod?: CovrCheckMethodName;
-    };
-  };
-}
+type FailWAScreenProps = NativeStackScreenProps<RootStackParamList, "FailWA">;
 
-type FailWAScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "FailWA"
->;
-
-export default function FailWAScreen({ route }: FailWAScreenProps) {
+export default function FailWAScreen({ route, navigation }: FailWAScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<FailWAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const { width } = useWindowDimensions();
   const styles = getStyles();

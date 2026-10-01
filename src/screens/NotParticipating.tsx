@@ -2,32 +2,22 @@ import React, { useContext } from "react";
 import { Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import RenderHTML from "react-native-render-html";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import { StateData } from "@/utils/types";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
-type NotParticipatingScreenNavigation = NativeStackNavigationProp<
+type NotParticipatingScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "NotParticipating"
 >;
 
-interface NotParticipatingScreenProps {
-  route: {
-    params: {
-      state: StateData;
-    };
-  };
-}
-
 export const NotParticipatingScreen = ({
   route,
+  navigation,
 }: NotParticipatingScreenProps) => {
-  const navigation = useNavigation<NotParticipatingScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -74,7 +64,40 @@ export const NotParticipatingScreen = ({
         {state?.show_vr_check_button && (
           <CustomButton
             title={t("not_participating_page.check_btn_text")}
-            onPress={() => navigation.navigate("Lookup", {})}
+            onPress={() =>
+              navigation.navigate("CheckVoterStatus", {
+                form: {
+                  partner_id: 1,
+
+                  first_name: "",
+                  last_name: "",
+                  email: "",
+                  city: "",
+                  zip: "",
+
+                  aptunit: "",
+                  address: "",
+                  birthMonth: "",
+                  birthDay: "",
+                  birthYear: "",
+                  date_of_birth: "",
+                  phone: "",
+
+                  opt_in_email: false,
+                  opt_in_sms: true,
+                  volunteer: false,
+
+                  survey_question_1: "",
+                  survey_answer_1: "",
+                  survey_question_2: "",
+                  survey_answer_2: "",
+
+                  prefType1: true,
+                  prefType2: true,
+                  prefType3: true,
+                },
+              })
+            }
           />
         )}
       </View>

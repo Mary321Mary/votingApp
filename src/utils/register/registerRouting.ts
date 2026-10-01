@@ -72,5 +72,8 @@ export function mapRegisterFormToVrLookupPayload(
     survey_answer_1: form.survey_answer_1,
     survey_question_2: form.survey_question_2,
     survey_answer_2: form.survey_answer_2,
+    prefType1: true,
+    prefType2: true,
+    prefType3: true,
   };
 }

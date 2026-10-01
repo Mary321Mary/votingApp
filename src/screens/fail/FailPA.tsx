@@ -6,43 +6,21 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import RenderHTML from "react-native-render-html";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-import {
-  RegisterFormState,
-  StateData,
-  SubmitEmailZipResponseProps,
-} from "@/utils/types";
+import { SubmitEmailZipResponseProps } from "@/utils/types";
 import { useCovrFailReportEvent } from "../../utils/hooks/useCovrFailReportEvent";
-import { CovrCheckMethodName } from "../../utils/report/covrFailReporting";
 
 const PERSONAL_INFO_LINK = "app://personal-info/";
 const PAPER_FORM_LINK = "app://paper-form/";
 
-interface FailPAScreenProps {
-  route: {
-    params?: {
-      state: StateData;
-      zip: string;
-      email: string;
-      form: RegisterFormState;
-      apiTimeoutMethod?: CovrCheckMethodName;
-    };
-  };
-}
+type FailPAScreenProps = NativeStackScreenProps<RootStackParamList, "FailPA">;
 
-type FailPAScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "FailPA"
->;
-
-export default function FailPAScreen({ route }: FailPAScreenProps) {
+export default function FailPAScreen({ route, navigation }: FailPAScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<FailPAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const { width } = useWindowDimensions();
   const styles = getStyles();

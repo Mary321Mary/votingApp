@@ -87,6 +87,7 @@ interface RegisterResultProps {
   isRedirectedCompressNVRA?: boolean;
   form?: RegisterFormState;
   initialStep?: 1 | 2 | 3;
+  onboardingFlow?: boolean;
 }
 
 export const RegisterResult = ({
@@ -101,6 +102,7 @@ export const RegisterResult = ({
   voluntaryPaperRedirect = false,
   form: initform,
   initialStep,
+  onboardingFlow,
 }: RegisterResultProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -325,7 +327,7 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${paPayload.first_name} ${paPayload.last_name}`.trim(),
         );
-        navigation.replace("SuccessPA", { state, form });
+        navigation.replace("SuccessPA", { state, form, onboardingFlow });
         return;
       }
 
@@ -391,7 +393,7 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${waPayload.first_name} ${waPayload.last_name}`.trim(),
         );
-        navigation.replace("SuccessWA", { state, form });
+        navigation.replace("SuccessWA", { state, form, onboardingFlow });
       } else {
         // Check returning a documented failure should route to the WA fail screen
         // (retry / paper form prompt), but still be treated as an error.
@@ -433,6 +435,7 @@ export const RegisterResult = ({
             ? "nvra"
             : workflow,
         finish_with_state: false,
+        onboardingFlow,
       });
     } else {
       navigation.replace("Print", {
@@ -444,6 +447,7 @@ export const RegisterResult = ({
             ? "nvra"
             : workflow,
         finish_with_state: false,
+        onboardingFlow,
       });
     }
   };
@@ -605,7 +609,11 @@ export const RegisterResult = ({
                   "rtv_voter_name",
                   miPayload.full_name,
                 );
-                navigation.replace("SuccessMI", { state, form });
+                navigation.replace("SuccessMI", {
+                  state,
+                  form,
+                  onboardingFlow,
+                });
               } else {
                 navigation.navigate("FailMI", {
                   state,
@@ -686,10 +694,18 @@ export const RegisterResult = ({
               if (state?.online_registration_system_url)
                 Linking.openURL(state.online_registration_system_url);
 
-              navigation.replace("FinishWithState", { state, form });
+              navigation.replace("FinishWithState", {
+                state,
+                form,
+                onboardingFlow,
+              });
             } catch (error: any) {
               console.log("Error", error);
-              navigation.replace("FinishWithState", { state, form });
+              navigation.replace("FinishWithState", {
+                state,
+                form,
+                onboardingFlow,
+              });
             }
           }
         }

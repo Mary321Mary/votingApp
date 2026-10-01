@@ -11,16 +11,14 @@ import {
   Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Clipboard from "@react-native-clipboard/clipboard";
 
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { filterRegistrant } from "@/utils/constants";
-import { RegisterFormState, StateData } from "@/utils/types";
+import { filterRegistrant, ONBOARDING_COMPLETED_KEY } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { INTERNAL_ERRORS } from "@/utils/internal-errors";
@@ -28,35 +26,21 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { mapRegisterFormToVrLookupPayload } from "../../utils/register/registerRouting";
 
-interface PrintScreenProps {
-  route: {
-    params: {
-      form: RegisterFormState;
-      state: StateData;
-      workflow_type?: string;
-      finish_with_state: boolean;
-    };
-  };
-}
+type PrintScreenProps = NativeStackScreenProps<RootStackParamList, "Print">;
 
-type PrintScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "Print"
->;
-
-export default function PrintScreen({ route }: PrintScreenProps) {
+export default function PrintScreen({ route, navigation }: PrintScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<PrintScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();
 
-  const { form, state, workflow_type, finish_with_state } = route.params;
+  const { form, state, workflow_type, finish_with_state, onboardingFlow } =
+    route.params;
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [copyNotification, setCopyNotification] = useState("");
 
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -201,74 +185,89 @@ export default function PrintScreen({ route }: PrintScreenProps) {
         <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
-          <CustomButton
-            title={t("print_form_page.share_fb_button_text")}
-            variant="outline-primary"
-            onPress={async () => {
-              Linking.openURL(config?.share?.registrations?.facebook || "");
-
-              const registration_uid =
-                (await AsyncStorage.getItem(`registration_uid`)) || "";
-              await reportEvent({
-                registration_uid,
-                partner_id: form.partner_id.toString(),
-                step: REPORT_EVENT_STEPS.EMPTY,
-                event_name:
-                  "CTA clicked: " + config?.share?.registrations?.facebook,
-              });
-            }}
-          />
-          <CustomButton
-            title={t("print_form_page.share_x_button_text")}
-            variant="outline-primary"
-            onPress={async () => {
-              Linking.openURL(config?.share?.registrations?.x || "");
-
-              const registration_uid =
-                (await AsyncStorage.getItem(`registration_uid`)) || "";
-              await reportEvent({
-                registration_uid,
-                partner_id: form.partner_id.toString(),
-                step: REPORT_EVENT_STEPS.EMPTY,
-                event_name: "CTA clicked: " + config?.share?.registrations?.x,
-              });
-            }}
-          />
-          <CustomButton
-            title={t("print_form_page.copy_link")}
-            variant="outline-primary"
-            onPress={async () => {
-              const targetUrl = config?.share?.registrations?.copy_link || "";
-
-              try {
-                Clipboard.setString(targetUrl);
-
-                if (Platform.OS === "android") {
-                  ToastAndroid.show(
-                    t(`pennsylvania.link_copied`),
-                    ToastAndroid.SHORT,
-                  );
-                } else {
-                  Alert.alert("Success", t(`pennsylvania.link_copied`));
-                }
-                setCopyNotification(t(`pennsylvania.link_copied`));
-
-                const registration_uid =
-                  (await AsyncStorage.getItem(`registration_uid`)) || "";
-                await reportEvent({
-                  registration_uid,
-                  partner_id: form.partner_id.toString(),
-                  step: REPORT_EVENT_STEPS.EMPTY,
-                  event_name:
-                    "CTA clicked: copy link " +
-                    config?.share?.registrations?.copy_link,
+          {onboardingFlow ? (
+            <CustomButton
+              title={t("register_18_by_election_page.continue_button_text")}
+              onPress={async () => {
+                await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+                navigation.navigate("Onboarding2", {
+                  form: mapRegisterFormToVrLookupPayload(form),
                 });
-              } catch (err) {
-                console.error("Failed to copy link:", err);
-              }
-            }}
-          />
-          {copyNotification && <Text>{copyNotification}</Text>}
+              }}
+            />
+          ) : (
+            <>
+              <CustomButton
+                title={t("print_form_page.share_fb_button_text")}
+                variant="outline-primary"
+                onPress={async () => {
+                  Linking.openURL(config?.share?.registrations?.facebook || "");
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem(`registration_uid`)) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.facebook,
+                  });
+                }}
+              />
+              <CustomButton
+                title={t("print_form_page.share_x_button_text")}
+                variant="outline-primary"
+                onPress={async () => {
+                  Linking.openURL(config?.share?.registrations?.x || "");
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem(`registration_uid`)) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.x,
+                  });
+                }}
+              />
+              <CustomButton
+                title={t("print_form_page.copy_link")}
+                variant="outline-primary"
+                onPress={async () => {
+                  const targetUrl =
+                    config?.share?.registrations?.copy_link || "";
+
+                  try {
+                    Clipboard.setString(targetUrl);
+
+                    if (Platform.OS === "android") {
+                      ToastAndroid.show(
+                        t(`pennsylvania.link_copied`),
+                        ToastAndroid.SHORT,
+                      );
+                    } else {
+                      Alert.alert("Success", t(`pennsylvania.link_copied`));
+                    }
+
+                    const registration_uid =
+                      (await AsyncStorage.getItem(`registration_uid`)) || "";
+                    await reportEvent({
+                      registration_uid,
+                      partner_id: form.partner_id.toString(),
+                      step: REPORT_EVENT_STEPS.EMPTY,
+                      event_name:
+                        "CTA clicked: copy link " +
+                        config?.share?.registrations?.copy_link,
+                    });
+                  } catch (err) {
+                    console.error("Failed to copy link:", err);
+                  }
+                }}
+              />
+            </>
+          )}
+
           {/* Footer */}
           <View>
             <View style={styles.divider} />

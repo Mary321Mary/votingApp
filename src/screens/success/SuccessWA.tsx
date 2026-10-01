@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,43 +10,34 @@ import {
   Alert,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Clipboard from "@react-native-clipboard/clipboard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-import { RegisterFormState, StateData } from "@/utils/types";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
+import { ONBOARDING_COMPLETED_KEY } from "../../utils/constants";
 
-interface SuccessWAScreenProps {
-  route: {
-    params?: {
-      state: StateData;
-      form: RegisterFormState;
-    };
-  };
-}
-
-type SuccessWAScreenNavigation = NativeStackNavigationProp<
+type SuccessWAScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "SuccessWA"
 >;
 
-export const SuccessWAScreen = ({ route }: SuccessWAScreenProps) => {
+export const SuccessWAScreen = ({
+  route,
+  navigation,
+}: SuccessWAScreenProps) => {
   const { t } = useTranslation();
-  const navigation = useNavigation<SuccessWAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();
-
   const params = route.params;
-  const [copyNotification, setCopyNotification] = useState("");
 
   useEffect(() => {
     if (!params?.state) {
@@ -72,7 +63,7 @@ export const SuccessWAScreen = ({ route }: SuccessWAScreenProps) => {
     return null;
   }
 
-  const { state, form } = params;
+  const { state, form, onboardingFlow } = params;
 
   const handleLearnAbout = async () => {
     if (state.learn_about_url) {
@@ -101,74 +92,89 @@ export const SuccessWAScreen = ({ route }: SuccessWAScreenProps) => {
             onPress={handleLearnAbout}
           />
           <View style={styles.buttonSpacer} />
-          <CustomButton
-            title={t("print_form_page.share_fb_button_text")}
-            variant="outline-primary"
-            onPress={async () => {
-              Linking.openURL(config?.share?.registrations?.facebook || "");
-
-              const registration_uid =
-                (await AsyncStorage.getItem(`registration_uid`)) || "";
-              await reportEvent({
-                registration_uid,
-                partner_id: form.partner_id.toString(),
-                step: REPORT_EVENT_STEPS.EMPTY,
-                event_name:
-                  "CTA clicked: " + config?.share?.registrations?.facebook,
-              });
-            }}
-          />
-          <CustomButton
-            title={t("print_form_page.share_x_button_text")}
-            variant="outline-primary"
-            onPress={async () => {
-              Linking.openURL(config?.share?.registrations?.x || "");
-
-              const registration_uid =
-                (await AsyncStorage.getItem(`registration_uid`)) || "";
-              await reportEvent({
-                registration_uid,
-                partner_id: form.partner_id.toString(),
-                step: REPORT_EVENT_STEPS.EMPTY,
-                event_name: "CTA clicked: " + config?.share?.registrations?.x,
-              });
-            }}
-          />
-          <CustomButton
-            title={t("print_form_page.copy_link")}
-            variant="outline-primary"
-            onPress={async () => {
-              const targetUrl = config?.share?.registrations?.copy_link || "";
-
-              try {
-                Clipboard.setString(targetUrl);
-
-                if (Platform.OS === "android") {
-                  ToastAndroid.show(
-                    t(`pennsylvania.link_copied`),
-                    ToastAndroid.SHORT,
-                  );
-                } else {
-                  Alert.alert("Success", t(`pennsylvania.link_copied`));
-                }
-                setCopyNotification(t(`pennsylvania.link_copied`));
-
-                const registration_uid =
-                  (await AsyncStorage.getItem(`registration_uid`)) || "";
-                await reportEvent({
-                  registration_uid,
-                  partner_id: form.partner_id.toString(),
-                  step: REPORT_EVENT_STEPS.EMPTY,
-                  event_name:
-                    "CTA clicked: copy link " +
-                    config?.share?.registrations?.copy_link,
+          {onboardingFlow ? (
+            <CustomButton
+              title={t("register_18_by_election_page.continue_button_text")}
+              onPress={async () => {
+                await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+                navigation.navigate("Onboarding2", {
+                  form: mapRegisterFormToVrLookupPayload(form),
                 });
-              } catch (err) {
-                console.error("Failed to copy link:", err);
-              }
-            }}
-          />
-          {copyNotification && <Text>{copyNotification}</Text>}
+              }}
+            />
+          ) : (
+            <>
+              <CustomButton
+                title={t("print_form_page.share_fb_button_text")}
+                variant="outline-primary"
+                onPress={async () => {
+                  Linking.openURL(config?.share?.registrations?.facebook || "");
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem(`registration_uid`)) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.facebook,
+                  });
+                }}
+              />
+              <CustomButton
+                title={t("print_form_page.share_x_button_text")}
+                variant="outline-primary"
+                onPress={async () => {
+                  Linking.openURL(config?.share?.registrations?.x || "");
+
+                  const registration_uid =
+                    (await AsyncStorage.getItem(`registration_uid`)) || "";
+                  await reportEvent({
+                    registration_uid,
+                    partner_id: form.partner_id.toString(),
+                    step: REPORT_EVENT_STEPS.EMPTY,
+                    event_name:
+                      "CTA clicked: " + config?.share?.registrations?.x,
+                  });
+                }}
+              />
+              <CustomButton
+                title={t("print_form_page.copy_link")}
+                variant="outline-primary"
+                onPress={async () => {
+                  const targetUrl =
+                    config?.share?.registrations?.copy_link || "";
+
+                  try {
+                    Clipboard.setString(targetUrl);
+
+                    if (Platform.OS === "android") {
+                      ToastAndroid.show(
+                        t(`pennsylvania.link_copied`),
+                        ToastAndroid.SHORT,
+                      );
+                    } else {
+                      Alert.alert("Success", t(`pennsylvania.link_copied`));
+                    }
+
+                    const registration_uid =
+                      (await AsyncStorage.getItem(`registration_uid`)) || "";
+                    await reportEvent({
+                      registration_uid,
+                      partner_id: form.partner_id.toString(),
+                      step: REPORT_EVENT_STEPS.EMPTY,
+                      event_name:
+                        "CTA clicked: copy link " +
+                        config?.share?.registrations?.copy_link,
+                    });
+                  } catch (err) {
+                    console.error("Failed to copy link:", err);
+                  }
+                }}
+              />
+            </>
+          )}
+
           {/* Footer */}
           <View>
             <View style={styles.divider} />

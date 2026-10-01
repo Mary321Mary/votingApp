@@ -7,25 +7,27 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { CustomButton } from "../components/atoms/CustomButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { VOTER_FORM_STORAGE_KEY } from "../utils/constants";
+import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
 import {
   CheckRegistrationStatus,
   CheckRegistrationStatusError,
-} from "../utils/types";
+} from "@/utils/types";
 import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
-import { DateRow } from "../components/atoms/DateOfBirth/DateRow";
-import InputField from "../components/atoms/InputField";
-import { processDateOfBirthValidation } from "../components/atoms/DateOfBirth/dateValidation";
+import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
+import InputField from "@/components/atoms/InputField";
+import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
+import { RootStackParamList } from "@/components/Navigation";
 
-export default function ProfileScreen() {
+type ProfileScreenProps = NativeStackScreenProps<RootStackParamList, "Profile">;
+
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const [form, setForm] = useState<CheckRegistrationStatus>({

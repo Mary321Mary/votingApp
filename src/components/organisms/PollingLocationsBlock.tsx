@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-
-// import LocationCard from "@/components/organisms/LocationCard";
-// import LocationMap from "@/components/organisms/LocationMap";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { LocationsData, LocationItem } from "@/utils/types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { VOTER_POOLING_KEY } from "../../utils/constants";
+import { VOTER_POOLING_KEY } from "@/utils/constants";
 import { LocationCard } from "../modules/LocationCard";
+import { ThemeContext } from "@/styles/ThemeProvider";
 
 export const PollingLocationsBlock = () => {
   const { t } = useTranslation();
+  const theme = useContext(ThemeContext);
+  const styles = getStyles(theme);
+
   const [locations, setLocations] = useState<LocationsData>({
     map_key: "",
     map_center: { lat: 0, lng: 0 },
@@ -84,19 +85,14 @@ export const PollingLocationsBlock = () => {
       {/* {hasMapCenter && <LocationMap data={locations} />} */}
 
       {!hasLocations ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {!hasMapCenter
-              ? t(
-                  "location_lookup_page2.address_not_found",
-                  "Address not found",
-                )
-              : t(
-                  "location_lookup_page2.locations_not_found",
-                  "No locations found",
-                )}
-          </Text>
-        </View>
+        <Text style={styles.emptyText}>
+          {!hasMapCenter
+            ? t("location_lookup_page2.address_not_found", "Address not found")
+            : t(
+                "location_lookup_page2.locations_not_found",
+                "No locations found",
+              )}
+        </Text>
       ) : (
         <View style={styles.resultsContainer}>
           {/* Primary Polling Place */}
@@ -140,49 +136,44 @@ export const PollingLocationsBlock = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    marginTop: 16,
-  },
-  centered: {
-    padding: 20,
-    alignItems: "center",
-  },
-  emptyContainer: {
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
-  },
-  resultsContainer: {
-    marginTop: 12,
-  },
-  sectionContainer: {
-    marginBottom: 16,
-  },
-  accordionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  chevronIcon: {
-    fontSize: 12,
-    color: "#6B7280",
-  },
-  listContainer: {
-    paddingTop: 10,
-    gap: 10,
-  },
-});
+const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      marginTop: 16,
+    },
+    centered: {
+      padding: 20,
+      alignItems: "center",
+    },
+    emptyText: {
+      fontSize: 14,
+      color: theme.gray,
+    },
+    resultsContainer: {
+      marginTop: 12,
+    },
+    sectionContainer: {
+      marginBottom: 16,
+    },
+    accordionHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: "#E5E7EB",
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    chevronIcon: {
+      fontSize: 12,
+      color: "#6B7280",
+    },
+    listContainer: {
+      paddingTop: 10,
+      gap: 10,
+    },
+  });

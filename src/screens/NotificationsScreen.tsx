@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   Bell,
   CheckCircle2,
@@ -21,6 +21,7 @@ import {
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { CustomButton } from "../components/atoms/CustomButton";
+import { RootStackParamList } from "../components/Navigation";
 
 export interface NotificationItem {
   id: string;
@@ -71,9 +72,15 @@ const MOCK_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
-export default function NotificationsScreen() {
+type NotificationsScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "Notifications"
+>;
+
+export default function NotificationsScreen({
+  navigation,
+}: NotificationsScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 

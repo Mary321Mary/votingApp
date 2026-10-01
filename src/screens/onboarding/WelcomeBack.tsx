@@ -12,29 +12,37 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import InAppBrowser from "react-native-inappbrowser-reborn";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Clipboard from "@react-native-clipboard/clipboard";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import { ThemeContext } from "@/styles/ThemeProvider";
-import Header from "@/layout/Header";
-import { CustomButton } from "../../components/atoms/CustomButton";
 import {
   FIRST_TIME_COMPLETED_KEY,
   ONBOARDING_COMPLETED_KEY,
   VOTER_ELECTIONS_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_POOLING_KEY,
-} from "../../utils/constants";
-import { CheckRegistrationStatus } from "../../utils/types";
-import { PollingLocationsBlock } from "../../components/organisms/PollingLocationsBlock";
-import { useUIConfig } from "../../contexts/UIConfigContext";
-import { reportEvent } from "../../utils/api";
-import { REPORT_EVENT_STEPS } from "../../utils/report/eventReporting";
-import Clipboard from "@react-native-clipboard/clipboard";
+} from "@/utils/constants";
+import { CheckRegistrationStatus } from "@/utils/types";
+import { reportEvent } from "@/utils/api";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 
-export default function WelcomeBackScreen() {
+import { ThemeContext } from "@/styles/ThemeProvider";
+import Header from "@/layout/Header";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import { PollingLocationsBlock } from "@/components/organisms/PollingLocationsBlock";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import { RootStackParamList } from "@/components/Navigation";
+
+type WelcomeBackScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "WelcomeBack"
+>;
+
+export default function WelcomeBackScreen({
+  navigation,
+}: WelcomeBackScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();
@@ -123,8 +131,8 @@ export default function WelcomeBackScreen() {
 
   const welcomeText = userName
     ? onboardingCompleted
-      ? t("dashboard.returning", { firstname: userName })
-      : t("dashboard.finished_onboarding", { firstname: userName })
+      ? t("native_local.dashboard.returning", { firstname: userName })
+      : t("native_local.dashboard.finished_onboarding", { firstname: userName })
     : "Welcome back. Your best next step are ...";
 
   const handleContinueOnboarding = () => {
@@ -187,7 +195,7 @@ export default function WelcomeBackScreen() {
 
   return (
     <View style={styles.container}>
-      <Header text={t("dashboard.title")} />
+      <Header text={t("native_local.dashboard.title")} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.text}>{welcomeText}</Text>
@@ -195,7 +203,9 @@ export default function WelcomeBackScreen() {
         {userName && <PollingLocationsBlock />}
         {userName && elections.length > 0 && (
           <View style={styles.buttonContainer}>
-            <Text style={styles.bold}>{t("dashboard.upcoming_election")}</Text>
+            <Text style={styles.bold}>
+              {t("native_local.dashboard.upcoming_election")}
+            </Text>
             {elections.map(election => (
               <Text key={election.id}>{election.description}</Text>
             ))}
@@ -310,5 +320,6 @@ const getStyles = (theme: any) =>
     },
     buttonContainer: {
       width: "100%",
+      marginTop: 10,
     },
   });

@@ -1,27 +1,24 @@
 import React, { useContext } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+
+import logo from "assets/images/warning-zone.jpg";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import logo from "assets/images/warning-zone.jpg";
-import { UserData } from "@/utils/types";
-import { CustomButton } from "../components/atoms/CustomButton";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import { RootStackParamList } from "@/components/Navigation";
 
-interface ZipErrorScreenProps {
-  route: {
-    params: {
-      text: string;
-      header?: string;
-      showImage?: boolean;
-      user: UserData | null;
-    };
-  };
-}
+type ZipErrorScreenProps = NativeStackScreenProps<
+  RootStackParamList,
+  "ZipError"
+>;
 
-export default function ZipErrorScreen({ route }: ZipErrorScreenProps) {
+export default function ZipErrorScreen({
+  route,
+  navigation,
+}: ZipErrorScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 

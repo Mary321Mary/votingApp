@@ -246,8 +246,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           style={styles.linkText}
           onPress={() => {
             navigation.navigate("CheckVoterStatus", {
-              zip: zipCode,
-              email,
               form: {
                 partner_id: 1,
 

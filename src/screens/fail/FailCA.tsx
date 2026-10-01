@@ -1,40 +1,21 @@
 import React, { useContext, useEffect } from "react";
 import { StyleSheet, ScrollView, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import RenderHTML from "react-native-render-html";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-import {
-  RegisterFormState,
-  StateData,
-  SubmitEmailZipResponseProps,
-} from "@/utils/types";
+import { SubmitEmailZipResponseProps } from "@/utils/types";
 
 const PERSONAL_INFO_LINK = "app://personal-info-link/";
 const PAPER_FORM_LINK = "app://paper-link/";
 
-interface FailCAScreenProps {
-  route: {
-    params?: {
-      state: StateData;
-      zip: string;
-      email: string;
-      form: RegisterFormState;
-    };
-  };
-}
+type FailCAScreenProps = NativeStackScreenProps<RootStackParamList, "FailCA">;
 
-type FailCAScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "FailCA"
->;
-
-export default function FailCAScreen({ route }: FailCAScreenProps) {
+export default function FailCAScreen({ route, navigation }: FailCAScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<FailCAScreenNavigation>();
   const theme = useContext(ThemeContext);
   const { width } = useWindowDimensions();
   const styles = getStyles();

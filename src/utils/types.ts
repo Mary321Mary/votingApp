@@ -781,7 +781,7 @@ export interface SubmitEmailZipResponse {
 
 export interface SubmitEmailZipResponseProps {
   status: { success: boolean; errors: string[] | null };
-  registration_uid?: string;
+  onboardingFlow?: boolean;
   state?: StateData;
   zip: string;
   email: string;

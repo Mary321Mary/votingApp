@@ -9,38 +9,21 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RegisterFormState, StateData } from "@/utils/types";
 import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { getFlowType } from "@/utils/register/registerRouting";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
-interface Under18ScreenProps {
-  route: {
-    params: {
-      state: StateData;
-      form: RegisterFormState;
-      workflow_type: string;
-      registration_uid: string;
-    };
-  };
-}
+type Under18ScreenProps = NativeStackScreenProps<RootStackParamList, "Under18">;
 
-type Under18ScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "Under18"
->;
-
-export const Under18Screen = ({ route }: Under18ScreenProps) => {
+export const Under18Screen = ({ route, navigation }: Under18ScreenProps) => {
   const { t } = useTranslation();
   const state = route?.params ?? null;
-  const navigation = useNavigation<Under18ScreenNavigation>();
   const theme = useContext(ThemeContext);
   const { width } = useWindowDimensions();
 

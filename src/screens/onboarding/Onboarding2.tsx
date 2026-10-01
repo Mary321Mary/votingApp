@@ -8,34 +8,33 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import { ThemeContext } from "@/styles/ThemeProvider";
-import Header from "@/layout/Header";
-import { CheckRegistrationStatus } from "../../utils/types";
-import { VOTER_FORM_STORAGE_KEY } from "../../utils/constants";
-import { Checkbox } from "../../components/atoms/Checkbox";
-import { CustomButton } from "../../components/atoms/CustomButton";
 import RenderHTML from "react-native-render-html";
-import InputField from "../../components/atoms/InputField";
-import { useUIConfig } from "../../contexts/UIConfigContext";
-import { getSurveyQuestions } from "../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+
 import i18n from "i18n";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import Header from "@/layout/Header";
+import { CheckRegistrationStatus } from "@/utils/types";
+import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
+import { getSurveyQuestions } from "@/utils/api";
 
-type RouteParams = {
-  form: CheckRegistrationStatus;
-};
+import { Checkbox } from "@/components/atoms/Checkbox";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import InputField from "@/components/atoms/InputField";
+import { RootStackParamList } from "@/components/Navigation";
 
-type Onboarding2RouteProp = RouteProp<
-  { Onboarding2: RouteParams },
+type Onboarding2ScreenProps = NativeStackScreenProps<
+  RootStackParamList,
   "Onboarding2"
 >;
 
-export default function Onboarding2Screen() {
+export default function Onboarding2Screen({
+  route,
+  navigation,
+}: Onboarding2ScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
-  const route = useRoute<Onboarding2RouteProp>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();

@@ -10,13 +10,11 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { InAppBrowser } from "react-native-inappbrowser-reborn";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import i18n from "@/i18n";
@@ -24,28 +22,15 @@ import { useUIConfig } from "@/contexts/UIConfigContext";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
-type LookupScreenNavigation = NativeStackNavigationProp<
-  RootStackParamList,
-  "Lookup"
->;
+type LookupScreenProps = NativeStackScreenProps<RootStackParamList, "Lookup">;
 
-interface LookupScreenProps {
-  route: {
-    params: {
-      state: StateData;
-      form: CheckRegistrationStatus;
-    };
-  };
-}
-
-export default function LookupScreen({ route }: LookupScreenProps) {
+export default function LookupScreen({ route, navigation }: LookupScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
   const { state, form } = route.params;
   const { config } = useUIConfig();
-  const navigation = useNavigation<LookupScreenNavigation>();
 
   const handleOpenLink = async () => {
     const url = state?.online_registration_system_url;
@@ -206,11 +191,11 @@ export default function LookupScreen({ route }: LookupScreenProps) {
         />
         <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
-          onPress={() => {
+          onPress={() =>
             navigation.navigate("Onboarding2", {
               form,
-            });
-          }}
+            })
+          }
         />
         <Text style={styles.bold}>
           {t("lookup_success_page.something_wrong")}

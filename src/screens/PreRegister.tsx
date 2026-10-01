@@ -7,17 +7,11 @@ import {
   Linking,
 } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import {
-  DataCollectionConfiguration,
-  RegisterFormState,
-  StateData,
-} from "@/utils/types";
 import { getFlowType } from "@/utils/register/registerRouting";
 import { reportEvent, setUnder18Reminder } from "@/utils/api";
 import { newlinesToBr } from "@/utils/stateCopy";
@@ -25,19 +19,7 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
-interface PreRegisterScreenProps {
-  route: {
-    params: {
-      state: StateData;
-      form: RegisterFormState;
-      workflow_type: string;
-      formCongif: DataCollectionConfiguration;
-      registration_uid: string;
-    };
-  };
-}
-
-type PreRegisterScreenNavigation = NativeStackNavigationProp<
+type PreRegisterScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "PreRegister"
 >;
@@ -45,9 +27,11 @@ type PreRegisterScreenNavigation = NativeStackNavigationProp<
 const PRIMARIES_CAUCUSES_URL =
   "https://www.rockthevote.org/how-to-vote/nationwide-voting-info/primaries-and-caucuses/";
 
-export default function PreRegisterScreen({ route }: PreRegisterScreenProps) {
+export default function PreRegisterScreen({
+  route,
+  navigation,
+}: PreRegisterScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<PreRegisterScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { config } = useUIConfig();

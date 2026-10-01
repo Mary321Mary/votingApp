@@ -2,37 +2,26 @@ import React, { useContext, useEffect } from "react";
 import { View, Text, StyleSheet, Linking, ScrollView } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CheckRegistrationStatus, StateData } from "@/utils/types";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
-type LookupNotFoundScreenNavigation = NativeStackNavigationProp<
+type LookupNotFoundScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "LookupNotFound"
 >;
 
-interface LookupNotFoundScreenProps {
-  route: {
-    params: {
-      state: StateData;
-      form: CheckRegistrationStatus;
-    };
-  };
-}
-
 export default function LookupNotFoundScreen({
   route,
+  navigation,
 }: LookupNotFoundScreenProps) {
   const { t } = useTranslation();
-  const navigation = useNavigation<LookupNotFoundScreenNavigation>();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { state, form } = route.params;
@@ -136,22 +125,28 @@ export default function LookupNotFoundScreen({
               });
 
               navigation.replace("Register", {
-                status: { success: true },
+                status: { success: true, errors: [] },
                 state,
                 zip: form.zip,
                 email: form.email,
-                form,
+                form: form as any,
                 pageFromLookup: "paper",
                 workflowType: "nvra",
                 showRedirectText: false,
-              } as any);
+                onboardingFlow: true,
+              });
             }}
           />
         )}
         <CustomButton
           title={t("lookup_not_found_page.cta_try_again")}
           variant="outline-primary"
-          onPress={() => navigation.goBack()}
+          onPress={() =>
+            navigation.replace("CheckVoterStatus", {
+              form,
+              afterNotFound: true,
+            })
+          }
         />
       </View>
     </ScrollView>
