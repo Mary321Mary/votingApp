@@ -1,7 +1,6 @@
-import React, { useState, useContext, useMemo, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   SafeAreaView,
@@ -168,10 +167,10 @@ export default function ProfileScreen() {
     return !Object.values(errorMessage).some(value => value.trim() !== "");
   };
 
-  const bodyParagraphs = useMemo(() => {
-    const rawText = t("native_local.initial_profile_page.no_data_body");
-    return rawText.split(/<p\s*\/?>/gi);
-  }, [t]);
+  // const bodyParagraphs = useMemo(() => {
+  //   const rawText = t("native_local.initial_profile_page.no_data_body");
+  //   return rawText.split(/<p\s*\/?>/gi);
+  // }, [t]);
 
   if (loading) {
     return (
@@ -187,13 +186,13 @@ export default function ProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Page Body / Intro Text */}
-        <View style={styles.bodyContainer}>
+        {/* <View style={styles.bodyContainer}>
           {bodyParagraphs.map((paragraph, index) => (
             <Text key={index} style={styles.bodyText}>
               {paragraph.trim()}
             </Text>
           ))}
-        </View>
+        </View> */}
 
         {/* Form Fields */}
         <InputField

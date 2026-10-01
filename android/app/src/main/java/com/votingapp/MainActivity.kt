@@ -1,4 +1,4 @@
-package com.votingapp
+package org.rockythevote.rocky
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

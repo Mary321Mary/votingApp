@@ -1,4 +1,4 @@
-package com.votingapp
+package org.rockythevote.rocky
 
 import android.app.Application
 import com.facebook.react.PackageList
