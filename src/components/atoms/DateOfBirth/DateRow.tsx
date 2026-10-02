@@ -6,6 +6,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 import HelpTooltip from "../HelpTooltip";
 import { useFormScroll } from "@/contexts/FormScrollContext";
+import { COLORS } from "@/styles/colors";
 
 export interface DateField {
   name: keyof RegisterFormState;
@@ -84,29 +85,25 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
 
       <View style={styles.dateRow}>
         <View style={styles.monthCol}>
-          <View
-            style={[
-              styles.pickerWrapper,
-              disabled && { backgroundColor: theme.borderColor },
-            ]}
-          >
+          <View style={styles.pickerWrapper}>
             <Picker
               ref={registerField(month.name)}
               enabled={!disabled}
-              selectedValue={month.value}
+              selectedValue={String(month.value ?? "")}
               onValueChange={(text: string) =>
                 updateField(month.name, text as any)
               }
-              dropdownIconColor={theme.textPrimary}
-              style={[styles.picker, { color: theme.primary }]}
+              dropdownIconColor={COLORS.textPrimary}
+              style={styles.picker}
+              // КРИТИЧНО ДЛЯ iOS: задает цвет текста и высоту списка внутри UIPickerView
+              itemStyle={styles.pickerItemIOS}
             >
               {MONTHS.map(monthItem => (
                 <Picker.Item
-                  key={monthItem.value}
-                  label={monthItem.name}
-                  value={monthItem.value}
-                  color={theme.textPrimary}
-                  style={{ fontSize: 14 }}
+                  key={String(monthItem.value)}
+                  label={String(monthItem.name)}
+                  value={String(monthItem.value)}
+                  color={COLORS.textPrimary}
                 />
               ))}
             </Picker>
@@ -209,17 +206,23 @@ const getStyles = (theme: any) =>
       flex: 4,
     },
     pickerWrapper: {
-      height: 45,
+      height: 48,
       backgroundColor: theme.white,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: theme.borderColor,
-      borderRadius: 5,
       overflow: "hidden",
       justifyContent: "center",
     },
     picker: {
-      height: 48,
+      height: 50,
       width: "100%",
+      color: theme.textPrimary,
+    },
+    pickerItemIOS: {
+      color: theme.textPrimary,
+      fontSize: 16,
+      height: 50,
     },
     dateInput: {
       backgroundColor: theme.white,
