@@ -98,13 +98,14 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
                 updateField(month.name, text as any)
               }
               dropdownIconColor={theme.textPrimary}
-              style={styles.picker}
+              style={[styles.picker, { color: theme.primary }]}
             >
               {MONTHS.map(monthItem => (
                 <Picker.Item
                   key={monthItem.value}
                   label={monthItem.name}
                   value={monthItem.value}
+                  color={theme.textPrimary}
                   style={{ fontSize: 14 }}
                 />
               ))}

@@ -26,6 +26,7 @@ import {
   mapFormStateToMICovrPayload,
   mapFormStateToPACovrPayload,
   mapFormStateToWACovrPayload,
+  VOTER_USER_STATUS,
 } from "@/utils/constants";
 import {
   DataCollectionConfiguration,
@@ -609,6 +610,7 @@ export const RegisterResult = ({
                   "rtv_voter_name",
                   miPayload.full_name,
                 );
+                await AsyncStorage.setItem(VOTER_USER_STATUS, "active");
                 navigation.replace("SuccessMI", {
                   state,
                   form,

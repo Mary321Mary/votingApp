@@ -99,22 +99,19 @@ const Header = ({ text }: HeaderProp) => {
         <TouchableWithoutFeedback onPress={toggleMenu}>
           <View style={styles.modalOverlay}>
             <View style={styles.menuContainer}>
-              <TouchableOpacity style={styles.menuItem}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => handleNavigate("Settings")}
+              >
                 <Settings size={20} color={theme.textPrimary} />
-                <Text
-                  style={styles.menuItemText}
-                  onPress={() => handleNavigate("Settings")}
-                >
-                  Settings
-                </Text>
+                <Text style={styles.menuItemText}>Settings</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.menuItem}>
-                <User
-                  size={20}
-                  color={theme.textPrimary}
-                  onPress={() => handleNavigate("Profile")}
-                />
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => handleNavigate("Profile")}
+              >
+                <User size={20} color={theme.textPrimary} />
                 <Text style={styles.menuItemText}>Profile</Text>
               </TouchableOpacity>
 

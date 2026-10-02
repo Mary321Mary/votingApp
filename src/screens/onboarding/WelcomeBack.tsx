@@ -22,6 +22,7 @@ import {
   VOTER_ELECTIONS_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_POOLING_KEY,
+  VOTER_USER_STATUS,
 } from "@/utils/constants";
 import { CheckRegistrationStatus } from "@/utils/types";
 import { reportEvent } from "@/utils/api";
@@ -80,6 +81,7 @@ export default function WelcomeBackScreen({
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>();
+  const [status, setStatus] = useState<string>();
   const [elections, setElections] = useState<
     {
       id: number;
@@ -92,13 +94,17 @@ export default function WelcomeBackScreen({
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm, storedOnboardingCompleted, storesElections] =
-          await Promise.all([
-            AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-            AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
-            AsyncStorage.getItem(VOTER_ELECTIONS_KEY),
-          ]);
-        console.log(storedForm, storedOnboardingCompleted, storesElections);
+        const [
+          storedForm,
+          storedOnboardingCompleted,
+          storesElections,
+          storesStatus,
+        ] = await Promise.all([
+          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+          AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
+          AsyncStorage.getItem(VOTER_ELECTIONS_KEY),
+          AsyncStorage.getItem(VOTER_USER_STATUS),
+        ]);
 
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
@@ -111,6 +117,7 @@ export default function WelcomeBackScreen({
         if (storesElections) {
           setElections(JSON.parse(storesElections));
         }
+        setStatus(storesStatus || "pending");
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
       } finally {
@@ -199,6 +206,7 @@ export default function WelcomeBackScreen({
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.text}>{welcomeText}</Text>
+        <Text style={styles.text}>Status: {status}</Text>
 
         {userName && <PollingLocationsBlock />}
         {userName && elections.length > 0 && (
@@ -275,6 +283,7 @@ export default function WelcomeBackScreen({
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
                   VOTER_ELECTIONS_KEY,
+                  VOTER_USER_STATUS,
                 ]);
               } catch (error) {
                 console.error("Failed to clear saved data:", error);

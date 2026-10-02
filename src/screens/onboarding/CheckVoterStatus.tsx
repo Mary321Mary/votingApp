@@ -39,6 +39,7 @@ import {
   VOTER_ELECTIONS_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_POOLING_KEY,
+  VOTER_USER_STATUS,
 } from "@/utils/constants";
 import i18n from "i18n";
 
@@ -118,7 +119,7 @@ export const CheckVoterStatusScreen = ({
       if (Platform.OS === "ios") {
         const permission = await Contacts.requestPermission();
 
-        if (permission === "authorized") {
+        if (permission === "authorized" || permission === "limited") {
           let myCard: Contact | null = null;
           const contactsApi = Contacts as any;
 
@@ -135,7 +136,7 @@ export const CheckVoterStatusScreen = ({
             const email = myCard.emailAddresses[0]?.email || "";
 
             const rawPhone = myCard.phoneNumbers[0]?.number || "";
-            const phoneDigits = onlyDigits(rawPhone).slice(-10); // Берем последние 10 цифр
+            const phoneDigits = onlyDigits(rawPhone).slice(-10);
             const formattedPhone = formatPhone(phoneDigits);
 
             const postalAddress = myCard.postalAddresses[0];
@@ -171,30 +172,12 @@ export const CheckVoterStatusScreen = ({
               birthDay: birthDay || prev.birthDay,
             }));
 
-            Alert.alert(
-              t("general.success"),
-              t(
-                "form_fields.autofill_success",
-                "Form pre-filled from My Card!",
-              ),
-            );
+            Alert.alert("Success", "Form pre-filled from My Card!");
           } else {
-            Alert.alert(
-              t("general.notice"),
-              t(
-                "form_fields.no_my_card",
-                "No 'My Card' contact found on this device.",
-              ),
-            );
+            Alert.alert("Notice", "No 'My Card' contact found on this device.");
           }
         } else {
-          Alert.alert(
-            t("general.error"),
-            t(
-              "form_fields.contacts_permission_denied",
-              "Permission to access contacts was denied.",
-            ),
-          );
+          Alert.alert("Error", "Permission to access contacts was denied.");
         }
       }
     } catch (error) {
@@ -246,6 +229,7 @@ export const CheckVoterStatusScreen = ({
           (form.first_name === "Jane" && form.last_name === "Doe")
         ) {
           await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+          await AsyncStorage.setItem(VOTER_USER_STATUS, "active");
           navigation.navigate("Lookup", {
             form,
             state: responseLookup.data.state,
@@ -325,9 +309,7 @@ export const CheckVoterStatusScreen = ({
     // } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
     //   errorMessage.phone = t("form_fields.invalid_phone");
     // }
-    if (form.phone.trim()) {
-      errorMessage.phone = t("form_fields.required_phone");
-    } else if (fullPhoneRegex.test(form.phone.trim())) {
+    if (fullPhoneRegex.test(form.phone.trim())) {
       errorMessage.phone = t("form_fields.invalid_phone");
     }
     if (!form.zip.trim()) {
