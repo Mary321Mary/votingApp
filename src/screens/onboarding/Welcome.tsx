@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   useWindowDimensions,
   Image,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Globe } from "lucide-react-native";
 import RenderHTML from "react-native-render-html";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,12 +16,8 @@ import { CustomButton } from "@/components/atoms/CustomButton";
 import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
-
-const ALL_LOCALES = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "tl", label: "Tagalog" },
-];
+import { LANGUAGE_KEY } from "@/i18n";
+import LanguageSelector from "@/components/atoms/LanguageSelector";
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, "Welcome">;
 
@@ -34,9 +28,13 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
 
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language || "en";
+  const currentLangRef = useRef(currentLang);
 
   const [remoteContent, setRemoteContent] = useState<any>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    currentLangRef.current = currentLang;
+  }, [currentLang]);
 
   useEffect(() => {
     const fetchRemoteData = async () => {
@@ -51,18 +49,18 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
     fetchRemoteData();
   }, []);
 
-  const sortedLocales = [
-    ...ALL_LOCALES.filter(l => l.code === currentLang),
-    ...ALL_LOCALES.filter(l => l.code !== currentLang),
-  ];
-
-  const handleLanguageChange = (langCode: string) => {
-    i18n.changeLanguage(langCode);
-    setIsDropdownOpen(false);
-  };
-
   const handleGetStarted = async () => {
-    await AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true");
+    const activeLanguage = i18n.language || "en";
+
+    try {
+      await Promise.all([
+        AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
+        AsyncStorage.setItem(LANGUAGE_KEY, activeLanguage),
+      ]);
+    } catch (e) {
+      console.error("Failed to save preferences", e);
+    }
+
     navigation.replace("CheckVoterStatus", {
       form: {
         partner_id: 1,
@@ -85,9 +83,20 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
         survey_answer_1: "",
         survey_question_2: "",
         survey_answer_2: "",
+        prefType1: true,
+        prefType2: true,
+        prefType3: true,
       },
     });
   };
+
+  useEffect(() => {
+    return () => {
+      AsyncStorage.setItem(LANGUAGE_KEY, currentLangRef.current).catch(err =>
+        console.error("Failed to persist language on unmount", err),
+      );
+    };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -123,41 +132,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
         />
       </View>
 
-      <View style={styles.localeSelectorContainer}>
-        <TouchableOpacity
-          style={styles.dropdownHeader}
-          onPress={() => setIsDropdownOpen(!isDropdownOpen)}
-        >
-          <View style={styles.dropdownHeaderContent}>
-            <Globe size={16} color={theme.white} />
-            <Text style={styles.dropdownText}>{sortedLocales[0].label}</Text>
-            <Text style={styles.dropdownIcon}>
-              {isDropdownOpen ? "▲" : "▼"}
-            </Text>
-          </View>
-        </TouchableOpacity>
-
-        {isDropdownOpen && (
-          <View style={styles.dropdownMenu}>
-            {sortedLocales.map(locale => (
-              <TouchableOpacity
-                key={locale.code}
-                style={styles.dropdownItem}
-                onPress={() => handleLanguageChange(locale.code)}
-              >
-                <Text
-                  style={[
-                    styles.dropdownItemText,
-                    locale.code === currentLang && styles.activeLocaleText,
-                  ]}
-                >
-                  {locale.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
+      <LanguageSelector />
     </View>
   );
 }
@@ -184,55 +159,5 @@ const getStyles = (theme: any) =>
     },
     text: {
       fontSize: 18,
-    },
-    localeSelectorContainer: {
-      alignSelf: "flex-end",
-      marginRight: 10,
-    },
-    dropdownHeader: {
-      padding: 8,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      backgroundColor: theme.gray,
-    },
-    dropdownHeaderContent: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-    },
-    dropdownText: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: theme.white,
-    },
-    dropdownIcon: {
-      fontSize: 8,
-      color: theme.white,
-    },
-    dropdownMenu: {
-      position: "absolute",
-      top: 40,
-      right: 0,
-      backgroundColor: theme.white,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      borderRadius: 6,
-      width: 120,
-      elevation: 3,
-      shadowColor: theme.black,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-    },
-    dropdownItem: {
-      padding: 10,
-    },
-    dropdownItemText: {
-      fontSize: 14,
-    },
-    activeLocaleText: {
-      fontWeight: "bold",
-      color: theme.primary,
     },
   });

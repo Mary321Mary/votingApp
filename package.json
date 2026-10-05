@@ -25,6 +25,7 @@
     "react-native-config": "^1.6.0",
     "react-native-contacts": "^8.0.10",
     "react-native-fs": "^2.20.0",
+    "react-native-google-places-autocomplete": "^2.6.5",
     "react-native-image-crop-picker": "^0.51.1",
     "react-native-inappbrowser-reborn": "^3.7.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",

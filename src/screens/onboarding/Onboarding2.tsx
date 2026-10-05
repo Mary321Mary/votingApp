@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/atoms/Checkbox";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/Navigation";
+import LanguageSelector from "@/components/atoms/LanguageSelector";
 
 type Onboarding2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -207,6 +208,12 @@ export default function Onboarding2Screen({
             },
           }}
         />
+        <View style={styles.language_block}>
+          <Text style={styles.language_text}>
+            {t("native_local.onboarding2.language_pref")}
+          </Text>
+          <LanguageSelector />
+        </View>
 
         <CustomButton title="Finish" onPress={handleFinish} />
       </ScrollView>
@@ -250,5 +257,15 @@ const getStyles = (theme: any) =>
       height: 1,
       backgroundColor: theme.gray,
       marginVertical: 16,
+    },
+    language_block: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginVertical: 10,
+    },
+    language_text: {
+      fontSize: 16,
+      lineHeight: 22,
     },
   });

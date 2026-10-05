@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { View, Text, TouchableOpacity, Image, Linking } from "react-native";
 import { StyleSheet } from "react-native";
-import LanguageSelector from "@/components/atoms/LanguageSelector";
 import { useTranslation } from "react-i18next";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Spinner from "../components/atoms/Spinner";
@@ -47,7 +46,7 @@ const Footer = () => {
       </View>
       {isLoading && <Spinner />}
       <View style={styles.rightBlock}>
-        <LanguageSelector />
+        {/* <LanguageSelector /> */}
         <View style={styles.awsBlock}>
           <Text style={styles.poweredText}>Powered By</Text>
           <Image source={logo} style={styles.awsLogo} resizeMode="contain" />

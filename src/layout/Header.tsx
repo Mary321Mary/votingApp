@@ -18,9 +18,10 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 
 interface HeaderProp {
   text: string;
+  showMenu?: boolean;
 }
 
-const Header = ({ text }: HeaderProp) => {
+const Header = ({ text, showMenu = false }: HeaderProp) => {
   const { t } = useTranslation();
   const { config } = useUIConfig();
   const theme = useContext(ThemeContext);
@@ -79,16 +80,18 @@ const Header = ({ text }: HeaderProp) => {
         <Text style={styles.title}>{text?.replace(/<br\s*\/?>/gi, "\n")}</Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.menuButton}
-        onPress={toggleMenu}
-        activeOpacity={0.7}
-        accessibilityLabel="Open menu"
-      >
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-      </TouchableOpacity>
+      {showMenu && (
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={toggleMenu}
+          activeOpacity={0.7}
+          accessibilityLabel="Open menu"
+        >
+          <View style={styles.hamburgerLine} />
+          <View style={styles.hamburgerLine} />
+          <View style={styles.hamburgerLine} />
+        </TouchableOpacity>
+      )}
 
       <Modal
         visible={isMenuVisible}
@@ -136,7 +139,7 @@ const getStyles = (theme: any) =>
       width: "100%",
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 20,
+      paddingVertical: 10,
       borderBottomWidth: 1,
       borderBottomColor: theme?.borderColor,
       backgroundColor: theme?.white,
@@ -146,14 +149,15 @@ const getStyles = (theme: any) =>
     titleContainer: {
       flex: 1,
       alignItems: "center",
+      paddingHorizontal: 8,
     },
     logo: {
-      width: 60,
-      height: 60,
+      width: 44,
+      height: 44,
       resizeMode: "contain",
     },
     title: {
-      fontSize: 28,
+      fontSize: 21,
       fontWeight: "600",
       fontFamily: "Inter-VariableFont_opsz_wght",
       color: theme.textPrimary,
@@ -178,7 +182,7 @@ const getStyles = (theme: any) =>
       backgroundColor: "rgba(0, 0, 0, 0.3)",
       justifyContent: "flex-start",
       alignItems: "flex-end",
-      paddingTop: 60,
+      paddingTop: 50,
       paddingRight: 16,
     },
     menuContainer: {

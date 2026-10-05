@@ -281,29 +281,6 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
           variant="outline-primary"
           onPress={() => navigation.goBack()}
         />
-        {/* <View style={styles.divider} />
-        <Text style={styles.secondaryText}>
-          {t("general.calls_to_action.building_site")}
-        </Text>
-
-        <Text>
-          <Trans
-            i18nKey="general.calls_to_action.get_tool_reg"
-            components={{
-              a: (
-                <Text
-                  key="email-link"
-                  style={styles.linkText}
-                  onPress={() => {
-                    Linking.openURL("mailto:civictech@rockthevote.org");
-                  }}
-                >
-                  {0}
-                </Text>
-              ),
-            }}
-          />
-        </Text> */}
       </View>
     </ScrollView>
   );

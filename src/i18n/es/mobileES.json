@@ -24,6 +24,7 @@
       "comm_preferences_body2": "Recibirá las notificaciones seleccionadas a través de las notificaciones de esta aplicación en la pantalla de notificaciones de su dispositivo. También puede elegir:",
       "comm_preferences_option_email": "Recibir notificaciones también por correo electrónico",
       "comm_preferences_option_sms": "Recibir notificaciones también por mensajes de texto",
+      "language_pref": "Preferencia de idioma: ",
       "about_you_header": "Sobre usted"
     },
     "dashboard": {

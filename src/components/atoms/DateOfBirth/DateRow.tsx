@@ -1,12 +1,19 @@
-import React, { useContext } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import React, { useState, useContext } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import { useTranslation } from "react-i18next";
-import { Picker } from "@react-native-picker/picker";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RegisterFormState } from "@/utils/types";
 import HelpTooltip from "../HelpTooltip";
 import { useFormScroll } from "@/contexts/FormScrollContext";
-import { COLORS } from "@/styles/colors";
 
 export interface DateField {
   name: keyof RegisterFormState;
@@ -46,6 +53,8 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
   const { t } = useTranslation();
   const { registerField } = useFormScroll();
 
+  const [isMonthModalVisible, setMonthModalVisible] = useState(false);
+
   const MONTHS = [
     { value: "", name: t("general.months.month") },
     { value: "01", name: t("general.months.january") },
@@ -61,6 +70,8 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
     { value: "11", name: t("general.months.november") },
     { value: "12", name: t("general.months.december") },
   ];
+
+  const selectedMonth = MONTHS.find(m => m.value === String(month.value));
 
   const handleDayChange = (text: string) => {
     if (/^\d*$/.test(text) && text.length <= 2) {
@@ -85,29 +96,24 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
 
       <View style={styles.dateRow}>
         <View style={styles.monthCol}>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              ref={registerField(month.name)}
-              enabled={!disabled}
-              selectedValue={String(month.value ?? "")}
-              onValueChange={(text: string) =>
-                updateField(month.name, text as any)
-              }
-              dropdownIconColor={COLORS.textPrimary}
-              style={styles.picker}
-              // КРИТИЧНО ДЛЯ iOS: задает цвет текста и высоту списка внутри UIPickerView
-              itemStyle={styles.pickerItemIOS}
+          <TouchableOpacity
+            disabled={disabled}
+            style={[
+              styles.selectInput,
+              disabled && { backgroundColor: theme.borderColor },
+            ]}
+            onPress={() => setMonthModalVisible(true)}
+          >
+            <Text
+              style={[
+                styles.selectInputText,
+                !selectedMonth && { color: theme.gray },
+              ]}
+              numberOfLines={1}
             >
-              {MONTHS.map(monthItem => (
-                <Picker.Item
-                  key={String(monthItem.value)}
-                  label={String(monthItem.name)}
-                  value={String(monthItem.value)}
-                  color={COLORS.textPrimary}
-                />
-              ))}
-            </Picker>
-          </View>
+              {selectedMonth ? selectedMonth.name : t("general.months.month")}
+            </Text>
+          </TouchableOpacity>
           {month.errorText && (
             <Text style={styles.errorText}>{month.errorText}</Text>
           )}
@@ -133,7 +139,6 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
           )}
         </View>
 
-        {/* Год (flex: 4) */}
         <View style={styles.yearCol}>
           <TextInput
             ref={registerField(year.name)}
@@ -154,6 +159,43 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
           )}
         </View>
       </View>
+
+      <Modal visible={isMonthModalVisible} transparent animationType="fade">
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setMonthModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t("general.months.month")}</Text>
+            <FlatList
+              data={MONTHS}
+              keyExtractor={item => item.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.monthOption,
+                    item.value === month.value && styles.monthOptionSelected,
+                  ]}
+                  onPress={() => {
+                    updateField(month.name, item.value as any);
+                    setMonthModalVisible(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.monthOptionText,
+                      item.value === month.value &&
+                        styles.monthOptionTextSelected,
+                    ]}
+                  >
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 };
@@ -205,25 +247,6 @@ const getStyles = (theme: any) =>
     yearCol: {
       flex: 4,
     },
-    pickerWrapper: {
-      height: 48,
-      backgroundColor: theme.white,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.borderColor,
-      overflow: "hidden",
-      justifyContent: "center",
-    },
-    picker: {
-      height: 50,
-      width: "100%",
-      color: theme.textPrimary,
-    },
-    pickerItemIOS: {
-      color: theme.textPrimary,
-      fontSize: 16,
-      height: 50,
-    },
     dateInput: {
       backgroundColor: theme.white,
       height: 48,
@@ -239,5 +262,60 @@ const getStyles = (theme: any) =>
       color: theme.danger || "red",
       fontSize: 11,
       marginBottom: 4,
+    },
+
+    selectInput: {
+      backgroundColor: theme.white,
+      height: 48,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderRadius: 6,
+      paddingHorizontal: 8,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    selectInputText: {
+      fontSize: 14,
+      color: theme.textPrimary,
+      fontWeight: "500",
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 20,
+    },
+    modalContent: {
+      backgroundColor: theme.white,
+      borderRadius: 12,
+      width: "100%",
+      maxHeight: "60%",
+      paddingVertical: 16,
+    },
+    modalTitle: {
+      fontSize: 16,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginBottom: 12,
+      color: theme.textPrimary,
+    },
+    monthOption: {
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.borderColor,
+    },
+    monthOptionSelected: {
+      backgroundColor: theme.borderColor + "40",
+    },
+    monthOptionText: {
+      fontSize: 15,
+      color: theme.textPrimary,
+      textAlign: "center",
+    },
+    monthOptionTextSelected: {
+      fontWeight: "bold",
+      color: theme.primary,
     },
   });

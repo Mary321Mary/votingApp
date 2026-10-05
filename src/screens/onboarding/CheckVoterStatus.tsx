@@ -42,6 +42,8 @@ import {
   VOTER_USER_STATUS,
 } from "@/utils/constants";
 import i18n from "i18n";
+import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
+import { Checkbox } from "../../components/atoms/Checkbox";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -91,6 +93,7 @@ export const CheckVoterStatusScreen = ({
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
   const [autofill, setAutofill] = useState(false);
+  const [isByFields, setIsByFields] = useState<boolean>(false);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -309,7 +312,9 @@ export const CheckVoterStatusScreen = ({
     // } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
     //   errorMessage.phone = t("form_fields.invalid_phone");
     // }
-    if (fullPhoneRegex.test(form.phone.trim())) {
+    if (!form.phone.trim()) {
+      errorMessage.phone = t("form_fields.required_phone");
+    } else if (!fullPhoneRegex.test(form.phone.trim())) {
       errorMessage.phone = t("form_fields.invalid_phone");
     }
     if (!form.zip.trim()) {
@@ -373,7 +378,7 @@ export const CheckVoterStatusScreen = ({
 
   return (
     <ScrollView>
-      <Header text={t("lookup_page.check_voter_registration_status")} />
+      <Header text={t("native_local.initial_profile_page.title")} />
       <View style={styles.box}>
         {afterNotFound ? (
           <Text>{t("native_local.initial_profile_page.retry_body")}</Text>
@@ -411,36 +416,71 @@ export const CheckVoterStatusScreen = ({
           errorMessage={errMsg.last_name}
           onChangeText={(text: string) => updateField("last_name", text)}
         />
-        <InputField
-          name="address"
-          label={t("form_fields.address")}
-          required
-          value={form.address}
-          errorMessage={errMsg.address}
-          onChangeText={(text: string) => updateField("address", text)}
-        />
-        <InputField
-          name="aptunit"
-          label={t("form_fields.unit_lot")}
-          value={form.aptunit}
-          errorMessage={t(errMsg.aptunit)}
-          onChangeText={(text: string) => updateField("aptunit", text)}
-        />
-        <InputField
-          name="city"
-          label={t("form_fields.city")}
-          required
-          value={form.city}
-          errorMessage={errMsg.city}
-          onChangeText={(text: string) => updateField("city", text)}
-        />
-        <InputField
-          name="zip"
-          label={t("form_fields.zip")}
-          required
-          value={form.zip}
-          errorMessage={errMsg.zip}
-          onChangeText={(text: string) => updateField("zip", text)}
+        {!isByFields ? (
+          <AddressAutocomplete
+            apiKey={config?.google_maps_browser_key || ""}
+            label={t("form_fields.address")}
+            required
+            errorText={errMsg.address}
+            onAddressSelect={({ address, city, zip }) => {
+              setForm(prev => ({
+                ...prev,
+                address,
+                city,
+                zip,
+              }));
+              setErrMsg(prev => ({
+                ...prev,
+                address: "",
+                city: "",
+                zip: "",
+              }));
+            }}
+          />
+        ) : (
+          <>
+            <InputField
+              name="address"
+              label={t("form_fields.address")}
+              required
+              value={form.address}
+              errorMessage={errMsg.address}
+              onChangeText={(text: string) => updateField("address", text)}
+            />
+            <InputField
+              name="aptunit"
+              label={t("form_fields.unit_lot")}
+              value={form.aptunit}
+              errorMessage={t(errMsg.aptunit)}
+              onChangeText={(text: string) => updateField("aptunit", text)}
+            />
+            <InputField
+              name="city"
+              label={t("form_fields.city")}
+              required
+              value={form.city}
+              errorMessage={errMsg.city}
+              onChangeText={(text: string) => updateField("city", text)}
+            />
+            <InputField
+              name="zip"
+              label={t("form_fields.zip")}
+              required
+              value={form.zip}
+              errorMessage={errMsg.zip}
+              onChangeText={(text: string) => updateField("zip", text)}
+            />
+          </>
+        )}
+        <Checkbox
+          name="toggleAddressMode"
+          label={
+            isByFields
+              ? t("form_fields.enter_address_single_field")
+              : t("form_fields.enter_address_by_fields")
+          }
+          value={isByFields}
+          onValueChange={(checked: boolean) => setIsByFields(checked)}
         />
 
         <DateRow
@@ -478,8 +518,8 @@ export const CheckVoterStatusScreen = ({
           label={t("form_fields.phone")}
           placeholder="###-###-####"
           value={form.phone}
+          required
           errorMessage={errMsg.phone}
-          helpText={t("form_fields.phone_help")}
           onChangeText={handlePhoneChange}
         />
 

@@ -24,6 +24,7 @@ import InputField from "../components/atoms/InputField";
 import RenderHTML from "react-native-render-html";
 import { RootStackParamList } from "../components/Navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import LanguageSelector from "../components/atoms/LanguageSelector";
 
 type SettingsScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -254,6 +255,12 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             },
           }}
         />
+        <View style={styles.language_block}>
+          <Text style={styles.language_text}>
+            {t("native_local.onboarding2.language_pref")}
+          </Text>
+          <LanguageSelector />
+        </View>
 
         <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
@@ -305,5 +312,15 @@ const getStyles = (theme: any) =>
       height: 1,
       backgroundColor: theme.gray,
       marginVertical: 16,
+    },
+    language_block: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginVertical: 10,
+    },
+    language_text: {
+      fontSize: 16,
+      lineHeight: 22,
     },
   });

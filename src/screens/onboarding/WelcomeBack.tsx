@@ -191,18 +191,9 @@ export default function WelcomeBackScreen({
     }
   };
 
-  const handleResetTest = async () => {
-    try {
-      await AsyncStorage.multiRemove([VOTER_FORM_STORAGE_KEY]);
-    } catch (error) {
-      console.error("Failed to clear saved data:", error);
-    }
-    navigation.navigate("Home");
-  };
-
   return (
     <View style={styles.container}>
-      <Header text={t("native_local.dashboard.title")} />
+      <Header showMenu text={t("native_local.dashboard.title")} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.text}>{welcomeText}</Text>
@@ -227,11 +218,6 @@ export default function WelcomeBackScreen({
               onPress={handleContinueOnboarding}
             />
           )}
-
-          <CustomButton
-            title={t("general.restart_test")}
-            onPress={handleResetTest}
-          />
 
           <CustomButton
             title={t("finish_with_state_page3.fb_button_text")}

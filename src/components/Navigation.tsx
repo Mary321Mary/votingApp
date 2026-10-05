@@ -225,16 +225,16 @@ function Navigation({}) {
         component={withDefaultLayout(LookupNotFoundScreen)}
       />
       <Stack.Screen
+        name="Onboarding2"
+        component={withDefaultLayout(Onboarding2Screen)}
+      />
+      <Stack.Screen
         name="AlreadyRegistered"
         component={withDefaultLayout(AlreadyRegisteredScreen)}
       />
       <Stack.Screen
         name="WelcomeBack"
         component={withDefaultLayout(WelcomeBackScreen)}
-      />
-      <Stack.Screen
-        name="Onboarding2"
-        component={withDefaultLayout(Onboarding2Screen)}
       />
       <Stack.Screen
         name="Settings"
