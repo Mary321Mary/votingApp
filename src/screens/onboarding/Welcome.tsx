@@ -61,7 +61,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
       console.error("Failed to save preferences", e);
     }
 
-    navigation.replace("CheckVoterStatus", {
+    navigation.navigate("CheckVoterStatus", {
       form: {
         partner_id: 1,
         first_name: "",
