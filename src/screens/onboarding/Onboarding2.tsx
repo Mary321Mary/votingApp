@@ -1,20 +1,11 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Linking,
-  useWindowDimensions,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import i18n from "i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { useUIConfig } from "@/contexts/UIConfigContext";
 import Header from "@/layout/Header";
 import { CheckRegistrationStatus } from "@/utils/types";
 import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
@@ -38,8 +29,6 @@ export default function Onboarding2Screen({
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const { config } = useUIConfig();
-  const { width } = useWindowDimensions();
 
   const initialForm: CheckRegistrationStatus = route.params?.form || {};
   const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
@@ -54,7 +43,7 @@ export default function Onboarding2Screen({
 
       navigation.reset({
         index: 0,
-        routes: [{ name: "WelcomeBack" }],
+        routes: [{ name: "Dashboard" }],
       });
     } catch (error) {
       console.error("Failed to save final onboarding data:", error);
@@ -125,61 +114,73 @@ export default function Onboarding2Screen({
               onValueChange={() => updateField("prefType3", !form.prefType3)}
             />
           </View>
+        </View>
 
-          {/* Segment 2 */}
+        <View style={styles.divider} />
+        {/* Segment 2 */}
+        <View>
+          <Text style={styles.headerText}>
+            {t("native_local.onboarding2.about_you_header")}
+          </Text>
+
+          <Text style={styles.title}>
+            {t("nvra_form_page.questions_for_you")}
+          </Text>
+
+          <InputField
+            name="survey_answer_1"
+            value={form.survey_answer_1}
+            label={form.survey_question_1}
+            onChangeText={(text: string) =>
+              updateField("survey_answer_1", text)
+            }
+          />
+
+          <InputField
+            name="survey_answer_2"
+            value={form.survey_answer_2}
+            label={form.survey_question_2}
+            onChangeText={(text: string) =>
+              updateField("survey_answer_2", text)
+            }
+          />
+
+          <Checkbox
+            name="volunteer"
+            label={t("general.opt_ins.volunteer")}
+            value={form.volunteer}
+            onValueChange={(checked: boolean) =>
+              updateField("volunteer", checked)
+            }
+          />
+
+          <View style={styles.divider} />
           <Text style={styles.subBodyText}>
             {t("native_local.onboarding2.comm_preferences_body2")}
           </Text>
+
+          <Checkbox
+            name="opt_in_email"
+            label={t("native_local.onboarding2.comm_preferences_option_email")}
+            value={form.opt_in_email}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_email", checked)
+            }
+          />
+
+          <Checkbox
+            name="opt_in_sms"
+            label={t("native_local.onboarding2.comm_preferences_option_sms")}
+            value={form.opt_in_sms}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_sms", checked)
+            }
+          />
         </View>
-        <View style={styles.divider} />
-        <Text style={styles.title}>
-          {t("nvra_form_page.questions_for_you")}
-        </Text>
-
-        <InputField
-          name="survey_answer_1"
-          value={form.survey_answer_1}
-          label={form.survey_question_1}
-          onChangeText={(text: string) => updateField("survey_answer_1", text)}
-        />
-
-        <InputField
-          name="survey_answer_2"
-          value={form.survey_answer_2}
-          label={form.survey_question_2}
-          onChangeText={(text: string) => updateField("survey_answer_2", text)}
-        />
 
         <View style={styles.divider} />
 
-        <Checkbox
-          name="opt_in_email"
-          label={t("general.opt_ins.email_opt_in")}
-          value={form.opt_in_email}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_email", checked)
-          }
-        />
-
-        <Checkbox
-          name="opt_in_sms"
-          label={t("general.opt_ins.sms_opt_in")}
-          value={form.opt_in_sms}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_sms", checked)
-          }
-        />
-
-        <Checkbox
-          name="volunteer"
-          label={t("general.opt_ins.volunteer")}
-          value={form.volunteer}
-          onValueChange={(checked: boolean) =>
-            updateField("volunteer", checked)
-          }
-        />
-
-        <RenderHTML
+        {/* <RenderHTML
           contentWidth={width}
           source={{
             html: t("general.opt_ins.sms_disclaimer", {
@@ -207,7 +208,7 @@ export default function Onboarding2Screen({
               },
             },
           }}
-        />
+        /> */}
         <View style={styles.language_block}>
           <Text style={styles.language_text}>
             {t("native_local.onboarding2.language_pref")}

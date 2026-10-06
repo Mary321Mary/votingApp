@@ -5,7 +5,13 @@ import { Globe } from "lucide-react-native";
 import i18n, { LANGUAGE_KEY } from "@/i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
 
-const LanguageSelector: React.FC = () => {
+interface LanguageSelectorProps {
+  dropUp?: boolean;
+}
+
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  dropUp = false,
+}) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const [selectedLanguage, setSelectedLanguage] = useState(
@@ -51,11 +57,19 @@ const LanguageSelector: React.FC = () => {
         <View style={styles.dropdownHeaderContent}>
           <Globe size={16} color={theme.white} />
           <Text style={styles.dropdownText}>{orderedLanguages[0].label}</Text>
-          <Text style={styles.dropdownIcon}>{isDropdownOpen ? "▲" : "▼"}</Text>
+          <Text style={styles.dropdownIcon}>
+            {dropUp ? (isDropdownOpen ? "▼" : "▲") : isDropdownOpen ? "▲" : "▼"}
+          </Text>
         </View>
       </TouchableOpacity>
+
       {isDropdownOpen && (
-        <View style={styles.dropdownMenu}>
+        <View
+          style={[
+            styles.dropdownMenu,
+            dropUp ? styles.dropdownMenuUp : styles.dropdownMenuDown,
+          ]}
+        >
           {orderedLanguages.map(locale => (
             <TouchableOpacity
               key={locale.code}
@@ -119,18 +133,16 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
     },
     pickerItem: {
-      // Эти стили применяются в основном на iOS
       fontSize: 16,
       height: 50,
-      // Стилизация активного элемента, как в вашем примере (fontWeight: 'bold'),
-      // в Picker для Android и iOS реализуется очень сложно или не поддерживается.
-      // Обычно используется стандартный внешний вид системы.
     },
 
     localeSelectorContainer: {
       alignSelf: "flex-end",
       marginRight: 10,
       marginBottom: 10,
+      position: "relative",
+      zIndex: 1,
     },
     dropdownHeader: {
       padding: 8,
@@ -156,17 +168,23 @@ const getStyles = (theme: any) =>
     },
     dropdownMenu: {
       position: "absolute",
-      top: 40,
       right: 0,
       backgroundColor: theme.white,
       borderWidth: 1,
       borderColor: theme.borderColor,
       borderRadius: 6,
       width: 120,
-      elevation: 3,
+      elevation: 5,
       shadowColor: theme.black,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
+      zIndex: 1000,
+    },
+    dropdownMenuDown: {
+      top: 40,
+    },
+    dropdownMenuUp: {
+      bottom: 40,
     },
     dropdownItem: {
       padding: 10,

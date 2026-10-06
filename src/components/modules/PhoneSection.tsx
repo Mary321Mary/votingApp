@@ -63,6 +63,7 @@ export const PhoneSection = ({
       {isVisible(formCongif, "phone") && (
         <InputField
           name="phone"
+          numeric
           label={label || t("form_fields.phone")}
           helpText={t("form_fields.phone_help")}
           placeholder="###-###-####"

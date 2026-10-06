@@ -31,6 +31,7 @@ export interface DateOfBirthProps {
   value: DateOfBirthFields;
   legend?: string;
   disabled?: boolean;
+  showTooltip?: boolean;
   required?: boolean;
   name?: string;
   updateField: <K extends keyof RegisterFormState>(
@@ -44,6 +45,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
   value,
   legend,
   disabled = false,
+  showTooltip = true,
   required = false,
   updateField,
 }) => {
@@ -91,7 +93,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
           {legend || t("form_fields.dob")}
           {required && <Text style={styles.requiredStar}> *</Text>}
         </Text>
-        <HelpTooltip text={t("form_fields.dob_help")} />
+        {showTooltip && <HelpTooltip text={t("form_fields.dob_help")} />}
       </View>
 
       <View style={styles.dateRow}>
@@ -277,7 +279,6 @@ const getStyles = (theme: any) =>
     selectInputText: {
       fontSize: 14,
       color: theme.textPrimary,
-      fontWeight: "500",
     },
     modalOverlay: {
       flex: 1,

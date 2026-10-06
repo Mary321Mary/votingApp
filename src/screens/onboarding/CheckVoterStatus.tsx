@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -280,7 +280,7 @@ export const CheckVoterStatusScreen = ({
     let errorMessage = { ...EMPTY_ERROR_MESSAGES };
     if (!form.first_name.trim())
       errorMessage.first_name = t("general.required");
-    if (!form.last_name.trim()) errorMessage.first_name = t("general.required");
+    if (!form.last_name.trim()) errorMessage.last_name = t("general.required");
     if (!form.city.trim()) errorMessage.city = t("general.required");
     if (!form.address.trim()) errorMessage.address = t("general.required");
 
@@ -307,11 +307,6 @@ export const CheckVoterStatusScreen = ({
     Object.assign(errorMessage, dobValidation.errors);
     Object.assign(form, dobValidation.formUpdates);
 
-    // if (form.opt_in_sms && !form.phone.trim()) {
-    //   errorMessage.phone = t("form_fields.required_phone");
-    // } else if (form.opt_in_sms && !fullPhoneRegex.test(form.phone.trim())) {
-    //   errorMessage.phone = t("form_fields.invalid_phone");
-    // }
     if (!form.phone.trim()) {
       errorMessage.phone = t("form_fields.required_phone");
     } else if (!fullPhoneRegex.test(form.phone.trim())) {
@@ -328,22 +323,44 @@ export const CheckVoterStatusScreen = ({
       errorMessage.email = t("form_fields.email_error");
     }
 
-    // if (
-    //   form.survey_answer_1 &&
-    //   !PARTNER_ANSWER_REGEX.test(form.survey_answer_1)
-    // ) {
-    //   errorMessage.survey_answer_1 = t("form_fields.partner_answer_invalid");
-    // }
-    // if (
-    //   form.survey_answer_2 &&
-    //   !PARTNER_ANSWER_REGEX.test(form.survey_answer_2)
-    // ) {
-    //   errorMessage.survey_answer_2 = t("form_fields.partner_answer_invalid");
-    // }
-
     setErrMsg(errorMessage);
     return !Object.values(errorMessage).some(value => value.trim() !== "");
   };
+
+  const isFormValid = useMemo(() => {
+    const zipRegex = /^\d{5}$/;
+    const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const isNameValid = Boolean(
+      form.first_name?.trim() && form.last_name?.trim(),
+    );
+    const isDobValid = Boolean(
+      form.birthYear?.trim() &&
+        form.birthMonth?.trim() &&
+        form.birthDay?.trim(),
+    );
+    const isContactValid =
+      emailRegex.test(form.email?.trim() || "") &&
+      fullPhoneRegex.test(form.phone?.trim() || "");
+
+    let isAddressValid = false;
+    if (isByFields) {
+      isAddressValid = Boolean(
+        form.address?.trim() &&
+          form.city?.trim() &&
+          zipRegex.test(form.zip?.trim() || ""),
+      );
+    } else {
+      isAddressValid = Boolean(
+        form.address?.trim() &&
+          form.city?.trim() &&
+          zipRegex.test(form.zip?.trim() || ""),
+      );
+    }
+
+    return isNameValid && isDobValid && isContactValid && isAddressValid;
+  }, [form, isByFields]);
 
   useEffect(() => {
     const saveFormToStorage = async () => {
@@ -377,7 +394,7 @@ export const CheckVoterStatusScreen = ({
   }, []);
 
   return (
-    <ScrollView>
+    <ScrollView keyboardShouldPersistTaps="handled">
       <Header text={t("native_local.initial_profile_page.title")} />
       <View style={styles.box}>
         {afterNotFound ? (
@@ -387,8 +404,8 @@ export const CheckVoterStatusScreen = ({
             contentWidth={width}
             source={{
               html: autofill
-                ? t("native_local.initial_profile_page.no_data_body")
-                : t("native_local.initial_profile_page.some_data_body"),
+                ? t("native_local.initial_profile_page.some_data_body")
+                : t("native_local.initial_profile_page.no_data_body"),
             }}
             baseStyle={styles.text}
           />
@@ -464,6 +481,7 @@ export const CheckVoterStatusScreen = ({
             />
             <InputField
               name="zip"
+              numeric
               label={t("form_fields.zip")}
               required
               value={form.zip}
@@ -480,7 +498,10 @@ export const CheckVoterStatusScreen = ({
               : t("form_fields.enter_address_by_fields")
           }
           value={isByFields}
-          onValueChange={(checked: boolean) => setIsByFields(checked)}
+          onValueChange={(checked: boolean) => {
+            setIsByFields(checked);
+            setErrMsg(EMPTY_ERROR_MESSAGES);
+          }}
         />
 
         <DateRow
@@ -502,11 +523,13 @@ export const CheckVoterStatusScreen = ({
             },
           }}
           required
+          showTooltip={false}
           updateField={updateField}
         />
 
         <InputField
           name="email"
+          email
           label={t("form_fields.email")}
           value={form.email}
           required
@@ -515,6 +538,7 @@ export const CheckVoterStatusScreen = ({
         />
         <InputField
           name="phone"
+          numeric
           label={t("form_fields.phone")}
           placeholder="###-###-####"
           value={form.phone}
@@ -526,7 +550,7 @@ export const CheckVoterStatusScreen = ({
         {/* Continue */}
         <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
-          disabled={isLoading}
+          disabled={isLoading || !isFormValid}
           onPress={onContinue}
         />
         {/* Register */}

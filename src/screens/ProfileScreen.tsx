@@ -23,6 +23,9 @@ import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
 import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
 import { RootStackParamList } from "@/components/Navigation";
+import { Checkbox } from "../components/atoms/Checkbox";
+import { AddressAutocomplete } from "../components/atoms/AddressAutocomplete";
+import { useUIConfig } from "../contexts/UIConfigContext";
 
 type ProfileScreenProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
@@ -30,6 +33,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { config } = useUIConfig();
+
   const [form, setForm] = useState<CheckRegistrationStatus>({
     partner_id: 1,
 
@@ -63,6 +68,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
+  const [isByFields, setIsByFields] = useState<boolean>(false);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -110,7 +116,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const handleContinue = async () => {
     if (validateRegistrationStatus()) {
       await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
-      navigation.replace("WelcomeBack");
+      navigation.replace("Dashboard");
     }
   };
 
@@ -122,7 +128,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     let errorMessage = { ...EMPTY_ERROR_MESSAGES };
     if (!form.first_name.trim())
       errorMessage.first_name = t("general.required");
-    if (!form.last_name.trim()) errorMessage.first_name = t("general.required");
+    if (!form.last_name.trim()) errorMessage.last_name = t("general.required");
     if (!form.city.trim()) errorMessage.city = t("general.required");
     if (!form.address.trim()) errorMessage.address = t("general.required");
 
@@ -169,11 +175,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     return !Object.values(errorMessage).some(value => value.trim() !== "");
   };
 
-  // const bodyParagraphs = useMemo(() => {
-  //   const rawText = t("native_local.initial_profile_page.no_data_body");
-  //   return rawText.split(/<p\s*\/?>/gi);
-  // }, [t]);
-
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -187,15 +188,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       <Header text={t("native_local.initial_profile_page.title")} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Page Body / Intro Text */}
-        {/* <View style={styles.bodyContainer}>
-          {bodyParagraphs.map((paragraph, index) => (
-            <Text key={index} style={styles.bodyText}>
-              {paragraph.trim()}
-            </Text>
-          ))}
-        </View> */}
-
         {/* Form Fields */}
         <InputField
           name="first_name"
@@ -213,36 +205,75 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           errorMessage={errors.last_name}
           onChangeText={(text: string) => updateField("last_name", text)}
         />
-        <InputField
-          name="address"
-          label={t("form_fields.address")}
-          required
-          value={form.address}
-          errorMessage={errors.address}
-          onChangeText={(text: string) => updateField("address", text)}
-        />
-        <InputField
-          name="aptunit"
-          label={t("form_fields.unit_lot")}
-          value={form.aptunit}
-          errorMessage={t(errors.aptunit)}
-          onChangeText={(text: string) => updateField("aptunit", text)}
-        />
-        <InputField
-          name="city"
-          label={t("form_fields.city")}
-          required
-          value={form.city}
-          errorMessage={errors.city}
-          onChangeText={(text: string) => updateField("city", text)}
-        />
-        <InputField
-          name="zip"
-          label={t("form_fields.zip")}
-          required
-          value={form.zip}
-          errorMessage={errors.zip}
-          onChangeText={(text: string) => updateField("zip", text)}
+        {!isByFields ? (
+          <AddressAutocomplete
+            apiKey={config?.google_maps_browser_key || ""}
+            label={t("form_fields.address")}
+            required
+            errorText={errors.address}
+            onAddressSelect={({ address, city, zip }) => {
+              setForm(prev => ({
+                ...prev,
+                address,
+                city,
+                zip,
+              }));
+              setErrors(prev => ({
+                ...prev,
+                address: "",
+                city: "",
+                zip: "",
+              }));
+            }}
+          />
+        ) : (
+          <>
+            <InputField
+              name="address"
+              label={t("form_fields.address")}
+              required
+              value={form.address}
+              errorMessage={errors.address}
+              onChangeText={(text: string) => updateField("address", text)}
+            />
+            <InputField
+              name="aptunit"
+              label={t("form_fields.unit_lot")}
+              value={form.aptunit}
+              errorMessage={t(errors.aptunit)}
+              onChangeText={(text: string) => updateField("aptunit", text)}
+            />
+            <InputField
+              name="city"
+              label={t("form_fields.city")}
+              required
+              value={form.city}
+              errorMessage={errors.city}
+              onChangeText={(text: string) => updateField("city", text)}
+            />
+            <InputField
+              name="zip"
+              numeric
+              label={t("form_fields.zip")}
+              required
+              value={form.zip}
+              errorMessage={errors.zip}
+              onChangeText={(text: string) => updateField("zip", text)}
+            />
+          </>
+        )}
+        <Checkbox
+          name="toggleAddressMode"
+          label={
+            isByFields
+              ? t("form_fields.enter_address_single_field")
+              : t("form_fields.enter_address_by_fields")
+          }
+          value={isByFields}
+          onValueChange={(checked: boolean) => {
+            setIsByFields(checked);
+            setErrors(EMPTY_ERROR_MESSAGES);
+          }}
         />
 
         <DateRow
@@ -269,6 +300,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
         <InputField
           name="email"
+          email
           label={t("form_fields.email")}
           value={form.email}
           required
@@ -277,6 +309,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         />
         <InputField
           name="phone"
+          numeric
           label={t("form_fields.phone")}
           placeholder="###-###-####"
           value={form.phone}

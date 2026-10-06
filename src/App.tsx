@@ -6,13 +6,17 @@
  */
 
 import React from "react";
-import { StatusBar, useColorScheme } from "react-native";
+import { LogBox, StatusBar, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { UIConfigProvider } from "./contexts/UIConfigContext";
 import { ThemeProvider } from "./styles/ThemeProvider";
 import Navigation from "./components/Navigation";
 import { FormScrollProvider } from "./contexts/FormScrollContext";
+
+LogBox.ignoreLogs([
+  "VirtualizedLists should never be nested inside plain ScrollViews",
+]);
 
 function App() {
   const isDarkMode = useColorScheme() === "dark";

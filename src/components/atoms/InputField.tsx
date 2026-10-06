@@ -20,6 +20,7 @@ interface InputFieldProp {
   secureTextEntry?: boolean;
   disabled?: boolean;
   numeric?: boolean;
+  email?: boolean;
   maxLength?: number;
   errorMessage?: React.ReactNode;
   afterLabel?: React.ReactNode;
@@ -38,6 +39,7 @@ const InputField = ({
   disabled = false,
   errorMessage = "",
   afterLabel = "",
+  email = false,
   numeric = false,
   maxLength = undefined,
   helpText = "",
@@ -79,7 +81,9 @@ const InputField = ({
           placeholder={placeholder}
           secureTextEntry={shouldSecureText}
           editable={!disabled}
-          keyboardType={numeric ? "number-pad" : "default"}
+          keyboardType={
+            numeric ? "number-pad" : email ? "email-address" : "default"
+          }
           maxLength={maxLength}
           onChangeText={onChangeText}
         />

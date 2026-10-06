@@ -35,6 +35,10 @@
       "reg_status_pending": "Estado del registro de votante: Pendiente",
       "reg_status_active": "Estado del registro de votante: Activo"
     },
+    "restart": {
+      "title": "Recomenzar",
+      "body": "¡Hola de nuevo! No has completado la incorporación necesaria para usar esta aplicación. Por favor, continúa con el proceso de incorporación."
+    },
     "header_links": {}
   }
 }

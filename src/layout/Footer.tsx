@@ -6,6 +6,7 @@ import { useUIConfig } from "@/contexts/UIConfigContext";
 import Spinner from "../components/atoms/Spinner";
 import logo from "@/assets/images/AWS logo.png";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import LanguageSelector from "../components/atoms/LanguageSelector";
 
 const Footer = () => {
   const theme = useContext(ThemeContext);
@@ -46,7 +47,7 @@ const Footer = () => {
       </View>
       {isLoading && <Spinner />}
       <View style={styles.rightBlock}>
-        {/* <LanguageSelector /> */}
+        <LanguageSelector dropUp />
         <View style={styles.awsBlock}>
           <Text style={styles.poweredText}>Powered By</Text>
           <Image source={logo} style={styles.awsLogo} resizeMode="contain" />
@@ -96,6 +97,7 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
     },
     rightBlock: {
+      flexDirection: "row",
       alignItems: "center",
       gap: 10,
     },

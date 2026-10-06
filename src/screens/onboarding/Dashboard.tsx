@@ -35,14 +35,12 @@ import { PollingLocationsBlock } from "@/components/organisms/PollingLocationsBl
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
 
-type WelcomeBackScreenProps = NativeStackScreenProps<
+type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
-  "WelcomeBack"
+  "Dashboard"
 >;
 
-export default function WelcomeBackScreen({
-  navigation,
-}: WelcomeBackScreenProps) {
+export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -214,7 +212,7 @@ export default function WelcomeBackScreen({
         <View style={styles.buttonContainer}>
           {!onboardingCompleted && (
             <CustomButton
-              title={t("general.continue_onboarding", "Continue Onboarding")}
+              title="Continue Onboarding"
               onPress={handleContinueOnboarding}
             />
           )}

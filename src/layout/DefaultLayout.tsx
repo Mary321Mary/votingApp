@@ -18,7 +18,10 @@ const DefaultLayout = ({ children }: { children: ReactNode }) => {
       }
     >
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContent}
+        >
           <View style={styles.container}>{children}</View>
 
           <Footer />

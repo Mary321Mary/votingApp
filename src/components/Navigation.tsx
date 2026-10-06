@@ -20,7 +20,7 @@ import LookupScreen from "@/screens/onboarding/Lookup";
 import { CheckVoterStatusScreen } from "@/screens/onboarding/CheckVoterStatus";
 import LookupNotFoundScreen from "@/screens/onboarding/LookupNotFound";
 import WelcomeScreen from "@/screens/onboarding/Welcome";
-import WelcomeBackScreen from "@/screens/onboarding/WelcomeBack";
+import DashboardScreen from "@/screens/onboarding/Dashboard";
 import Onboarding2Screen from "@/screens/onboarding/Onboarding2";
 
 import PrintScreen from "@/screens/success/Print";
@@ -44,13 +44,18 @@ import NotificationsScreen from "@/screens/NotificationsScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import SettingsScreen from "@/screens/Settings";
 
-import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
+import {
+  FIRST_TIME_COMPLETED_KEY,
+  ONBOARDING_COMPLETED_KEY,
+} from "@/utils/constants";
 import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
+import ReturnScreen from "../screens/onboarding/Return";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
   Welcome: undefined; // or { id: string }
-  WelcomeBack: undefined;
+  Dashboard: undefined;
+  Return: undefined;
   Onboarding2: {
     form: CheckRegistrationStatus;
   };
@@ -180,7 +185,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function Navigation({}) {
   const [initialRouteName, setInitialRouteName] = useState<
-    "Welcome" | "WelcomeBack" | null
+    "Welcome" | "Dashboard" | "Return" | null
   >(null);
 
   useEffect(() => {
@@ -188,8 +193,15 @@ function Navigation({}) {
       const firstTimeCompleted = await AsyncStorage.getItem(
         FIRST_TIME_COMPLETED_KEY,
       );
+      const onboardingCompletedKey = await AsyncStorage.getItem(
+        ONBOARDING_COMPLETED_KEY,
+      );
       setInitialRouteName(
-        firstTimeCompleted === "true" ? "WelcomeBack" : "Welcome",
+        firstTimeCompleted === "true"
+          ? onboardingCompletedKey
+            ? "Dashboard"
+            : "Return"
+          : "Welcome",
       );
     };
 
@@ -203,7 +215,11 @@ function Navigation({}) {
   return (
     <Stack.Navigator
       initialRouteName={initialRouteName}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+      }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Home" component={withDefaultLayout(HomeScreen)} />
@@ -232,9 +248,10 @@ function Navigation({}) {
         name="AlreadyRegistered"
         component={withDefaultLayout(AlreadyRegisteredScreen)}
       />
+      <Stack.Screen name="Return" component={withDefaultLayout(ReturnScreen)} />
       <Stack.Screen
-        name="WelcomeBack"
-        component={withDefaultLayout(WelcomeBackScreen)}
+        name="Dashboard"
+        component={withDefaultLayout(DashboardScreen)}
       />
       <Stack.Screen
         name="Settings"

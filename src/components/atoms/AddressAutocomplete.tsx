@@ -42,6 +42,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         placeholder="Enter your street address..."
         minLength={2}
         fetchDetails={true}
+        keyboardShouldPersistTaps="handled"
         onPress={(data, details = null) => {
           if (!details || !details.address_components) return;
 
@@ -77,6 +78,8 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             formattedAddress,
           });
         }}
+        onFail={error => console.log("GOOGLE PLACES ERROR:", error)}
+        onNotFound={() => console.log("GOOGLE PLACES: DETAILS NOT FOUND")}
         query={{
           key: apiKey,
           language: "en",

@@ -35,6 +35,10 @@
       "reg_status_pending": "Status ng Rehistrasyon ng Botante: Nakabinbin",
       "reg_status_active": "Status ng Rehistrasyon ng Botante: Aktibo"
     },
+    "restart": {
+      "title": "Umulpil ulit",
+      "body": "Maligayang pagbabalik! Hindi mo pa natatapos ang kinakailangang onboarding para magamit ang app na ito. Mangyaring ipagpatuloy ang proseso ng onboarding."
+    },
     "header_links": {}
   }
 }

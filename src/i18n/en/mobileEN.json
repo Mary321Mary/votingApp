@@ -35,6 +35,10 @@
       "reg_status_pending": "Voter Registration Status: Pending",
       "reg_status_active": "Voter Registration Status: Active"
     },
+    "restart": {
+      "title": "Restart",
+      "body": "Welcome back! You haven’t finished the onboarding needed to use this app. Please continue the on-boarding process."
+    },
     "header_links": {}
   }
 }

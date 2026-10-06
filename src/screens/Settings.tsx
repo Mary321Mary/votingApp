@@ -76,7 +76,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleContinue = async () => {
     await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
-    navigation.replace("WelcomeBack");
+    navigation.replace("Dashboard");
   };
 
   useEffect(() => {
@@ -259,7 +259,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <Text style={styles.language_text}>
             {t("native_local.onboarding2.language_pref")}
           </Text>
-          <LanguageSelector />
+          <LanguageSelector dropUp />
         </View>
 
         <CustomButton

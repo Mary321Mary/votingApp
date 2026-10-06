@@ -23,6 +23,12 @@ import Header from "@/layout/Header";
 import { CustomButton } from "../components/atoms/CustomButton";
 import { RootStackParamList } from "../components/Navigation";
 
+type ScreensWithoutParams = {
+  [K in keyof RootStackParamList]: RootStackParamList[K] extends undefined
+    ? K
+    : never;
+}[keyof RootStackParamList];
+
 export interface NotificationItem {
   id: string;
   title: string;
@@ -31,7 +37,7 @@ export interface NotificationItem {
   date: string;
   isRead: boolean;
   type: "status" | "deadline" | "alert";
-  actionTarget?: string;
+  actionTarget?: ScreensWithoutParams;
 }
 
 const MOCK_NOTIFICATIONS: NotificationItem[] = [
@@ -44,7 +50,7 @@ const MOCK_NOTIFICATIONS: NotificationItem[] = [
     date: "Today, 10:15 AM",
     isRead: false,
     type: "status",
-    actionTarget: "WelcomeBack",
+    actionTarget: "Dashboard",
   },
   {
     id: "2",
@@ -56,7 +62,7 @@ const MOCK_NOTIFICATIONS: NotificationItem[] = [
     date: "Yesterday, 2:30 PM",
     isRead: true,
     type: "deadline",
-    actionTarget: "WelcomeBack",
+    actionTarget: "Dashboard",
   },
   {
     id: "3",
@@ -68,7 +74,7 @@ const MOCK_NOTIFICATIONS: NotificationItem[] = [
     date: "Oct 24, 2026",
     isRead: true,
     type: "alert",
-    actionTarget: "WelcomeBack",
+    actionTarget: "Dashboard",
   },
 ];
 
@@ -97,7 +103,7 @@ export default function NotificationsScreen({
   };
 
   const handleActionClick = () => {
-    const target = selectedNotification?.actionTarget || "WelcomeBack";
+    const target = selectedNotification?.actionTarget || "Dashboard";
     setSelectedNotification(null);
     navigation.navigate(target);
   };
@@ -198,8 +204,7 @@ export default function NotificationsScreen({
               <CustomButton
                 title={t(
                   "notifications.view_dashboard",
-                  "Go to " + selectedNotification?.actionTarget ||
-                    "WelcomeBack",
+                  "Go to " + selectedNotification?.actionTarget || "Dashboard",
                 )}
                 onPress={handleActionClick}
               />

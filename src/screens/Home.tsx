@@ -167,6 +167,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         )}
         <InputField
           name="email"
+          email
           value={email}
           label={t("form_fields.email")}
           placeholder="you@example.com"
