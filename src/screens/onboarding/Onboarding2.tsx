@@ -213,7 +213,7 @@ export default function Onboarding2Screen({
           <Text style={styles.language_text}>
             {t("native_local.onboarding2.language_pref")}
           </Text>
-          <LanguageSelector />
+          <LanguageSelector dropUp />
         </View>
 
         <CustomButton title="Finish" onPress={handleFinish} />
