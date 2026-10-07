@@ -610,7 +610,7 @@ export const RegisterResult = ({
                   "rtv_voter_name",
                   miPayload.full_name,
                 );
-                await AsyncStorage.setItem(VOTER_USER_STATUS, "active");
+                await AsyncStorage.setItem(VOTER_USER_STATUS, "true");
                 navigation.replace("SuccessMI", {
                   state,
                   form,

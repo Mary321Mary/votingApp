@@ -18,6 +18,7 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
 import { LANGUAGE_KEY } from "@/i18n";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, "Welcome">;
 
@@ -99,41 +100,23 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <Image source={black_logo} style={styles.logo} resizeMode="contain" />
 
       <View style={styles.content}>
-        <Text style={styles.header}>{t("native_local.welcome.header")}</Text>
+        <Text style={styles.header}>{t("native_local.splash_page.title")}</Text>
 
-        <Text style={styles.text}>
-          {t("native_local.welcome.description1")}
-        </Text>
-
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("native_local.welcome.description2"),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 18,
-              color: theme.textPrimary,
-            },
-            strong: {
-              fontWeight: "bold",
-            },
-          }}
-        />
+        <Text style={styles.text}>{t("native_local.splash_page.body")}</Text>
 
         <CustomButton
-          title={t("native_local.welcome.get_started")}
+          title={t("native_local.splash_page.button")}
           variant="outline-primary"
           onPress={handleGetStarted}
         />
       </View>
 
       <LanguageSelector />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -156,8 +139,12 @@ const getStyles = (theme: any) =>
     header: {
       fontSize: 22,
       fontWeight: "bold",
+      lineHeight: 26,
+      color: theme.textPrimary,
     },
     text: {
-      fontSize: 18,
+      fontSize: 16,
+      lineHeight: 20,
+      color: theme.textPrimary,
     },
   });

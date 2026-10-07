@@ -50,6 +50,8 @@ import {
 } from "@/utils/constants";
 import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
 import ReturnScreen from "../screens/onboarding/Return";
+import BallotScreen from "../screens/Ballot";
+import LocationScreen from "../screens/Location";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
@@ -171,6 +173,8 @@ export type RootStackParamList = {
     onboardingFlow?: boolean;
   };
   ApiError: { state: StateData; title?: string };
+  Ballot: undefined;
+  Location: undefined;
 };
 
 const withDefaultLayout = (Component: React.ComponentType<any>) => {
@@ -233,7 +237,7 @@ function Navigation({}) {
       />
       <Stack.Screen
         name="CheckVoterStatus"
-        component={withDefaultLayout(CheckVoterStatusScreen)}
+        component={CheckVoterStatusScreen}
       />
       <Stack.Screen name="Lookup" component={withDefaultLayout(LookupScreen)} />
       <Stack.Screen
@@ -313,6 +317,11 @@ function Navigation({}) {
       <Stack.Screen
         name="ApiError"
         component={withDefaultLayout(ApiErrorScreen)}
+      />
+      <Stack.Screen name="Ballot" component={withDefaultLayout(BallotScreen)} />
+      <Stack.Screen
+        name="Location"
+        component={withDefaultLayout(LocationScreen)}
       />
     </Stack.Navigator>
   );

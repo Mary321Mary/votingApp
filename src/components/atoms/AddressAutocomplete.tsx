@@ -1,11 +1,17 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import {
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+} from "react-native-google-places-autocomplete";
 import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { useFormScroll } from "@/contexts/FormScrollContext";
 
 interface AddressAutocompleteProps {
   apiKey: string;
+  name: string;
+  value: string;
   label?: string;
   required?: boolean;
   helpText?: string;
@@ -20,6 +26,8 @@ interface AddressAutocompleteProps {
 
 export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   apiKey,
+  name,
+  value,
   label,
   required,
   helpText,
@@ -28,21 +36,36 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 }) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
+  const { registerField } = useFormScroll();
+
+  const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
+
+  useEffect(() => {
+    if (value && googleRef.current) {
+      googleRef.current.setAddressText(value);
+    }
+  }, [value]);
 
   return (
     <View style={styles.container}>
       {!!label && (
-        <Text style={styles.inputLabel}>
+        <Text ref={registerField(name)} style={styles.inputLabel}>
           {label}
           {required && <Text style={styles.requiredStar}> *</Text>}{" "}
           {helpText && <HelpTooltip text={helpText} />}
         </Text>
       )}
       <GooglePlacesAutocomplete
+        ref={googleRef}
         placeholder="Enter your street address..."
         minLength={2}
         fetchDetails={true}
         keyboardShouldPersistTaps="handled"
+        // textInputProps={{
+        //   onChangeText: (text) => {
+        //     onChangeText?.(text);
+        //   },
+        // }}
         onPress={(data, details = null) => {
           if (!details || !details.address_components) return;
 

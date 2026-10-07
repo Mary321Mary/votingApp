@@ -14,12 +14,27 @@ import {
 export const DEFAULT_STATE_REQUIRED_ID =
   "driver's license or state identification card";
 
-export const VOTER_ELECTIONS_KEY = "voter_elections_data";
-export const VOTER_POOLING_KEY = "voter_pooling_data";
 export const VOTER_FORM_STORAGE_KEY = "voter_lookup_saved_form";
+export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
 export const VOTER_USER_STATUS = "rtv_voter_status";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";
+
+export const getFormattedElectionTitle = (electionObj: any) => {
+  if (!electionObj?.date) return "";
+
+  const formattedDate = new Date(
+    `${electionObj.date}T00:00:00Z`,
+  ).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
+  const electionType = electionObj.type || "";
+  return `${formattedDate} ${electionType} Election`.trim();
+};
 
 export const isVisible = (
   formConfig: DataCollectionConfiguration | undefined,

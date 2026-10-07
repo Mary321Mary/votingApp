@@ -6,27 +6,24 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
-  FIRST_TIME_COMPLETED_KEY,
-  ONBOARDING_COMPLETED_KEY,
+  getFormattedElectionTitle,
   VOTER_FORM_STORAGE_KEY,
-  VOTER_STATE_STORAGE_KEY,
-  VOTER_USER_STATUS,
 } from "@/utils/constants";
-import { CheckRegistrationStatus } from "@/utils/types";
+import { submitElectionsLookup } from "@/utils/api";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
+import { CheckRegistrationStatus } from "../utils/types";
 
-type ReturnScreenProps = NativeStackScreenProps<RootStackParamList, "Return">;
+type BallotScreenProps = NativeStackScreenProps<RootStackParamList, "Ballot">;
 
-export default function ReturnScreen({ navigation }: ReturnScreenProps) {
+export default function BallotScreen({ navigation }: BallotScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -62,21 +59,28 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
     prefType3: true,
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>();
+  const [elections, setElections] = useState<
+    {
+      id: number;
+      type: string;
+      date: string;
+      description: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm, storedOnboardingCompleted] = await Promise.all([
+        const [storedForm] = await Promise.all([
           AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-          AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
         ]);
 
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
           setSavedForm(parsedForm);
+          const apiElectionsResponse = await submitElectionsLookup(parsedForm);
+          setElections(apiElectionsResponse.data.elections);
         }
-        setOnboardingCompleted(Boolean(storedOnboardingCompleted));
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
       } finally {
@@ -95,45 +99,28 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
     );
   }
 
-  const handleContinueOnboarding = () => {
-    navigation.navigate("CheckVoterStatus", {
-      form: savedForm,
-    });
-  };
-
   return (
     <View style={styles.container}>
-      <Header showMenu text={t("native_local.restart.title")} />
+      <Header showMenu text={t("native_local.dashboard.title")} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.text}>{t("native_local.restart.body")}</Text>
+        <Text style={styles.bold}>
+          {t("native_local.dashboard.upcoming_election")}
+        </Text>
+        {elections.map(election => (
+          <Text key={election.id}>{getFormattedElectionTitle(election)}</Text>
+        ))}
 
-        <View style={styles.buttonContainer}>
-          {!onboardingCompleted && (
-            <CustomButton
-              title="Continue Onboarding"
-              onPress={handleContinueOnboarding}
+        {savedForm.zip === "38111" && (
+          <Text style={styles.text}>
+            <Trans
+              i18nKey="native_local.dashboard.abr_prompt"
+              components={{
+                abrLink: <Text style={styles.link} onPress={() => {}} />,
+              }}
             />
-          )}
-
-          <CustomButton
-            title="Reset Test"
-            onPress={async () => {
-              try {
-                await AsyncStorage.multiRemove([
-                  VOTER_FORM_STORAGE_KEY,
-                  FIRST_TIME_COMPLETED_KEY,
-                  ONBOARDING_COMPLETED_KEY,
-                  VOTER_USER_STATUS,
-                  VOTER_STATE_STORAGE_KEY,
-                ]);
-              } catch (error) {
-                console.error("Failed to clear saved data:", error);
-              }
-              navigation.replace("Welcome");
-            }}
-          />
-        </View>
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -152,8 +139,14 @@ const getStyles = (theme: any) =>
       alignItems: "center",
     },
     content: {
-      padding: 20,
-      alignItems: "center",
+      padding: 10,
+    },
+    bold: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      fontWeight: "bold",
+      lineHeight: 22,
+      color: theme.textPrimary,
     },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
@@ -162,8 +155,9 @@ const getStyles = (theme: any) =>
       lineHeight: 22,
       color: theme.textPrimary,
     },
-    buttonContainer: {
-      width: "100%",
-      marginTop: 10,
+    link: {
+      color: theme.link,
+      fontSize: 15,
+      textDecorationLine: "underline",
     },
   });

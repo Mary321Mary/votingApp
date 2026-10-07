@@ -1,10 +1,11 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   ScrollView,
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
+  Text,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,7 +13,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CustomButton } from "../components/atoms/CustomButton";
+import { CustomButton } from "@/components/atoms/CustomButton";
 import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
 import {
   CheckRegistrationStatus,
@@ -26,6 +27,34 @@ import { RootStackParamList } from "@/components/Navigation";
 import { Checkbox } from "../components/atoms/Checkbox";
 import { AddressAutocomplete } from "../components/atoms/AddressAutocomplete";
 import { useUIConfig } from "../contexts/UIConfigContext";
+import i18n from "../i18n";
+import { submitEmailZip } from "../utils/api";
+
+const INITIAL_FORM_STATE: CheckRegistrationStatus = {
+  partner_id: 1,
+  first_name: "",
+  last_name: "",
+  email: "",
+  city: "",
+  zip: "",
+  aptunit: "",
+  address: "",
+  birthMonth: "",
+  birthDay: "",
+  birthYear: "",
+  date_of_birth: "",
+  phone: "",
+  opt_in_email: false,
+  opt_in_sms: true,
+  volunteer: false,
+  survey_question_1: "",
+  survey_answer_1: "",
+  survey_question_2: "",
+  survey_answer_2: "",
+  prefType1: true,
+  prefType2: true,
+  prefType3: true,
+};
 
 type ProfileScreenProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
@@ -35,43 +64,17 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const styles = getStyles(theme);
   const { config } = useUIConfig();
 
-  const [form, setForm] = useState<CheckRegistrationStatus>({
-    partner_id: 1,
+  const [form, setForm] = useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
+  const [initialForm, setInitialForm] =
+    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
 
-    first_name: "",
-    last_name: "",
-    email: "",
-    city: "",
-    zip: "",
-
-    aptunit: "",
-    address: "",
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    date_of_birth: "",
-    phone: "",
-
-    opt_in_email: false,
-    opt_in_sms: true,
-    volunteer: false,
-
-    survey_question_1: "",
-    survey_answer_1: "",
-    survey_question_2: "",
-    survey_answer_2: "",
-
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
-  });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [errors, setErrors] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
   const [isByFields, setIsByFields] = useState<boolean>(false);
 
   const updateField = (key: string, fieldValue: any) => {
-    setForm({ ...form, [key]: fieldValue });
+    setForm(prev => ({ ...prev, [key]: fieldValue }));
   };
   const onlyDigits = (text: string) => text.replace(/\D/g, "");
 
@@ -95,13 +98,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-        ]);
-
+        const storedForm = await AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY);
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
           setForm(parsedForm);
+          setInitialForm(parsedForm);
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -113,11 +114,30 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     loadUserData();
   }, []);
 
-  const handleContinue = async () => {
-    if (validateRegistrationStatus()) {
-      await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
-      navigation.replace("Dashboard");
+  const isNameOrAddressChanged =
+    form.first_name.trim() !== initialForm.first_name.trim() ||
+    form.last_name.trim() !== initialForm.last_name.trim() ||
+    form.address.trim() !== initialForm.address.trim() ||
+    (form.aptunit || "").trim() !== (initialForm.aptunit || "").trim() ||
+    form.city.trim() !== initialForm.city.trim() ||
+    form.zip.trim() !== initialForm.zip.trim();
+
+  const isContactOnlyChanged =
+    !isNameOrAddressChanged &&
+    (form.email.trim() !== initialForm.email.trim() ||
+      form.phone.trim() !== initialForm.phone.trim());
+
+  const getButtonTitle = () => {
+    if (isNameOrAddressChanged) {
+      return t(
+        "native_local.profile.btn_update_vr",
+        "Update Your Voter Registration",
+      );
     }
+    if (isContactOnlyChanged) {
+      return t("general.save_changes", "Save Changes");
+    }
+    return t("native_local.profile.btn_return", "Return to Dashboard");
   };
 
   const validateRegistrationStatus = () => {
@@ -138,10 +158,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       form.birthDay,
       {
         fields: {},
-        validations: {
-          po_box_allowed: false,
-          min_age: 18,
-        },
+        validations: { po_box_allowed: false, min_age: 18 },
         eligibility: {
           allows_pre_reg: false,
           min_pre_reg_age: 18,
@@ -155,9 +172,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     Object.assign(errorMessage, dobValidation.errors);
     Object.assign(form, dobValidation.formUpdates);
 
-    if (form.phone.trim()) {
+    if (!form.phone.trim()) {
       errorMessage.phone = t("form_fields.required_phone");
-    } else if (fullPhoneRegex.test(form.phone.trim())) {
+    } else if (!fullPhoneRegex.test(form.phone.trim())) {
       errorMessage.phone = t("form_fields.invalid_phone");
     }
     if (!form.zip.trim()) {
@@ -175,6 +192,46 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     return !Object.values(errorMessage).some(value => value.trim() !== "");
   };
 
+  const handleAction = async () => {
+    if (!isNameOrAddressChanged && !isContactOnlyChanged) {
+      navigation.replace("Dashboard");
+      return;
+    }
+
+    if (!validateRegistrationStatus()) {
+      return;
+    }
+
+    await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
+
+    if (isNameOrAddressChanged) {
+      const response = await submitEmailZip({
+        email: form.email,
+        zip: form.zip,
+        locale: i18n.language,
+        partner_id: form.partner_id.toString(),
+      });
+      await AsyncStorage.setItem(
+        "registration_uid",
+        response.data.registration_uid,
+      );
+
+      navigation.replace("Register", {
+        status: { success: true, errors: [] },
+        state: response.data.state,
+        zip: form.zip,
+        email: form.email,
+        form: form as any,
+        pageFromLookup: "paper",
+        workflowType: "nvra",
+        showRedirectText: false,
+        onboardingFlow: true,
+      });
+    } else {
+      navigation.replace("Dashboard");
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -185,9 +242,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header text={t("native_local.initial_profile_page.title")} />
+      <Header text={t("native_local.profile.title")} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.bodyText}>{t("native_local.profile.body")}</Text>
+
         {/* Form Fields */}
         <InputField
           name="first_name"
@@ -205,8 +264,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           errorMessage={errors.last_name}
           onChangeText={(text: string) => updateField("last_name", text)}
         />
+
         {!isByFields ? (
           <AddressAutocomplete
+            name="address"
+            value={form.address}
             apiKey={config?.google_maps_browser_key || ""}
             label={t("form_fields.address")}
             required
@@ -318,11 +380,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           onChangeText={handlePhoneChange}
         />
 
-        {/* Bottom Continue Button */}
-        <CustomButton
-          title={t("register_18_by_election_page.continue_button_text")}
-          onPress={handleContinue}
-        />
+        {isNameOrAddressChanged && (
+          <Text style={styles.changeNotice}>
+            {t("native_local.profile.change_notice")}
+          </Text>
+        )}
+
+        <CustomButton title={getButtonTitle()} onPress={handleAction} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -331,8 +395,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     container: {
+      width: "100%",
       flex: 1,
-      backgroundColor: theme?.white || "#FFFFFF",
+      backgroundColor: theme.white,
     },
     centered: {
       flex: 1,
@@ -340,15 +405,18 @@ const getStyles = (theme: any) =>
       alignItems: "center",
     },
     scrollContent: {
-      padding: 10,
-    },
-    bodyContainer: {
-      marginBottom: 24,
-      gap: 12,
+      padding: 15,
+      gap: 10,
     },
     bodyText: {
-      fontSize: 15,
-      color: theme?.textColor || "#374151",
-      lineHeight: 22,
+      fontSize: 14,
+      color: theme.textPrimary,
+      marginBottom: 5,
+    },
+    changeNotice: {
+      fontSize: 13,
+      color: theme.secondary,
+      marginTop: 10,
+      marginBottom: 5,
     },
   });

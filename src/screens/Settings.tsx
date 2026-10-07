@@ -274,6 +274,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 const getStyles = (theme: any) =>
   StyleSheet.create({
     container: {
+      width: "100%",
       flex: 1,
       backgroundColor: theme.white,
     },

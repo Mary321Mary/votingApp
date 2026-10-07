@@ -1,10 +1,5 @@
-import React, { createContext, useContext, useRef } from "react";
-import {
-  findNodeHandle,
-  InteractionManager,
-  NativeMethods,
-  UIManager,
-} from "react-native";
+import React, { useRef, useContext, createContext } from "react";
+import { NativeMethods, findNodeHandle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type ScrollToOptions = { x?: number; y?: number; animated?: boolean };
@@ -58,33 +53,21 @@ export const FormScrollProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (!registeredField || !scrollView) return;
 
-    InteractionManager.runAfterInteractions(() => {
+    setTimeout(() => {
       registeredField.focusAction?.();
-      if (typeof registeredField.ref.focus === "function") {
+      if (typeof registeredField.ref?.focus === "function") {
         registeredField.ref.focus();
       }
 
-      const scrollResponder = scrollView.getScrollResponder();
-      const scrollViewNode = findNodeHandle(scrollView);
-      const targetNode = findNodeHandle(
-        registeredField.ref as unknown as React.Component,
-      );
-
-      if (!scrollResponder || scrollViewNode === null || targetNode === null) {
-        return;
-      }
-
-      UIManager.measureLayout(
-        targetNode,
-        scrollViewNode,
-        () => scrollResponder.scrollTo({ y: 0, animated: true }),
-        (_x, y) =>
-          scrollResponder.scrollTo({
-            y: Math.max(0, y - 20),
-            animated: true,
-          }),
-      );
-    });
+      requestAnimationFrame(() => {
+        const node = findNodeHandle(
+          registeredField.ref as unknown as React.Component,
+        );
+        if (node && typeof scrollView.scrollToFocusedInput === "function") {
+          scrollView.scrollToFocusedInput(node, 100);
+        }
+      });
+    }, 50);
   };
 
   return (

@@ -1,17 +1,16 @@
 {
   "native_local": {
-    "welcome": {
-      "header": "Maligayang pagdating sa RockTheVote!",
-      "get_started": "Magsimula",
-      "description1": "Nandito kami upang tulungan ka sa lahat ng hakbang para maging handa sa pagboto, at upang tulungan din ang iyong mga kaibigan at pamilya.",
-      "description2": "Maaari mong piliin ang kagustuhang wika, at pagkatapos ay <strong>Magsimula</strong> na sa pag-set up ng iyong profile at mga tool sa pagboto."
+    "splash_page": {
+      "button": "Magsimula",
+      "body": "Tutulungan ka ng app na ito sa lahat ng hakbang upang maging handa sa pagboto, at upang matulungan din ang iyong mga kaibigan at pamilya. Ang mga unang hakbang ay suriin kung ikaw ay nakarehistro na para bumoto, irehistro ka kung kailangan, at pagkatapos ay ipakita ang iyong mga opsyon para sa mga kasunod na hakbang upang maging ganap na handa sa pagboto.",
+      "title": "Maligayang pagdating sa RockTheVote!"
     },
-    "splash_page": {},
     "initial_profile_page": {
-      "title": "Tungkol sa Iyo at Pagpaparehistro ng Botante",
-      "retry_body": "Upang subukang muli ang paghahanap sa iyong rehistrasyon bilang botante, iwasto ang alinman sa impormasyon sa ibaba. Kung mukhang tama na ang impormasyon, piliin ang Magparehistro para Bumoto sa ibaba.",
-      "some_data_body": "Ang pagpaparehistro ng botante ay ang unang hakbang tungo sa pagboto. Ang status ng iyong pagpaparehistro ay ang pangunahing bahagi ng iyong profile bilang botante at ng iyong mga kagustuhan para sa mga aksyon na maaari naming itulong sa iyo. <p>Kung hindi ka sigurado kung ikaw ay nakarehistro na, titiyakin natin ito. Kung nakapagparehistro ka na noon, titiyakin natin na ikaw ay nakarehistro pa rin at updated. Kaya simulan natin ang iyong profile sa pamamagitan ng paghanap sa iyong rehistrasyon: paki-kumpirma, iwasto, o kumpletuhin ang impormasyon tungkol sa iyo sa ibaba.",
-      "no_data_body": "Ang pagpaparehistro ng botante ay ang unang hakbang tungo sa pagboto. Ang status ng iyong pagpaparehistro ay ang pangunahing bahagi ng iyong profile bilang botante at ng iyong mga kagustuhan para sa mga aksyon na maaari naming itulong sa iyo. <p>Kung hindi ka sigurado kung ikaw ay nakarehistro na, titiyakin natin ito. Kung nakapagparehistro ka na noon, titiyakin natin na ikaw ay nakarehistro pa rin at updated. Kaya simulan natin ang iyong profile sa pamamagitan ng pagkuha ng ilang pangunahing impormasyon na gagamitin sa paghanap ng iyong rehistrasyon."
+      "title": "Suriin ang Iyong Rehistrasyon bilang Botante",
+      "retry_title": "Hanapin ang Iyong Rehistrasyon bilang Botante",
+      "retry_body": "Upang subukang muli ang paghahanap sa iyong rehistrasyon bilang botante, iwasto ang alinman sa impormasyon sa ibaba. Kung mukhang tama na ang impormasyon, piliin ang Magparehistro upang Bumoto sa ibaba.",
+      "some_data_body": "Maniwala mong suriin ang impormasyon tungkol sa iyo na nakalista sa ibaba: kumpirmahin, iwasto, o kumpletuhin ang impormasyon na gagamitin namin upang suriin ang iyong rehistrasyon bilang botante.",
+      "no_data_body": "Mangyaring punan ang lahat ng mga patlang sa ibaba upang masuri namin kung kailangan mong magparehistro upang bumoto."
     },
     "onboarding2": {
       "title": "Lutasin ang Iyong Profile bilang Botante",
@@ -23,6 +22,9 @@
       "comm_preferences_type3": "Iba pang mga alerto sa impormasyon at aksyon upang matulungan mo ang iyong mga kaibigan at pamilya.",
       "comm_preferences_body2": "Matatanggap mo ang iyong mga napiling abiso sa pamamagitan ng mga notification ng app na ito sa notification screen ng iyong aparato. Maaari mo ring piliin ang:",
       "comm_preferences_option_email": "Makatanggap din ng mga abiso sa pamamagitan ng email",
+      "ballot_prompt": "Tingnan ang iyong mga darating na halalan at alamin ang <ballotLink>Nasa Iyong Balota</ballotLink>",
+      "location_prompt": "Tingnan ang iyong mga opsyon para sa personal na pagboto o paghulog ng balota sa pamamagitan ng koreo sa <locationLink>Iyong Mapa ng Halalan</locationLink>",
+      "abr_prompt": "Maaaring qualified ka para bumoto sa pamamagitan ng absentee o sa koreo -- <abrLink>Suriin ang Iyong mga Opsyon</abrLink>",
       "comm_preferences_option_sms": "Makatanggap din ng mga abiso sa pamamagitan ng text message",
       "language_pref": "Gusto sa Wika: ",
       "about_you_header": "Tungkol sa Iyo"
@@ -38,6 +40,11 @@
     "restart": {
       "title": "Umulpil ulit",
       "body": "Maligayang pagbabalik! Hindi mo pa natatapos ang kinakailangang onboarding para magamit ang app na ito. Mangyaring ipagpatuloy ang proseso ng onboarding."
+    },
+    "profile": {
+      "title": "Iyong Profile",
+      "body": "Mangyaring i-update ang alinman sa iyong personal na impormasyon sa ibaba na nagbago",
+      "change_notice": "Dahil binago mo ang iyong pangalan o address, kailangan mong i-update ang iyong rehistrasyon bilang botante sa pamamagitan ng pagpapatuloy sa ibaba"
     },
     "header_links": {}
   }

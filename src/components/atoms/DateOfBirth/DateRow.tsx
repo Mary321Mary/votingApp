@@ -99,6 +99,7 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
       <View style={styles.dateRow}>
         <View style={styles.monthCol}>
           <TouchableOpacity
+            ref={registerField(month.name, () => setMonthModalVisible(true))}
             disabled={disabled}
             style={[
               styles.selectInput,

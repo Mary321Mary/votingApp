@@ -1,10 +1,8 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  ScrollView,
   useWindowDimensions,
-  Linking,
   Alert,
   Platform,
   Text,
@@ -28,22 +26,19 @@ import {
 } from "@/utils/types";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import {
-  getLocations,
-  submitElectionsLookup,
-  submitEmailZip,
-  submitLookup,
-} from "@/utils/api";
+import { submitEmailZip, submitLookup } from "@/utils/api";
 import {
   ONBOARDING_COMPLETED_KEY,
-  VOTER_ELECTIONS_KEY,
   VOTER_FORM_STORAGE_KEY,
-  VOTER_POOLING_KEY,
+  VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
 } from "@/utils/constants";
 import i18n from "i18n";
 import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
 import { Checkbox } from "../../components/atoms/Checkbox";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Footer from "../../layout/Footer";
+import { useFormScroll } from "../../contexts/FormScrollContext";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -54,22 +49,23 @@ export const EMPTY_ERROR_MESSAGES = {
   partner_id: "",
   first_name: "",
   last_name: "",
-  email: "",
-  zip: "",
 
   aptunit: "",
   state: "",
   address: "",
   city: "",
-  phone: "",
-  opt_in_email: "",
-  opt_in_sms: "",
-  volunteer: "",
+  zip: "",
 
   birthMonth: "",
   birthDay: "",
   birthYear: "",
   date_of_birth: "",
+
+  email: "",
+  phone: "",
+  opt_in_email: "",
+  opt_in_sms: "",
+  volunteer: "",
 
   survey_question_1: "",
   survey_answer_1: "",
@@ -84,10 +80,11 @@ export const CheckVoterStatusScreen = ({
   const { form: initialForm, afterNotFound } = route.params;
   const { config } = useUIConfig();
   const { width } = useWindowDimensions();
-
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
+  const { scrollViewRef, scrollToFirstError } = useFormScroll();
+
   const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
   const [errMsg, setErrMsg] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
@@ -189,7 +186,9 @@ export const CheckVoterStatusScreen = ({
   };
 
   const onContinue = async () => {
-    if (validateRegistrationStatus()) {
+    const { isValid, errors } = validateRegistrationStatus();
+
+    if (isValid) {
       setIsLoading(true);
 
       try {
@@ -206,20 +205,6 @@ export const CheckVoterStatusScreen = ({
           await AsyncStorage.setItem("registration_uid", "");
         }
 
-        const apiLocationResponse = await getLocations(form);
-        if (apiLocationResponse.data.status.success)
-          await AsyncStorage.setItem(
-            VOTER_POOLING_KEY,
-            JSON.stringify(apiLocationResponse.data.locations),
-          );
-
-        const apiElectionsResponse = await submitElectionsLookup(form);
-        if (apiElectionsResponse.data.status.success)
-          await AsyncStorage.setItem(
-            VOTER_ELECTIONS_KEY,
-            JSON.stringify(apiElectionsResponse.data.elections),
-          );
-
         if (responseLookup.data.state?.abbreviation === "ND") {
           navigation.navigate("NotParticipating", {
             state: responseLookup.data.state,
@@ -231,8 +216,15 @@ export const CheckVoterStatusScreen = ({
           responseLookup.data.status.success ||
           (form.first_name === "Jane" && form.last_name === "Doe")
         ) {
+          await AsyncStorage.setItem(
+            VOTER_STATE_STORAGE_KEY,
+            JSON.stringify(responseLookup.data.state),
+          );
           await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-          await AsyncStorage.setItem(VOTER_USER_STATUS, "active");
+          await AsyncStorage.setItem(
+            VOTER_USER_STATUS,
+            responseLookup.data.voter?.registration_status.toString() || "true",
+          );
           navigation.navigate("Lookup", {
             form,
             state: responseLookup.data.state,
@@ -267,6 +259,8 @@ export const CheckVoterStatusScreen = ({
       } finally {
         setIsLoading(false);
       }
+    } else {
+      scrollToFirstError(errors);
     }
   };
 
@@ -324,43 +318,13 @@ export const CheckVoterStatusScreen = ({
     }
 
     setErrMsg(errorMessage);
-    return !Object.values(errorMessage).some(value => value.trim() !== "");
+
+    const isValid = !Object.values(errorMessage).some(
+      value => value.trim() !== "",
+    );
+
+    return { isValid, errors: errorMessage };
   };
-
-  const isFormValid = useMemo(() => {
-    const zipRegex = /^\d{5}$/;
-    const fullPhoneRegex = /^\d{3}-\d{3}-\d{4}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    const isNameValid = Boolean(
-      form.first_name?.trim() && form.last_name?.trim(),
-    );
-    const isDobValid = Boolean(
-      form.birthYear?.trim() &&
-        form.birthMonth?.trim() &&
-        form.birthDay?.trim(),
-    );
-    const isContactValid =
-      emailRegex.test(form.email?.trim() || "") &&
-      fullPhoneRegex.test(form.phone?.trim() || "");
-
-    let isAddressValid = false;
-    if (isByFields) {
-      isAddressValid = Boolean(
-        form.address?.trim() &&
-          form.city?.trim() &&
-          zipRegex.test(form.zip?.trim() || ""),
-      );
-    } else {
-      isAddressValid = Boolean(
-        form.address?.trim() &&
-          form.city?.trim() &&
-          zipRegex.test(form.zip?.trim() || ""),
-      );
-    }
-
-    return isNameValid && isDobValid && isContactValid && isAddressValid;
-  }, [form, isByFields]);
 
   useEffect(() => {
     const saveFormToStorage = async () => {
@@ -394,7 +358,16 @@ export const CheckVoterStatusScreen = ({
   }, []);
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+    <KeyboardAwareScrollView
+      ref={scrollViewRef}
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      keyboardShouldPersistTaps="handled"
+      enableOnAndroid={true}
+      enableAutomaticScroll={true}
+      extraScrollHeight={0}
+      keyboardOpeningTime={0}
+    >
       <Header text={t("native_local.initial_profile_page.title")} />
       <View style={styles.box}>
         {afterNotFound ? (
@@ -436,6 +409,8 @@ export const CheckVoterStatusScreen = ({
         {!isByFields ? (
           <AddressAutocomplete
             apiKey={config?.google_maps_browser_key || ""}
+            name="address"
+            value={form.address}
             label={t("form_fields.address")}
             required
             errorText={errMsg.address}
@@ -549,8 +524,12 @@ export const CheckVoterStatusScreen = ({
 
         {/* Continue */}
         <CustomButton
-          title={t("register_18_by_election_page.continue_button_text")}
-          disabled={isLoading || !isFormValid}
+          title={
+            afterNotFound
+              ? t("native_local.initial_profile_page.retry_title")
+              : t("register_18_by_election_page.continue_button_text")
+          }
+          disabled={isLoading}
           onPress={onContinue}
         />
         {/* Register */}
@@ -584,43 +563,16 @@ export const CheckVoterStatusScreen = ({
             }}
           />
         )}
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("general.opt_ins.continue_privacy_ack", {
-              rtv_privacy_url: config?.urls?.privacy,
-            }),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              marginVertical: 18,
-            },
-            a: {
-              fontSize: 14,
-              color: theme.link,
-              textDecorationLine: "underline",
-            },
-          }}
-          renderersProps={{
-            a: {
-              onPress: (_, href) => {
-                if (href) {
-                  Linking.openURL(href);
-                }
-              },
-            },
-          }}
-        />
       </View>
-    </ScrollView>
+      <Footer showLanguageSelector={!afterNotFound} />
+    </KeyboardAwareScrollView>
   );
 };
 
 const getStyles = (theme: any) =>
   StyleSheet.create({
     box: {
-      paddingHorizontal: 10,
+      padding: 10,
     },
     text: {
       fontSize: 14,

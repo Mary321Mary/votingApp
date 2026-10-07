@@ -1,17 +1,16 @@
 {
   "native_local": {
-    "welcome": {
-      "header": "Welcome to RockTheVote!",
-      "get_started": "Get Started",
-      "description1": "We're here to help you through all the steps to get ready to vote, and to help your friends and family too.",
-      "description2": "You can select language preference, and then let's <strong>Get Started</strong> setting up your profile and voter tools."
+    "splash_page": {
+      "title": "Welcome to RockTheVote!",
+      "body": "This app will help you through all the steps to be ready to vote, and to help your friends and family too. The first steps are to check whether you are registered to vote, get you registered if needed, and then show your options for next steps to being fully vote ready.",
+      "button": "Get Started"
     },
-    "splash_page": {},
     "initial_profile_page": {
-      "title": "About You and Voter Registration",
+      "title": "Check Your Voter Registration",
+      "retry_title": "Look Up Your Voter Registration",
       "retry_body": "To re-try your voter registration lookup, correct any of the information below. If the information already looks right, choose Register to Vote below.",
-      "some_data_body": "Voter registration is the first of the steps towards casting a ballot. Your voter registration status is the core of your voter profile and your preferences for the actions we can help you with. <p>If you’re not sure whether you are registered, we’ll get sure. If you have registered before, we’ll make sure you are still registered and up to date. So let’s start your profile by looking up your registration: please confirm, correct, or complete the below information about you",
-      "no_data_body": "Voter registration is the first of the steps towards casting a ballot. Your voter registration status is the core of your voter profile and your preferences for the actions we can help you with. <p>If you’re not sure whether you are registered, we’ll get sure. If you have registered before, we’ll make sure you are still registered and up to date. So let’s start your profile by collecting some basic info to use to look up your registration."
+      "some_data_body": "Please check the information about you listed below: confirm, correct, or complete the information that we will use to check your voter registration.",
+      "no_data_body": "Please fill out all the fields below so that we can check whether you need to register to vote."
     },
     "onboarding2": {
       "title": "Finish Your Voter Profile",
@@ -32,12 +31,20 @@
       "returning": "Welcome back, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
       "finished_onboarding": "Thanks, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
       "upcoming_election": "Upcoming Election: ",
+      "ballot_prompt": "Check out your upcoming elections and see <ballotLink>What’s On Your Ballot</ballotLink>",
+      "location_prompt": "View your options for voting in person or mail ballot drop-off in <locationLink>Your Elections Map</locationLink>",
+      "abr_prompt": "You may be eligible to vote absentee or by mail -- <abrLink>Check Your Options</abrLink>",
       "reg_status_pending": "Voter Registration Status: Pending",
       "reg_status_active": "Voter Registration Status: Active"
     },
     "restart": {
       "title": "Restart",
       "body": "Welcome back! You haven’t finished the onboarding needed to use this app. Please continue the on-boarding process."
+    },
+    "profile": {
+      "title": "Your Profile",
+      "body": "Please update any of your personal information below that has changed",
+      "change_notice": "Because you have changed your name or address, you’ll need to update your voter registration by continuing below"
     },
     "header_links": {}
   }

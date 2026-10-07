@@ -11,14 +11,12 @@ import { Trans, useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { InAppBrowser } from "react-native-inappbrowser-reborn";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import i18n from "@/i18n";
-import { useUIConfig } from "@/contexts/UIConfigContext";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
 
@@ -30,7 +28,6 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
   const { state, form } = route.params;
-  const { config } = useUIConfig();
 
   const handleOpenLink = async () => {
     const url = state?.online_registration_system_url;
@@ -40,34 +37,34 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
     }
   };
 
-  const openInAppUrl = async (url: string) => {
-    if (!url) return;
-    try {
-      if (await InAppBrowser.isAvailable()) {
-        await InAppBrowser.open(url, {
-          // iOS settings
-          dismissButtonStyle: "close",
-          preferredBarTintColor: "#ffffff",
-          preferredControlTintColor: "#000000",
-          readerMode: false,
-          animated: true,
-          modalEnabled: true,
-          // Android settings
-          showTitle: true,
-          toolbarColor: "#ffffff",
-          secondaryToolbarColor: "black",
-          navigationBarColor: "black",
-          enableUrlBarHiding: true,
-          enableDefaultShare: false,
-        });
-      } else {
-        await Linking.openURL(url);
-      }
-    } catch (error) {
-      console.error(error);
-      await Linking.openURL(url);
-    }
-  };
+  // const openInAppUrl = async (url: string) => {
+  //   if (!url) return;
+  //   try {
+  //     if (await InAppBrowser.isAvailable()) {
+  //       await InAppBrowser.open(url, {
+  //         // iOS settings
+  //         dismissButtonStyle: "close",
+  //         preferredBarTintColor: "#ffffff",
+  //         preferredControlTintColor: "#000000",
+  //         readerMode: false,
+  //         animated: true,
+  //         modalEnabled: true,
+  //         // Android settings
+  //         showTitle: true,
+  //         toolbarColor: "#ffffff",
+  //         secondaryToolbarColor: "black",
+  //         navigationBarColor: "black",
+  //         enableUrlBarHiding: true,
+  //         enableDefaultShare: false,
+  //       });
+  //     } else {
+  //       await Linking.openURL(url);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     await Linking.openURL(url);
+  //   }
+  // };
 
   useEffect(() => {
     async function fetchData() {
@@ -153,7 +150,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
             }}
           />
         </Text>
-        <CustomButton
+        {/* <CustomButton
           title={t("lookup_success_page.cta_learn_about", {
             state_abbr: state?.abbreviation,
           })}
@@ -188,7 +185,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
             const url = config?.urls.abr_tool || "";
             if (url) openInAppUrl(url);
           }}
-        />
+        /> */}
         <CustomButton
           title={t("register_18_by_election_page.continue_button_text")}
           onPress={() =>
@@ -297,7 +294,6 @@ const getStyles = (theme: any) =>
       paddingHorizontal: 10,
       paddingBottom: 20,
       maxWidth: "100%",
-      gap: 12,
     },
 
     text: {
@@ -316,25 +312,25 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.gray,
       marginVertical: 5,
     },
-    list: {
-      gap: 16,
-    },
+    list: {},
     listItem: {
       flexDirection: "row",
       alignItems: "flex-start",
     },
     number: {
-      width: 24,
-      fontSize: 16,
+      width: 20,
+      fontSize: 14,
+      lineHeight: 18,
     },
     textLi: {
       marginRight: 10,
-      fontSize: 15,
-      lineHeight: 22,
+      fontSize: 12,
+      lineHeight: 16,
     },
     link: {
       color: theme.link,
-      fontSize: 15,
+      fontSize: 12,
+      lineHeight: 16,
       textDecorationLine: "underline",
     },
   });

@@ -174,7 +174,7 @@
   },
   "lookup_success_page": {
     "success_title": "Check Voter Status in ",
-    "success_statement": "<strong>We found a likely match.</strong><br/><br/>Is this your registration information, {{user_first_name}}?",
+    "success_statement": "<strong>We found a likely match.</strong><br/>Is this your registration information, {{user_first_name}}?",
     "birth_date": "Birth Date: ",
     "voter_status": "Voter Status: Active",
     "success_question": "<strong>Look good?</strong><br/>Now that you've confirmed your registration, make sure you're ready to vote! ",

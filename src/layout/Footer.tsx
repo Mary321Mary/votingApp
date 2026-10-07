@@ -1,14 +1,17 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, Image, Linking } from "react-native";
+import { View, Text, TouchableOpacity, Linking } from "react-native";
 import { StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import Spinner from "../components/atoms/Spinner";
-import logo from "@/assets/images/AWS logo.png";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import LanguageSelector from "../components/atoms/LanguageSelector";
 
-const Footer = () => {
+interface FooterProps {
+  showLanguageSelector?: boolean;
+}
+
+const Footer = ({ showLanguageSelector = false }: FooterProps) => {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -43,16 +46,16 @@ const Footer = () => {
             </TouchableOpacity>
           </View>
         )}
-        <Text style={styles.copyright}>© Copyright 2025, Rock the Vote</Text>
+        <Text style={styles.copyright}>
+          © Copyright {new Date().getFullYear()}, Rock the Vote
+        </Text>
       </View>
       {isLoading && <Spinner />}
-      <View style={styles.rightBlock}>
-        <LanguageSelector dropUp />
-        <View style={styles.awsBlock}>
-          <Text style={styles.poweredText}>Powered By</Text>
-          <Image source={logo} style={styles.awsLogo} resizeMode="contain" />
+      {showLanguageSelector && (
+        <View style={styles.rightBlock}>
+          <LanguageSelector dropUp />
         </View>
-      </View>
+      )}
     </View>
   );
 };
@@ -82,8 +85,9 @@ const getStyles = (theme: any) =>
     link: {
       color: theme.textPrimary,
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 12,
+      fontSize: 10,
       fontWeight: "medium",
+      lineHeight: 14,
     },
     separator: {
       fontSize: 14,
@@ -100,19 +104,6 @@ const getStyles = (theme: any) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
-    },
-    awsBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    poweredText: {
-      fontSize: 12,
-      marginRight: 6,
-      color: theme.textPrimary,
-    },
-    awsLogo: {
-      width: 50,
-      height: 20,
     },
   });
 

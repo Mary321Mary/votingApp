@@ -161,8 +161,7 @@ const getStyles = (theme: any) =>
     },
 
     content: {
-      paddingHorizontal: 10,
-      paddingBottom: 20,
+      padding: 10,
       maxWidth: "100%",
       gap: 12,
     },
@@ -189,26 +188,25 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.gray,
       marginVertical: 5,
     },
-    list: {
-      gap: 16,
-    },
+    list: {},
     listItem: {
       flexDirection: "row",
       alignItems: "flex-start",
     },
     number: {
-      width: 24,
-      fontSize: 16,
+      width: 20,
+      fontSize: 14,
+      lineHeight: 18,
     },
-
     textLi: {
       marginRight: 10,
-      fontSize: 15,
-      lineHeight: 22,
+      fontSize: 12,
+      lineHeight: 16,
     },
     link: {
       color: theme.link,
-      fontSize: 15,
+      fontSize: 12,
+      lineHeight: 16,
       textDecorationLine: "underline",
     },
   });

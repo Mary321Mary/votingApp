@@ -119,6 +119,36 @@ export default function Onboarding2Screen({
         <View style={styles.divider} />
         {/* Segment 2 */}
         <View>
+          <Text style={styles.subBodyText}>
+            {t("native_local.onboarding2.comm_preferences_body2")}
+          </Text>
+
+          <Checkbox
+            name="opt_in_email"
+            label={t("native_local.onboarding2.comm_preferences_option_email")}
+            value={form.opt_in_email}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_email", checked)
+            }
+          />
+
+          <Checkbox
+            name="opt_in_sms"
+            label={t("native_local.onboarding2.comm_preferences_option_sms")}
+            value={form.opt_in_sms}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_sms", checked)
+            }
+          />
+
+          <View style={styles.language_block}>
+            <Text style={styles.language_text}>
+              {t("native_local.onboarding2.language_pref")}
+            </Text>
+            <LanguageSelector dropUp />
+          </View>
+          <View style={styles.divider} />
+
           <Text style={styles.headerText}>
             {t("native_local.onboarding2.about_you_header")}
           </Text>
@@ -153,67 +183,6 @@ export default function Onboarding2Screen({
               updateField("volunteer", checked)
             }
           />
-
-          <View style={styles.divider} />
-          <Text style={styles.subBodyText}>
-            {t("native_local.onboarding2.comm_preferences_body2")}
-          </Text>
-
-          <Checkbox
-            name="opt_in_email"
-            label={t("native_local.onboarding2.comm_preferences_option_email")}
-            value={form.opt_in_email}
-            onValueChange={(checked: boolean) =>
-              updateField("opt_in_email", checked)
-            }
-          />
-
-          <Checkbox
-            name="opt_in_sms"
-            label={t("native_local.onboarding2.comm_preferences_option_sms")}
-            value={form.opt_in_sms}
-            onValueChange={(checked: boolean) =>
-              updateField("opt_in_sms", checked)
-            }
-          />
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("general.opt_ins.sms_disclaimer", {
-              rtv_terms_url: config?.urls?.terms,
-              rtv_privacy_url: config?.urls?.privacy,
-            }),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginVertical: 15,
-            },
-            a: {
-              color: theme.link,
-              textDecorationLine: "underline",
-            },
-          }}
-          renderersProps={{
-            a: {
-              onPress: (_, href) => {
-                if (href) {
-                  Linking.openURL(href);
-                }
-              },
-            },
-          }}
-        /> */}
-        <View style={styles.language_block}>
-          <Text style={styles.language_text}>
-            {t("native_local.onboarding2.language_pref")}
-          </Text>
-          <LanguageSelector dropUp />
         </View>
 
         <CustomButton title="Finish" onPress={handleFinish} />
@@ -229,8 +198,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.white,
     },
     scrollContent: {
-      padding: 20,
-      paddingBottom: 40,
+      padding: 10,
     },
     bodyText: {
       fontSize: 16,

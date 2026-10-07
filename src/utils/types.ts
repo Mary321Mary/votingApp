@@ -158,6 +158,7 @@ export type CheckRegistrationStatusResponse = {
   state: StateData;
   lookup_uid: string | null;
   found: boolean;
+  voter: UserData;
 };
 
 // --------------
@@ -650,15 +651,7 @@ export type SubmitVoterStatusResponse = {
   state: StateData;
   request_uid: string;
   registrant_uid: string | null;
-  voter: {
-    uid: string | null;
-    email: string;
-    registration_status: boolean;
-    registration_status_date: string | null;
-    registration_date: string | null;
-    pledge_status: boolean;
-    pledge_data: string | null;
-  } | null;
+  voter: UserData;
 };
 
 export type FormProps = {

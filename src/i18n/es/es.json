@@ -150,7 +150,7 @@
     "birth_date": "Birth Date: ",
     "voter_status": "Voter Status: Active",
     "success_question": "Look good? Now that you've confirmed your registration, make sure you're ready to vote! ",
-    "cta_learn_about": "Learn about voting in ",
+    "cta_learn_about": "Learn about voting in {{state_abbr}}",
     "something_wrong": "Something Wrong?"
   },
   "not_participating_page": {
