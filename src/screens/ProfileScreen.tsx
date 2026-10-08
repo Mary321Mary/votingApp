@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
-  ScrollView,
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
@@ -10,25 +9,27 @@ import {
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CustomButton } from "@/components/atoms/CustomButton";
+import { useUIConfig } from "@/contexts/UIConfigContext";
 import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
 import {
   CheckRegistrationStatus,
   CheckRegistrationStatusError,
 } from "@/utils/types";
-import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
+import { submitEmailZip } from "@/utils/api";
+
+import { CustomButton } from "@/components/atoms/CustomButton";
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
 import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
 import { RootStackParamList } from "@/components/Navigation";
-import { Checkbox } from "../components/atoms/Checkbox";
-import { AddressAutocomplete } from "../components/atoms/AddressAutocomplete";
-import { useUIConfig } from "../contexts/UIConfigContext";
+import { Checkbox } from "@/components/atoms/Checkbox";
+import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
+import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
 import i18n from "../i18n";
-import { submitEmailZip } from "../utils/api";
 
 const INITIAL_FORM_STATE: CheckRegistrationStatus = {
   partner_id: 1,
@@ -114,30 +115,30 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     loadUserData();
   }, []);
 
-  const isNameOrAddressChanged =
+  const isNameAddressOrDobChanged =
     form.first_name.trim() !== initialForm.first_name.trim() ||
     form.last_name.trim() !== initialForm.last_name.trim() ||
     form.address.trim() !== initialForm.address.trim() ||
     (form.aptunit || "").trim() !== (initialForm.aptunit || "").trim() ||
     form.city.trim() !== initialForm.city.trim() ||
-    form.zip.trim() !== initialForm.zip.trim();
+    form.zip.trim() !== initialForm.zip.trim() ||
+    form.birthMonth !== initialForm.birthMonth ||
+    form.birthDay !== initialForm.birthDay ||
+    form.birthYear !== initialForm.birthYear;
 
   const isContactOnlyChanged =
-    !isNameOrAddressChanged &&
+    !isNameAddressOrDobChanged &&
     (form.email.trim() !== initialForm.email.trim() ||
       form.phone.trim() !== initialForm.phone.trim());
 
   const getButtonTitle = () => {
-    if (isNameOrAddressChanged) {
-      return t(
-        "native_local.profile.btn_update_vr",
-        "Update Your Voter Registration",
-      );
+    if (isNameAddressOrDobChanged) {
+      return "Update Your Voter Registration";
     }
     if (isContactOnlyChanged) {
-      return t("general.save_changes", "Save Changes");
+      return "Save Changes";
     }
-    return t("native_local.profile.btn_return", "Return to Dashboard");
+    return "Return to Dashboard";
   };
 
   const validateRegistrationStatus = () => {
@@ -193,8 +194,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   };
 
   const handleAction = async () => {
-    if (!isNameOrAddressChanged && !isContactOnlyChanged) {
-      navigation.replace("Dashboard");
+    if (!isNameAddressOrDobChanged && !isContactOnlyChanged) {
+      navigation.replace("Dashboard", {});
       return;
     }
 
@@ -204,32 +205,34 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
     await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
 
-    if (isNameOrAddressChanged) {
-      const response = await submitEmailZip({
-        email: form.email,
-        zip: form.zip,
-        locale: i18n.language,
-        partner_id: form.partner_id.toString(),
-      });
-      await AsyncStorage.setItem(
-        "registration_uid",
-        response.data.registration_uid,
-      );
-
-      navigation.replace("Register", {
-        status: { success: true, errors: [] },
-        state: response.data.state,
-        zip: form.zip,
-        email: form.email,
-        form: form as any,
-        pageFromLookup: "paper",
-        workflowType: "nvra",
-        showRedirectText: false,
-        onboardingFlow: true,
-      });
-    } else {
-      navigation.replace("Dashboard");
+    if (isContactOnlyChanged) {
+      navigation.replace("Dashboard", {});
+      return;
     }
+
+    setLoading(true);
+    const response = await submitEmailZip({
+      email: form.email,
+      zip: form.zip,
+      locale: i18n.language,
+      partner_id: form.partner_id.toString(),
+    });
+    await AsyncStorage.setItem(
+      "registration_uid",
+      response.data.registration_uid,
+    );
+
+    navigation.replace("Register", {
+      status: { success: true, errors: [] },
+      state: response.data.state,
+      zip: form.zip,
+      email: form.email,
+      form: form as any,
+      pageFromLookup: "paper",
+      workflowType: "nvra",
+      showRedirectText: false,
+      onboardingFlow: true,
+    });
   };
 
   if (loading) {
@@ -244,7 +247,13 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     <SafeAreaView style={styles.container}>
       <Header text={t("native_local.profile.title")} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+      >
         <Text style={styles.bodyText}>{t("native_local.profile.body")}</Text>
 
         {/* Form Fields */}
@@ -357,6 +366,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             },
           }}
           required
+          showTooltip={false}
           updateField={updateField}
         />
 
@@ -372,22 +382,26 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         <InputField
           name="phone"
           numeric
+          required
           label={t("form_fields.phone")}
           placeholder="###-###-####"
           value={form.phone}
           errorMessage={errors.phone}
-          helpText={t("form_fields.phone_help")}
           onChangeText={handlePhoneChange}
         />
 
-        {isNameOrAddressChanged && (
+        {isNameAddressOrDobChanged && (
           <Text style={styles.changeNotice}>
             {t("native_local.profile.change_notice")}
           </Text>
         )}
 
-        <CustomButton title={getButtonTitle()} onPress={handleAction} />
-      </ScrollView>
+        <CustomButton
+          title={getButtonTitle()}
+          disabled={loading}
+          onPress={handleAction}
+        />
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

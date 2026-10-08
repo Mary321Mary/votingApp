@@ -68,7 +68,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     prefType2: true,
     prefType3: true,
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -76,49 +76,39 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   const handleContinue = async () => {
     await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
-    navigation.replace("Dashboard");
+    navigation.replace("Dashboard", {});
   };
 
   useEffect(() => {
-    const loadUserData = async () => {
+    const initData = async () => {
       try {
-        const [storedForm] = await Promise.all([
+        const [storedForm, questionsResponse] = await Promise.all([
           AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+          getSurveyQuestions({
+            partner_id: "1",
+            locale: i18n.language,
+          }).catch(() => null),
         ]);
 
-        if (storedForm) {
-          const parsedForm = JSON.parse(storedForm);
-          setForm(parsedForm);
+        let initialForm = storedForm ? JSON.parse(storedForm) : form;
+
+        if (questionsResponse?.data) {
+          initialForm = {
+            ...initialForm,
+            survey_question_1: questionsResponse.data.survey_question_1,
+            survey_question_2: questionsResponse.data.survey_question_2,
+          };
         }
+
+        setForm(initialForm);
       } catch (error) {
-        console.error("Failed to load user data from AsyncStorage:", error);
+        console.error("Failed to load initial data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserData();
-  }, []);
-
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await getSurveyQuestions({
-          partner_id: "1",
-          locale: i18n.language,
-        });
-        const data = response.data;
-        setForm({
-          ...form,
-          survey_question_1: data.survey_question_1,
-          survey_question_2: data.survey_question_2,
-        });
-      } catch (err) {
-        console.error("Failed to fetch Data configuration:", err);
-      }
-    };
-
-    fetchQuestions();
+    initData();
   }, []);
 
   if (loading) {

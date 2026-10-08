@@ -1,3 +1,4 @@
+import { TFunction } from "i18next";
 import {
   buildPAHomeAddressFromForm,
   buildPAMailingAddressFromForm,
@@ -17,6 +18,7 @@ export const DEFAULT_STATE_REQUIRED_ID =
 export const VOTER_FORM_STORAGE_KEY = "voter_lookup_saved_form";
 export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
 export const VOTER_USER_STATUS = "rtv_voter_status";
+export const ONBOARDING2_COMPLETED_KEY = "onboarding2_completed";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";
 
@@ -520,4 +522,40 @@ export function willBe18ByElectionLabelKey(stateAbbr?: string): string {
     default:
       return "nvra_form_page.age_eligibility";
   }
+}
+
+const PARTY_I18N_KEYS: Record<string, string> = {
+  "democratic party": "democratic",
+  democratic: "democratic",
+  democrat: "democratic",
+  "republican party": "republican",
+  republican: "republican",
+  "libertarian party": "libertarian",
+  libertarian: "libertarian",
+  "green party": "green",
+  green: "green",
+  independent: "independent",
+  "independent party": "independent_party",
+  nonpartisan: "nonpartisan",
+  "non-partisan": "nonpartisan",
+  "non partisan": "nonpartisan",
+  "no party preference": "no_party_preference",
+  unaffiliated: "unaffiliated",
+  "american independent party": "american_independent",
+  "peace and freedom party": "peace_and_freedom",
+  "working families party": "working_families",
+  "conservative party": "conservative",
+  "constitution party": "constitution",
+  "federalist party": "federalist",
+};
+
+export function partyDisplayName(
+  name: string | null | undefined,
+  t: TFunction,
+): string {
+  if (!name || !name.trim())
+    return t("ballot_lookup_page2.parties.nonpartisan");
+  const key = PARTY_I18N_KEYS[name.trim().toLowerCase()];
+  if (!key) return name;
+  return t(`ballot_lookup_page2.parties.${key}`);
 }

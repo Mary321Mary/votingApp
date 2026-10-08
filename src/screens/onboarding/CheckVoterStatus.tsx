@@ -88,6 +88,7 @@ export const CheckVoterStatusScreen = ({
   const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
   const [errMsg, setErrMsg] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
+  const [commotError, setCommonError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [autofill, setAutofill] = useState(false);
   const [isByFields, setIsByFields] = useState<boolean>(false);
@@ -190,6 +191,7 @@ export const CheckVoterStatusScreen = ({
 
     if (isValid) {
       setIsLoading(true);
+      setCommonError("");
 
       try {
         form.date_of_birth =
@@ -250,10 +252,7 @@ export const CheckVoterStatusScreen = ({
               zip: t("form_fields.zip_code_error"),
             }));
           } else {
-            setErrMsg(prev => ({
-              ...prev,
-              email: t("form_fields.email_error"),
-            }));
+            setCommonError(prev => prev + " " + err);
           }
         });
       } finally {
@@ -538,31 +537,54 @@ export const CheckVoterStatusScreen = ({
             title={t("general.calls_to_action.cta_register")}
             disabled={isLoading}
             onPress={async () => {
-              const response = await submitEmailZip({
-                email: form.email,
-                zip: form.zip,
-                locale: i18n.language,
-                partner_id: form.partner_id.toString(),
-              });
-              await AsyncStorage.setItem(
-                "registration_uid",
-                response.data.registration_uid,
-              );
+              try {
+                const response = await submitEmailZip({
+                  email: form.email,
+                  zip: form.zip,
+                  locale: i18n.language,
+                  partner_id: form.partner_id.toString(),
+                });
+                await AsyncStorage.setItem(
+                  "registration_uid",
+                  response.data.registration_uid,
+                );
 
-              navigation.replace("Register", {
-                status: { success: true, errors: [] },
-                state: response.data.state,
-                zip: form.zip,
-                email: form.email,
-                form: form as any,
-                pageFromLookup: "paper",
-                workflowType: "nvra",
-                showRedirectText: false,
-                onboardingFlow: true,
-              });
+                navigation.replace("Register", {
+                  status: { success: true, errors: [] },
+                  state: response.data.state,
+                  zip: form.zip,
+                  email: form.email,
+                  form: form as any,
+                  pageFromLookup: "paper",
+                  workflowType: "nvra",
+                  showRedirectText: false,
+                  onboardingFlow: true,
+                });
+              } catch (error: any) {
+                console.error("Lookup submission failed:", error);
+
+                error?.response?.data?.status?.errors?.forEach(
+                  (err: string) => {
+                    if (err.includes("email")) {
+                      setErrMsg(prev => ({
+                        ...prev,
+                        email: t("form_fields.email_error"),
+                      }));
+                    } else if (err.includes("zip")) {
+                      setErrMsg(prev => ({
+                        ...prev,
+                        zip: t("form_fields.zip_code_error"),
+                      }));
+                    } else {
+                      setCommonError(prev => prev + " " + err);
+                    }
+                  },
+                );
+              }
             }}
           />
         )}
+        <Text style={styles.errorText}>{commotError}</Text>
       </View>
       <Footer showLanguageSelector={!afterNotFound} />
     </KeyboardAwareScrollView>
@@ -578,5 +600,12 @@ const getStyles = (theme: any) =>
       fontSize: 14,
       lineHeight: 20,
       color: theme.textPrimary,
+    },
+    errorText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.secondary,
+      textAlign: "center",
+      marginBottom: 15,
     },
   });

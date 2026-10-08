@@ -19,6 +19,7 @@ import Header from "@/layout/Header";
 import { RootStackParamList } from "@/components/Navigation";
 import { LocationItem, LocationsData } from "../utils/types";
 import { LocationCard } from "../components/modules/LocationCard";
+import { CustomButton } from "../components/atoms/CustomButton";
 
 type LocationScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -117,7 +118,7 @@ export default function LocationScreen({ navigation }: LocationScreenProps) {
 
   return (
     <View style={styles.container}>
-      <Header showMenu text={t("native_local.dashboard.title")} />
+      <Header showMenu text={"Your Voting Locations"} />
 
       <ScrollView contentContainerStyle={styles.content}>
         {/* {hasMapCenter && <LocationMap data={locations} />} */}
@@ -176,6 +177,11 @@ export default function LocationScreen({ navigation }: LocationScreenProps) {
             )}
           </View>
         )}
+
+        <CustomButton
+          title={"Return to Dashboard"}
+          onPress={() => navigation.navigate("Dashboard", {})}
+        />
       </ScrollView>
     </View>
   );

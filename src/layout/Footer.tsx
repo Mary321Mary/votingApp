@@ -25,7 +25,8 @@ const Footer = ({ showLanguageSelector = false }: FooterProps) => {
   return (
     <View style={styles.footer}>
       <View style={styles.linksBlock}>
-        {sources && (
+        {isLoading && <Spinner />}
+        {!isLoading && sources && (
           <View style={styles.linksContainer}>
             <TouchableOpacity onPress={() => openUrl(sources.faq)}>
               <Text style={styles.link}>{t("general.footer.faq")}</Text>
@@ -50,7 +51,6 @@ const Footer = ({ showLanguageSelector = false }: FooterProps) => {
           © Copyright {new Date().getFullYear()}, Rock the Vote
         </Text>
       </View>
-      {isLoading && <Spinner />}
       {showLanguageSelector && (
         <View style={styles.rightBlock}>
           <LanguageSelector dropUp />

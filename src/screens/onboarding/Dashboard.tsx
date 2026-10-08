@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
   FIRST_TIME_COMPLETED_KEY,
+  ONBOARDING2_COMPLETED_KEY,
   ONBOARDING_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
@@ -28,14 +29,19 @@ import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
-import i18n from "../../i18n";
+import i18n from "i18n";
+import ElectionData from "@/components/organisms/ElectionData";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "Dashboard"
 >;
 
-export default function DashboardScreen({ navigation }: DashboardScreenProps) {
+export default function DashboardScreen({
+  navigation,
+  route,
+}: DashboardScreenProps) {
+  const { afterRegistration = false } = route.params || {};
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
@@ -74,20 +80,13 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     prefType3: true,
   });
   const [loading, setLoading] = useState<boolean>(true);
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>();
   const [status, setStatus] = useState<boolean>();
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [
-          storedForm,
-          storedOnboardingCompleted,
-          storesStatus,
-          storedState,
-        ] = await Promise.all([
+        const [storedForm, storesStatus, storedState] = await Promise.all([
           AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-          AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
           AsyncStorage.getItem(VOTER_USER_STATUS),
           AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
         ]);
@@ -99,11 +98,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             setUserName(parsedForm.first_name);
           }
         }
-        setOnboardingCompleted(Boolean(storedOnboardingCompleted));
         setStatus(Boolean(storesStatus) || false);
         if (storedState) {
           const parsedState = JSON.parse(storedState);
-          setSavedState(parsedState.abbreviation);
+          setSavedState(parsedState);
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -124,16 +122,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   }
 
   const welcomeText = userName
-    ? onboardingCompleted
+    ? afterRegistration
       ? t("native_local.dashboard.finished_onboarding", { firstname: userName })
       : t("native_local.dashboard.returning", { firstname: userName })
     : "Welcome back. Your best next step are ...";
-
-  const handleContinueOnboarding = () => {
-    navigation.navigate("CheckVoterStatus", {
-      form: savedForm,
-    });
-  };
 
   const openInAppUrl = async (url: string) => {
     if (!url) return;
@@ -164,14 +156,6 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     }
   };
 
-  const handleNavigateToBallot = () => {
-    navigation.navigate("Ballot");
-  };
-
-  const handleNavigateToLocation = () => {
-    navigation.navigate("Location");
-  };
-
   return (
     <View style={styles.container}>
       <Header showMenu text={t("native_local.dashboard.title")} />
@@ -184,7 +168,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
             : t("native_local.dashboard.reg_status_pending")}
         </Text>
 
-        <Text style={styles.text}>
+        {/* <Text style={styles.text}>
           <Trans
             i18nKey="native_local.dashboard.ballot_prompt"
             components={{
@@ -193,26 +177,10 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               ),
             }}
           />
-        </Text>
-        <Text style={styles.text}>
-          <Trans
-            i18nKey="native_local.dashboard.location_prompt"
-            components={{
-              locationLink: (
-                <Text style={styles.link} onPress={handleNavigateToLocation} />
-              ),
-            }}
-          />
-        </Text>
+        </Text> */}
+        <ElectionData />
 
         <View style={styles.buttonContainer}>
-          {!onboardingCompleted && (
-            <CustomButton
-              title="Continue Onboarding"
-              onPress={handleContinueOnboarding}
-            />
-          )}
-
           <CustomButton
             title={t("lookup_success_page.cta_learn_about", {
               state_abbr: savedState?.abbreviation,
@@ -289,6 +257,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
                   VOTER_FORM_STORAGE_KEY,
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
+                  ONBOARDING2_COMPLETED_KEY,
                   VOTER_USER_STATUS,
                   VOTER_STATE_STORAGE_KEY,
                 ]);

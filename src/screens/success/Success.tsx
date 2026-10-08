@@ -18,7 +18,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useUIConfig } from "@/contexts/UIConfigContext";
-import { filterRegistrant, ONBOARDING_COMPLETED_KEY } from "@/utils/constants";
+import {
+  filterRegistrant,
+  ONBOARDING2_COMPLETED_KEY,
+  VOTER_FORM_STORAGE_KEY,
+} from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { RootStackParamList } from "@/components/Navigation";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
@@ -211,10 +215,19 @@ export default function SuccessScreen({
             <CustomButton
               title={t("register_18_by_election_page.continue_button_text")}
               onPress={async () => {
-                await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-                navigation.navigate("Onboarding2", {
-                  form: mapRegisterFormToVrLookupPayload(form),
-                });
+                const onboarding2CompletedKey = await AsyncStorage.getItem(
+                  ONBOARDING2_COMPLETED_KEY,
+                );
+                if (onboarding2CompletedKey === "true") {
+                  await AsyncStorage.setItem(
+                    VOTER_FORM_STORAGE_KEY,
+                    JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
+                  );
+                  navigation.navigate("Dashboard", {});
+                } else
+                  navigation.navigate("Onboarding2", {
+                    form: mapRegisterFormToVrLookupPayload(form),
+                  });
               }}
             />
           ) : (

@@ -84,6 +84,7 @@ const InputField = ({
           keyboardType={
             numeric ? "number-pad" : email ? "email-address" : "default"
           }
+          autoCapitalize={email ? "none" : "sentences"}
           maxLength={maxLength}
           onChangeText={onChangeText}
         />

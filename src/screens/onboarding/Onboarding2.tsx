@@ -8,7 +8,10 @@ import i18n from "i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { CheckRegistrationStatus } from "@/utils/types";
-import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
+import {
+  ONBOARDING2_COMPLETED_KEY,
+  VOTER_FORM_STORAGE_KEY,
+} from "@/utils/constants";
 import { getSurveyQuestions } from "@/utils/api";
 
 import { Checkbox } from "@/components/atoms/Checkbox";
@@ -39,16 +42,30 @@ export default function Onboarding2Screen({
 
   const handleFinish = async () => {
     try {
-      await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
+      await AsyncStorage.setItem(ONBOARDING2_COMPLETED_KEY, "true");
 
       navigation.reset({
         index: 0,
-        routes: [{ name: "Dashboard" }],
+        routes: [{ name: "Dashboard", params: { afterRegistration: true } }],
       });
     } catch (error) {
       console.error("Failed to save final onboarding data:", error);
     }
   };
+
+  useEffect(() => {
+    const saveFormToStorage = async () => {
+      try {
+        await AsyncStorage.setItem(
+          VOTER_FORM_STORAGE_KEY,
+          JSON.stringify(form),
+        );
+      } catch (e) {
+        console.error("Failed to save voter form:", e);
+      }
+    };
+    saveFormToStorage();
+  }, [form]);
 
   useEffect(() => {
     const fetchQuestions = async () => {

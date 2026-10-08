@@ -23,12 +23,6 @@ import Header from "@/layout/Header";
 import { CustomButton } from "../components/atoms/CustomButton";
 import { RootStackParamList } from "../components/Navigation";
 
-type ScreensWithoutParams = {
-  [K in keyof RootStackParamList]: RootStackParamList[K] extends undefined
-    ? K
-    : never;
-}[keyof RootStackParamList];
-
 export interface NotificationItem {
   id: string;
   title: string;
@@ -37,7 +31,7 @@ export interface NotificationItem {
   date: string;
   isRead: boolean;
   type: "status" | "deadline" | "alert";
-  actionTarget?: ScreensWithoutParams;
+  actionTarget?: any;
 }
 
 const MOCK_NOTIFICATIONS: NotificationItem[] = [

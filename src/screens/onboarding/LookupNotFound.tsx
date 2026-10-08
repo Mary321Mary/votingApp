@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Linking, ScrollView } from "react-native";
 import { Trans, useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +25,12 @@ export default function LookupNotFoundScreen({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const { state, form } = route.params;
+
+  const [errors, setErrors] = useState<{
+    email?: string;
+    zip?: string;
+    general?: string;
+  }>({});
 
   const handleOpenLink = async () => {
     const url = state?.online_status_check_url;
@@ -106,37 +112,71 @@ export default function LookupNotFoundScreen({
           <CustomButton
             title={t("lookup_not_found_page.cta_register")}
             onPress={async () => {
-              const response = await submitEmailZip({
-                email: form.email,
-                zip: form.zip,
-                locale: i18n.language,
-                partner_id: form.partner_id.toString(),
-              });
-              await AsyncStorage.setItem(
-                "registration_uid",
-                response.data.registration_uid,
-              );
+              try {
+                const response = await submitEmailZip({
+                  email: form.email,
+                  zip: form.zip,
+                  locale: i18n.language,
+                  partner_id: form.partner_id.toString(),
+                });
+                await AsyncStorage.setItem(
+                  "registration_uid",
+                  response.data.registration_uid,
+                );
 
-              await reportEvent({
-                registration_uid: response.data.registration_uid ?? "",
-                partner_id: form.partner_id.toString() || "1",
-                step: REPORT_EVENT_STEPS.STEP_1,
-                event_name: "redirect from lookup to OV",
-              });
+                await reportEvent({
+                  registration_uid: response.data.registration_uid ?? "",
+                  partner_id: form.partner_id.toString() || "1",
+                  step: REPORT_EVENT_STEPS.STEP_1,
+                  event_name: "redirect from lookup to OV",
+                });
 
-              navigation.replace("Register", {
-                status: { success: true, errors: [] },
-                state,
-                zip: form.zip,
-                email: form.email,
-                form: form as any,
-                pageFromLookup: "paper",
-                workflowType: "nvra",
-                showRedirectText: false,
-                onboardingFlow: true,
-              });
+                navigation.replace("Register", {
+                  status: { success: true, errors: [] },
+                  state,
+                  zip: form.zip,
+                  email: form.email,
+                  form: form as any,
+                  pageFromLookup: "paper",
+                  workflowType: "nvra",
+                  showRedirectText: false,
+                  onboardingFlow: true,
+                });
+              } catch (error: any) {
+                console.error("Register failed:", error);
+
+                const newErrors: {
+                  email?: string;
+                  zip?: string;
+                  general?: string;
+                } = {};
+                if (
+                  error?.response?.status === 422 &&
+                  Array.isArray(error?.response?.data?.status?.errors)
+                ) {
+                  error.response.data.status.errors.forEach((msg: string) => {
+                    const lowerMsg = msg.toLowerCase();
+                    if (lowerMsg.includes("email")) {
+                      newErrors.email = t("form_fields.email_error");
+                    } else if (lowerMsg.includes("zip")) {
+                      newErrors.zip = t("form_fields.zip_code_error");
+                    } else
+                      newErrors.general = newErrors.general
+                        ? `${newErrors.general}\n${msg}`
+                        : msg;
+                  });
+                } else
+                  newErrors.general =
+                    "An error occurred. Please try again later.";
+                setErrors(newErrors);
+              }
             }}
           />
+        )}
+        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+        {errors.zip && <Text style={styles.errorText}>{errors.zip}</Text>}
+        {errors.general && (
+          <Text style={styles.errorText}>{errors.general}</Text>
         )}
         <CustomButton
           title={t("lookup_not_found_page.cta_try_again")}
@@ -208,5 +248,12 @@ const getStyles = (theme: any) =>
       fontSize: 12,
       lineHeight: 16,
       textDecorationLine: "underline",
+    },
+    errorText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.secondary,
+      textAlign: "center",
+      marginBottom: 15,
     },
   });

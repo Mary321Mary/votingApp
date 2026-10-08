@@ -1,23 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-} from "react-native";
+import React, { useContext } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
   FIRST_TIME_COMPLETED_KEY,
+  ONBOARDING2_COMPLETED_KEY,
   ONBOARDING_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
 } from "@/utils/constants";
-import { CheckRegistrationStatus } from "@/utils/types";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
@@ -31,74 +25,50 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const [savedForm, setSavedForm] = useState<CheckRegistrationStatus>({
-    partner_id: 1,
+  const handleContinueOnboarding = async () => {
+    const [storedForm, storedOnboardingCompleted] = await Promise.all([
+      AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+      AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
+    ]);
+    let form = {
+      partner_id: 1,
 
-    first_name: "",
-    last_name: "",
-    email: "",
-    city: "",
-    zip: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      city: "",
+      zip: "",
 
-    aptunit: "",
-    address: "",
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    date_of_birth: "",
-    phone: "",
+      aptunit: "",
+      address: "",
+      birthMonth: "",
+      birthDay: "",
+      birthYear: "",
+      date_of_birth: "",
+      phone: "",
 
-    opt_in_email: false,
-    opt_in_sms: true,
-    volunteer: false,
+      opt_in_email: false,
+      opt_in_sms: true,
+      volunteer: false,
 
-    survey_question_1: "",
-    survey_answer_1: "",
-    survey_question_2: "",
-    survey_answer_2: "",
+      survey_question_1: "",
+      survey_answer_1: "",
+      survey_question_2: "",
+      survey_answer_2: "",
 
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
-  });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>();
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const [storedForm, storedOnboardingCompleted] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-          AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
-        ]);
-
-        if (storedForm) {
-          const parsedForm = JSON.parse(storedForm);
-          setSavedForm(parsedForm);
-        }
-        setOnboardingCompleted(Boolean(storedOnboardingCompleted));
-      } catch (error) {
-        console.error("Failed to load user data from AsyncStorage:", error);
-      } finally {
-        setLoading(false);
-      }
+      prefType1: true,
+      prefType2: true,
+      prefType3: true,
     };
+    if (storedForm) {
+      form = JSON.parse(storedForm);
+    }
 
-    loadUserData();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={theme.primary} />
-      </View>
-    );
-  }
-
-  const handleContinueOnboarding = () => {
-    navigation.navigate("CheckVoterStatus", {
-      form: savedForm,
-    });
+    if (storedOnboardingCompleted === "true") {
+      navigation.navigate("Onboarding2", { form });
+    } else {
+      navigation.navigate("CheckVoterStatus", { form });
+    }
   };
 
   return (
@@ -109,12 +79,10 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
         <Text style={styles.text}>{t("native_local.restart.body")}</Text>
 
         <View style={styles.buttonContainer}>
-          {!onboardingCompleted && (
-            <CustomButton
-              title="Continue Onboarding"
-              onPress={handleContinueOnboarding}
-            />
-          )}
+          <CustomButton
+            title="Continue Onboarding"
+            onPress={handleContinueOnboarding}
+          />
 
           <CustomButton
             title="Reset Test"
@@ -124,6 +92,7 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
                   VOTER_FORM_STORAGE_KEY,
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
+                  ONBOARDING2_COMPLETED_KEY,
                   VOTER_USER_STATUS,
                   VOTER_STATE_STORAGE_KEY,
                 ]);
@@ -145,11 +114,6 @@ const getStyles = (theme: any) =>
       width: "100%",
       flex: 1,
       backgroundColor: theme.white,
-    },
-    centered: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
     },
     content: {
       padding: 20,

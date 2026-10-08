@@ -61,11 +61,6 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         minLength={2}
         fetchDetails={true}
         keyboardShouldPersistTaps="handled"
-        // textInputProps={{
-        //   onChangeText: (text) => {
-        //     onChangeText?.(text);
-        //   },
-        // }}
         onPress={(data, details = null) => {
           if (!details || !details.address_components) return;
 
@@ -76,18 +71,11 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
           details.address_components.forEach((component: any) => {
             const types: string[] = component.types;
-            if (types.includes("street_number")) {
+            if (types.includes("street_number"))
               streetNumber = component.long_name;
-            }
-            if (types.includes("route")) {
-              route = component.long_name;
-            }
-            if (types.includes("locality")) {
-              locality = component.long_name;
-            }
-            if (types.includes("postal_code")) {
-              postalCode = component.long_name;
-            }
+            if (types.includes("route")) route = component.long_name;
+            if (types.includes("locality")) locality = component.long_name;
+            if (types.includes("postal_code")) postalCode = component.long_name;
           });
 
           const fullStreetAddress = `${streetNumber} ${route}`.trim();
@@ -95,7 +83,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             details.formatted_address || data.description;
 
           onAddressSelect({
-            address: fullStreetAddress || formattedAddress,
+            address: formattedAddress || fullStreetAddress,
             city: locality,
             zip: postalCode,
             formattedAddress,

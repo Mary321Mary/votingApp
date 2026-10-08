@@ -5,6 +5,7 @@ import DefaultLayout from "@/layout/DefaultLayout";
 import {
   CheckRegistrationStatus,
   DataCollectionConfiguration,
+  Election,
   RegisterFormState,
   StateData,
   SubmitEmailZipResponse,
@@ -46,7 +47,7 @@ import SettingsScreen from "@/screens/Settings";
 
 import {
   FIRST_TIME_COMPLETED_KEY,
-  ONBOARDING_COMPLETED_KEY,
+  ONBOARDING2_COMPLETED_KEY,
 } from "@/utils/constants";
 import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
 import ReturnScreen from "../screens/onboarding/Return";
@@ -56,7 +57,7 @@ import LocationScreen from "../screens/Location";
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
   Welcome: undefined; // or { id: string }
-  Dashboard: undefined;
+  Dashboard: { afterRegistration?: boolean };
   Return: undefined;
   Onboarding2: {
     form: CheckRegistrationStatus;
@@ -173,7 +174,17 @@ export type RootStackParamList = {
     onboardingFlow?: boolean;
   };
   ApiError: { state: StateData; title?: string };
-  Ballot: undefined;
+  Ballot: {
+    ballotData: {
+      longitude: number;
+      latitude: number;
+      elections: Election[];
+    };
+    form: CheckRegistrationStatus;
+    stateData: StateData | null;
+    electionTitle?: string;
+    savedSelections: any;
+  };
   Location: undefined;
 };
 
@@ -197,12 +208,12 @@ function Navigation({}) {
       const firstTimeCompleted = await AsyncStorage.getItem(
         FIRST_TIME_COMPLETED_KEY,
       );
-      const onboardingCompletedKey = await AsyncStorage.getItem(
-        ONBOARDING_COMPLETED_KEY,
+      const onboarding2CompletedKey = await AsyncStorage.getItem(
+        ONBOARDING2_COMPLETED_KEY,
       );
       setInitialRouteName(
         firstTimeCompleted === "true"
-          ? onboardingCompletedKey
+          ? onboarding2CompletedKey === "true"
             ? "Dashboard"
             : "Return"
           : "Welcome",

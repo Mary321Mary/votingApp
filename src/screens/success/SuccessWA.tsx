@@ -22,7 +22,10 @@ import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
-import { ONBOARDING_COMPLETED_KEY } from "../../utils/constants";
+import {
+  ONBOARDING2_COMPLETED_KEY,
+  VOTER_FORM_STORAGE_KEY,
+} from "../../utils/constants";
 
 type SuccessWAScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -96,10 +99,19 @@ export const SuccessWAScreen = ({
             <CustomButton
               title={t("register_18_by_election_page.continue_button_text")}
               onPress={async () => {
-                await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-                navigation.navigate("Onboarding2", {
-                  form: mapRegisterFormToVrLookupPayload(form),
-                });
+                const onboarding2CompletedKey = await AsyncStorage.getItem(
+                  ONBOARDING2_COMPLETED_KEY,
+                );
+                if (onboarding2CompletedKey === "true") {
+                  await AsyncStorage.setItem(
+                    VOTER_FORM_STORAGE_KEY,
+                    JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
+                  );
+                  navigation.navigate("Dashboard", {});
+                } else
+                  navigation.navigate("Onboarding2", {
+                    form: mapRegisterFormToVrLookupPayload(form),
+                  });
               }}
             />
           ) : (

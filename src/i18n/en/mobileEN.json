@@ -28,11 +28,13 @@
     },
     "dashboard": {
       "title": "Your Voter Status Dashboard",
-      "returning": "Welcome back, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
+      "returning": "Welcome back, {{firstname}}! Check everything you need to get completely vote-ready.",
       "finished_onboarding": "Thanks, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
-      "upcoming_election": "Upcoming Election: ",
-      "ballot_prompt": "Check out your upcoming elections and see <ballotLink>What’s On Your Ballot</ballotLink>",
-      "location_prompt": "View your options for voting in person or mail ballot drop-off in <locationLink>Your Elections Map</locationLink>",
+      "upcoming_election": "Next Election: ",
+      "ballot_prompt": "See what’s on <ballotLink>Your Ballot</ballotLink>",
+      "ballot_none": "Sample Ballot: not yet available",
+      "location_prompt": "See your <locationLink>Voting Map</locationLink> for options to vote in person, early, or ballot drop-off",
+      "location_none": "Voting Map: not yet available",
       "abr_prompt": "You may be eligible to vote absentee or by mail -- <abrLink>Check Your Options</abrLink>",
       "reg_status_pending": "Voter Registration Status: Pending",
       "reg_status_active": "Voter Registration Status: Active"
@@ -44,7 +46,7 @@
     "profile": {
       "title": "Your Profile",
       "body": "Please update any of your personal information below that has changed",
-      "change_notice": "Because you have changed your name or address, you’ll need to update your voter registration by continuing below"
+      "change_notice": "Because you your changes, you’ll need to update your voter registration by continuing below"
     },
     "header_links": {}
   }
