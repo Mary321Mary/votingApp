@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, Linking, Alert } from "react-native";
+import { View, Text, StyleSheet, Linking, Alert, Platform } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -62,12 +62,34 @@ export const LocationCard: React.FC<LocationCardProps> = ({ item }) => {
     if (!map_url) return;
 
     try {
-      const decodedUrl = decodeURIComponent(map_url);
-      const safeUrl = encodeURI(decodedUrl);
-      await Linking.openURL(safeUrl);
+      const cleanUrl = map_url.trim();
+
+      if (Platform.OS === "ios") {
+        const urlObj = new URL(cleanUrl);
+        const searchQuery =
+          urlObj.searchParams.get("query") ||
+          urlObj.searchParams.get("q") ||
+          address?.locationName;
+
+        if (searchQuery) {
+          const appleMapsUrl = `maps://?q=${encodeURIComponent(searchQuery)}`;
+          const canOpenApple = await Linking.canOpenURL(appleMapsUrl);
+
+          if (canOpenApple) {
+            await Linking.openURL(appleMapsUrl);
+            return;
+          }
+        }
+      }
+
+      await Linking.openURL(cleanUrl);
     } catch (error) {
       console.error("Failed to open map URL:", error);
-      Alert.alert("Error", "Could not open map link.");
+      try {
+        await Linking.openURL(map_url);
+      } catch {
+        Alert.alert("Error", "Could not open map link.");
+      }
     }
   };
 
