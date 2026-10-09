@@ -87,7 +87,7 @@ export default function LocationScreen({
 
   return (
     <View style={styles.container}>
-      <Header showMenu text={"native_local.dashboard.your_locations"} />
+      <Header showMenu text={t("native_local.dashboard.your_locations")} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text>
