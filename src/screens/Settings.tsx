@@ -4,8 +4,6 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  Linking,
-  useWindowDimensions,
   ActivityIndicator,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -14,14 +12,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import i18n from "i18n";
-import { useUIConfig } from "../contexts/UIConfigContext";
 import { CheckRegistrationStatus } from "../utils/types";
 import { getSurveyQuestions } from "../utils/api";
 import { CustomButton } from "../components/atoms/CustomButton";
 import { VOTER_FORM_STORAGE_KEY } from "../utils/constants";
 import { Checkbox } from "../components/atoms/Checkbox";
 import InputField from "../components/atoms/InputField";
-import RenderHTML from "react-native-render-html";
 import { RootStackParamList } from "../components/Navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import LanguageSelector from "../components/atoms/LanguageSelector";
@@ -35,8 +31,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
-  const { config } = useUIConfig();
-  const { width } = useWindowDimensions();
 
   const [form, setForm] = useState<CheckRegistrationStatus>({
     partner_id: 1,
@@ -56,7 +50,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     phone: "",
 
     opt_in_email: false,
-    opt_in_sms: true,
+    opt_in_sms: false,
     volunteer: false,
 
     survey_question_1: "",
@@ -121,7 +115,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
 
   return (
     <View style={styles.container}>
-      <Header text={t("native_local.onboarding2.title")} />
+      <Header text={t("native_local.preferences.title")} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Subtitle */}
@@ -162,94 +156,75 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
               onValueChange={() => updateField("prefType3", !form.prefType3)}
             />
           </View>
+        </View>
 
-          {/* Segment 2 */}
+        <View style={styles.divider} />
+        {/* Segment 2 */}
+        <View>
           <Text style={styles.subBodyText}>
             {t("native_local.onboarding2.comm_preferences_body2")}
           </Text>
-        </View>
-        <View style={styles.divider} />
-        <Text style={styles.title}>
-          {t("nvra_form_page.questions_for_you")}
-        </Text>
 
-        <InputField
-          name="survey_answer_1"
-          value={form.survey_answer_1}
-          label={form.survey_question_1}
-          onChangeText={(text: string) => updateField("survey_answer_1", text)}
-        />
+          <Checkbox
+            name="opt_in_email"
+            label={t("native_local.onboarding2.comm_preferences_option_email")}
+            value={form.opt_in_email}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_email", checked)
+            }
+          />
 
-        <InputField
-          name="survey_answer_2"
-          value={form.survey_answer_2}
-          label={form.survey_question_2}
-          onChangeText={(text: string) => updateField("survey_answer_2", text)}
-        />
+          <Checkbox
+            name="opt_in_sms"
+            label={t("native_local.onboarding2.comm_preferences_option_sms")}
+            value={form.opt_in_sms}
+            onValueChange={(checked: boolean) =>
+              updateField("opt_in_sms", checked)
+            }
+          />
 
-        <View style={styles.divider} />
+          <View style={styles.language_block}>
+            <Text style={styles.language_text}>
+              {t("native_local.onboarding2.language_pref")}
+            </Text>
+            <LanguageSelector dropUp />
+          </View>
+          <View style={styles.divider} />
 
-        <Checkbox
-          name="opt_in_email"
-          label={t("general.opt_ins.email_opt_in")}
-          value={form.opt_in_email}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_email", checked)
-          }
-        />
-
-        <Checkbox
-          name="opt_in_sms"
-          label={t("general.opt_ins.sms_opt_in")}
-          value={form.opt_in_sms}
-          onValueChange={(checked: boolean) =>
-            updateField("opt_in_sms", checked)
-          }
-        />
-
-        <Checkbox
-          name="volunteer"
-          label={t("general.opt_ins.volunteer")}
-          value={form.volunteer}
-          onValueChange={(checked: boolean) =>
-            updateField("volunteer", checked)
-          }
-        />
-
-        <RenderHTML
-          contentWidth={width}
-          source={{
-            html: t("general.opt_ins.sms_disclaimer", {
-              rtv_terms_url: config?.urls?.terms,
-              rtv_privacy_url: config?.urls?.privacy,
-            }),
-          }}
-          tagsStyles={{
-            body: {
-              fontSize: 14,
-              lineHeight: 18,
-              marginVertical: 15,
-            },
-            a: {
-              color: theme.link,
-              textDecorationLine: "underline",
-            },
-          }}
-          renderersProps={{
-            a: {
-              onPress: (_, href) => {
-                if (href) {
-                  Linking.openURL(href);
-                }
-              },
-            },
-          }}
-        />
-        <View style={styles.language_block}>
-          <Text style={styles.language_text}>
-            {t("native_local.onboarding2.language_pref")}
+          <Text style={styles.headerText}>
+            {t("native_local.onboarding2.about_you_header")}
           </Text>
-          <LanguageSelector dropUp />
+
+          <Text style={styles.title}>
+            {t("nvra_form_page.questions_for_you")}
+          </Text>
+
+          <InputField
+            name="survey_answer_1"
+            value={form.survey_answer_1}
+            label={form.survey_question_1}
+            onChangeText={(text: string) =>
+              updateField("survey_answer_1", text)
+            }
+          />
+
+          <InputField
+            name="survey_answer_2"
+            value={form.survey_answer_2}
+            label={form.survey_question_2}
+            onChangeText={(text: string) =>
+              updateField("survey_answer_2", text)
+            }
+          />
+
+          <Checkbox
+            name="volunteer"
+            label={t("general.opt_ins.volunteer")}
+            value={form.volunteer}
+            onValueChange={(checked: boolean) =>
+              updateField("volunteer", checked)
+            }
+          />
         </View>
 
         <CustomButton
@@ -274,8 +249,7 @@ const getStyles = (theme: any) =>
       alignItems: "center",
     },
     scrollContent: {
-      padding: 20,
-      paddingBottom: 40,
+      padding: 10,
     },
     bodyText: {
       fontSize: 16,

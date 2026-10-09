@@ -15,10 +15,18 @@ import {
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
 } from "@/utils/constants";
-import { submitBallotLookup, submitElectionsLookup } from "@/utils/api";
+import {
+  getLocations,
+  submitBallotLookup,
+  submitElectionsLookup,
+} from "@/utils/api";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { CheckRegistrationStatus, Election } from "@/utils/types";
+import {
+  CheckRegistrationStatus,
+  Election,
+  LocationsData,
+} from "@/utils/types";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../Navigation";
 
@@ -94,7 +102,7 @@ export default function ElectionData() {
     phone: "",
 
     opt_in_email: false,
-    opt_in_sms: true,
+    opt_in_sms: false,
     volunteer: false,
 
     survey_question_1: "",
@@ -117,9 +125,21 @@ export default function ElectionData() {
     latitude: 0,
     elections: [],
   });
+  const [locations, setLocations] = useState<LocationsData>({
+    map_key: "",
+    map_center: { lat: 0, lng: 0 },
+    pollingLocations: [],
+    earlyVoteSites: [],
+    dropOffLocations: [],
+  });
+
+  const pollingCount = locations.pollingLocations?.length || 0;
+  const earlyCount = locations.earlyVoteSites?.length || 0;
+  const dropboxCount = locations.dropOffLocations?.length || 0;
+  const hasLocations = pollingCount > 0 || earlyCount > 0 || dropboxCount > 0;
 
   const handleNavigateToLocation = () => {
-    navigation.navigate("Location");
+    navigation.navigate("Location", { locations, form: savedForm });
   };
 
   useEffect(() => {
@@ -143,6 +163,9 @@ export default function ElectionData() {
             setBallotData(ballotResponse.data.ballot);
           }
           setElections(election);
+
+          const apiLocationResponse = await getLocations(parsedForm);
+          setLocations(apiLocationResponse.data.locations);
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -178,13 +201,25 @@ export default function ElectionData() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <Text style={styles.bold}>
-        {t("native_local.dashboard.upcoming_election")}
+      <Text>
+        <Trans
+          i18nKey={
+            elections
+              ? "native_local.dashboard.upcoming_election"
+              : "native_local.dashboard.upcoming_election_none"
+          }
+          components={{
+            body: <Text style={styles.text} />,
+            strong: <Text style={styles.bold} />,
+          }}
+        />
       </Text>
       <View style={styles.elections}>
         <Text style={styles.text}>{getFormattedElectionTitle(elections)}</Text>
         {ballotData.elections.length === 0 ? (
-          <Text>{t("native_local.dashboard.ballot_none")}</Text>
+          <Text style={styles.text}>
+            {t("native_local.dashboard.ballot_none")}
+          </Text>
         ) : (
           <Text style={styles.text}>
             <Trans
@@ -198,14 +233,21 @@ export default function ElectionData() {
           </Text>
         )}
         <Text style={styles.text}>
-          <Trans
-            i18nKey="native_local.dashboard.location_prompt"
-            components={{
-              locationLink: (
-                <Text style={styles.link} onPress={handleNavigateToLocation} />
-              ),
-            }}
-          />
+          {hasLocations ? (
+            <Trans
+              i18nKey="native_local.dashboard.location_prompt"
+              components={{
+                locationLink: (
+                  <Text
+                    style={styles.link}
+                    onPress={handleNavigateToLocation}
+                  />
+                ),
+              }}
+            />
+          ) : (
+            t("native_local.dashboard.location_none")
+          )}
         </Text>
         {savedForm.zip === "38111" && (
           <Text style={styles.text}>
@@ -248,13 +290,14 @@ const getStyles = (theme: any) =>
       fontWeight: "600",
       lineHeight: 22,
       color: theme.textPrimary,
+      marginTop: 5,
     },
     elections: {
       marginLeft: 30,
     },
     link: {
       color: theme.link,
-      fontSize: 15,
+      fontSize: 16,
       textDecorationLine: "underline",
     },
   });

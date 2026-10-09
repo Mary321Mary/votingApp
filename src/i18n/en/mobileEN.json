@@ -2,7 +2,7 @@
   "native_local": {
     "splash_page": {
       "title": "Welcome to RockTheVote!",
-      "body": "This app will help you through all the steps to be ready to vote, and to help your friends and family too. The first steps are to check whether you are registered to vote, get you registered if needed, and then show your options for next steps to being fully vote ready.",
+      "body": "This app will help you through all the steps to be ready to vote, and to help your friends and family too. <p> The first steps are to check whether you are registered to vote, get you registered if needed, and then show your options for next steps to getting fully vote-ready.",
       "button": "Get Started"
     },
     "initial_profile_page": {
@@ -10,7 +10,7 @@
       "retry_title": "Look Up Your Voter Registration",
       "retry_body": "To re-try your voter registration lookup, correct any of the information below. If the information already looks right, choose Register to Vote below.",
       "some_data_body": "Please check the information about you listed below: confirm, correct, or complete the information that we will use to check your voter registration.",
-      "no_data_body": "Please fill out all the fields below so that we can check whether you need to register to vote."
+      "no_data_body": "Please fill out all the fields below, so that we can check whether you need to register to vote."
     },
     "onboarding2": {
       "title": "Finish Your Voter Profile",
@@ -28,16 +28,18 @@
     },
     "dashboard": {
       "title": "Your Voter Status Dashboard",
-      "returning": "Welcome back, {{firstname}}! Check everything you need to get completely vote-ready.",
-      "finished_onboarding": "Thanks, {{firstname}}! Below you’ll find everything you need to know to get completely vote-ready.",
-      "upcoming_election": "Next Election: ",
+      "returning": "<strong>Welcome back, {{firstname}}!</strong> Check everything you need to get completely vote-ready.",
+      "finished_onboarding": "<strong>Thanks, {{firstname}}!</strong> Below you’ll find everything you need to know to get completely vote-ready.",
+      "upcoming_election": "<strong>Next Election: </strong>",
+      "upcoming_election_none": "<strong>Next Election:</strong> not available",
       "ballot_prompt": "See what’s on <ballotLink>Your Ballot</ballotLink>",
       "ballot_none": "Sample Ballot: not yet available",
+      "your_locations": "Your Voting Locations",
       "location_prompt": "See your <locationLink>Voting Map</locationLink> for options to vote in person, early, or ballot drop-off",
       "location_none": "Voting Map: not yet available",
       "abr_prompt": "You may be eligible to vote absentee or by mail -- <abrLink>Check Your Options</abrLink>",
-      "reg_status_pending": "Voter Registration Status: Pending",
-      "reg_status_active": "Voter Registration Status: Active"
+      "reg_status_pending": "<strong>Voter Registration Status:</strong> Pending",
+      "reg_status_active": "<strong>Voter Registration Status:</strong> Active"
     },
     "restart": {
       "title": "Restart",
@@ -46,7 +48,10 @@
     "profile": {
       "title": "Your Profile",
       "body": "Please update any of your personal information below that has changed",
-      "change_notice": "Because you your changes, you’ll need to update your voter registration by continuing below"
+      "change_notice": "Because of your changes, you’ll need to update your voter registration by continuing below."
+    },
+    "preferences": {
+      "title": "Preferences"
     },
     "header_links": {}
   }

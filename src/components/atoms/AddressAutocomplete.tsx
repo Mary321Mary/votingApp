@@ -17,6 +17,7 @@ interface AddressAutocompleteProps {
   helpText?: string;
   onAddressSelect: (data: {
     address: string;
+    aptunit: string;
     city: string;
     zip: string;
     formattedAddress: string;
@@ -66,6 +67,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
           let streetNumber = "";
           let route = "";
+          let aptunit = "";
           let locality = "";
           let postalCode = "";
 
@@ -73,6 +75,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             const types: string[] = component.types;
             if (types.includes("street_number"))
               streetNumber = component.long_name;
+            if (types.includes("subpremise")) aptunit = component.long_name;
             if (types.includes("route")) route = component.long_name;
             if (types.includes("locality")) locality = component.long_name;
             if (types.includes("postal_code")) postalCode = component.long_name;
@@ -84,6 +87,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
           onAddressSelect({
             address: formattedAddress || fullStreetAddress,
+            aptunit,
             city: locality,
             zip: postalCode,
             formattedAddress,

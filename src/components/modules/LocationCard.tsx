@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, StyleSheet, Linking } from "react-native";
+import { View, Text, StyleSheet, Linking, Alert } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -28,7 +28,6 @@ interface LocationCardProps {
   idPrefix?: string;
 }
 
-// Вспомогательные утилиты
 const formatCityStateZip = (city?: string, state?: string, zip?: string) => {
   return [city, state, zip].filter(Boolean).join(", ");
 };
@@ -60,11 +59,15 @@ export const LocationCard: React.FC<LocationCardProps> = ({ item }) => {
   const { address, pollingHours, startDate, endDate, map_url, map_data } = item;
 
   const handleMapClick = async () => {
-    if (map_url) {
-      const canOpen = await Linking.canOpenURL(map_url);
-      if (canOpen) {
-        await Linking.openURL(map_url);
-      }
+    if (!map_url) return;
+
+    try {
+      const decodedUrl = decodeURIComponent(map_url);
+      const safeUrl = encodeURI(decodedUrl);
+      await Linking.openURL(safeUrl);
+    } catch (error) {
+      console.error("Failed to open map URL:", error);
+      Alert.alert("Error", "Could not open map link.");
     }
   };
 
@@ -75,12 +78,10 @@ export const LocationCard: React.FC<LocationCardProps> = ({ item }) => {
   );
   const hours = resolveLocationHours(pollingHours, map_data?.placeHours);
   const placeNotes = map_data?.placeNotes?.trim() ?? "";
-  const locationName = address?.locationName?.trim() ?? "";
-  const mapButtonText = t("location_lookup_page2.map_button_text", "Map");
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{locationName}</Text>
+      <Text style={styles.title}>{address?.locationName?.trim() ?? ""}</Text>
 
       <View style={styles.body}>
         <View style={styles.details}>
@@ -112,7 +113,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({ item }) => {
 
         <View style={styles.buttonContainer}>
           <CustomButton
-            title={mapButtonText}
+            title={t("location_lookup_page2.map_button_text")}
             onPress={handleMapClick}
             disabled={!map_url}
           />

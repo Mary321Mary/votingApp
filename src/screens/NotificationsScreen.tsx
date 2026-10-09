@@ -147,6 +147,7 @@ export default function NotificationsScreen({
       <Header text={t("menu.notifications", "Notifications")} />
 
       <View style={styles.listContent}>
+        <CustomButton title={"Go to Dashboard"} onPress={handleActionClick} />
         {notifications.length > 0 ? (
           notifications.map(item => (
             <React.Fragment key={item.id}>
@@ -196,10 +197,9 @@ export default function NotificationsScreen({
             {/* Action / Next Step CTA */}
             <View style={styles.modalFooter}>
               <CustomButton
-                title={t(
-                  "notifications.view_dashboard",
-                  "Go to " + selectedNotification?.actionTarget || "Dashboard",
-                )}
+                title={
+                  "Go to " + selectedNotification?.actionTarget || "Dashboard"
+                }
                 onPress={handleActionClick}
               />
             </View>
@@ -218,7 +218,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.white,
     },
     listContent: {
-      padding: 15,
+      padding: 10,
       gap: 10,
     },
     card: {
@@ -283,7 +283,7 @@ const getStyles = (theme: any) =>
     // Modal Styles
     modalOverlay: {
       flex: 1,
-      backgroundColor: theme.gray,
+      backgroundColor: "rgba(0, 0, 0, 0.3)",
       justifyContent: "flex-end",
     },
     modalContent: {

@@ -301,6 +301,17 @@ export interface LatLng {
   lng: number;
 }
 
+export interface MarkerLatLng {
+  latitude: number;
+  longitude: number;
+}
+
+export interface MarkerModel {
+  id: string;
+  location: LocationItem;
+  position: MarkerLatLng;
+}
+
 export type LocationType = "electionday" | "earlyvote" | "dropoff";
 
 export interface MapData {

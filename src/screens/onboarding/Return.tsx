@@ -48,7 +48,7 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
       phone: "",
 
       opt_in_email: false,
-      opt_in_sms: true,
+      opt_in_sms: false,
       volunteer: false,
 
       survey_question_1: "",

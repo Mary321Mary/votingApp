@@ -1,49 +1,48 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
-import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
-import { getLocations } from "@/utils/api";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RootStackParamList } from "@/components/Navigation";
-import { LocationItem, LocationsData } from "../utils/types";
+import { LocationItem } from "../utils/types";
 import { LocationCard } from "../components/modules/LocationCard";
 import { CustomButton } from "../components/atoms/CustomButton";
+import { LocationMap } from "../components/modules/LocationMap";
 
 type LocationScreenProps = NativeStackScreenProps<
   RootStackParamList,
   "Location"
 >;
 
-export default function LocationScreen({ navigation }: LocationScreenProps) {
+export default function LocationScreen({
+  navigation,
+  route,
+}: LocationScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const [locations, setLocations] = useState<LocationsData>({
+  const locations = route.params.locations || {
     map_key: "",
     map_center: { lat: 0, lng: 0 },
     pollingLocations: [],
     earlyVoteSites: [],
     dropOffLocations: [],
-  });
+  };
+  const form = route.params.form;
 
   const pollingCount = locations.pollingLocations?.length || 0;
   const earlyCount = locations.earlyVoteSites?.length || 0;
   const dropboxCount = locations.dropOffLocations?.length || 0;
 
-  const [loading, setLoading] = useState<boolean>(true);
   const [isEarlyOpen, setIsEarlyOpen] = useState(earlyCount <= 3);
   const [isDropboxesOpen, setIsDropboxesOpen] = useState(dropboxCount <= 3);
 
@@ -52,28 +51,6 @@ export default function LocationScreen({ navigation }: LocationScreenProps) {
     Boolean(locations.map_center) &&
     typeof locations.map_center?.lat === "number" &&
     typeof locations.map_center?.lng === "number";
-
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const [storedForm] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-        ]);
-
-        if (storedForm) {
-          const parsedForm = JSON.parse(storedForm);
-          const apiLocationResponse = await getLocations(parsedForm);
-          setLocations(apiLocationResponse.data.locations);
-        }
-      } catch (error) {
-        console.error("Failed to load user data from AsyncStorage:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUserData();
-  }, []);
 
   const renderAccordionSection = (
     title: string,
@@ -108,32 +85,22 @@ export default function LocationScreen({ navigation }: LocationScreenProps) {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={theme.primary} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <Header showMenu text={"Your Voting Locations"} />
+      <Header showMenu text={"native_local.dashboard.your_locations"} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* {hasMapCenter && <LocationMap data={locations} />} */}
+        <Text>
+          <Text>{t("location_lookup_page2.subtitle1")}</Text>
+          {form ? form.address : "N/A"}
+        </Text>
+        {hasMapCenter && <LocationMap data={locations} />}
 
         {!hasLocations ? (
           <Text style={styles.emptyText}>
             {!hasMapCenter
-              ? t(
-                  "location_lookup_page2.address_not_found",
-                  "Address not found",
-                )
-              : t(
-                  "location_lookup_page2.locations_not_found",
-                  "No locations found",
-                )}
+              ? t("location_lookup_page2.address_not_found")
+              : t("location_lookup_page2.locations_not_found")}
           </Text>
         ) : (
           <View style={styles.resultsContainer}>
@@ -179,7 +146,7 @@ export default function LocationScreen({ navigation }: LocationScreenProps) {
         )}
 
         <CustomButton
-          title={"Return to Dashboard"}
+          title={"Back to Dashboard"}
           onPress={() => navigation.navigate("Dashboard", {})}
         />
       </ScrollView>
@@ -193,11 +160,6 @@ const getStyles = (theme: any) =>
       width: "100%",
       flex: 1,
       backgroundColor: theme.white,
-    },
-    centered: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
     },
     content: {
       padding: 10,

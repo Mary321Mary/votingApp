@@ -6,6 +6,7 @@ import {
   CheckRegistrationStatus,
   DataCollectionConfiguration,
   Election,
+  LocationsData,
   RegisterFormState,
   StateData,
   SubmitEmailZipResponse,
@@ -185,7 +186,10 @@ export type RootStackParamList = {
     electionTitle?: string;
     savedSelections: any;
   };
-  Location: undefined;
+  Location: {
+    locations: LocationsData;
+    form: CheckRegistrationStatus;
+  };
 };
 
 const withDefaultLayout = (Component: React.ComponentType<any>) => {

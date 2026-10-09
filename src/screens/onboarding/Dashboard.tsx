@@ -67,7 +67,7 @@ export default function DashboardScreen({
     phone: "",
 
     opt_in_email: false,
-    opt_in_sms: true,
+    opt_in_sms: false,
     volunteer: false,
 
     survey_question_1: "",
@@ -121,12 +121,6 @@ export default function DashboardScreen({
     );
   }
 
-  const welcomeText = userName
-    ? afterRegistration
-      ? t("native_local.dashboard.finished_onboarding", { firstname: userName })
-      : t("native_local.dashboard.returning", { firstname: userName })
-    : "Welcome back. Your best next step are ...";
-
   const openInAppUrl = async (url: string) => {
     if (!url) return;
     try {
@@ -161,23 +155,34 @@ export default function DashboardScreen({
       <Header showMenu text={t("native_local.dashboard.title")} />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.text}>{welcomeText}</Text>
         <Text style={styles.text}>
-          {status
-            ? t("native_local.dashboard.reg_status_active")
-            : t("native_local.dashboard.reg_status_pending")}
-        </Text>
-
-        {/* <Text style={styles.text}>
           <Trans
-            i18nKey="native_local.dashboard.ballot_prompt"
+            i18nKey={
+              afterRegistration
+                ? "native_local.dashboard.finished_onboarding"
+                : "native_local.dashboard.returning"
+            }
+            values={{ firstname: userName }}
             components={{
-              ballotLink: (
-                <Text style={styles.link} onPress={handleNavigateToBallot} />
-              ),
+              body: <Text style={styles.text} />,
+              strong: <Text style={styles.bold} />,
             }}
           />
-        </Text> */}
+        </Text>
+        <Text style={styles.text}>
+          <Trans
+            i18nKey={
+              status
+                ? t("native_local.dashboard.reg_status_active")
+                : t("native_local.dashboard.reg_status_pending")
+            }
+            components={{
+              body: <Text style={styles.text} />,
+              strong: <Text style={styles.bold} />,
+            }}
+          />
+        </Text>
+
         <ElectionData />
 
         <View style={styles.buttonContainer}>
@@ -286,7 +291,7 @@ const getStyles = (theme: any) =>
       alignItems: "center",
     },
     content: {
-      padding: 20,
+      padding: 10,
     },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
@@ -294,6 +299,7 @@ const getStyles = (theme: any) =>
       fontWeight: "600",
       lineHeight: 22,
       color: theme.textPrimary,
+      marginBottom: 5,
     },
     bold: {
       fontFamily: "Inter-VariableFont_opsz_wght",

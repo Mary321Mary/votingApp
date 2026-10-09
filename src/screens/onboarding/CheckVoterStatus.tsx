@@ -39,6 +39,7 @@ import { Checkbox } from "../../components/atoms/Checkbox";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Footer from "../../layout/Footer";
 import { useFormScroll } from "../../contexts/FormScrollContext";
+import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -408,11 +409,11 @@ export const CheckVoterStatusScreen = ({
         {!isByFields ? (
           <AddressAutocomplete
             apiKey={config?.google_maps_browser_key || ""}
-            name="address"
+            name={errMsg.address ? "address" : errMsg.city ? "city" : "zip"}
             value={form.address}
             label={t("form_fields.address")}
             required
-            errorText={errMsg.address}
+            errorText={errMsg.address || errMsg.city || errMsg.zip}
             onAddressSelect={({ address, city, zip }) => {
               setForm(prev => ({
                 ...prev,
@@ -554,7 +555,7 @@ export const CheckVoterStatusScreen = ({
                   state: response.data.state,
                   zip: form.zip,
                   email: form.email,
-                  form: form as any,
+                  form: mapLookupFormToRegisterForm(form),
                   pageFromLookup: "paper",
                   workflowType: "nvra",
                   showRedirectText: false,

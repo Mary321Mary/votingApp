@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import i18n from "@/i18n";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
 
 type LookupScreenProps = NativeStackScreenProps<RootStackParamList, "Lookup">;
 
@@ -28,6 +29,12 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
   const styles = getStyles(theme);
   const { width } = useWindowDimensions();
   const { state, form } = route.params;
+
+  const [errors, setErrors] = useState<{
+    email?: string;
+    zip?: string;
+    general?: string;
+  }>({});
 
   const handleOpenLink = async () => {
     const url = state?.online_registration_system_url;
@@ -242,36 +249,70 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
             title={t("lookup_not_found_page.cta_register")}
             variant="outline-primary"
             onPress={async () => {
-              const response = await submitEmailZip({
-                email: form.email,
-                zip: form.zip,
-                locale: i18n.language,
-                partner_id: form.partner_id.toString(),
-              });
-              await AsyncStorage.setItem(
-                "registration_uid",
-                response.data.registration_uid,
-              );
+              try {
+                const response = await submitEmailZip({
+                  email: form.email,
+                  zip: form.zip,
+                  locale: i18n.language,
+                  partner_id: form.partner_id.toString(),
+                });
+                await AsyncStorage.setItem(
+                  "registration_uid",
+                  response.data.registration_uid,
+                );
 
-              await reportEvent({
-                registration_uid: response.data.registration_uid ?? "",
-                partner_id: form.partner_id.toString() || "1",
-                step: REPORT_EVENT_STEPS.STEP_1,
-                event_name: "redirect from lookup to OV",
-              });
+                await reportEvent({
+                  registration_uid: response.data.registration_uid ?? "",
+                  partner_id: form.partner_id.toString() || "1",
+                  step: REPORT_EVENT_STEPS.STEP_1,
+                  event_name: "redirect from lookup to OV",
+                });
 
-              navigation.replace("Register", {
-                status: { success: true },
-                state,
-                zip: form.zip,
-                email: form.email,
-                form,
-                pageFromLookup: "paper",
-                workflowType: "nvra",
-                showRedirectText: false,
-              } as any);
+                navigation.replace("Register", {
+                  status: { success: true, errors: [] },
+                  state,
+                  zip: form.zip,
+                  email: form.email,
+                  form: mapLookupFormToRegisterForm(form),
+                  pageFromLookup: "paper",
+                  workflowType: "nvra",
+                  showRedirectText: false,
+                });
+              } catch (error: any) {
+                console.error("Register failed:", error);
+
+                const newErrors: {
+                  email?: string;
+                  zip?: string;
+                  general?: string;
+                } = {};
+                if (
+                  error?.response?.status === 422 &&
+                  Array.isArray(error?.response?.data?.status?.errors)
+                ) {
+                  error.response.data.status.errors.forEach((msg: string) => {
+                    const lowerMsg = msg.toLowerCase();
+                    if (lowerMsg.includes("email")) {
+                      newErrors.email = t("form_fields.email_error");
+                    } else if (lowerMsg.includes("zip")) {
+                      newErrors.zip = t("form_fields.zip_code_error");
+                    } else
+                      newErrors.general = newErrors.general
+                        ? `${newErrors.general}\n${msg}`
+                        : msg;
+                  });
+                } else
+                  newErrors.general =
+                    "An error occurred. Please try again later.";
+                setErrors(newErrors);
+              }
             }}
           />
+        )}
+        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+        {errors.zip && <Text style={styles.errorText}>{errors.zip}</Text>}
+        {errors.general && (
+          <Text style={styles.errorText}>{errors.general}</Text>
         )}
         <CustomButton
           title={t("lookup_not_found_page.cta_try_again")}
@@ -332,5 +373,12 @@ const getStyles = (theme: any) =>
       fontSize: 12,
       lineHeight: 16,
       textDecorationLine: "underline",
+    },
+    errorText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 14,
+      color: theme.secondary,
+      textAlign: "center",
+      marginBottom: 15,
     },
   });

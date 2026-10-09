@@ -11,6 +11,7 @@ import { reportEvent, submitEmailZip } from "@/utils/api";
 import i18n from "@/i18n";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
 
 type LookupNotFoundScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -136,7 +137,7 @@ export default function LookupNotFoundScreen({
                   state,
                   zip: form.zip,
                   email: form.email,
-                  form: form as any,
+                  form: mapLookupFormToRegisterForm(form),
                   pageFromLookup: "paper",
                   workflowType: "nvra",
                   showRedirectText: false,

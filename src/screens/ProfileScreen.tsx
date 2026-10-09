@@ -30,6 +30,7 @@ import { Checkbox } from "@/components/atoms/Checkbox";
 import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
 import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
 import i18n from "../i18n";
+import { mapLookupFormToRegisterForm } from "../utils/register/registerRouting";
 
 const INITIAL_FORM_STATE: CheckRegistrationStatus = {
   partner_id: 1,
@@ -46,7 +47,7 @@ const INITIAL_FORM_STATE: CheckRegistrationStatus = {
   date_of_birth: "",
   phone: "",
   opt_in_email: false,
-  opt_in_sms: true,
+  opt_in_sms: false,
   volunteer: false,
   survey_question_1: "",
   survey_answer_1: "",
@@ -227,7 +228,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       state: response.data.state,
       zip: form.zip,
       email: form.email,
-      form: form as any,
+      form: mapLookupFormToRegisterForm(form),
       pageFromLookup: "paper",
       workflowType: "nvra",
       showRedirectText: false,

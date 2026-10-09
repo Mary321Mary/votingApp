@@ -113,6 +113,7 @@ const getStyles = (theme: any) =>
     },
     outlineText: {
       color: theme.primary,
+      fontSize: 14,
     },
     linkText: {
       color: theme.primary,

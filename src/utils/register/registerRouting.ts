@@ -77,3 +77,36 @@ export function mapRegisterFormToVrLookupPayload(
     prefType3: true,
   };
 }
+
+export function mapLookupFormToRegisterForm(
+  lookupForm: CheckRegistrationStatus,
+): RegisterFormState {
+  return {
+    partner_id: lookupForm.partner_id,
+    first_name: lookupForm.first_name,
+    last_name: lookupForm.last_name,
+    home_address: lookupForm.address,
+    home_city: lookupForm.city,
+    home_unit: lookupForm.aptunit,
+
+    phone: lookupForm.phone,
+    opt_in_email: lookupForm.opt_in_email,
+    opt_in_sms: lookupForm.opt_in_sms,
+    volunteer: lookupForm.volunteer,
+
+    birthMonth: lookupForm.birthMonth,
+    birthDay: lookupForm.birthDay,
+    birthYear: lookupForm.birthYear,
+    date_of_birth:
+      lookupForm.birthYear +
+      "-" +
+      lookupForm.birthMonth +
+      "-" +
+      lookupForm.birthDay,
+
+    survey_question_1: lookupForm.survey_question_1,
+    survey_answer_1: lookupForm.survey_answer_1,
+    survey_question_2: lookupForm.survey_question_2,
+    survey_answer_2: lookupForm.survey_answer_2,
+  } as RegisterFormState;
+}

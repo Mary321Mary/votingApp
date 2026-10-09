@@ -78,7 +78,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
         date_of_birth: "",
         phone: "",
         opt_in_email: false,
-        opt_in_sms: true,
+        opt_in_sms: false,
         volunteer: false,
         survey_question_1: "",
         survey_answer_1: "",
@@ -106,7 +106,11 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
       <View style={styles.content}>
         <Text style={styles.header}>{t("native_local.splash_page.title")}</Text>
 
-        <Text style={styles.text}>{t("native_local.splash_page.body")}</Text>
+        <RenderHTML
+          contentWidth={width}
+          source={{ html: t("native_local.splash_page.body") }}
+          baseStyle={styles.text}
+        />
 
         <CustomButton
           title={t("native_local.splash_page.button")}
