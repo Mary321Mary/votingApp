@@ -2,7 +2,7 @@
   "native_local": {
     "splash_page": {
       "title": "¡Bienvenido a RockTheVote!",
-      "body": "Esta aplicación te guiará en todos los pasos para estar listo para votar y para ayudar a tus amigos y familiares también. Los primeros pasos son verificar si estás registrado para votar, registrarte si es necesario y luego mostrarte las opciones de los siguientes pasos para estar completamente listo para votar.",
+      "body": "Esta aplicación te guiará en todos los pasos para estar listo para votar y para ayudar a tus amigos y familiares también. <p> Los primeros pasos son verificar si estás registrado para votar, registrarte si es necesario y luego mostrarte las opciones de los siguientes pasos para estar completamente listo para votar.",
       "button": "Comenzar"
     },
     "initial_profile_page": {
@@ -28,14 +28,17 @@
     },
     "dashboard": {
       "title": "Su panel de estado de votante",
-      "returning": "¡Bienvenido de nuevo, <firstname>! A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
-      "finished_onboarding": "¡Gracias, <firstname>! A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
-      "upcoming_election": "Próxima elección: ",
+      "returning": "<strong>¡Bienvenido de nuevo, <firstname>!</strong> A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
+      "finished_onboarding": "<strong>¡Gracias, <firstname>!</strong> A continuación encontrará todo lo que necesita saber para estar completamente listo para votar.",
+      "upcoming_election": "<strong>Próxima elección:</strong> ",
+      "upcoming_election_none": "<strong>Next Election:</strong> not available",
       "ballot_prompt": "Consulta tus próximas elecciones y mira <ballotLink>Qué hay en tu papeleta</ballotLink>",
+      "ballot_none": "Sample Ballot: not yet available",
+      "your_locations": "Your Voting Locations",
       "location_prompt": "Consulta tus opciones para votar en persona o entregar tu papeleta por correo en <locationLink>Tu mapa electoral</locationLink>",
       "abr_prompt": "Es posible que seas elegible para votar en ausencia o por correo: <abrLink>Consulta tus opciones</abrLink>",
-      "reg_status_pending": "Estado del registro de votante: Pendiente",
-      "reg_status_active": "Estado del registro de votante: Activo"
+      "reg_status_pending": "<strong>Estado del registro de votante:</strong> Pendiente",
+      "reg_status_active": "<strong>Estado del registro de votante:</strong> Activo"
     },
     "restart": {
       "title": "Recomenzar",
@@ -45,6 +48,9 @@
       "title": "Tu perfil",
       "body": "Por favor, actualiza a continuación cualquier información personal que haya cambiado",
       "change_notice": "Debido a que cambiaste tu nombre o dirección, deberás actualizar tu registro de elector continuando a continuación"
+    },
+    "preferences": {
+      "title": "Preferences"
     },
     "header_links": {}
   }

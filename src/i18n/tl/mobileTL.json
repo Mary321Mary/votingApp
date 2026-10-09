@@ -2,7 +2,7 @@
   "native_local": {
     "splash_page": {
       "button": "Magsimula",
-      "body": "Tutulungan ka ng app na ito sa lahat ng hakbang upang maging handa sa pagboto, at upang matulungan din ang iyong mga kaibigan at pamilya. Ang mga unang hakbang ay suriin kung ikaw ay nakarehistro na para bumoto, irehistro ka kung kailangan, at pagkatapos ay ipakita ang iyong mga opsyon para sa mga kasunod na hakbang upang maging ganap na handa sa pagboto.",
+      "body": "Tutulungan ka ng app na ito sa lahat ng hakbang upang maging handa sa pagboto, at upang matulungan din ang iyong mga kaibigan at pamilya. <p> Ang mga unang hakbang ay suriin kung ikaw ay nakarehistro na para bumoto, irehistro ka kung kailangan, at pagkatapos ay ipakita ang iyong mga opsyon para sa mga kasunod na hakbang upang maging ganap na handa sa pagboto.",
       "title": "Maligayang pagdating sa RockTheVote!"
     },
     "initial_profile_page": {
@@ -31,11 +31,17 @@
     },
     "dashboard": {
       "title": "Dashboard ng Status ng Iyong Pagkabotante",
-      "returning": "Maligayang pagbabalik, <firstname>! Sa ibaba ay makikita mo ang lahat ng kailangan mong malaman upang maging ganap na handa sa pagboto.",
-      "finished_onboarding": "Salamat, <firstname>! Sa ibaba ay makikita mo ang lahat ng kailangan mong malaman upang maging ganap na handa sa pagboto.",
-      "upcoming_election": "Muling Halalan: ",
-      "reg_status_pending": "Status ng Rehistrasyon ng Botante: Nakabinbin",
-      "reg_status_active": "Status ng Rehistrasyon ng Botante: Aktibo"
+      "returning": "<strong>Maligayang pagbabalik, <firstname>! Sa ibaba ay makikita mo ang lahat ng kailangan mong malaman upang maging ganap na handa sa pagboto.",
+      "finished_onboarding": "<strong>Salamat, <firstname>! Sa ibaba ay makikita mo ang lahat ng kailangan mong malaman upang maging ganap na handa sa pagboto.",
+      "upcoming_election": "<strong>Muling Halalan:</strong> ",
+      "upcoming_election_none": "<strong>Next Election:</strong> not available",
+      "ballot_prompt": "Consulta tus próximas elecciones y mira <ballotLink>Qué hay en tu papeleta</ballotLink>",
+      "ballot_none": "Sample Ballot: not yet available",
+      "your_locations": "Your Voting Locations",
+      "location_prompt": "Consulta tus opciones para votar en persona o entregar tu papeleta por correo en <locationLink>Tu mapa electoral</locationLink>",
+      "abr_prompt": "Es posible que seas elegible para votar en ausencia o por correo: <abrLink>Consulta tus opciones</abrLink>",
+      "reg_status_pending": "<strong>Status ng Rehistrasyon ng Botante:</strong> Nakabinbin",
+      "reg_status_active": "<strong>Status ng Rehistrasyon ng Botante:</strong> Aktibo"
     },
     "restart": {
       "title": "Umulpil ulit",
@@ -45,6 +51,9 @@
       "title": "Iyong Profile",
       "body": "Mangyaring i-update ang alinman sa iyong personal na impormasyon sa ibaba na nagbago",
       "change_notice": "Dahil binago mo ang iyong pangalan o address, kailangan mong i-update ang iyong rehistrasyon bilang botante sa pamamagitan ng pagpapatuloy sa ibaba"
+    },
+    "preferences": {
+      "title": "Preferences"
     },
     "header_links": {}
   }
