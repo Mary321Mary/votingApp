@@ -81,16 +81,21 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             if (types.includes("postal_code")) postalCode = component.long_name;
           });
 
-          const fullStreetAddress = `${streetNumber} ${route}`.trim();
+          const streetAddress = `${streetNumber} ${route}`.trim();
           const formattedAddress =
             details.formatted_address || data.description;
 
+          // 👉 ПРИНУДИТЕЛЬНО УСТАНАВЛИВАЕМ ВСЮ СТРОКУ В ИНПУТ АВТОЗАПОЛНЕНИЯ:
+          if (googleRef.current && formattedAddress) {
+            googleRef.current.setAddressText(formattedAddress);
+          }
+
           onAddressSelect({
-            address: formattedAddress || fullStreetAddress,
+            address: streetAddress || formattedAddress, // Только улица (для стейта формы)
             aptunit,
             city: locality,
             zip: postalCode,
-            formattedAddress,
+            formattedAddress, // Вся строка
           });
         }}
         onFail={error => console.log("GOOGLE PLACES ERROR:", error)}

@@ -283,10 +283,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             label={t("form_fields.address")}
             required
             errorText={errors.address}
-            onAddressSelect={({ address, city, zip }) => {
+            onAddressSelect={({ address, aptunit, city, zip }) => {
               setForm(prev => ({
                 ...prev,
                 address,
+                aptunit,
                 city,
                 zip,
               }));

@@ -414,10 +414,11 @@ export const CheckVoterStatusScreen = ({
             label={t("form_fields.address")}
             required
             errorText={errMsg.address || errMsg.city || errMsg.zip}
-            onAddressSelect={({ address, city, zip }) => {
+            onAddressSelect={({ address, aptunit, city, zip }) => {
               setForm(prev => ({
                 ...prev,
                 address,
+                aptunit,
                 city,
                 zip,
               }));
