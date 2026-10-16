@@ -8,18 +8,20 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import i18n from "i18n";
-import { CheckRegistrationStatus } from "../utils/types";
-import { getSurveyQuestions } from "../utils/api";
+import { CheckRegistrationStatus } from "@/utils/types";
+import { getSurveyQuestions } from "@/utils/api";
+import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
+
 import { CustomButton } from "../components/atoms/CustomButton";
-import { VOTER_FORM_STORAGE_KEY } from "../utils/constants";
 import { Checkbox } from "../components/atoms/Checkbox";
 import InputField from "../components/atoms/InputField";
 import { RootStackParamList } from "../components/Navigation";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import LanguageSelector from "../components/atoms/LanguageSelector";
 
 type SettingsScreenProps = NativeStackScreenProps<
@@ -118,11 +120,6 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
       <Header text={t("native_local.preferences.title")} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Subtitle */}
-        <Text style={styles.bodyText}>
-          {t("native_local.onboarding2.body")}
-        </Text>
-
         {/* ================= BLOCK 1: Communication Preferences ================= */}
         <View>
           <Text style={styles.headerText}>
@@ -236,7 +233,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -250,11 +247,6 @@ const getStyles = (theme: any) =>
     },
     scrollContent: {
       padding: 10,
-    },
-    bodyText: {
-      fontSize: 16,
-      marginBottom: 20,
-      lineHeight: 22,
     },
     headerText: {
       fontSize: 20,

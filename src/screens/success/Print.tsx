@@ -18,6 +18,10 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
+import { RootStackParamList } from "@/components/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
+
 import {
   filterRegistrant,
   ONBOARDING2_COMPLETED_KEY,
@@ -28,8 +32,6 @@ import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
-import { RootStackParamList } from "@/components/Navigation";
-import { CustomButton } from "@/components/atoms/CustomButton";
 import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
 
 type PrintScreenProps = NativeStackScreenProps<RootStackParamList, "Print">;
@@ -171,6 +173,7 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
             title={t("print_form_page.learn_button_text", {
               state_abbr: form.state,
             })}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(state.learn_about_url || "");
 
@@ -185,8 +188,6 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
             }}
           />
         </View>
-
-        <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
           {onboardingFlow ? (
@@ -282,43 +283,45 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
           )}
 
           {/* Footer */}
-          <View>
-            <View style={styles.divider} />
-            <Text style={styles.secondaryText}>
-              {t("general.calls_to_action.building_site")}
-            </Text>
+          {!onboardingFlow && (
+            <View>
+              <View style={styles.divider} />
+              <Text style={styles.secondaryText}>
+                {t("general.calls_to_action.building_site")}
+              </Text>
 
-            <Text>
-              <Trans
-                i18nKey="general.calls_to_action.get_tool_reg"
-                components={{
-                  a: (
-                    <Text
-                      key="email-link"
-                      style={styles.linkText}
-                      onPress={() => {
-                        Linking.openURL("mailto:civictech@rockthevote.org");
-                      }}
-                    >
-                      {0}
-                    </Text>
-                  ),
-                }}
-              />
-            </Text>
-          </View>
+              <Text>
+                <Trans
+                  i18nKey="general.calls_to_action.get_tool_reg"
+                  components={{
+                    a: (
+                      <Text
+                        key="email-link"
+                        style={styles.linkText}
+                        onPress={() =>
+                          Linking.openURL("mailto:civictech@rockthevote.org")
+                        }
+                      >
+                        {0}
+                      </Text>
+                    ),
+                  }}
+                />
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: { flex: 1 },
     body: { padding: 10 },
     title: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
-    section: { marginVertical: 16 },
+    section: { marginVertical: 10 },
     loadingContainer: { flexDirection: "row" },
     loadingText: { marginLeft: 8, fontSize: 16 },
     boldText: { fontWeight: "bold", fontSize: 16 },
@@ -329,7 +332,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.gray,
       marginVertical: 16,
     },
-    shareButtons: { marginTop: 16, gap: 12 },
+    shareButtons: { gap: 10 },
     secondaryText: { marginBottom: 8 },
     linkText: { color: theme.link, textDecorationLine: "underline" },
   });

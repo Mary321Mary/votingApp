@@ -14,6 +14,7 @@ import {
 } from "@/utils/constants";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
@@ -108,7 +109,7 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -116,7 +117,7 @@ const getStyles = (theme: any) =>
       backgroundColor: theme.white,
     },
     content: {
-      padding: 20,
+      padding: 10,
       alignItems: "center",
     },
     text: {

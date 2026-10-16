@@ -40,6 +40,7 @@ import type {
 } from "utils/types";
 import { HttpClient } from "utils/http/http";
 import * as ENDPOINTS from "utils/endpoints";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // need to check EMAIL_ZIP and UI_CONFIG
 
@@ -118,6 +119,21 @@ export function submitLookup(
     CheckRegistrationStatusResponse
   >(ENDPOINTS.SUBMIT_LOOKUP, data, headers);
 }
+
+export const lookupVoterByUid = async (uid: string) => {
+  try {
+    const storedVoter = await AsyncStorage.getItem("voter_data");
+
+    if (storedVoter) {
+      return JSON.parse(storedVoter);
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error in lookupVoterByUid:", error);
+    return null;
+  }
+};
 
 export function submitElectionsLookup(
   data: CheckRegistrationStatus,

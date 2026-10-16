@@ -7,6 +7,7 @@ import {
 import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { useFormScroll } from "@/contexts/FormScrollContext";
+import { COLORS } from "@/styles/colors";
 
 interface AddressAutocompleteProps {
   apiKey: string;
@@ -42,7 +43,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
 
   useEffect(() => {
-    if (value && googleRef.current) {
+    if (value !== undefined && googleRef.current) {
       googleRef.current.setAddressText(value);
     }
   }, [value]);
@@ -85,17 +86,12 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           const formattedAddress =
             details.formatted_address || data.description;
 
-          // 👉 ПРИНУДИТЕЛЬНО УСТАНАВЛИВАЕМ ВСЮ СТРОКУ В ИНПУТ АВТОЗАПОЛНЕНИЯ:
-          if (googleRef.current && formattedAddress) {
-            googleRef.current.setAddressText(formattedAddress);
-          }
-
           onAddressSelect({
-            address: streetAddress || formattedAddress, // Только улица (для стейта формы)
+            address: streetAddress || formattedAddress,
             aptunit,
             city: locality,
             zip: postalCode,
-            formattedAddress, // Вся строка
+            formattedAddress,
           });
         }}
         onFail={error => console.log("GOOGLE PLACES ERROR:", error)}
@@ -137,7 +133,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   );
 };
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,

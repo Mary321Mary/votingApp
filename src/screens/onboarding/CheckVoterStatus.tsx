@@ -12,20 +12,22 @@ import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Contacts, { Contact } from "react-native-contacts";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
 import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/Navigation";
 import { processDateOfBirthValidation } from "@/components/atoms/DateOfBirth/dateValidation";
 import { CustomButton } from "@/components/atoms/CustomButton";
+import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
+import { Checkbox } from "@/components/atoms/Checkbox";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import {
   CheckRegistrationStatus,
   CheckRegistrationStatusError,
 } from "@/utils/types";
-import Header from "@/layout/Header";
-import { useUIConfig } from "@/contexts/UIConfigContext";
 import { submitEmailZip, submitLookup } from "@/utils/api";
 import {
   ONBOARDING_COMPLETED_KEY,
@@ -33,13 +35,13 @@ import {
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
 } from "@/utils/constants";
+import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
+
 import i18n from "i18n";
-import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
-import { Checkbox } from "../../components/atoms/Checkbox";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Footer from "../../layout/Footer";
-import { useFormScroll } from "../../contexts/FormScrollContext";
-import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
+import Footer from "@/layout/Footer";
+import Header from "@/layout/Header";
+import { useUIConfig } from "@/contexts/UIConfigContext";
+import { useFormScroll } from "@/contexts/FormScrollContext";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -198,6 +200,7 @@ export const CheckVoterStatusScreen = ({
         form.date_of_birth =
           form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
         const responseLookup = await submitLookup({ ...form });
+        // const voterData = await lookupVoterByUid(responseLookup.data.lookup_uid);
 
         if (responseLookup.data.lookup_uid) {
           await AsyncStorage.setItem(
@@ -228,6 +231,7 @@ export const CheckVoterStatusScreen = ({
             VOTER_USER_STATUS,
             responseLookup.data.voter?.registration_status.toString() || "true",
           );
+
           navigation.navigate("Lookup", {
             form,
             state: responseLookup.data.state,
@@ -414,10 +418,16 @@ export const CheckVoterStatusScreen = ({
             label={t("form_fields.address")}
             required
             errorText={errMsg.address || errMsg.city || errMsg.zip}
-            onAddressSelect={({ address, aptunit, city, zip }) => {
+            onAddressSelect={({
+              address,
+              aptunit,
+              city,
+              zip,
+              formattedAddress,
+            }) => {
               setForm(prev => ({
                 ...prev,
-                address,
+                address: formattedAddress || address,
                 aptunit,
                 city,
                 zip,
@@ -477,6 +487,10 @@ export const CheckVoterStatusScreen = ({
           onValueChange={(checked: boolean) => {
             setIsByFields(checked);
             setErrMsg(EMPTY_ERROR_MESSAGES);
+            if (checked && form.address.includes(",")) {
+              const streetOnly = form.address.split(",")[0];
+              setForm(prev => ({ ...prev, address: streetOnly }));
+            }
           }}
         />
 
@@ -593,7 +607,7 @@ export const CheckVoterStatusScreen = ({
   );
 };
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     box: {
       padding: 10,

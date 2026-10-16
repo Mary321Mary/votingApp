@@ -12,14 +12,18 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
+import i18n from "i18n";
+
 import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
 import {
   CheckRegistrationStatus,
   CheckRegistrationStatusError,
 } from "@/utils/types";
 import { submitEmailZip } from "@/utils/api";
+import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
 
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
@@ -29,8 +33,6 @@ import { RootStackParamList } from "@/components/Navigation";
 import { Checkbox } from "@/components/atoms/Checkbox";
 import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
 import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
-import i18n from "../i18n";
-import { mapLookupFormToRegisterForm } from "../utils/register/registerRouting";
 
 const INITIAL_FORM_STATE: CheckRegistrationStatus = {
   partner_id: 1,
@@ -283,10 +285,16 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             label={t("form_fields.address")}
             required
             errorText={errors.address}
-            onAddressSelect={({ address, aptunit, city, zip }) => {
+            onAddressSelect={({
+              address,
+              aptunit,
+              city,
+              zip,
+              formattedAddress,
+            }) => {
               setForm(prev => ({
                 ...prev,
-                address,
+                address: formattedAddress || address,
                 aptunit,
                 city,
                 zip,
@@ -346,6 +354,10 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           onValueChange={(checked: boolean) => {
             setIsByFields(checked);
             setErrors(EMPTY_ERROR_MESSAGES);
+            if (checked && form.address.includes(",")) {
+              const streetOnly = form.address.split(",")[0];
+              setForm(prev => ({ ...prev, address: streetOnly }));
+            }
           }}
         />
 
@@ -408,7 +420,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       width: "100%",

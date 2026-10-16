@@ -50,7 +50,7 @@ import {
 } from "@/utils/api";
 import { submitAndCheckMICovr } from "@/utils/register/miCovr";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { RootStackParamList } from "../../Navigation";
+import { RootStackParamList } from "@/components/Navigation";
 
 import {
   EMPTY_ERROR_MESSAGES,
@@ -64,12 +64,14 @@ import {
   getPACovrFailNavigationExtras,
 } from "@/utils/register/paCovrErrors";
 import { submitAndCheckWACovr } from "@/utils/register/waCovr";
+import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
+import { apiTimeoutMethodFromPollErrors } from "@/utils/report/covrFailReporting";
+
 import RegisterFlowContent from "./RegisterFlowContent";
 import { getInitialFormState } from "./initFormState";
-import { useFormScroll } from "../../../contexts/FormScrollContext";
-import { REPORT_EVENT_STEPS } from "../../../utils/report/eventReporting";
-import { apiTimeoutMethodFromPollErrors } from "../../../utils/report/covrFailReporting";
-import Spinner from "../../atoms/Spinner";
+import { useFormScroll } from "@/contexts/FormScrollContext";
+import Spinner from "@/components/atoms/Spinner";
+import { COLORS } from "@/styles/colors";
 
 export type RegisterScreenNavigation = NativeStackNavigationProp<
   RootStackParamList,
@@ -330,6 +332,7 @@ export const RegisterResult = ({
           `${paPayload.first_name} ${paPayload.last_name}`.trim(),
         );
         await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+
         navigation.replace("SuccessPA", { state, form, onboardingFlow });
         return;
       }
@@ -397,6 +400,7 @@ export const RegisterResult = ({
           `${waPayload.first_name} ${waPayload.last_name}`.trim(),
         );
         await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+
         navigation.replace("SuccessWA", { state, form, onboardingFlow });
       } else {
         // Check returning a documented failure should route to the WA fail screen
@@ -616,6 +620,7 @@ export const RegisterResult = ({
                 );
                 await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
                 await AsyncStorage.setItem(VOTER_USER_STATUS, "true");
+
                 navigation.replace("SuccessMI", {
                   state,
                   form,
@@ -954,7 +959,7 @@ export const RegisterResult = ({
   );
 };
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     box: {
       maxWidth: "100%",

@@ -31,6 +31,8 @@ import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
 import i18n from "i18n";
 import ElectionData from "@/components/organisms/ElectionData";
+import { COLORS } from "@/styles/colors";
+import { Checkbox } from "../../components/atoms/Checkbox";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -171,6 +173,15 @@ export default function DashboardScreen({
         </Text>
         <Text style={styles.text}>
           <Trans
+            i18nKey={t("native_local.dashboard.reg_header")}
+            components={{
+              body: <Text style={styles.text} />,
+              strong: <Text style={styles.bold} />,
+            }}
+          />
+        </Text>
+        <Text style={styles.text}>
+          <Trans
             i18nKey={
               status
                 ? t("native_local.dashboard.reg_status_active")
@@ -182,6 +193,32 @@ export default function DashboardScreen({
             }}
           />
         </Text>
+        <Text style={styles.text}>
+          {t("native_local.dashboard.reg_date")}{" "}
+          {new Date().toLocaleDateString(i18n.language, {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </Text>
+        <Text style={styles.text}>
+          {savedForm.first_name} {savedForm.last_name}
+        </Text>
+        <Checkbox
+          name="name_change"
+          value={false}
+          label={t("native_local.dashboard.name_change")}
+          disabled
+          onValueChange={() => {}}
+        />
+        <Text style={styles.text}>{savedForm.address}</Text>
+        <Checkbox
+          name="address_change"
+          value={false}
+          label={t("native_local.dashboard.address_change")}
+          disabled
+          onValueChange={() => {}}
+        />
 
         <ElectionData />
 
@@ -278,7 +315,7 @@ export default function DashboardScreen({
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -296,7 +333,8 @@ const getStyles = (theme: any) =>
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
-      fontWeight: "600",
+      fontWeight: "500",
+      fontStyle: "italic",
       lineHeight: 22,
       color: theme.textPrimary,
       marginBottom: 5,
@@ -305,6 +343,7 @@ const getStyles = (theme: any) =>
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
       fontWeight: "bold",
+      fontStyle: "normal",
       lineHeight: 22,
       color: theme.textPrimary,
     },

@@ -17,19 +17,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Header from "@/layout/Header";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import { useUIConfig } from "@/contexts/UIConfigContext";
+import { RootStackParamList } from "@/components/Navigation";
+import { CustomButton } from "@/components/atoms/CustomButton";
+
 import {
   filterRegistrant,
   ONBOARDING2_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
 } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
-import { RootStackParamList } from "@/components/Navigation";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
-import { CustomButton } from "@/components/atoms/CustomButton";
 import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
 
 type SuccessScreenProps = NativeStackScreenProps<RootStackParamList, "Success">;
@@ -193,6 +195,7 @@ export default function SuccessScreen({
             title={t("print_form_page.learn_button_text", {
               state_abbr: form.state,
             })}
+            variant="outline-primary"
             onPress={async () => {
               Linking.openURL(state.learn_about_url || "");
 
@@ -207,8 +210,6 @@ export default function SuccessScreen({
             }}
           />
         </View>
-
-        <Text style={styles.title}>{t("print_form_page.encourage")}</Text>
 
         <View style={styles.shareButtons}>
           {onboardingFlow ? (
@@ -306,38 +307,40 @@ export default function SuccessScreen({
           )}
 
           {/* Footer */}
-          <View>
-            <View style={styles.divider} />
-            <Text style={styles.secondaryText}>
-              {t("general.calls_to_action.building_site")}
-            </Text>
+          {!onboardingFlow && (
+            <View>
+              <View style={styles.divider} />
+              <Text style={styles.secondaryText}>
+                {t("general.calls_to_action.building_site")}
+              </Text>
 
-            <Text>
-              <Trans
-                i18nKey="general.calls_to_action.get_tool_reg"
-                components={{
-                  a: (
-                    <Text
-                      key="email-link"
-                      style={styles.linkText}
-                      onPress={() => {
-                        Linking.openURL("mailto:civictech@rockthevote.org");
-                      }}
-                    >
-                      {0}
-                    </Text>
-                  ),
-                }}
-              />
-            </Text>
-          </View>
+              <Text>
+                <Trans
+                  i18nKey="general.calls_to_action.get_tool_reg"
+                  components={{
+                    a: (
+                      <Text
+                        key="email-link"
+                        style={styles.linkText}
+                        onPress={() =>
+                          Linking.openURL("mailto:civictech@rockthevote.org")
+                        }
+                      >
+                        {0}
+                      </Text>
+                    ),
+                  }}
+                />
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: { flex: 1 },
     titleText: { fontSize: 24, fontWeight: "bold" },

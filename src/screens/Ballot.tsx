@@ -9,10 +9,12 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../components/Navigation";
-import { partyDisplayName } from "../utils/constants";
-import Header from "../layout/Header";
-import { ThemeContext } from "../styles/ThemeProvider";
+
+import { RootStackParamList } from "@/components/Navigation";
+import { partyDisplayName } from "@/utils/constants";
+import Header from "@/layout/Header";
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 
 export interface FlattenedBallotItem {
   id: number;
@@ -315,7 +317,7 @@ export default function BallotDetailsScreen({ route, navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <Header showMenu text={"Your Simply Ballot"} />
+      <Header showMenu text={"Your Sample Ballot"} />
       <ScrollView
         ref={scrollViewRef}
         style={styles.container}
@@ -635,7 +637,7 @@ export default function BallotDetailsScreen({ route, navigation }: Props) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,
