@@ -205,27 +205,27 @@ export default function DashboardScreen({
             />
           </Text>
 
-          {/* {status && ( */}
-          <Text style={styles.text}>
-            <Text style={styles.bold}>
-              {t("native_local.dashboard.reg_date")}{" "}
-            </Text>
-            {savedUser?.registration_date
-              ? new Date(savedUser.registration_date).toLocaleDateString(
-                  "en-US",
-                  {
+          {status && (
+            <Text style={styles.text}>
+              <Text style={styles.bold}>
+                {t("native_local.dashboard.reg_date")}{" "}
+              </Text>
+              {savedUser?.registration_date
+                ? new Date(savedUser.registration_date).toLocaleDateString(
+                    "en-US",
+                    {
+                      month: "2-digit",
+                      day: "2-digit",
+                      year: "numeric",
+                    },
+                  )
+                : new Date().toLocaleDateString("en-US", {
                     month: "2-digit",
                     day: "2-digit",
                     year: "numeric",
-                  },
-                )
-              : new Date().toLocaleDateString("en-US", {
-                  month: "2-digit",
-                  day: "2-digit",
-                  year: "numeric",
-                })}
-          </Text>
-          {/* )} */}
+                  })}
+            </Text>
+          )}
           <Text style={styles.userDataText}>
             {savedForm.first_name} {savedForm.last_name}
           </Text>
