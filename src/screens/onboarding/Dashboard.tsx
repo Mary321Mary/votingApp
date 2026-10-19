@@ -19,8 +19,9 @@ import {
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
-import { CheckRegistrationStatus, StateData } from "@/utils/types";
+import { CheckRegistrationStatus, StateData, UserData } from "@/utils/types";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 
@@ -32,7 +33,7 @@ import { RootStackParamList } from "@/components/Navigation";
 import i18n from "i18n";
 import ElectionData from "@/components/organisms/ElectionData";
 import { COLORS } from "@/styles/colors";
-import { Checkbox } from "../../components/atoms/Checkbox";
+import { Checkbox } from "@/components/atoms/Checkbox";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -50,6 +51,7 @@ export default function DashboardScreen({
   const { config } = useUIConfig();
 
   const [userName, setUserName] = useState<string>("");
+  const [savedUser, setSavedUser] = useState<UserData>();
   const [savedState, setSavedState] = useState<StateData>();
   const [savedForm, setSavedForm] = useState<CheckRegistrationStatus>({
     partner_id: 1,
@@ -83,15 +85,19 @@ export default function DashboardScreen({
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [status, setStatus] = useState<boolean>();
+  const [changeNameOrAddress, setChangeNameOrAddress] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm, storesStatus, storedState] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-          AsyncStorage.getItem(VOTER_USER_STATUS),
-          AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
-        ]);
+        const [storedForm, storesStatus, storedState, storedUser] =
+          await Promise.all([
+            AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+            AsyncStorage.getItem(VOTER_USER_STATUS),
+            AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
+            AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
+          ]);
 
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
@@ -104,6 +110,10 @@ export default function DashboardScreen({
         if (storedState) {
           const parsedState = JSON.parse(storedState);
           setSavedState(parsedState);
+        }
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setSavedUser(parsedUser);
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -180,45 +190,57 @@ export default function DashboardScreen({
             }}
           />
         </Text>
-        <Text style={styles.text}>
-          <Trans
-            i18nKey={
-              status
-                ? t("native_local.dashboard.reg_status_active")
-                : t("native_local.dashboard.reg_status_pending")
+        <View style={styles.reg_box}>
+          <Text style={styles.text}>
+            <Trans
+              i18nKey={
+                status
+                  ? t("native_local.dashboard.reg_status_active")
+                  : t("native_local.dashboard.reg_status_pending")
+              }
+              components={{
+                body: <Text style={styles.text} />,
+                strong: <Text style={styles.bold} />,
+              }}
+            />
+          </Text>
+
+          {/* {status && ( */}
+          <Text style={styles.text}>
+            <Text style={styles.bold}>
+              {t("native_local.dashboard.reg_date")}{" "}
+            </Text>
+            {savedUser?.registration_date
+              ? new Date(savedUser.registration_date).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                  },
+                )
+              : new Date().toLocaleDateString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
+                })}
+          </Text>
+          {/* )} */}
+          <Text style={styles.userDataText}>
+            {savedForm.first_name} {savedForm.last_name}
+          </Text>
+          <Text style={styles.userDataText}>{savedForm.address}</Text>
+
+          <Checkbox
+            name="name_change"
+            value={changeNameOrAddress}
+            label={t("native_local.dashboard.name_address_change")}
+            size="small"
+            onValueChange={(checked: boolean) =>
+              setChangeNameOrAddress(checked)
             }
-            components={{
-              body: <Text style={styles.text} />,
-              strong: <Text style={styles.bold} />,
-            }}
           />
-        </Text>
-        <Text style={styles.text}>
-          {t("native_local.dashboard.reg_date")}{" "}
-          {new Date().toLocaleDateString(i18n.language, {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </Text>
-        <Text style={styles.text}>
-          {savedForm.first_name} {savedForm.last_name}
-        </Text>
-        <Checkbox
-          name="name_change"
-          value={false}
-          label={t("native_local.dashboard.name_change")}
-          disabled
-          onValueChange={() => {}}
-        />
-        <Text style={styles.text}>{savedForm.address}</Text>
-        <Checkbox
-          name="address_change"
-          value={false}
-          label={t("native_local.dashboard.address_change")}
-          disabled
-          onValueChange={() => {}}
-        />
+        </View>
 
         <ElectionData />
 
@@ -296,6 +318,7 @@ export default function DashboardScreen({
             onPress={async () => {
               try {
                 await AsyncStorage.multiRemove([
+                  VOTER_USER_STORAGE_KEY,
                   VOTER_FORM_STORAGE_KEY,
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
@@ -328,24 +351,40 @@ const getStyles = (theme: typeof COLORS) =>
       alignItems: "center",
     },
     content: {
-      padding: 10,
+      padding: 16,
+    },
+    reg_box: {
+      backgroundColor: theme.background,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.primary,
+      padding: 12,
+      marginTop: 8,
+      marginBottom: 16,
     },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 16,
-      fontWeight: "500",
-      fontStyle: "italic",
+      fontSize: 15,
+      fontWeight: "400",
       lineHeight: 22,
-      color: theme.textPrimary,
-      marginBottom: 5,
+      color: theme.gray,
+      marginBottom: 6,
     },
     bold: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 16,
-      fontWeight: "bold",
-      fontStyle: "normal",
+      fontSize: 15,
+      fontWeight: "700",
       lineHeight: 22,
       color: theme.textPrimary,
+    },
+    userDataText: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 15,
+      fontWeight: "600",
+      color: theme.textPrimary,
+      marginBottom: 6,
     },
     buttonContainer: {
       width: "100%",

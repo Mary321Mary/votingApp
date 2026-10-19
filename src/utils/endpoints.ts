@@ -1,9 +1,3 @@
-export const AUTH_LOGIN = "/api/ng/auth/login";
-export const AUTH_REGISTER = "/api/ng/auth/register";
-export const AUTH_ME = "/api/ng/auth/me";
-export const AUTH_REFRESH = "/api/ng/auth/refresh";
-export const AUTH_UPDATE_ME = "/api/ng/auth/me/update";
-
 export const EMAIL_ZIP = "/api/ng/submit_email_zip";
 export const UI_CONFIG = "/api/ng/fetch_ui_configuration?partner_id=1";
 export const DATA_CONFIG = "/api/ng/fetch_data_collection_configuration?";

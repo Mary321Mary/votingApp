@@ -15,6 +15,7 @@ import {
 export const DEFAULT_STATE_REQUIRED_ID =
   "driver's license or state identification card";
 
+export const VOTER_USER_STORAGE_KEY = "voter_saved_user";
 export const VOTER_FORM_STORAGE_KEY = "voter_lookup_saved_form";
 export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
 export const VOTER_USER_STATUS = "rtv_voter_status";

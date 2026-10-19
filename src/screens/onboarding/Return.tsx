@@ -11,6 +11,7 @@ import {
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
@@ -90,6 +91,7 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
             onPress={async () => {
               try {
                 await AsyncStorage.multiRemove([
+                  VOTER_USER_STORAGE_KEY,
                   VOTER_FORM_STORAGE_KEY,
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,

@@ -34,6 +34,7 @@ import {
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STATUS,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
 
@@ -222,6 +223,10 @@ export const CheckVoterStatusScreen = ({
           responseLookup.data.status.success ||
           (form.first_name === "Jane" && form.last_name === "Doe")
         ) {
+          await AsyncStorage.setItem(
+            VOTER_USER_STORAGE_KEY,
+            JSON.stringify(responseLookup.data.voter),
+          );
           await AsyncStorage.setItem(
             VOTER_STATE_STORAGE_KEY,
             JSON.stringify(responseLookup.data.state),
