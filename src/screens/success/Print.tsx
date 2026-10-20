@@ -26,6 +26,7 @@ import {
   filterRegistrant,
   ONBOARDING2_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
+  VOTER_STATE_STORAGE_KEY,
 } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
@@ -104,9 +105,24 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         step: REPORT_EVENT_STEPS.STEP_2,
         event_name: "NVRA print",
       });
+
+      const onboarding2CompletedKey = await AsyncStorage.getItem(
+        ONBOARDING2_COMPLETED_KEY,
+      );
+      if (onboarding2CompletedKey === "true") {
+        await AsyncStorage.setItem(
+          VOTER_FORM_STORAGE_KEY,
+          JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
+        );
+      } else {
+        await AsyncStorage.setItem(
+          VOTER_STATE_STORAGE_KEY,
+          JSON.stringify(state),
+        );
+      }
     }
     fetchData();
-  }, []);
+  }, [form, state]);
 
   const handleDownload = async () => {
     if (!pdfUrl) return;
@@ -198,10 +214,6 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
                   ONBOARDING2_COMPLETED_KEY,
                 );
                 if (onboarding2CompletedKey === "true") {
-                  await AsyncStorage.setItem(
-                    VOTER_FORM_STORAGE_KEY,
-                    JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
-                  );
                   navigation.navigate("Dashboard", {});
                 } else
                   navigation.navigate("Onboarding2", {

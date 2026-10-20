@@ -223,10 +223,12 @@ export const CheckVoterStatusScreen = ({
           responseLookup.data.status.success ||
           (form.first_name === "Jane" && form.last_name === "Doe")
         ) {
-          await AsyncStorage.setItem(
-            VOTER_USER_STORAGE_KEY,
-            JSON.stringify(responseLookup.data.voter),
-          );
+          if (responseLookup.data.voter) {
+            await AsyncStorage.setItem(
+              VOTER_USER_STORAGE_KEY,
+              JSON.stringify(responseLookup.data.voter),
+            );
+          }
           await AsyncStorage.setItem(
             VOTER_STATE_STORAGE_KEY,
             JSON.stringify(responseLookup.data.state),
@@ -419,7 +421,7 @@ export const CheckVoterStatusScreen = ({
           <AddressAutocomplete
             apiKey={config?.google_maps_browser_key || ""}
             name={errMsg.address ? "address" : errMsg.city ? "city" : "zip"}
-            value={form.address}
+            value={form.formattedAddress}
             label={t("form_fields.address")}
             required
             errorText={errMsg.address || errMsg.city || errMsg.zip}
@@ -432,7 +434,8 @@ export const CheckVoterStatusScreen = ({
             }) => {
               setForm(prev => ({
                 ...prev,
-                address: formattedAddress || address,
+                formattedAddress,
+                address,
                 aptunit,
                 city,
                 zip,

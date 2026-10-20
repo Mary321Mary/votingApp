@@ -19,6 +19,8 @@ import { RootStackParamList } from "@/components/Navigation";
 import { LANGUAGE_KEY } from "@/i18n";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { INITIAL_FORM_STATE } from "../ProfileScreen";
+import { COLORS } from "../../styles/colors";
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, "Welcome">;
 
@@ -63,31 +65,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
     }
 
     navigation.navigate("CheckVoterStatus", {
-      form: {
-        partner_id: 1,
-        first_name: "",
-        last_name: "",
-        email: "",
-        city: "",
-        zip: "",
-        aptunit: "",
-        address: "",
-        birthMonth: "",
-        birthDay: "",
-        birthYear: "",
-        date_of_birth: "",
-        phone: "",
-        opt_in_email: false,
-        opt_in_sms: false,
-        volunteer: false,
-        survey_question_1: "",
-        survey_answer_1: "",
-        survey_question_2: "",
-        survey_answer_2: "",
-        prefType1: true,
-        prefType2: true,
-        prefType3: true,
-      },
+      form: INITIAL_FORM_STATE,
     });
   };
 
@@ -124,7 +102,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,

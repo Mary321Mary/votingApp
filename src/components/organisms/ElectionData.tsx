@@ -9,7 +9,12 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../Navigation";
 
+import { INITIAL_FORM_STATE } from "@/screens/ProfileScreen";
+import { COLORS } from "@/styles/colors";
+import { ThemeContext } from "@/styles/ThemeProvider";
 import {
   getFormattedElectionTitle,
   VOTER_FORM_STORAGE_KEY,
@@ -20,15 +25,11 @@ import {
   submitBallotLookup,
   submitElectionsLookup,
 } from "@/utils/api";
-
-import { ThemeContext } from "@/styles/ThemeProvider";
 import {
   CheckRegistrationStatus,
   Election,
   LocationsData,
 } from "@/utils/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../Navigation";
 
 interface ElectionData {
   id: number;
@@ -84,36 +85,8 @@ export default function ElectionData() {
   const styles = getStyles(theme);
   const navigation = useNavigation<DashboardScreenNavigation>();
 
-  const [savedForm, setSavedForm] = useState<CheckRegistrationStatus>({
-    partner_id: 1,
-
-    first_name: "",
-    last_name: "",
-    email: "",
-    city: "",
-    zip: "",
-
-    aptunit: "",
-    address: "",
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    date_of_birth: "",
-    phone: "",
-
-    opt_in_email: false,
-    opt_in_sms: false,
-    volunteer: false,
-
-    survey_question_1: "",
-    survey_answer_1: "",
-    survey_question_2: "",
-    survey_answer_2: "",
-
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
-  });
+  const [savedForm, setSavedForm] =
+    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
   const [loading, setLoading] = useState<boolean>(true);
   const [elections, setElections] = useState<ElectionData | null>(null);
   const [ballotData, setBallotData] = useState<{
@@ -215,13 +188,13 @@ export default function ElectionData() {
         />
       </Text>
       <View style={styles.elections}>
-        <Text style={styles.text}>{getFormattedElectionTitle(elections)}</Text>
+        <Text style={styles.bold}>{getFormattedElectionTitle(elections)}</Text>
         {ballotData.elections.length === 0 ? (
-          <Text style={styles.text}>
+          <Text style={styles.textGray}>
             {t("native_local.dashboard.ballot_none")}
           </Text>
         ) : (
-          <Text style={styles.text}>
+          <Text style={styles.textGray}>
             <Trans
               i18nKey="native_local.dashboard.ballot_prompt"
               components={{
@@ -232,7 +205,7 @@ export default function ElectionData() {
             />
           </Text>
         )}
-        <Text style={styles.text}>
+        <Text style={styles.textGray}>
           {hasLocations ? (
             <Trans
               i18nKey="native_local.dashboard.location_prompt"
@@ -264,7 +237,7 @@ export default function ElectionData() {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -284,6 +257,13 @@ const getStyles = (theme: any) =>
       lineHeight: 22,
       color: theme.textPrimary,
     },
+    textGray: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontSize: 16,
+      fontWeight: "600",
+      lineHeight: 22,
+      color: theme.gray,
+    },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
@@ -293,11 +273,20 @@ const getStyles = (theme: any) =>
       marginTop: 5,
     },
     elections: {
-      marginLeft: 30,
+      backgroundColor: theme.background,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.primary,
+      padding: 12,
+      marginTop: 8,
+      marginBottom: 16,
     },
     link: {
       color: theme.link,
       fontSize: 16,
+      lineHeight: 22,
       textDecorationLine: "underline",
     },
   });

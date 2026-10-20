@@ -34,6 +34,7 @@ import i18n from "i18n";
 import ElectionData from "@/components/organisms/ElectionData";
 import { COLORS } from "@/styles/colors";
 import { Checkbox } from "@/components/atoms/Checkbox";
+import { INITIAL_FORM_STATE } from "../ProfileScreen";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -53,36 +54,8 @@ export default function DashboardScreen({
   const [userName, setUserName] = useState<string>("");
   const [savedUser, setSavedUser] = useState<UserData>();
   const [savedState, setSavedState] = useState<StateData>();
-  const [savedForm, setSavedForm] = useState<CheckRegistrationStatus>({
-    partner_id: 1,
-
-    first_name: "",
-    last_name: "",
-    email: "",
-    city: "",
-    zip: "",
-
-    aptunit: "",
-    address: "",
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    date_of_birth: "",
-    phone: "",
-
-    opt_in_email: false,
-    opt_in_sms: false,
-    volunteer: false,
-
-    survey_question_1: "",
-    survey_answer_1: "",
-    survey_question_2: "",
-    survey_answer_2: "",
-
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
-  });
+  const [savedForm, setSavedForm] =
+    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
   const [loading, setLoading] = useState<boolean>(true);
   const [status, setStatus] = useState<boolean>();
   const [changeNameOrAddress, setChangeNameOrAddress] =
@@ -227,9 +200,11 @@ export default function DashboardScreen({
             </Text>
           )}
           <Text style={styles.userDataText}>
-            {savedForm.first_name} {savedForm.last_name}
+            {savedForm.first_name} {savedForm.last_name} - {savedForm.address},{" "}
+            {savedForm.city}
+            {savedState?.abbreviation && `, ${savedState?.abbreviation}`}
+            {savedForm.zip && ` ${savedForm.zip}`}
           </Text>
-          <Text style={styles.userDataText}>{savedForm.address}</Text>
 
           <Checkbox
             name="name_change"

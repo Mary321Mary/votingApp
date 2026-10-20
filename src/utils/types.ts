@@ -104,6 +104,7 @@ export type CheckRegistrationStatus = {
   email: string;
   zip: string;
 
+  formattedAddress: string;
   aptunit: string;
   address: string;
   city: string;

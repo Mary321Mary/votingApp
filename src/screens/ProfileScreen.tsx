@@ -34,27 +34,32 @@ import { Checkbox } from "@/components/atoms/Checkbox";
 import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
 import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
 
-const INITIAL_FORM_STATE: CheckRegistrationStatus = {
+export const INITIAL_FORM_STATE: CheckRegistrationStatus = {
   partner_id: 1,
   first_name: "",
   last_name: "",
   email: "",
   city: "",
   zip: "",
+
+  formattedAddress: "",
   aptunit: "",
   address: "",
   birthMonth: "",
   birthDay: "",
   birthYear: "",
   date_of_birth: "",
+
   phone: "",
   opt_in_email: false,
   opt_in_sms: false,
   volunteer: false,
+
   survey_question_1: "",
   survey_answer_1: "",
   survey_question_2: "",
   survey_answer_2: "",
+
   prefType1: true,
   prefType2: true,
   prefType3: true,
@@ -121,6 +126,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const isNameAddressOrDobChanged =
     form.first_name.trim() !== initialForm.first_name.trim() ||
     form.last_name.trim() !== initialForm.last_name.trim() ||
+    form.formattedAddress.trim() !== initialForm.formattedAddress.trim() ||
     form.address.trim() !== initialForm.address.trim() ||
     (form.aptunit || "").trim() !== (initialForm.aptunit || "").trim() ||
     form.city.trim() !== initialForm.city.trim() ||
@@ -206,9 +212,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       return;
     }
 
-    await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
-
     if (isContactOnlyChanged) {
+      await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
       navigation.replace("Dashboard", {});
       return;
     }
@@ -280,7 +285,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         {!isByFields ? (
           <AddressAutocomplete
             name="address"
-            value={form.address}
+            value={form.formattedAddress}
             apiKey={config?.google_maps_browser_key || ""}
             label={t("form_fields.address")}
             required
@@ -294,7 +299,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             }) => {
               setForm(prev => ({
                 ...prev,
-                address: formattedAddress || address,
+                formattedAddress,
+                address,
                 aptunit,
                 city,
                 zip,

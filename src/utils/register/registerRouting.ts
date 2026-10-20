@@ -57,6 +57,8 @@ export function mapRegisterFormToVrLookupPayload(
     last_name: form.last_name,
     email: form.email_address,
     zip: form.home_zip_code,
+
+    formattedAddress: buildPAMailingAddressFromForm(form),
     address: form.home_address,
     city: form.home_city,
     aptunit: form.home_unit_type + " " + form.home_unit,
@@ -90,8 +92,8 @@ export function mapLookupFormToRegisterForm(
     home_unit: lookupForm.aptunit,
 
     phone: lookupForm.phone,
-    opt_in_email: lookupForm.opt_in_email,
-    opt_in_sms: lookupForm.opt_in_sms,
+    opt_in_email: true,
+    opt_in_sms: true,
     volunteer: lookupForm.volunteer,
 
     birthMonth: lookupForm.birthMonth,
