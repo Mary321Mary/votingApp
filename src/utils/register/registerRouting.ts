@@ -23,6 +23,16 @@ export function buildPAMailingAddressFromForm(form: RegisterFormState): string {
   return parts.join(" ").trim();
 }
 
+export function buildAddressLine(form: RegisterFormState): string {
+  const parts = [
+    form.home_address?.trim(),
+    form.home_unit_type?.trim() && form.home_unit?.trim()
+      ? `${form.home_unit_type} ${form.home_unit}`
+      : form.home_unit?.trim(),
+  ].filter(Boolean);
+  return parts.join(" ").trim();
+}
+
 /**
  * Maps ovr_type from submit_email_zip to the UI flow identifier.
  * Centralize routing changes here (e.g. new state integrations).
@@ -58,7 +68,7 @@ export function mapRegisterFormToVrLookupPayload(
     email: form.email_address,
     zip: form.home_zip_code,
 
-    formattedAddress: buildPAMailingAddressFromForm(form),
+    formattedAddress: buildAddressLine(form),
     address: form.home_address,
     city: form.home_city,
     aptunit: form.home_unit_type + " " + form.home_unit,

@@ -126,7 +126,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const isNameAddressOrDobChanged =
     form.first_name.trim() !== initialForm.first_name.trim() ||
     form.last_name.trim() !== initialForm.last_name.trim() ||
-    form.formattedAddress.trim() !== initialForm.formattedAddress.trim() ||
+    (form.formattedAddress || "").trim() !==
+      (initialForm.formattedAddress || "").trim() ||
     form.address.trim() !== initialForm.address.trim() ||
     (form.aptunit || "").trim() !== (initialForm.aptunit || "").trim() ||
     form.city.trim() !== initialForm.city.trim() ||

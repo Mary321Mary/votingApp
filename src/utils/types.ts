@@ -759,6 +759,7 @@ export type UserData = {
   zip: string;
   date_of_birth: string;
   phone: string;
+
   survey_question_1: string | null;
   survey_answer_1: string | null;
   survey_question_2: string | null;
@@ -769,7 +770,10 @@ export type UserData = {
   partner_opt_in_sms: boolean | null;
   opt_in_volunteer: boolean | null;
   partner_opt_in_volunteer: boolean | null;
-  registration_status: boolean;
+
+  lookup_status_date: string;
+  lookup_status: string;
+  registration_status: string;
   registration_status_date: string;
   registration_date: string;
   pledge_status: boolean;

@@ -79,7 +79,7 @@ export default function DashboardScreen({
             setUserName(parsedForm.first_name);
           }
         }
-        setStatus(Boolean(storesStatus) || false);
+        setStatus(storesStatus === "true");
         if (storedState) {
           const parsedState = JSON.parse(storedState);
           setSavedState(parsedState);

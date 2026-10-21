@@ -226,7 +226,24 @@ export const CheckVoterStatusScreen = ({
           if (responseLookup.data.voter) {
             await AsyncStorage.setItem(
               VOTER_USER_STORAGE_KEY,
-              JSON.stringify(responseLookup.data.voter),
+              JSON.stringify({
+                ...responseLookup.data.voter,
+                registration_status: "active",
+                registration_status_date: new Date().toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                  },
+                ),
+                lookup_status: "catalist_match",
+                lookup_status_date: new Date().toLocaleDateString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+              }),
             );
           }
           await AsyncStorage.setItem(
@@ -244,6 +261,29 @@ export const CheckVoterStatusScreen = ({
             state: responseLookup.data.state,
           });
         } else {
+          if (responseLookup.data.voter) {
+            await AsyncStorage.setItem(
+              VOTER_USER_STORAGE_KEY,
+              JSON.stringify({
+                ...responseLookup.data.voter,
+                registration_status: "pending",
+                registration_status_date: new Date().toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "2-digit",
+                    day: "2-digit",
+                    year: "numeric",
+                  },
+                ),
+                lookup_status: "catalist_no_match",
+                lookup_status_date: new Date().toLocaleDateString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
+                }),
+              }),
+            );
+          }
           navigation.navigate("LookupNotFound", {
             form,
             state: responseLookup.data.state,
