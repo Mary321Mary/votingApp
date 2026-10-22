@@ -27,7 +27,6 @@ import {
   mapFormStateToPACovrPayload,
   mapFormStateToWACovrPayload,
   ONBOARDING_COMPLETED_KEY,
-  VOTER_USER_STATUS,
 } from "@/utils/constants";
 import {
   DataCollectionConfiguration,
@@ -331,7 +330,6 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${paPayload.first_name} ${paPayload.last_name}`.trim(),
         );
-        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
 
         navigation.replace("SuccessPA", { state, form, onboardingFlow });
         return;
@@ -399,7 +397,6 @@ export const RegisterResult = ({
           "rtv_voter_name",
           `${waPayload.first_name} ${waPayload.last_name}`.trim(),
         );
-        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
 
         navigation.replace("SuccessWA", { state, form, onboardingFlow });
       } else {
@@ -618,8 +615,6 @@ export const RegisterResult = ({
                   "rtv_voter_name",
                   miPayload.full_name,
                 );
-                await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-                await AsyncStorage.setItem(VOTER_USER_STATUS, "true");
 
                 navigation.replace("SuccessMI", {
                   state,
@@ -706,7 +701,6 @@ export const RegisterResult = ({
               if (state?.online_registration_system_url)
                 Linking.openURL(state.online_registration_system_url);
 
-              await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
               navigation.replace("FinishWithState", {
                 state,
                 form,

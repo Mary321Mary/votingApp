@@ -778,6 +778,8 @@ export type UserData = {
   registration_date: string;
   pledge_status: boolean;
   pledge_date: string | null;
+  ovr_status: string;
+  ovr_status_date: string;
 };
 
 export interface SubmitEmailZipResponse {

@@ -18,7 +18,6 @@ import {
   ONBOARDING_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
-  VOTER_USER_STATUS,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { CheckRegistrationStatus, StateData, UserData } from "@/utils/types";
@@ -57,20 +56,17 @@ export default function DashboardScreen({
   const [savedForm, setSavedForm] =
     useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
   const [loading, setLoading] = useState<boolean>(true);
-  const [status, setStatus] = useState<boolean>();
   const [changeNameOrAddress, setChangeNameOrAddress] =
     useState<boolean>(false);
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm, storesStatus, storedState, storedUser] =
-          await Promise.all([
-            AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
-            AsyncStorage.getItem(VOTER_USER_STATUS),
-            AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
-            AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
-          ]);
+        const [storedForm, storedState, storedUser] = await Promise.all([
+          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+          AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
+          AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
+        ]);
 
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
@@ -79,7 +75,6 @@ export default function DashboardScreen({
             setUserName(parsedForm.first_name);
           }
         }
-        setStatus(storesStatus === "true");
         if (storedState) {
           const parsedState = JSON.parse(storedState);
           setSavedState(parsedState);
@@ -167,7 +162,7 @@ export default function DashboardScreen({
           <Text style={styles.text}>
             <Trans
               i18nKey={
-                status
+                savedUser?.registration_status === "active"
                   ? t("native_local.dashboard.reg_status_active")
                   : t("native_local.dashboard.reg_status_pending")
               }
@@ -178,7 +173,7 @@ export default function DashboardScreen({
             />
           </Text>
 
-          {status && (
+          {savedUser?.registration_status === "active" && (
             <Text style={styles.text}>
               <Text style={styles.bold}>
                 {t("native_local.dashboard.reg_date")}{" "}
@@ -298,7 +293,6 @@ export default function DashboardScreen({
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
                   ONBOARDING2_COMPLETED_KEY,
-                  VOTER_USER_STATUS,
                   VOTER_STATE_STORAGE_KEY,
                 ]);
               } catch (error) {

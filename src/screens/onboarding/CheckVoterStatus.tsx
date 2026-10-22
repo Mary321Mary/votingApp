@@ -33,7 +33,6 @@ import {
   ONBOARDING_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
-  VOTER_USER_STATUS,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
@@ -251,10 +250,6 @@ export const CheckVoterStatusScreen = ({
             JSON.stringify(responseLookup.data.state),
           );
           await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-          await AsyncStorage.setItem(
-            VOTER_USER_STATUS,
-            responseLookup.data.voter?.registration_status.toString() || "true",
-          );
 
           navigation.navigate("Lookup", {
             form,

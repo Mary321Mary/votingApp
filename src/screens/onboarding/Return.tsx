@@ -10,7 +10,6 @@ import {
   ONBOARDING_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
-  VOTER_USER_STATUS,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 
@@ -19,6 +18,7 @@ import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
+import { INITIAL_FORM_STATE } from "../ProfileScreen";
 
 type ReturnScreenProps = NativeStackScreenProps<RootStackParamList, "Return">;
 
@@ -32,36 +32,7 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
       AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
       AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
     ]);
-    let form = {
-      partner_id: 1,
-
-      first_name: "",
-      last_name: "",
-      email: "",
-      city: "",
-      zip: "",
-
-      aptunit: "",
-      address: "",
-      birthMonth: "",
-      birthDay: "",
-      birthYear: "",
-      date_of_birth: "",
-      phone: "",
-
-      opt_in_email: false,
-      opt_in_sms: false,
-      volunteer: false,
-
-      survey_question_1: "",
-      survey_answer_1: "",
-      survey_question_2: "",
-      survey_answer_2: "",
-
-      prefType1: true,
-      prefType2: true,
-      prefType3: true,
-    };
+    let form = INITIAL_FORM_STATE;
     if (storedForm) {
       form = JSON.parse(storedForm);
     }
@@ -96,7 +67,6 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
                   ONBOARDING2_COMPLETED_KEY,
-                  VOTER_USER_STATUS,
                   VOTER_STATE_STORAGE_KEY,
                 ]);
               } catch (error) {

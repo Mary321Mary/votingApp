@@ -18,7 +18,6 @@ export const DEFAULT_STATE_REQUIRED_ID =
 export const VOTER_USER_STORAGE_KEY = "voter_saved_user";
 export const VOTER_FORM_STORAGE_KEY = "voter_lookup_saved_form";
 export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
-export const VOTER_USER_STATUS = "rtv_voter_status";
 export const ONBOARDING2_COMPLETED_KEY = "onboarding2_completed";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";

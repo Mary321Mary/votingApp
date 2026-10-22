@@ -223,7 +223,7 @@ export default function ElectionData() {
           )}
         </Text>
         {savedForm.zip === "38111" && (
-          <Text style={styles.text}>
+          <Text style={styles.textGray}>
             <Trans
               i18nKey="native_local.dashboard.abr_prompt"
               components={{
@@ -259,8 +259,8 @@ const getStyles = (theme: typeof COLORS) =>
     },
     textGray: {
       fontFamily: "Inter-VariableFont_opsz_wght",
-      fontSize: 16,
-      fontWeight: "600",
+      fontSize: 15,
+      fontWeight: "400",
       lineHeight: 22,
       color: theme.gray,
     },

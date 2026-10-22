@@ -27,6 +27,7 @@ import {
   ONBOARDING2_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
@@ -120,6 +121,24 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
           JSON.stringify(state),
         );
       }
+
+      await AsyncStorage.setItem(
+        VOTER_USER_STORAGE_KEY,
+        JSON.stringify({
+          registration_status: "pending",
+          registration_status_date: new Date().toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+          }),
+          ovr_status: "nvra_form_provided",
+          ovr_status_date: new Date().toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+          }),
+        }),
+      );
     }
     fetchData();
   }, [form, state]);
@@ -128,6 +147,24 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
     if (!pdfUrl) return;
 
     downloadPdf(pdfUrl, "form_placeholder.pdf");
+
+    await AsyncStorage.setItem(
+      VOTER_USER_STORAGE_KEY,
+      JSON.stringify({
+        registration_status: "pending",
+        registration_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        ovr_status: "nvra_form_downloaded",
+        ovr_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+      }),
+    );
 
     const registration_uid =
       (await AsyncStorage.getItem(`registration_uid`)) || "";

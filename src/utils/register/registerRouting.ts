@@ -103,7 +103,7 @@ export function mapLookupFormToRegisterForm(
 
     phone: lookupForm.phone,
     opt_in_email: true,
-    opt_in_sms: true,
+    opt_in_sms: false,
     volunteer: lookupForm.volunteer,
 
     birthMonth: lookupForm.birthMonth,
