@@ -239,7 +239,11 @@ export default function SuccessScreen({
                   navigation.navigate("Dashboard", {});
                 } else
                   navigation.navigate("Onboarding2", {
-                    form: mapRegisterFormToVrLookupPayload(form),
+                    form: {
+                      ...mapRegisterFormToVrLookupPayload(form),
+                      opt_in_email: false,
+                      opt_in_sms: false,
+                    },
                   });
               }}
             />

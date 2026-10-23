@@ -122,9 +122,13 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         );
       }
 
+      const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
+      if (!storedUser) return;
+      const parsedUser = JSON.parse(storedUser);
       await AsyncStorage.setItem(
         VOTER_USER_STORAGE_KEY,
         JSON.stringify({
+          ...parsedUser,
           registration_status: "pending",
           registration_status_date: new Date().toLocaleDateString("en-US", {
             month: "2-digit",
@@ -148,9 +152,13 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
 
     downloadPdf(pdfUrl, "form_placeholder.pdf");
 
+    const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
+    if (!storedUser) return;
+    const parsedUser = JSON.parse(storedUser);
     await AsyncStorage.setItem(
       VOTER_USER_STORAGE_KEY,
       JSON.stringify({
+        ...parsedUser,
         registration_status: "pending",
         registration_status_date: new Date().toLocaleDateString("en-US", {
           month: "2-digit",
@@ -254,7 +262,11 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
                   navigation.navigate("Dashboard", {});
                 } else
                   navigation.navigate("Onboarding2", {
-                    form: mapRegisterFormToVrLookupPayload(form),
+                    form: {
+                      ...mapRegisterFormToVrLookupPayload(form),
+                      opt_in_email: false,
+                      opt_in_sms: false,
+                    },
                   });
               }}
             />

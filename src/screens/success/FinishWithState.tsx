@@ -18,14 +18,9 @@ import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { reportEvent } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
-import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
-import {
-  ONBOARDING2_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
-} from "../../utils/constants";
 
 const { width } = Dimensions.get("window");
 
@@ -148,21 +143,21 @@ const FinishWithStateScreen = ({
           <CustomButton
             title={t("register_18_by_election_page.continue_button_text")}
             onPress={async () => {
-              const onboarding2CompletedKey = await AsyncStorage.getItem(
-                ONBOARDING2_COMPLETED_KEY,
-              );
-              if (onboarding2CompletedKey === "true") {
-                await AsyncStorage.setItem(
-                  VOTER_FORM_STORAGE_KEY,
-                  JSON.stringify(
-                    mapRegisterFormToVrLookupPayload(navState.form),
-                  ),
-                );
-                navigation.navigate("Dashboard", {});
-              } else
-                navigation.navigate("Onboarding2", {
-                  form: mapRegisterFormToVrLookupPayload(navState.form),
-                });
+              // const onboarding2CompletedKey = await AsyncStorage.getItem(
+              //   ONBOARDING2_COMPLETED_KEY,
+              // );
+              // if (onboarding2CompletedKey === "true") {
+              //   await AsyncStorage.setItem(
+              //     VOTER_FORM_STORAGE_KEY,
+              //     JSON.stringify(
+              //       mapRegisterFormToVrLookupPayload(navState.form),
+              //     ),
+              //   );
+              //   navigation.navigate("Dashboard", {});
+              // } else
+              //   navigation.navigate("Onboarding2", {
+              //     form: mapRegisterFormToVrLookupPayload(navState.form),
+              //   });
             }}
           />
         ) : (
