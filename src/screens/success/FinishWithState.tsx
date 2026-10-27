@@ -139,79 +139,78 @@ const FinishWithStateScreen = ({
           {t("finish_with_state_page3.encourage")}
         </Text>
 
-        {navState.onboardingFlow ? (
+        {/* {navState.onboardingFlow ? (
           <CustomButton
             title={t("register_18_by_election_page.continue_button_text")}
             onPress={async () => {
-              // const onboarding2CompletedKey = await AsyncStorage.getItem(
-              //   ONBOARDING2_COMPLETED_KEY,
-              // );
-              // if (onboarding2CompletedKey === "true") {
-              //   await AsyncStorage.setItem(
-              //     VOTER_FORM_STORAGE_KEY,
-              //     JSON.stringify(
-              //       mapRegisterFormToVrLookupPayload(navState.form),
-              //     ),
-              //   );
-              //   navigation.navigate("Dashboard", {});
-              // } else
-              //   navigation.navigate("Onboarding2", {
-              //     form: mapRegisterFormToVrLookupPayload(navState.form),
-              //   });
+              const onboarding2CompletedKey = await AsyncStorage.getItem(
+                ONBOARDING2_COMPLETED_KEY,
+              );
+              if (onboarding2CompletedKey === "true") {
+                await AsyncStorage.setItem(
+                  VOTER_FORM_STORAGE_KEY,
+                  JSON.stringify(
+                    mapRegisterFormToVrLookupPayload(navState.form),
+                  ),
+                );
+                navigation.navigate("Dashboard", {});
+              } else
+                navigation.navigate("Onboarding2", {
+                  form: mapRegisterFormToVrLookupPayload(navState.form),
+                });
             }}
           />
-        ) : (
-          <View style={styles.shareContainer}>
-            <CustomButton
-              title={t("finish_with_state_page3.fb_button_text")}
-              onPress={async () => {
-                const targetUrl = config?.share?.registrations?.facebook || "";
-                const supported = await Linking.canOpenURL(targetUrl);
-                if (supported) {
-                  await Linking.openURL(targetUrl);
+        ) : ( */}
+        <View style={styles.shareContainer}>
+          <CustomButton
+            title={t("finish_with_state_page3.fb_button_text")}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.facebook || "";
+              const supported = await Linking.canOpenURL(targetUrl);
+              if (supported) {
+                await Linking.openURL(targetUrl);
 
-                  const registration_uid =
-                    (await AsyncStorage.getItem("registration_uid")) || "";
-                  await reportEvent({
-                    registration_uid,
-                    partner_id: navState.form.partner_id.toString(),
-                    step: REPORT_EVENT_STEPS.EMPTY,
-                    event_name:
-                      "CTA clicked: " + config?.share?.registrations?.facebook,
-                  });
-                } else {
-                  console.warn(`Cannot open URL: ${targetUrl}`);
-                }
-              }}
-            />
-            <CustomButton
-              title={t("finish_with_state_page3.x_button_text")}
-              onPress={async () => {
-                const targetUrl = config?.share?.registrations?.x || "";
-                const supported = await Linking.canOpenURL(targetUrl);
-                if (supported) {
-                  await Linking.openURL(targetUrl);
+                const registration_uid =
+                  (await AsyncStorage.getItem("registration_uid")) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: navState.form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name:
+                    "CTA clicked: " + config?.share?.registrations?.facebook,
+                });
+              } else {
+                console.warn(`Cannot open URL: ${targetUrl}`);
+              }
+            }}
+          />
+          <CustomButton
+            title={t("finish_with_state_page3.x_button_text")}
+            onPress={async () => {
+              const targetUrl = config?.share?.registrations?.x || "";
+              const supported = await Linking.canOpenURL(targetUrl);
+              if (supported) {
+                await Linking.openURL(targetUrl);
 
-                  const registration_uid =
-                    (await AsyncStorage.getItem("registration_uid")) || "";
-                  await reportEvent({
-                    registration_uid,
-                    partner_id: navState.form.partner_id.toString(),
-                    step: REPORT_EVENT_STEPS.EMPTY,
-                    event_name:
-                      "CTA clicked: " + config?.share?.registrations?.x,
-                  });
-                } else {
-                  console.warn(`Cannot open URL: ${targetUrl}`);
-                }
-              }}
-            />
-            <CustomButton
-              title={t("finish_with_state_page3.copy_button_text")}
-              onPress={handleCopyLink}
-            />
-          </View>
-        )}
+                const registration_uid =
+                  (await AsyncStorage.getItem("registration_uid")) || "";
+                await reportEvent({
+                  registration_uid,
+                  partner_id: navState.form.partner_id.toString(),
+                  step: REPORT_EVENT_STEPS.EMPTY,
+                  event_name: "CTA clicked: " + config?.share?.registrations?.x,
+                });
+              } else {
+                console.warn(`Cannot open URL: ${targetUrl}`);
+              }
+            }}
+          />
+          <CustomButton
+            title={t("finish_with_state_page3.copy_button_text")}
+            onPress={handleCopyLink}
+          />
+        </View>
+        {/* )} */}
 
         <View style={styles.footerInfo}>
           <Text style={styles.boldText}>

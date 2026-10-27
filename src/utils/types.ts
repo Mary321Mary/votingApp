@@ -97,6 +97,43 @@ export interface StateData {
   in_person_deadline?: string | null;
 }
 
+export type UserData = {
+  uid: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  zip: string;
+
+  address: string;
+  aptunit: string | null;
+  city: string;
+  phone: string;
+  opt_in_email: boolean | null;
+  opt_in_sms: boolean | null;
+  opt_in_volunteer: boolean | null;
+
+  date_of_birth: string;
+
+  survey_question_1: string | null;
+  survey_answer_1: string | null;
+  survey_question_2: string | null;
+  survey_answer_2: string | null;
+
+  partner_opt_in_email: boolean | null;
+  partner_opt_in_sms: boolean | null;
+  partner_opt_in_volunteer: boolean | null;
+
+  lookup_status_date: string;
+  lookup_status: string;
+  registration_status: string;
+  registration_status_date: string;
+  registration_date: string;
+  pledge_status: boolean;
+  pledge_date: string | null;
+  ovr_status: string;
+  ovr_status_date: string;
+};
+
 export type CheckRegistrationStatus = {
   partner_id: number;
   first_name: string;
@@ -747,40 +784,6 @@ export interface SubmitEmailZipRequest {
   locale: string;
   partner_id: string;
 }
-
-export type UserData = {
-  uid: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  address: string;
-  aptunit: string | null;
-  city: string;
-  zip: string;
-  date_of_birth: string;
-  phone: string;
-
-  survey_question_1: string | null;
-  survey_answer_1: string | null;
-  survey_question_2: string | null;
-  survey_answer_2: string | null;
-  opt_in_email: boolean | null;
-  opt_in_sms: boolean | null;
-  partner_opt_in_email: boolean | null;
-  partner_opt_in_sms: boolean | null;
-  opt_in_volunteer: boolean | null;
-  partner_opt_in_volunteer: boolean | null;
-
-  lookup_status_date: string;
-  lookup_status: string;
-  registration_status: string;
-  registration_status_date: string;
-  registration_date: string;
-  pledge_status: boolean;
-  pledge_date: string | null;
-  ovr_status: string;
-  ovr_status_date: string;
-};
 
 export interface SubmitEmailZipResponse {
   status: { success: boolean; errors: string[] | null };

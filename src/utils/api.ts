@@ -41,6 +41,7 @@ import type {
 import { HttpClient } from "utils/http/http";
 import * as ENDPOINTS from "utils/endpoints";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { VOTER_USER_STORAGE_KEY } from "./constants";
 
 // need to check EMAIL_ZIP and UI_CONFIG
 
@@ -122,7 +123,7 @@ export function submitLookup(
 
 export const lookupVoterByUid = async (uid: string) => {
   try {
-    const storedVoter = await AsyncStorage.getItem("voter_data");
+    const storedVoter = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
 
     if (storedVoter) {
       return JSON.parse(storedVoter);

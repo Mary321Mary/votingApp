@@ -35,6 +35,7 @@ import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
+import { UserData } from "@/utils/types";
 
 type PrintScreenProps = NativeStackScreenProps<RootStackParamList, "Print">;
 
@@ -129,6 +130,25 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         VOTER_USER_STORAGE_KEY,
         JSON.stringify({
           ...parsedUser,
+          email: form.email_address,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          address: form.home_address,
+          aptunit: form.home_unit_type + " " + form.home_unit,
+          city: form.home_city,
+          zip: form.home_zip_code,
+          date_of_birth: form.date_of_birth,
+          phone: form.phone,
+
+          survey_question_1: form.survey_question_1,
+          survey_answer_1: form.survey_answer_1,
+          survey_question_2: form.survey_question_2,
+          survey_answer_2: form.survey_answer_2,
+
+          // opt_in_email: form.opt_in_email,
+          // opt_in_sms: form.opt_in_sms,
+          opt_in_volunteer: form.volunteer,
+
           registration_status: "pending",
           registration_status_date: new Date().toLocaleDateString("en-US", {
             month: "2-digit",
@@ -141,7 +161,7 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
             day: "2-digit",
             year: "numeric",
           }),
-        }),
+        } as UserData),
       );
     }
     fetchData();
@@ -151,6 +171,15 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
     if (!pdfUrl) return;
 
     downloadPdf(pdfUrl, "form_placeholder.pdf");
+
+    const registration_uid =
+      (await AsyncStorage.getItem(`registration_uid`)) || "";
+    await reportEvent({
+      registration_uid,
+      partner_id: form.partner_id.toString() || "1",
+      step: REPORT_EVENT_STEPS.STEP_5,
+      event_name: "NVRA form download",
+    });
 
     const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
     if (!storedUser) return;
@@ -173,15 +202,6 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         }),
       }),
     );
-
-    const registration_uid =
-      (await AsyncStorage.getItem(`registration_uid`)) || "";
-    await reportEvent({
-      registration_uid,
-      partner_id: form.partner_id.toString() || "1",
-      step: REPORT_EVENT_STEPS.STEP_5,
-      event_name: "NVRA form download",
-    });
   };
 
   return (

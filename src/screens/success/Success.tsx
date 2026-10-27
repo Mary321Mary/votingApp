@@ -27,6 +27,7 @@ import {
   ONBOARDING2_COMPLETED_KEY,
   VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { downloadPdf } from "@/utils/downloadFile";
 import { requestNvraFormWithPolling } from "@/utils/nvra-form";
@@ -34,6 +35,7 @@ import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
+import { UserData } from "@/utils/types";
 
 type SuccessScreenProps = NativeStackScreenProps<RootStackParamList, "Success">;
 
@@ -130,6 +132,48 @@ export default function SuccessScreen({
           JSON.stringify(state),
         );
       }
+
+      const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
+      if (!storedUser) return;
+      const parsedUser = JSON.parse(storedUser);
+      await AsyncStorage.setItem(
+        VOTER_USER_STORAGE_KEY,
+        JSON.stringify({
+          ...parsedUser,
+
+          email: form.email_address,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          address: form.home_address,
+          aptunit: form.home_unit_type + " " + form.home_unit,
+          city: form.home_city,
+          zip: form.home_zip_code,
+          date_of_birth: form.date_of_birth,
+          phone: form.phone,
+
+          survey_question_1: form.survey_question_1,
+          survey_answer_1: form.survey_answer_1,
+          survey_question_2: form.survey_question_2,
+          survey_answer_2: form.survey_answer_2,
+
+          // opt_in_email: form.opt_in_email,
+          // opt_in_sms: form.opt_in_sms,
+          opt_in_volunteer: form.volunteer,
+
+          registration_status: "pending",
+          registration_status_date: new Date().toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+          }),
+          ovr_status: "nvra_form_provided",
+          ovr_status_date: new Date().toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            year: "numeric",
+          }),
+        }),
+      );
     }
     fetchData();
   }, [form, state]);
@@ -146,6 +190,29 @@ export default function SuccessScreen({
       step: REPORT_EVENT_STEPS.STEP_5,
       event_name: "NVRA form mail request form downloaded",
     });
+
+    const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
+    if (!storedUser) return;
+    const parsedUser = JSON.parse(storedUser);
+    await AsyncStorage.setItem(
+      VOTER_USER_STORAGE_KEY,
+      JSON.stringify({
+        ...parsedUser,
+
+        registration_status: "pending",
+        registration_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        ovr_status: "nvra_form_downloaded",
+        ovr_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+      } as UserData),
+    );
   };
 
   if (!hasRouteState) {
