@@ -12,24 +12,20 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../Navigation";
 
-import { INITIAL_FORM_STATE } from "@/screens/ProfileScreen";
 import { COLORS } from "@/styles/colors";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import {
   getFormattedElectionTitle,
-  VOTER_FORM_STORAGE_KEY,
+  VOTER_USER_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
+  INITIAL_USER_STATE,
 } from "@/utils/constants";
 import {
   getLocations,
   submitBallotLookup,
   submitElectionsLookup,
 } from "@/utils/api";
-import {
-  CheckRegistrationStatus,
-  Election,
-  LocationsData,
-} from "@/utils/types";
+import { Election, LocationsData, UserData } from "@/utils/types";
 
 interface ElectionData {
   id: number;
@@ -85,8 +81,7 @@ export default function ElectionData() {
   const styles = getStyles(theme);
   const navigation = useNavigation<DashboardScreenNavigation>();
 
-  const [savedForm, setSavedForm] =
-    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
+  const [savedForm, setSavedForm] = useState<UserData>(INITIAL_USER_STATE);
   const [loading, setLoading] = useState<boolean>(true);
   const [elections, setElections] = useState<ElectionData | null>(null);
   const [ballotData, setBallotData] = useState<{
@@ -119,7 +114,7 @@ export default function ElectionData() {
     const loadUserData = async () => {
       try {
         const [storedForm] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+          AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
         ]);
 
         if (storedForm) {

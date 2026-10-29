@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultLayout from "@/layout/DefaultLayout";
+
 import {
-  CheckRegistrationStatus,
   DataCollectionConfiguration,
   Election,
   LocationsData,
@@ -13,6 +13,12 @@ import {
   SubmitEmailZipResponseProps,
   UserData,
 } from "@/utils/types";
+import {
+  FIRST_TIME_COMPLETED_KEY,
+  ONBOARDING2_COMPLETED_KEY,
+} from "@/utils/constants";
+import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
+
 import HomeScreen from "@/screens/Home";
 import RegisterScreen from "@/screens/Register";
 import ZipErrorScreen from "@/screens/ZipError";
@@ -24,6 +30,8 @@ import LookupNotFoundScreen from "@/screens/onboarding/LookupNotFound";
 import WelcomeScreen from "@/screens/onboarding/Welcome";
 import DashboardScreen from "@/screens/onboarding/Dashboard";
 import Onboarding2Screen from "@/screens/onboarding/Onboarding2";
+import ReturnScreen from "@/screens/onboarding/Return";
+import ResetScreen from "@/screens/onboarding/Reset";
 
 import PrintScreen from "@/screens/success/Print";
 import SuccessScreen from "@/screens/success/Success";
@@ -45,23 +53,17 @@ import Under18ReminderScreen from "@/screens/Under18Reminder";
 import NotificationsScreen from "@/screens/NotificationsScreen";
 import ProfileScreen from "@/screens/ProfileScreen";
 import SettingsScreen from "@/screens/Settings";
-
-import {
-  FIRST_TIME_COMPLETED_KEY,
-  ONBOARDING2_COMPLETED_KEY,
-} from "@/utils/constants";
-import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
-import ReturnScreen from "../screens/onboarding/Return";
-import BallotScreen from "../screens/Ballot";
-import LocationScreen from "../screens/Location";
+import BallotScreen from "@/screens/Ballot";
+import LocationScreen from "@/screens/Location";
 
 export type RootStackParamList = {
   Home: undefined; // or { id: string }
   Welcome: undefined; // or { id: string }
   Dashboard: { afterRegistration?: boolean };
   Return: undefined;
+  Reset: undefined;
   Onboarding2: {
-    form: CheckRegistrationStatus;
+    form: UserData;
   };
   Settings: undefined;
   Profile: undefined;
@@ -75,16 +77,16 @@ export type RootStackParamList = {
     onboardingFlow?: boolean;
   }; // or { id: string }
   CheckVoterStatus: {
-    form: CheckRegistrationStatus;
+    form: UserData;
     afterNotFound?: boolean;
   };
   Lookup: {
     state: StateData;
-    form: CheckRegistrationStatus;
+    form: UserData;
   };
   LookupNotFound: {
     state: StateData;
-    form: CheckRegistrationStatus;
+    form: UserData;
   };
   AlreadyRegistered: {
     state: StateData;
@@ -181,14 +183,14 @@ export type RootStackParamList = {
       latitude: number;
       elections: Election[];
     };
-    form: CheckRegistrationStatus;
+    form: UserData;
     stateData: StateData | null;
     electionTitle?: string;
     savedSelections: any;
   };
   Location: {
     locations: LocationsData;
-    form: CheckRegistrationStatus;
+    form: UserData;
   };
 };
 
@@ -267,6 +269,7 @@ function Navigation({}) {
         name="AlreadyRegistered"
         component={withDefaultLayout(AlreadyRegisteredScreen)}
       />
+      <Stack.Screen name="Reset" component={withDefaultLayout(ResetScreen)} />
       <Stack.Screen name="Return" component={withDefaultLayout(ReturnScreen)} />
       <Stack.Screen
         name="Dashboard"

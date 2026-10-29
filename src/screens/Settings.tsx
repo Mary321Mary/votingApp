@@ -14,9 +14,9 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import i18n from "i18n";
-import { CheckRegistrationStatus } from "@/utils/types";
+import { UserData } from "@/utils/types";
 import { getSurveyQuestions } from "@/utils/api";
-import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
+import { INITIAL_USER_STATE, VOTER_USER_STORAGE_KEY } from "@/utils/constants";
 
 import { CustomButton } from "../components/atoms/CustomButton";
 import { Checkbox } from "../components/atoms/Checkbox";
@@ -34,36 +34,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const [form, setForm] = useState<CheckRegistrationStatus>({
-    partner_id: 1,
-
-    first_name: "",
-    last_name: "",
-    email: "",
-    city: "",
-    zip: "",
-
-    aptunit: "",
-    address: "",
-    birthMonth: "",
-    birthDay: "",
-    birthYear: "",
-    date_of_birth: "",
-    phone: "",
-
-    opt_in_email: false,
-    opt_in_sms: false,
-    volunteer: false,
-
-    survey_question_1: "",
-    survey_answer_1: "",
-    survey_question_2: "",
-    survey_answer_2: "",
-
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
-  });
+  const [form, setForm] = useState<UserData>(INITIAL_USER_STATE);
   const [loading, setLoading] = useState(true);
 
   const updateField = (key: string, fieldValue: any) => {
@@ -71,7 +42,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   };
 
   const handleContinue = async () => {
-    await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
+    await AsyncStorage.setItem(VOTER_USER_STORAGE_KEY, JSON.stringify(form));
     navigation.replace("Dashboard", {});
   };
 
@@ -79,7 +50,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
     const initData = async () => {
       try {
         const [storedForm, questionsResponse] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+          AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
           getSurveyQuestions({
             partner_id: "1",
             locale: i18n.language,
@@ -217,7 +188,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <Checkbox
             name="volunteer"
             label={t("general.opt_ins.volunteer")}
-            value={form.volunteer}
+            value={form.opt_in_volunteer}
             onValueChange={(checked: boolean) =>
               updateField("volunteer", checked)
             }

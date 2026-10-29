@@ -9,6 +9,7 @@ import {
   SubmitMICovrPayload,
   SubmitPACovrPayload,
   SubmitWACovrPayload,
+  UserData,
 } from "./types";
 
 /** Fallback when submit_email_zip does not yet return state_required_id. */
@@ -16,11 +17,58 @@ export const DEFAULT_STATE_REQUIRED_ID =
   "driver's license or state identification card";
 
 export const VOTER_USER_STORAGE_KEY = "voter_saved_user";
-export const VOTER_FORM_STORAGE_KEY = "voter_lookup_saved_form";
 export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
 export const ONBOARDING2_COMPLETED_KEY = "onboarding2_completed";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";
+
+export const INITIAL_USER_STATE: UserData = {
+  uid: "",
+  first_name: "",
+  last_name: "",
+  email: "",
+  city: "",
+  zip: "",
+
+  formattedAddress: "",
+  aptunit: "",
+  address: "",
+  birthMonth: "",
+  birthDay: "",
+  birthYear: "",
+  date_of_birth: "",
+
+  phone: "",
+  opt_in_email: false,
+  opt_in_sms: false,
+  opt_in_volunteer: false,
+
+  survey_question_1: "",
+  survey_answer_1: "",
+  survey_question_2: "",
+  survey_answer_2: "",
+
+  prefType1: true,
+  prefType2: true,
+  prefType3: true,
+
+  partner_opt_in_email: false,
+  partner_opt_in_sms: false,
+  partner_opt_in_volunteer: false,
+
+  lookup_status_date: "",
+  lookup_status: "",
+  registration_status: "",
+  registration_status_date: "",
+  registration_date: "",
+  pledge_status: "",
+  pledge_date: "",
+  ovr_status: "",
+  ovr_status_date: "",
+  ballot_status: "",
+  abr_status: "",
+  location_status: "",
+};
 
 export const getFormattedElectionTitle = (electionObj: any) => {
   if (!electionObj?.date) return "";

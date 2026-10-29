@@ -13,14 +13,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
-  FIRST_TIME_COMPLETED_KEY,
-  ONBOARDING2_COMPLETED_KEY,
-  ONBOARDING_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
+  INITIAL_USER_STATE,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
-import { CheckRegistrationStatus, StateData, UserData } from "@/utils/types";
+import { StateData, UserData } from "@/utils/types";
 import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 
@@ -33,7 +30,6 @@ import i18n from "i18n";
 import ElectionData from "@/components/organisms/ElectionData";
 import { COLORS } from "@/styles/colors";
 import { Checkbox } from "@/components/atoms/Checkbox";
-import { INITIAL_FORM_STATE } from "../ProfileScreen";
 
 type DashboardScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -51,10 +47,8 @@ export default function DashboardScreen({
   const { config } = useUIConfig();
 
   const [userName, setUserName] = useState<string>("");
-  const [savedUser, setSavedUser] = useState<UserData>();
+  const [savedUser, setSavedUser] = useState<UserData>(INITIAL_USER_STATE);
   const [savedState, setSavedState] = useState<StateData>();
-  const [savedForm, setSavedForm] =
-    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
   const [loading, setLoading] = useState<boolean>(true);
   const [changeNameOrAddress, setChangeNameOrAddress] =
     useState<boolean>(false);
@@ -62,19 +56,10 @@ export default function DashboardScreen({
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const [storedForm, storedState, storedUser] = await Promise.all([
-          AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+        const [storedState, storedUser] = await Promise.all([
           AsyncStorage.getItem(VOTER_STATE_STORAGE_KEY),
           AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
         ]);
-
-        if (storedForm) {
-          const parsedForm = JSON.parse(storedForm);
-          setSavedForm(parsedForm);
-          if (parsedForm.first_name) {
-            setUserName(parsedForm.first_name);
-          }
-        }
         if (storedState) {
           const parsedState = JSON.parse(storedState);
           setSavedState(parsedState);
@@ -82,6 +67,9 @@ export default function DashboardScreen({
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setSavedUser(parsedUser);
+          if (parsedUser.first_name) {
+            setUserName(parsedUser.first_name);
+          }
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -195,10 +183,10 @@ export default function DashboardScreen({
             </Text>
           )}
           <Text style={styles.userDataText}>
-            {savedForm.first_name} {savedForm.last_name} - {savedForm.address},{" "}
-            {savedForm.city}
+            {savedUser.first_name} {savedUser.last_name} - {savedUser.address},{" "}
+            {savedUser.city}
             {savedState?.abbreviation && `, ${savedState?.abbreviation}`}
-            {savedForm.zip && ` ${savedForm.zip}`}
+            {savedUser.zip && ` ${savedUser.zip}`}
           </Text>
 
           <Checkbox
@@ -224,10 +212,10 @@ export default function DashboardScreen({
               if (url) openInAppUrl(url);
 
               const response = await submitEmailZip({
-                email: savedForm.email,
-                zip: savedForm.zip,
+                email: savedUser.email,
+                zip: savedUser.zip,
                 locale: i18n.language,
-                partner_id: savedForm.partner_id.toString(),
+                partner_id: "1",
               });
 
               await AsyncStorage.setItem(
@@ -237,7 +225,7 @@ export default function DashboardScreen({
 
               await reportEvent({
                 registration_uid: response.data.registration_uid ?? "",
-                partner_id: savedForm.partner_id.toString() || "1",
+                partner_id: "1",
                 step: REPORT_EVENT_STEPS.EMPTY,
                 event_name: "CTA clicked: " + url,
               });
@@ -285,20 +273,20 @@ export default function DashboardScreen({
 
           <CustomButton
             title="Reset Test"
-            onPress={async () => {
-              try {
-                await AsyncStorage.multiRemove([
-                  VOTER_USER_STORAGE_KEY,
-                  VOTER_FORM_STORAGE_KEY,
-                  FIRST_TIME_COMPLETED_KEY,
-                  ONBOARDING_COMPLETED_KEY,
-                  ONBOARDING2_COMPLETED_KEY,
-                  VOTER_STATE_STORAGE_KEY,
-                ]);
-              } catch (error) {
-                console.error("Failed to clear saved data:", error);
-              }
-              navigation.replace("Welcome");
+            onPress={() => {
+              navigation.navigate("Reset");
+              // try {
+              //   await AsyncStorage.multiRemove([
+              //     VOTER_USER_STORAGE_KEY,
+              //     FIRST_TIME_COMPLETED_KEY,
+              //     ONBOARDING_COMPLETED_KEY,
+              //     ONBOARDING2_COMPLETED_KEY,
+              //     VOTER_STATE_STORAGE_KEY,
+              //   ]);
+              // } catch (error) {
+              //   console.error("Failed to clear saved data:", error);
+              // }
+              // navigation.replace("Welcome");
             }}
           />
         </View>

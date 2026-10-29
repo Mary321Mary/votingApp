@@ -99,13 +99,13 @@ export const SuccessPAScreen = ({
                 );
                 if (onboarding2CompletedKey === "true") {
                   await AsyncStorage.setItem(
-                    VOTER_FORM_STORAGE_KEY,
-                    JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
+                    VOTER_USER_STORAGE_KEY,
+                    JSON.stringify(mapRegisterFormToUserForm(form)),
                   );
                   navigation.navigate("Dashboard", {});
                 } else
                   navigation.navigate("Onboarding2", {
-                    form: mapRegisterFormToVrLookupPayload(form),
+                    form: mapRegisterFormToUserForm(form),
                   });
               }}
             />

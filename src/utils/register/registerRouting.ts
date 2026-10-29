@@ -1,9 +1,4 @@
-import {
-  CheckRegistrationStatus,
-  OVR_TYPE_MAP,
-  RegisterFormState,
-  StateData,
-} from "../types";
+import { OVR_TYPE_MAP, RegisterFormState, StateData, UserData } from "../types";
 
 export function buildPAHomeAddressFromForm(form: RegisterFormState): string {
   const line2 = form.address_line_2?.trim();
@@ -58,11 +53,9 @@ export function resolveWorkflowType(
   return explicitWorkflowType !== undefined ? explicitWorkflowType : "ovr";
 }
 
-export function mapRegisterFormToVrLookupPayload(
-  form: RegisterFormState,
-): CheckRegistrationStatus {
+export function mapRegisterFormToUserForm(form: RegisterFormState): UserData {
   return {
-    partner_id: form.partner_id,
+    uid: "",
     first_name: form.first_name,
     last_name: form.last_name,
     email: form.email_address,
@@ -73,28 +66,46 @@ export function mapRegisterFormToVrLookupPayload(
     city: form.home_city,
     aptunit: form.home_unit_type + " " + form.home_unit,
     phone: form.phone,
+
     opt_in_email: form.opt_in_email,
     opt_in_sms: form.opt_in_sms,
-    volunteer: form.volunteer,
+    opt_in_volunteer: form.volunteer,
+
     birthMonth: form.birthMonth,
     birthDay: form.birthDay,
     birthYear: form.birthYear,
     date_of_birth: form.birthYear + "-" + form.birthMonth + "-" + form.birthDay,
+
     survey_question_1: form.survey_question_1,
     survey_answer_1: form.survey_answer_1,
     survey_question_2: form.survey_question_2,
     survey_answer_2: form.survey_answer_2,
+
     prefType1: true,
     prefType2: true,
     prefType3: true,
+
+    partner_opt_in_email: false,
+    partner_opt_in_sms: false,
+    partner_opt_in_volunteer: false,
+
+    lookup_status_date: "",
+    lookup_status: "",
+    registration_status: "",
+    registration_status_date: "",
+    registration_date: "",
+    pledge_status: false,
+    pledge_date: "",
+    ovr_status: "",
+    ovr_status_date: "",
   };
 }
 
-export function mapLookupFormToRegisterForm(
-  lookupForm: CheckRegistrationStatus,
+export function mapUserFormToRegisterForm(
+  lookupForm: UserData,
 ): RegisterFormState {
   return {
-    partner_id: lookupForm.partner_id,
+    partner_id: 1,
     first_name: lookupForm.first_name,
     last_name: lookupForm.last_name,
     home_address: lookupForm.address,
@@ -104,7 +115,7 @@ export function mapLookupFormToRegisterForm(
     phone: lookupForm.phone,
     opt_in_email: true,
     opt_in_sms: false,
-    volunteer: lookupForm.volunteer,
+    volunteer: lookupForm.opt_in_volunteer,
 
     birthMonth: lookupForm.birthMonth,
     birthDay: lookupForm.birthDay,

@@ -148,7 +148,7 @@ const FinishWithStateScreen = ({
               );
               if (onboarding2CompletedKey === "true") {
                 await AsyncStorage.setItem(
-                  VOTER_FORM_STORAGE_KEY,
+                  VOTER_USER_STORAGE_KEY,
                   JSON.stringify(
                     mapRegisterFormToVrLookupPayload(navState.form),
                   ),

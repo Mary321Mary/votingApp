@@ -17,13 +17,10 @@ import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import i18n from "i18n";
 
-import { VOTER_FORM_STORAGE_KEY } from "@/utils/constants";
-import {
-  CheckRegistrationStatus,
-  CheckRegistrationStatusError,
-} from "@/utils/types";
+import { INITIAL_USER_STATE, VOTER_USER_STORAGE_KEY } from "@/utils/constants";
+import { CheckRegistrationStatusError, UserData } from "@/utils/types";
 import { submitEmailZip } from "@/utils/api";
-import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
+import { mapUserFormToRegisterForm } from "@/utils/register/registerRouting";
 
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
@@ -34,37 +31,6 @@ import { Checkbox } from "@/components/atoms/Checkbox";
 import { AddressAutocomplete } from "@/components/atoms/AddressAutocomplete";
 import { EMPTY_ERROR_MESSAGES } from "./onboarding/CheckVoterStatus";
 
-export const INITIAL_FORM_STATE: CheckRegistrationStatus = {
-  partner_id: 1,
-  first_name: "",
-  last_name: "",
-  email: "",
-  city: "",
-  zip: "",
-
-  formattedAddress: "",
-  aptunit: "",
-  address: "",
-  birthMonth: "",
-  birthDay: "",
-  birthYear: "",
-  date_of_birth: "",
-
-  phone: "",
-  opt_in_email: false,
-  opt_in_sms: false,
-  volunteer: false,
-
-  survey_question_1: "",
-  survey_answer_1: "",
-  survey_question_2: "",
-  survey_answer_2: "",
-
-  prefType1: true,
-  prefType2: true,
-  prefType3: true,
-};
-
 type ProfileScreenProps = NativeStackScreenProps<RootStackParamList, "Profile">;
 
 export default function ProfileScreen({ navigation }: ProfileScreenProps) {
@@ -73,9 +39,8 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const styles = getStyles(theme);
   const { config } = useUIConfig();
 
-  const [form, setForm] = useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
-  const [initialForm, setInitialForm] =
-    useState<CheckRegistrationStatus>(INITIAL_FORM_STATE);
+  const [form, setForm] = useState<UserData>(INITIAL_USER_STATE);
+  const [initialForm, setInitialForm] = useState<UserData>(INITIAL_USER_STATE);
 
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] =
@@ -107,7 +72,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const storedForm = await AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY);
+        const storedForm = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
         if (storedForm) {
           const parsedForm = JSON.parse(storedForm);
           setForm(parsedForm);
@@ -214,7 +179,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     }
 
     if (isContactOnlyChanged) {
-      await AsyncStorage.setItem(VOTER_FORM_STORAGE_KEY, JSON.stringify(form));
+      await AsyncStorage.setItem(VOTER_USER_STORAGE_KEY, JSON.stringify(form));
       navigation.replace("Dashboard", {});
       return;
     }
@@ -224,7 +189,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       email: form.email,
       zip: form.zip,
       locale: i18n.language,
-      partner_id: form.partner_id.toString(),
+      partner_id: "1",
     });
     await AsyncStorage.setItem(
       "registration_uid",
@@ -236,7 +201,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       state: response.data.state,
       zip: form.zip,
       email: form.email,
-      form: mapLookupFormToRegisterForm(form),
+      form: mapUserFormToRegisterForm(form),
       pageFromLookup: "paper",
       workflowType: "nvra",
       showRedirectText: false,

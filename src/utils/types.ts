@@ -104,55 +104,14 @@ export type UserData = {
   email: string;
   zip: string;
 
-  address: string;
-  aptunit: string | null;
-  city: string;
-  phone: string;
-  opt_in_email: boolean | null;
-  opt_in_sms: boolean | null;
-  opt_in_volunteer: boolean | null;
-
-  date_of_birth: string;
-
-  survey_question_1: string | null;
-  survey_answer_1: string | null;
-  survey_question_2: string | null;
-  survey_answer_2: string | null;
-
-  partner_opt_in_email: boolean | null;
-  partner_opt_in_sms: boolean | null;
-  partner_opt_in_volunteer: boolean | null;
-
-  lookup_status_date: string;
-  lookup_status: string;
-  registration_status: string;
-  registration_status_date: string;
-  registration_date: string;
-  pledge_status: boolean;
-  pledge_date: string | null;
-  ovr_status: string;
-  ovr_status_date: string;
-};
-
-export type CheckRegistrationStatus = {
-  partner_id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  zip: string;
-
   formattedAddress: string;
-  aptunit: string;
   address: string;
+  aptunit: string;
   city: string;
   phone: string;
   opt_in_email: boolean;
   opt_in_sms: boolean;
-  volunteer: boolean;
-
-  prefType1: boolean;
-  prefType2: boolean;
-  prefType3: boolean;
+  opt_in_volunteer: boolean;
 
   birthMonth: string;
   birthDay: string;
@@ -163,6 +122,27 @@ export type CheckRegistrationStatus = {
   survey_answer_1: string;
   survey_question_2: string;
   survey_answer_2: string;
+
+  partner_opt_in_email: boolean | null;
+  partner_opt_in_sms: boolean | null;
+  partner_opt_in_volunteer: boolean | null;
+
+  prefType1: boolean;
+  prefType2: boolean;
+  prefType3: boolean;
+
+  lookup_status_date: string;
+  lookup_status: string;
+  registration_status: string;
+  registration_status_date: string;
+  registration_date: string;
+  pledge_status: string;
+  pledge_date: string | null;
+  ovr_status: string;
+  ovr_status_date: string;
+  ballot_status: string;
+  abr_status: string;
+  location_status: string;
 };
 
 export type CheckRegistrationStatusError = {

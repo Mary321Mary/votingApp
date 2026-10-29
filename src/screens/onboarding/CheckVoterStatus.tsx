@@ -24,18 +24,14 @@ import { Checkbox } from "@/components/atoms/Checkbox";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { COLORS } from "@/styles/colors";
-import {
-  CheckRegistrationStatus,
-  CheckRegistrationStatusError,
-} from "@/utils/types";
+import { CheckRegistrationStatusError, UserData } from "@/utils/types";
 import { submitEmailZip, submitLookup } from "@/utils/api";
 import {
   ONBOARDING_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
-import { mapLookupFormToRegisterForm } from "@/utils/register/registerRouting";
+import { mapUserFormToRegisterForm } from "@/utils/register/registerRouting";
 
 import i18n from "i18n";
 import Footer from "@/layout/Footer";
@@ -88,24 +84,22 @@ export const CheckVoterStatusScreen = ({
   const { t } = useTranslation();
   const { scrollViewRef, scrollToFirstError } = useFormScroll();
 
-  const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
+  const [form, setForm] = useState<UserData>(initialForm);
   const [errMsg, setErrMsg] =
     useState<CheckRegistrationStatusError>(EMPTY_ERROR_MESSAGES);
-  const [commotError, setCommonError] = useState("");
+  const [commonError, setCommonError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [autofill, setAutofill] = useState(false);
   const [isByFields, setIsByFields] = useState<boolean>(false);
 
   const updateField = (key: string, fieldValue: any) => {
-    setForm({ ...form, [key]: fieldValue });
+    setForm(prev => ({ ...prev, [key]: fieldValue }));
   };
   const onlyDigits = (text: string) => text.replace(/\D/g, "");
 
   const formatPhone = (digits: string) => {
     if (digits.length <= 3) return digits;
-    if (digits.length <= 6) {
-      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    }
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
   };
 
@@ -114,8 +108,42 @@ export const CheckVoterStatusScreen = ({
     if (form.phone.endsWith("-") && text.length === form.phone.length - 1) {
       digits = digits.slice(0, -1);
     }
-    const formatted = formatPhone(digits);
-    updateField("phone", formatted);
+    updateField("phone", formatPhone(digits));
+  };
+
+  const buildVoterObject = (
+    voterFromApi: Partial<UserData> | undefined,
+    currentForm: UserData,
+    status: "active" | "pending",
+    lookupStatus: "catalist_match" | "catalist_no_match",
+    formattedDob: string,
+  ): UserData => {
+    const today = new Date().toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+
+    return {
+      ...(voterFromApi || {}),
+      first_name: currentForm.first_name,
+      last_name: currentForm.last_name,
+      email: currentForm.email,
+      zip: currentForm.zip,
+      formattedAddress: currentForm.formattedAddress,
+      address: currentForm.address,
+      aptunit: currentForm.aptunit,
+      city: currentForm.city,
+      phone: currentForm.phone,
+      birthMonth: currentForm.birthMonth,
+      birthDay: currentForm.birthDay,
+      birthYear: currentForm.birthYear,
+      date_of_birth: formattedDob,
+      registration_status: status,
+      registration_status_date: today,
+      lookup_status: lookupStatus,
+      lookup_status_date: today,
+    } as UserData;
   };
 
   const handleAutofillFromMyCard = async () => {
@@ -191,122 +219,81 @@ export const CheckVoterStatusScreen = ({
 
   const onContinue = async () => {
     const { isValid, errors } = validateRegistrationStatus();
-
-    if (isValid) {
-      setIsLoading(true);
-      setCommonError("");
-
-      try {
-        form.date_of_birth =
-          form.birthYear + "-" + form.birthMonth + "-" + form.birthDay;
-        const responseLookup = await submitLookup({ ...form });
-        // const voterData = await lookupVoterByUid(responseLookup.data.lookup_uid);
-
-        if (responseLookup.data.lookup_uid) {
-          await AsyncStorage.setItem(
-            "registration_uid",
-            responseLookup.data.lookup_uid,
-          );
-        } else {
-          await AsyncStorage.setItem("registration_uid", "");
-        }
-
-        if (responseLookup.data.state?.abbreviation === "ND") {
-          navigation.navigate("NotParticipating", {
-            state: responseLookup.data.state,
-          });
-          return;
-        }
-
-        if (
-          responseLookup.data.status.success ||
-          (form.first_name === "Jane" && form.last_name === "Doe")
-        ) {
-          if (responseLookup.data.voter) {
-            await AsyncStorage.setItem(
-              VOTER_USER_STORAGE_KEY,
-              JSON.stringify({
-                ...responseLookup.data.voter,
-                registration_status: "active",
-                registration_status_date: new Date().toLocaleDateString(
-                  "en-US",
-                  {
-                    month: "2-digit",
-                    day: "2-digit",
-                    year: "numeric",
-                  },
-                ),
-                lookup_status: "catalist_match",
-                lookup_status_date: new Date().toLocaleDateString("en-US", {
-                  month: "2-digit",
-                  day: "2-digit",
-                  year: "numeric",
-                }),
-              }),
-            );
-          }
-          await AsyncStorage.setItem(
-            VOTER_STATE_STORAGE_KEY,
-            JSON.stringify(responseLookup.data.state),
-          );
-          await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
-
-          navigation.navigate("Lookup", {
-            form,
-            state: responseLookup.data.state,
-          });
-        } else {
-          if (responseLookup.data.voter) {
-            await AsyncStorage.setItem(
-              VOTER_USER_STORAGE_KEY,
-              JSON.stringify({
-                ...responseLookup.data.voter,
-                registration_status: "pending",
-                registration_status_date: new Date().toLocaleDateString(
-                  "en-US",
-                  {
-                    month: "2-digit",
-                    day: "2-digit",
-                    year: "numeric",
-                  },
-                ),
-                lookup_status: "catalist_no_match",
-                lookup_status_date: new Date().toLocaleDateString("en-US", {
-                  month: "2-digit",
-                  day: "2-digit",
-                  year: "numeric",
-                }),
-              }),
-            );
-          }
-          navigation.navigate("LookupNotFound", {
-            form,
-            state: responseLookup.data.state,
-          });
-        }
-      } catch (error: any) {
-        console.error("Lookup submission failed:", error);
-
-        error?.response?.data?.status?.errors?.forEach((err: string) => {
-          if (err.includes("email")) {
-            setErrMsg(prev => ({
-              ...prev,
-              email: t("form_fields.email_error"),
-            }));
-          } else if (err.includes("zip")) {
-            setErrMsg(prev => ({
-              ...prev,
-              zip: t("form_fields.zip_code_error"),
-            }));
-          } else {
-            setCommonError(prev => prev + " " + err);
-          }
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
+    if (!isValid) {
       scrollToFirstError(errors);
+      return;
+    }
+
+    setIsLoading(true);
+    setCommonError("");
+
+    try {
+      const formattedDob = `${form.birthYear}-${form.birthMonth}-${form.birthDay}`;
+      const payload = { ...form, date_of_birth: formattedDob };
+
+      const responseLookup = await submitLookup(payload);
+      const lookupUid = responseLookup.data.lookup_uid || "";
+
+      await AsyncStorage.setItem("registration_uid", lookupUid);
+
+      if (responseLookup.data.state?.abbreviation === "ND") {
+        navigation.navigate("NotParticipating", {
+          state: responseLookup.data.state,
+        });
+        return;
+      }
+
+      const isMatch =
+        responseLookup.data.status.success ||
+        (form.first_name === "Jane" && form.last_name === "Doe");
+
+      const updatedVoter = buildVoterObject(
+        responseLookup.data.voter,
+        payload,
+        isMatch ? "active" : "pending",
+        isMatch ? "catalist_match" : "catalist_no_match",
+        formattedDob,
+      );
+
+      await AsyncStorage.setItem(
+        VOTER_USER_STORAGE_KEY,
+        JSON.stringify(updatedVoter),
+      );
+
+      if (isMatch) {
+        await AsyncStorage.setItem(
+          VOTER_STATE_STORAGE_KEY,
+          JSON.stringify(responseLookup.data.state),
+        );
+        await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, "true");
+
+        navigation.navigate("Lookup", {
+          form: updatedVoter,
+          state: responseLookup.data.state,
+        });
+      } else {
+        navigation.navigate("LookupNotFound", {
+          form: updatedVoter,
+          state: responseLookup.data.state,
+        });
+      }
+    } catch (error: any) {
+      console.error("Lookup submission failed:", error);
+
+      error?.response?.data?.status?.errors?.forEach((err: string) => {
+        if (err.includes("email")) {
+          setErrMsg(prev => ({ ...prev, email: t("form_fields.email_error") }));
+        } else if (err.includes("zip")) {
+          setErrMsg(prev => ({
+            ...prev,
+            zip: t("form_fields.zip_code_error"),
+          }));
+        } else {
+          setCommonError(prev => `${prev} ${err}`.trim());
+        }
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -377,7 +364,7 @@ export const CheckVoterStatusScreen = ({
       try {
         if (form.first_name || form.last_name || form.email) {
           await AsyncStorage.setItem(
-            VOTER_FORM_STORAGE_KEY,
+            VOTER_USER_STORAGE_KEY,
             JSON.stringify(form),
           );
         }
@@ -391,7 +378,7 @@ export const CheckVoterStatusScreen = ({
   useEffect(() => {
     const restoreSavedForm = async () => {
       try {
-        const savedData = await AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY);
+        const savedData = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
         if (savedData) {
           const parsedForm = JSON.parse(savedData);
           setForm(prev => ({ ...prev, ...parsedForm }));
@@ -601,7 +588,7 @@ export const CheckVoterStatusScreen = ({
                   email: form.email,
                   zip: form.zip,
                   locale: i18n.language,
-                  partner_id: form.partner_id.toString(),
+                  partner_id: "1",
                 });
                 await AsyncStorage.setItem(
                   "registration_uid",
@@ -613,7 +600,7 @@ export const CheckVoterStatusScreen = ({
                   state: response.data.state,
                   zip: form.zip,
                   email: form.email,
-                  form: mapLookupFormToRegisterForm(form),
+                  form: mapUserFormToRegisterForm(form),
                   pageFromLookup: "paper",
                   workflowType: "nvra",
                   showRedirectText: false,
@@ -643,7 +630,7 @@ export const CheckVoterStatusScreen = ({
             }}
           />
         )}
-        <Text style={styles.errorText}>{commotError}</Text>
+        <Text style={styles.errorText}>{commonError}</Text>
       </View>
       <Footer showLanguageSelector={!afterNotFound} />
     </KeyboardAwareScrollView>

@@ -25,7 +25,6 @@ import { CustomButton } from "@/components/atoms/CustomButton";
 import {
   filterRegistrant,
   ONBOARDING2_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
@@ -34,7 +33,7 @@ import { requestNvraFormWithPolling } from "@/utils/nvra-form";
 import { INTERNAL_ERRORS } from "@/utils/internal-errors";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
-import { mapRegisterFormToVrLookupPayload } from "@/utils/register/registerRouting";
+import { mapRegisterFormToUserForm } from "@/utils/register/registerRouting";
 import { UserData } from "@/utils/types";
 
 type PrintScreenProps = NativeStackScreenProps<RootStackParamList, "Print">;
@@ -113,8 +112,8 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
       );
       if (onboarding2CompletedKey === "true") {
         await AsyncStorage.setItem(
-          VOTER_FORM_STORAGE_KEY,
-          JSON.stringify(mapRegisterFormToVrLookupPayload(form)),
+          VOTER_USER_STORAGE_KEY,
+          JSON.stringify(mapRegisterFormToUserForm(form)),
         );
       } else {
         await AsyncStorage.setItem(
@@ -145,8 +144,8 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
           survey_question_2: form.survey_question_2,
           survey_answer_2: form.survey_answer_2,
 
-          // opt_in_email: form.opt_in_email,
-          // opt_in_sms: form.opt_in_sms,
+          opt_in_email: form.opt_in_email,
+          opt_in_sms: form.opt_in_sms,
           opt_in_volunteer: form.volunteer,
 
           registration_status: "pending",
@@ -283,7 +282,7 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
                 } else
                   navigation.navigate("Onboarding2", {
                     form: {
-                      ...mapRegisterFormToVrLookupPayload(form),
+                      ...mapRegisterFormToUserForm(form),
                       opt_in_email: false,
                       opt_in_sms: false,
                     },

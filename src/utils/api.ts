@@ -1,5 +1,4 @@
 import type {
-  CheckRegistrationStatus,
   CheckRegistrationStatusResponse,
   DataConfigurationRequest,
   DataSurveyQuestionsRequest,
@@ -31,6 +30,7 @@ import type {
   SubmitVoterStatusResponse,
   SubmitWACovrPayload,
   UIConfig,
+  UserData,
   VoterDeviceEmailData,
   VoterDeviceResponse,
   VoterDeviceSMSData,
@@ -112,13 +112,14 @@ export function getSurveyQuestions(
 }
 
 export function submitLookup(
-  data: CheckRegistrationStatus,
+  data: UserData,
   headers: Record<string, string> = {},
 ) {
-  return HttpClient.Client.post<
-    CheckRegistrationStatus,
-    CheckRegistrationStatusResponse
-  >(ENDPOINTS.SUBMIT_LOOKUP, data, headers);
+  return HttpClient.Client.post<UserData, CheckRegistrationStatusResponse>(
+    ENDPOINTS.SUBMIT_LOOKUP,
+    data,
+    headers,
+  );
 }
 
 export const lookupVoterByUid = async (uid: string) => {
@@ -137,13 +138,14 @@ export const lookupVoterByUid = async (uid: string) => {
 };
 
 export function submitElectionsLookup(
-  data: CheckRegistrationStatus,
+  data: UserData,
   headers: Record<string, string> = {},
 ) {
-  return HttpClient.Client.post<
-    CheckRegistrationStatus,
-    SubmitElectionsResponse
-  >(ENDPOINTS.SUBMIT_ELECTIONS_LOOKUP, data, headers);
+  return HttpClient.Client.post<UserData, SubmitElectionsResponse>(
+    ENDPOINTS.SUBMIT_ELECTIONS_LOOKUP,
+    data,
+    headers,
+  );
 }
 
 export function submitBallotLookup(
@@ -158,13 +160,14 @@ export function submitBallotLookup(
 }
 
 export function getLocations(
-  data: CheckRegistrationStatus,
+  data: UserData,
   headers: Record<string, string> = {},
 ) {
-  return HttpClient.Client.post<
-    CheckRegistrationStatus,
-    LookupVotingLocationsResponse
-  >(ENDPOINTS.GET_LOATIONS, data, headers);
+  return HttpClient.Client.post<UserData, LookupVotingLocationsResponse>(
+    ENDPOINTS.GET_LOATIONS,
+    data,
+    headers,
+  );
 }
 
 export function setUnder18Reminder(

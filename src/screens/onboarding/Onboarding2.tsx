@@ -7,10 +7,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import i18n from "i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
-import { CheckRegistrationStatus } from "@/utils/types";
+import { UserData } from "@/utils/types";
 import {
   ONBOARDING2_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
+  VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { getSurveyQuestions } from "@/utils/api";
 
@@ -33,8 +33,8 @@ export default function Onboarding2Screen({
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const initialForm: CheckRegistrationStatus = route.params?.form || {};
-  const [form, setForm] = useState<CheckRegistrationStatus>(initialForm);
+  const initialForm: UserData = route.params?.form || {};
+  const [form, setForm] = useState<UserData>(initialForm);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
@@ -57,7 +57,7 @@ export default function Onboarding2Screen({
     const saveFormToStorage = async () => {
       try {
         await AsyncStorage.setItem(
-          VOTER_FORM_STORAGE_KEY,
+          VOTER_USER_STORAGE_KEY,
           JSON.stringify(form),
         );
       } catch (e) {
@@ -195,7 +195,7 @@ export default function Onboarding2Screen({
           <Checkbox
             name="volunteer"
             label={t("general.opt_ins.volunteer")}
-            value={form.volunteer}
+            value={form.opt_in_volunteer}
             onValueChange={(checked: boolean) =>
               updateField("volunteer", checked)
             }

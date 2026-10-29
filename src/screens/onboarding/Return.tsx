@@ -6,9 +6,9 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import {
   FIRST_TIME_COMPLETED_KEY,
+  INITIAL_USER_STATE,
   ONBOARDING2_COMPLETED_KEY,
   ONBOARDING_COMPLETED_KEY,
-  VOTER_FORM_STORAGE_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
@@ -18,7 +18,6 @@ import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
-import { INITIAL_FORM_STATE } from "../ProfileScreen";
 
 type ReturnScreenProps = NativeStackScreenProps<RootStackParamList, "Return">;
 
@@ -29,10 +28,10 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
 
   const handleContinueOnboarding = async () => {
     const [storedForm, storedOnboardingCompleted] = await Promise.all([
-      AsyncStorage.getItem(VOTER_FORM_STORAGE_KEY),
+      AsyncStorage.getItem(VOTER_USER_STORAGE_KEY),
       AsyncStorage.getItem(ONBOARDING_COMPLETED_KEY),
     ]);
-    let form = INITIAL_FORM_STATE;
+    let form = INITIAL_USER_STATE;
     if (storedForm) {
       form = JSON.parse(storedForm);
     }
@@ -63,7 +62,6 @@ export default function ReturnScreen({ navigation }: ReturnScreenProps) {
               try {
                 await AsyncStorage.multiRemove([
                   VOTER_USER_STORAGE_KEY,
-                  VOTER_FORM_STORAGE_KEY,
                   FIRST_TIME_COMPLETED_KEY,
                   ONBOARDING_COMPLETED_KEY,
                   ONBOARDING2_COMPLETED_KEY,

@@ -13,13 +13,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import black_logo from "@/assets/images/mobile_black_logo.png";
 import { CustomButton } from "@/components/atoms/CustomButton";
-import { FIRST_TIME_COMPLETED_KEY } from "@/utils/constants";
+import {
+  FIRST_TIME_COMPLETED_KEY,
+  INITIAL_USER_STATE,
+} from "@/utils/constants";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { RootStackParamList } from "@/components/Navigation";
 import { LANGUAGE_KEY } from "@/i18n";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { INITIAL_FORM_STATE } from "../ProfileScreen";
 import { COLORS } from "../../styles/colors";
 
 type WelcomeScreenProps = NativeStackScreenProps<RootStackParamList, "Welcome">;
@@ -65,7 +67,7 @@ export default function WelcomeScreen({ navigation }: WelcomeScreenProps) {
     }
 
     navigation.navigate("CheckVoterStatus", {
-      form: INITIAL_FORM_STATE,
+      form: INITIAL_USER_STATE,
     });
   };
 

@@ -38,7 +38,7 @@ import {
 import {
   allowsPaperFallback,
   getFlowType,
-  mapRegisterFormToVrLookupPayload,
+  mapRegisterFormToUserForm,
   resolveWorkflowType,
 } from "@/utils/register/registerRouting";
 import {
@@ -505,7 +505,7 @@ export const RegisterResult = ({
     setIsSubmitting(true);
     try {
       if (state.vr_lookup_on_nvra_form) {
-        const payload = mapRegisterFormToVrLookupPayload(form);
+        const payload = mapRegisterFormToUserForm(form);
         const responseLookup = await submitLookup(payload);
 
         if (!isMountedRef.current) {

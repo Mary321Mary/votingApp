@@ -19,7 +19,7 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import i18n from "@/i18n";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
-import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
+import { mapUserFormToRegisterForm } from "@/utils/register/registerRouting";
 
 type LookupScreenProps = NativeStackScreenProps<RootStackParamList, "Lookup">;
 
@@ -79,7 +79,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
         (await AsyncStorage.getItem(`registration_uid`)) || "";
       await reportEvent({
         registration_uid,
-        partner_id: form.partner_id.toString(),
+        partner_id: "1",
         step: REPORT_EVENT_STEPS.STEP_5,
         event_name: "Voter Lookup success",
       });
@@ -254,7 +254,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
                   email: form.email,
                   zip: form.zip,
                   locale: i18n.language,
-                  partner_id: form.partner_id.toString(),
+                  partner_id: "1",
                 });
                 await AsyncStorage.setItem(
                   "registration_uid",
@@ -263,7 +263,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
 
                 await reportEvent({
                   registration_uid: response.data.registration_uid ?? "",
-                  partner_id: form.partner_id.toString() || "1",
+                  partner_id: "1",
                   step: REPORT_EVENT_STEPS.STEP_1,
                   event_name: "redirect from lookup to OV",
                 });
@@ -273,7 +273,7 @@ export default function LookupScreen({ route, navigation }: LookupScreenProps) {
                   state,
                   zip: form.zip,
                   email: form.email,
-                  form: mapLookupFormToRegisterForm(form),
+                  form: mapUserFormToRegisterForm(form),
                   pageFromLookup: "paper",
                   workflowType: "nvra",
                   showRedirectText: false,
