@@ -2,8 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { isRequired, isVisible, STATES } from "@/utils/constants";
 import { FormProps, RegisterFormState } from "@/utils/types";
-import InputField from "../atoms/InputField";
-import { SelectField } from "../atoms/SelectField";
+import InputField from "../../atoms/InputField";
+import { SelectField } from "../../atoms/SelectField";
 
 export const PoBoxMailingAddress = ({
   errorMessages,

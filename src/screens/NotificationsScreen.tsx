@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,9 +6,11 @@ import {
   Modal,
   StyleSheet,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Bell,
   CheckCircle2,
@@ -19,19 +21,25 @@ import {
 } from "lucide-react-native";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { CustomButton } from "../components/atoms/CustomButton";
 import { RootStackParamList } from "../components/Navigation";
+import { MailReminderModal } from "../components/modules/notification/MailReminderModal";
+import BallotReminderModal from "../components/modules/notification/BallotReminderModal";
 
 export interface NotificationItem {
   id: string;
   title: string;
   previewText: string;
-  fullBodyText: string;
+  fullBodyText?: string;
   date: string;
   isRead: boolean;
-  type: "status" | "deadline" | "alert";
+  type: "status" | "deadline" | "alert" | "reminder_mail" | "remind_ballot";
   actionTarget?: any;
+  payload?: {
+    url?: string;
+  };
 }
 
 const MOCK_NOTIFICATIONS: NotificationItem[] = [
@@ -78,16 +86,42 @@ type NotificationsScreenProps = NativeStackScreenProps<
 >;
 
 export default function NotificationsScreen({
+  route,
   navigation,
 }: NotificationsScreenProps) {
   const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
 
-  const [notifications, setNotifications] =
-    useState<NotificationItem[]>(MOCK_NOTIFICATIONS);
+  const routeParams = route.params as { notificationId?: string } | undefined;
+  const targetNotificationId = routeParams?.notificationId;
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationItem | null>(null);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const stored = await AsyncStorage.getItem("local_notifications_list");
+        const localList = stored ? JSON.parse(stored) : [];
+        const combined = [...localList, ...MOCK_NOTIFICATIONS];
+        setNotifications(combined);
+
+        // Если открыли экран по клику из системного пуша
+        if (targetNotificationId) {
+          const found = combined.find(n => n.id === targetNotificationId);
+          if (found) {
+            handleSelectNotification(found);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load notifications", e);
+      }
+    };
+
+    loadNotifications();
+  }, [targetNotificationId]);
 
   const handleSelectNotification = (item: NotificationItem) => {
     setNotifications(prev =>
@@ -99,7 +133,7 @@ export default function NotificationsScreen({
   const handleActionClick = () => {
     const target = selectedNotification?.actionTarget || "Dashboard";
     setSelectedNotification(null);
-    navigation.navigate(target);
+    navigation.navigate(target as any);
   };
 
   const getIcon = (type: NotificationItem["type"]) => {
@@ -146,7 +180,7 @@ export default function NotificationsScreen({
     <SafeAreaView style={styles.container}>
       <Header text={t("menu.notifications", "Notifications")} />
 
-      <View style={styles.listContent}>
+      <ScrollView contentContainerStyle={styles.listContent}>
         <CustomButton title={"Go to Dashboard"} onPress={handleActionClick} />
         {notifications.length > 0 ? (
           notifications.map(item => (
@@ -162,7 +196,7 @@ export default function NotificationsScreen({
             </Text>
           </View>
         )}
-      </View>
+      </ScrollView>
 
       <Modal
         visible={Boolean(selectedNotification)}
@@ -190,9 +224,17 @@ export default function NotificationsScreen({
 
             {/* Body */}
             <Text style={styles.modalTitle}>{selectedNotification?.title}</Text>
-            <Text style={styles.modalBody}>
-              {selectedNotification?.fullBodyText}
-            </Text>
+            {selectedNotification?.type === "reminder_mail" ? (
+              <MailReminderModal pdfUrl={selectedNotification.payload?.url} />
+            ) : selectedNotification?.type === "remind_ballot" ? (
+              <BallotReminderModal />
+            ) : (
+              <ScrollView>
+                <Text style={styles.modalBody}>
+                  {selectedNotification?.fullBodyText}
+                </Text>
+              </ScrollView>
+            )}
 
             {/* Action / Next Step CTA */}
             <View style={styles.modalFooter}>
@@ -210,17 +252,10 @@ export default function NotificationsScreen({
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
-    container: {
-      width: "100%",
-      flex: 1,
-      backgroundColor: theme.white,
-    },
-    listContent: {
-      padding: 10,
-      gap: 10,
-    },
+    container: { width: "100%", flex: 1, backgroundColor: theme.white },
+    listContent: { padding: 10, gap: 10 },
     card: {
       flexDirection: "row",
       alignItems: "center",
@@ -235,13 +270,8 @@ const getStyles = (theme: any) =>
       borderColor: theme.primary,
       borderWidth: 1.5,
     },
-    iconContainer: {
-      marginRight: 12,
-    },
-    cardContent: {
-      flex: 1,
-      marginRight: 8,
-    },
+    iconContainer: { marginRight: 12 },
+    cardContent: { flex: 1, marginRight: 8 },
     cardHeader: {
       flexDirection: "row",
       alignItems: "center",
@@ -251,10 +281,9 @@ const getStyles = (theme: any) =>
     cardTitle: {
       fontSize: 15,
       fontWeight: "500",
+      color: theme.textPrimary,
     },
-    boldText: {
-      fontWeight: "700",
-    },
+    boldText: { fontWeight: "700" },
     unreadDot: {
       width: 8,
       height: 8,
@@ -266,21 +295,11 @@ const getStyles = (theme: any) =>
       fontSize: 13,
       lineHeight: 18,
       marginBottom: 4,
-    },
-    dateText: {
-      fontSize: 11,
       color: theme.gray,
     },
-    emptyContainer: {
-      paddingTop: 60,
-      alignItems: "center",
-      gap: 12,
-    },
-    emptyText: {
-      fontSize: 15,
-    },
-
-    // Modal Styles
+    dateText: { fontSize: 11, color: theme.gray },
+    emptyContainer: { paddingTop: 60, alignItems: "center", gap: 12 },
+    emptyText: { fontSize: 15, color: theme.gray },
     modalOverlay: {
       flex: 1,
       backgroundColor: "rgba(0, 0, 0, 0.3)",
@@ -291,12 +310,12 @@ const getStyles = (theme: any) =>
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       padding: 24,
-      minHeight: 320,
+      maxHeight: "85%",
     },
     modalHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "center",
+      alignContent: "center",
       marginBottom: 16,
     },
     modalHeaderTitleGroup: {
@@ -304,24 +323,49 @@ const getStyles = (theme: any) =>
       alignItems: "center",
       gap: 8,
     },
-    modalDate: {
-      fontSize: 13,
-      color: theme.gray,
-    },
-    closeBtn: {
-      padding: 4,
-    },
+    modalDate: { fontSize: 13, color: theme.gray },
+    closeBtn: { padding: 4 },
     modalTitle: {
       fontSize: 18,
       fontWeight: "700",
       marginBottom: 12,
+      color: theme.textPrimary,
     },
     modalBody: {
       fontSize: 14,
       lineHeight: 22,
-      marginBottom: 24,
+      marginBottom: 16,
+      color: theme.textPrimary,
     },
-    modalFooter: {
-      marginTop: "auto",
+    text: {
+      fontSize: 14,
+      lineHeight: 22,
+      color: theme.textPrimary,
+      marginBottom: 12,
     },
+    linkContainer: { marginVertical: 8 },
+    linkText: {
+      fontSize: 14,
+      color: theme.primary,
+      textDecorationLine: "underline",
+      fontWeight: "600",
+    },
+    sliderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginVertical: 12,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: "#E0E0E0",
+    },
+    sliderLabel: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: "600",
+      color: "#111111",
+      marginRight: 10,
+    },
+    modalFooter: { marginTop: 16 },
   });

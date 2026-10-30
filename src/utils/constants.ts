@@ -21,6 +21,7 @@ export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
 export const ONBOARDING2_COMPLETED_KEY = "onboarding2_completed";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";
+export const PENDING_NOTIFICATION_ID_KEY = "pending_notification_id";
 
 export const INITIAL_USER_STATE: UserData = {
   uid: "",

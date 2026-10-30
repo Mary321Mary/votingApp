@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { FormProps, RegisterFormState } from "@/utils/types";
-import InputField from "../atoms/InputField";
+import InputField from "../../atoms/InputField";
 import { isRequired, isVisible } from "@/utils/constants";
 
 export const InternationalMailingAddress = ({

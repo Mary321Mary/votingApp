@@ -72,18 +72,86 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
       <ScrollView contentContainerStyle={styles.content}>
         {savedUser && (
           <View>
+            <Text style={styles.text}>uid: {savedUser.uid || "No uid"}</Text>
             <Text style={styles.text}>
               Name: {savedUser.first_name} {savedUser.last_name}
             </Text>
             <Text style={styles.text}>Email: {savedUser.email}</Text>
             <Text style={styles.text}>Phone: {savedUser.phone}</Text>
+            <Text style={styles.text}>DOB: {savedUser.date_of_birth}</Text>
             <Text style={styles.text}>
               Location: {savedUser.address}, {savedUser.city}
               {savedUser.zip && ` ${savedUser.zip}`}
             </Text>
             <Text style={styles.text}>
+              opt in email: {savedUser.opt_in_email ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
+              opt in sms: {savedUser.opt_in_sms ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
+              opt in volunteer: {savedUser.opt_in_volunteer ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
+              survey question 1: {savedUser.survey_question_1 || "No data"}
+            </Text>
+            <Text style={styles.text}>
+              survey answer 1: {savedUser.survey_answer_1 || "No data"}
+            </Text>
+            <Text style={styles.text}>
+              survey question 2: {savedUser.survey_question_2 || "No data"}
+            </Text>
+            <Text style={styles.text}>
+              survey answer 2: {savedUser.survey_answer_2 || "No data"}
+            </Text>
+            <Text style={styles.text}>
+              partner opt in email:{" "}
+              {savedUser.partner_opt_in_email ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
+              partner opt in sms: {savedUser.partner_opt_in_sms ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
+              partner opt in volunteer:{" "}
+              {savedUser.partner_opt_in_volunteer ? "On" : "Off"}
+            </Text>
+            <Text style={styles.text}>
               Registration Status:{" "}
               {savedUser.registration_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              Registration Status Date:{" "}
+              {savedUser.registration_status_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              Registration Date: {savedUser.registration_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              lookup Status: {savedUser.lookup_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              lookup Status Date: {savedUser.lookup_status_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              pledge Status: {savedUser.pledge_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              pledge Date: {savedUser.pledge_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              Ovr Status: {savedUser.ovr_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              Ovr Status Date: {savedUser.ovr_status_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              ballot Status: {savedUser.ballot_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              abr Status: {savedUser.abr_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              location Status: {savedUser.location_status || "No status"}
             </Text>
           </View>
         )}

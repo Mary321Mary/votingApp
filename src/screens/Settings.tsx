@@ -190,7 +190,7 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
             label={t("general.opt_ins.volunteer")}
             value={form.opt_in_volunteer}
             onValueChange={(checked: boolean) =>
-              updateField("volunteer", checked)
+              updateField("opt_in_volunteer", checked)
             }
           />
         </View>

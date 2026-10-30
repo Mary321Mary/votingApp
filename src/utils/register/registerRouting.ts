@@ -94,10 +94,13 @@ export function mapRegisterFormToUserForm(form: RegisterFormState): UserData {
     registration_status: "",
     registration_status_date: "",
     registration_date: "",
-    pledge_status: false,
+    pledge_status: "",
     pledge_date: "",
     ovr_status: "",
     ovr_status_date: "",
+    ballot_status: "",
+    abr_status: "",
+    location_status: "",
   };
 }
 

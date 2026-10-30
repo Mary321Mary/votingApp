@@ -5,13 +5,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import i18n from "@/i18n";
 import Header from "@/layout/Header";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent, submitEmailZip } from "@/utils/api";
-import i18n from "@/i18n";
+import { mapUserFormToRegisterForm } from "@/utils/register/registerRouting";
 import { RootStackParamList } from "@/components/Navigation";
 import { CustomButton } from "@/components/atoms/CustomButton";
-import { mapLookupFormToRegisterForm } from "../../utils/register/registerRouting";
 
 type LookupNotFoundScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -47,7 +47,7 @@ export default function LookupNotFoundScreen({
         (await AsyncStorage.getItem(`registration_uid`)) || "";
       await reportEvent({
         registration_uid,
-        partner_id: form.partner_id.toString() || "1",
+        partner_id: "1",
         step: REPORT_EVENT_STEPS.EMPTY,
         event_name: "Voter Lookup no found",
       });
@@ -118,7 +118,7 @@ export default function LookupNotFoundScreen({
                   email: form.email,
                   zip: form.zip,
                   locale: i18n.language,
-                  partner_id: form.partner_id.toString(),
+                  partner_id: "1",
                 });
                 await AsyncStorage.setItem(
                   "registration_uid",
@@ -127,7 +127,7 @@ export default function LookupNotFoundScreen({
 
                 await reportEvent({
                   registration_uid: response.data.registration_uid ?? "",
-                  partner_id: form.partner_id.toString() || "1",
+                  partner_id: "1",
                   step: REPORT_EVENT_STEPS.STEP_1,
                   event_name: "redirect from lookup to OV",
                 });
@@ -137,7 +137,7 @@ export default function LookupNotFoundScreen({
                   state,
                   zip: form.zip,
                   email: form.email,
-                  form: mapLookupFormToRegisterForm(form),
+                  form: mapUserFormToRegisterForm(form),
                   pageFromLookup: "paper",
                   workflowType: "nvra",
                   showRedirectText: false,

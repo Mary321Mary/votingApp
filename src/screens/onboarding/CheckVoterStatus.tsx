@@ -126,6 +126,7 @@ export const CheckVoterStatusScreen = ({
 
     return {
       ...(voterFromApi || {}),
+
       first_name: currentForm.first_name,
       last_name: currentForm.last_name,
       email: currentForm.email,
@@ -143,6 +144,10 @@ export const CheckVoterStatusScreen = ({
       registration_status_date: today,
       lookup_status: lookupStatus,
       lookup_status_date: today,
+
+      prefType1: true,
+      prefType2: true,
+      prefType3: true,
     } as UserData;
   };
 

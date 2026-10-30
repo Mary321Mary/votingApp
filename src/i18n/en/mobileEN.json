@@ -56,6 +56,13 @@
     "preferences": {
       "title": "Preferences"
     },
+    "notifications": {
+      "remind_mail_short": "{{firstname}} Thanks for completing your voter registration application! But you are not registered until you have turned in your form to your election officials. If you haven’t done so already, you must PRINT, SIGN, STAMP, and MAIL your form. More …",
+      "remind_mail_full": "",
+      "mailed_form": "I have signed and mailed my registration form",
+      "remind_ballot_full": "{{fname}} It’s time to double check <ballotLink>your ballot</ballotLink> for the {{electionName}}. You can view your sample ballot, see your voting choices on all your ballot items, get info about candidates and ballot questions, and save your choices. Then you can review your sample ballot’s choices when you mark your ballot.",
+      "remind_check_ballot_short": "{{fname}} It’s time to double check your ballot for the {{election_name}}. View your sample ballot and save your choices for election day."
+    },
     "header_links": {}
   }
 }

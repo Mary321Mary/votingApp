@@ -27,14 +27,16 @@ import {
 } from "@/utils/api";
 import { Election, LocationsData, UserData } from "@/utils/types";
 
-interface ElectionData {
+export interface ElectionData {
   id: number;
   type: string;
   date: string;
   description: string;
 }
 
-function getNextElection(elections: ElectionData[]): ElectionData | null {
+export function getNextElection(
+  elections: ElectionData[],
+): ElectionData | null {
   if (!elections.length) return null;
 
   const now = new Date();

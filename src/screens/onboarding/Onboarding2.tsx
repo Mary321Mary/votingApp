@@ -9,16 +9,19 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { UserData } from "@/utils/types";
 import {
+  getFormattedElectionTitle,
   ONBOARDING2_COMPLETED_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
-import { getSurveyQuestions } from "@/utils/api";
+import { getSurveyQuestions, submitElectionsLookup } from "@/utils/api";
 
 import { Checkbox } from "@/components/atoms/Checkbox";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/Navigation";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
+import { getNextElection } from "../../components/organisms/ElectionData";
+import { scheduleBallotReminderNotification } from "../../utils/notifications/notificationService";
 
 type Onboarding2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -42,6 +45,18 @@ export default function Onboarding2Screen({
 
   const handleFinish = async () => {
     try {
+      const apiElectionsResponse = await submitElectionsLookup(form);
+      let election = getNextElection(apiElectionsResponse.data.elections);
+
+      await scheduleBallotReminderNotification(
+        t("native_local.notifications.remind_check_ballot_short", {
+          fname: form.first_name || "Voter",
+          election_name: getFormattedElectionTitle(election),
+        }),
+        { electionName: getFormattedElectionTitle(election) },
+        1,
+      );
+
       await AsyncStorage.setItem(ONBOARDING2_COMPLETED_KEY, "true");
 
       navigation.reset({
@@ -197,7 +212,7 @@ export default function Onboarding2Screen({
             label={t("general.opt_ins.volunteer")}
             value={form.opt_in_volunteer}
             onValueChange={(checked: boolean) =>
-              updateField("volunteer", checked)
+              updateField("opt_in_volunteer", checked)
             }
           />
         </View>

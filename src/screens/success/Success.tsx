@@ -35,6 +35,7 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { mapRegisterFormToUserForm } from "@/utils/register/registerRouting";
 import { UserData } from "@/utils/types";
+import { scheduleMailReminderNotification } from "@/utils/notifications/notificationService";
 
 type SuccessScreenProps = NativeStackScreenProps<RootStackParamList, "Success">;
 
@@ -135,47 +136,60 @@ export default function SuccessScreen({
       const storedUser = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
       if (!storedUser) return;
       const parsedUser = JSON.parse(storedUser);
+
+      const updatedUser: UserData = {
+        ...parsedUser,
+        email: form.email_address,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        address: form.home_address,
+        aptunit: form.home_unit_type + " " + form.home_unit,
+        city: form.home_city,
+        zip: form.home_zip_code,
+        date_of_birth: form.date_of_birth,
+        phone: form.phone,
+
+        survey_question_1: form.survey_question_1,
+        survey_answer_1: form.survey_answer_1,
+        survey_question_2: form.survey_question_2,
+        survey_answer_2: form.survey_answer_2,
+
+        opt_in_email: form.opt_in_email,
+        opt_in_sms: form.opt_in_sms,
+        opt_in_volunteer: form.volunteer,
+
+        registration_status: "pending",
+        registration_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        ovr_status: "nvra_form_provided",
+        ovr_status_date: new Date().toLocaleDateString("en-US", {
+          month: "2-digit",
+          day: "2-digit",
+          year: "numeric",
+        }),
+      };
+
       await AsyncStorage.setItem(
         VOTER_USER_STORAGE_KEY,
-        JSON.stringify({
-          ...parsedUser,
-
-          email: form.email_address,
-          first_name: form.first_name,
-          last_name: form.last_name,
-          address: form.home_address,
-          aptunit: form.home_unit_type + " " + form.home_unit,
-          city: form.home_city,
-          zip: form.home_zip_code,
-          date_of_birth: form.date_of_birth,
-          phone: form.phone,
-
-          survey_question_1: form.survey_question_1,
-          survey_answer_1: form.survey_answer_1,
-          survey_question_2: form.survey_question_2,
-          survey_answer_2: form.survey_answer_2,
-
-          opt_in_email: form.opt_in_email,
-          opt_in_sms: form.opt_in_sms,
-          opt_in_volunteer: form.volunteer,
-
-          registration_status: "pending",
-          registration_status_date: new Date().toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          }),
-          ovr_status: "nvra_form_provided",
-          ovr_status_date: new Date().toLocaleDateString("en-US", {
-            month: "2-digit",
-            day: "2-digit",
-            year: "numeric",
-          }),
-        }),
+        JSON.stringify(updatedUser),
       );
+
+      if (updatedUser.lookup_status === "catalist_no_match") {
+        await scheduleMailReminderNotification(
+          t("native_local.notifications.remind_mail_short", {
+            firstname: updatedUser.first_name || "Voter",
+          }),
+          {
+            url: pdfUrl || "",
+          },
+        );
+      }
     }
     fetchData();
-  }, [form, state]);
+  }, [form, state, pdfUrl]);
 
   const handleDownload = async () => {
     if (!pdfUrl) return;

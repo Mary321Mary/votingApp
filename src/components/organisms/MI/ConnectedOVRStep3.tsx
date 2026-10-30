@@ -6,10 +6,10 @@ import InputField from "../../atoms/InputField";
 import { Checkbox } from "../../atoms/Checkbox";
 
 import { RegisterStepHeader } from "../../modules/RegisterStepHeader";
-import { StandardMailingAddress } from "../../modules/StandardMailingAddress";
-import { PoBoxMailingAddress } from "../../modules/PoBoxMailingAddress";
-import { MilitaryMailingAddress } from "../../modules/MilitaryMailingAddress";
-import { InternationalMailingAddress } from "../../modules/InternationalMailingAddress";
+import { StandardMailingAddress } from "../../modules/mailing/StandardMailingAddress";
+import { PoBoxMailingAddress } from "../../modules/mailing/PoBoxMailingAddress";
+import { MilitaryMailingAddress } from "../../modules/mailing/MilitaryMailingAddress";
+import { InternationalMailingAddress } from "../../modules/mailing/InternationalMailingAddress";
 import { PhoneSection } from "@/components/modules/PhoneSection";
 
 import { ThemeContext } from "@/styles/ThemeProvider";

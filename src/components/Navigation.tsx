@@ -1,6 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
+import { useNavigation } from "@react-navigation/native";
+import notifee, { EventType } from "@notifee/react-native";
 import DefaultLayout from "@/layout/DefaultLayout";
 
 import {
@@ -16,6 +22,7 @@ import {
 import {
   FIRST_TIME_COMPLETED_KEY,
   ONBOARDING2_COMPLETED_KEY,
+  PENDING_NOTIFICATION_ID_KEY,
 } from "@/utils/constants";
 import { CovrCheckMethodName } from "@/utils/report/covrFailReporting";
 
@@ -67,7 +74,7 @@ export type RootStackParamList = {
   };
   Settings: undefined;
   Profile: undefined;
-  Notifications: undefined;
+  Notifications: { notificationId: string };
   Register: SubmitEmailZipResponseProps; // or { id: string }
   Success: {
     form: RegisterFormState;
@@ -203,20 +210,92 @@ const withDefaultLayout = (Component: React.ComponentType<any>) => {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 function Navigation({}) {
+  const navigation = useNavigation<NavigationProp>();
   const [initialRouteName, setInitialRouteName] = useState<
-    "Welcome" | "Dashboard" | "Return" | null
+    "Welcome" | "Dashboard" | "Return" | "Notifications" | null
   >(null);
+  const [initialNotificationId, setInitialNotificationId] = useState<
+    string | undefined
+  >();
+  const pendingNotificationIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const handleNotificationPress = (data: any) => {
+      const notificationId = data?.notificationId;
+      if (notificationId) {
+        const id = String(notificationId);
+        if (initialRouteName) {
+          AsyncStorage.removeItem(PENDING_NOTIFICATION_ID_KEY).catch(error =>
+            console.error("Failed to clear pending notification ID:", error),
+          );
+          navigation.navigate("Notifications", { notificationId: id });
+        } else {
+          pendingNotificationIdRef.current = id;
+          AsyncStorage.setItem(PENDING_NOTIFICATION_ID_KEY, id).catch(error =>
+            console.error("Failed to save pending notification ID:", error),
+          );
+        }
+      }
+    };
+
+    const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS && detail.notification?.data) {
+        handleNotificationPress(detail.notification.data);
+      }
+    });
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      nextState => {
+        if (nextState === "active") {
+          AsyncStorage.getItem(PENDING_NOTIFICATION_ID_KEY)
+            .then(id => {
+              if (id) {
+                handleNotificationPress({ notificationId: id });
+              }
+            })
+            .catch(error =>
+              console.error("Failed to read pending notification ID:", error),
+            );
+        }
+      },
+    );
+
+    return () => {
+      unsubscribe();
+      appStateSubscription.remove();
+    };
+  }, [initialRouteName, navigation]);
 
   useEffect(() => {
     const loadInitialRoute = async () => {
-      const firstTimeCompleted = await AsyncStorage.getItem(
-        FIRST_TIME_COMPLETED_KEY,
-      );
-      const onboarding2CompletedKey = await AsyncStorage.getItem(
-        ONBOARDING2_COMPLETED_KEY,
-      );
+      const [
+        initialNotification,
+        storedNotificationId,
+        firstTimeCompleted,
+        onboarding2CompletedKey,
+      ] = await Promise.all([
+        notifee.getInitialNotification(),
+        AsyncStorage.getItem(PENDING_NOTIFICATION_ID_KEY),
+        AsyncStorage.getItem(FIRST_TIME_COMPLETED_KEY),
+        AsyncStorage.getItem(ONBOARDING2_COMPLETED_KEY),
+      ]);
+      const notificationId =
+        pendingNotificationIdRef.current ??
+        initialNotification?.notification?.data?.notificationId ??
+        storedNotificationId;
+
+      if (notificationId) {
+        const id = String(notificationId);
+        pendingNotificationIdRef.current = null;
+        setInitialNotificationId(id);
+        await AsyncStorage.removeItem(PENDING_NOTIFICATION_ID_KEY);
+        setInitialRouteName("Notifications");
+        return;
+      }
+
       setInitialRouteName(
         firstTimeCompleted === "true"
           ? onboarding2CompletedKey === "true"
@@ -228,6 +307,17 @@ function Navigation({}) {
 
     loadInitialRoute().catch(() => setInitialRouteName("Welcome"));
   }, []);
+
+  useEffect(() => {
+    if (!initialRouteName || !pendingNotificationIdRef.current) return;
+
+    const notificationId = pendingNotificationIdRef.current;
+    pendingNotificationIdRef.current = null;
+    AsyncStorage.removeItem(PENDING_NOTIFICATION_ID_KEY).catch(error =>
+      console.error("Failed to clear pending notification ID:", error),
+    );
+    navigation.navigate("Notifications", { notificationId });
+  }, [initialRouteName, navigation]);
 
   if (!initialRouteName) {
     return null;
@@ -286,6 +376,11 @@ function Navigation({}) {
       <Stack.Screen
         name="Notifications"
         component={withDefaultLayout(NotificationsScreen)}
+        initialParams={
+          initialNotificationId
+            ? { notificationId: initialNotificationId }
+            : undefined
+        }
       />
       <Stack.Screen
         name="ZipError"
