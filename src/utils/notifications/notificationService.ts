@@ -28,8 +28,7 @@ export async function scheduleMailReminderNotification(
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
-    timestamp: Date.now() + delayInMinutes * 60 * 10,
-    // timestamp: Date.now() + delayInMinutes * 60 * 1000,
+    timestamp: Date.now() + delayInMinutes * 60 * 1000,
   };
 
   const notificationId = `mail_reminder_${Date.now()}`;
@@ -97,7 +96,6 @@ export async function scheduleBallotReminderNotification(
 
   const notificationId = `ballot_reminder_${Date.now()}`;
 
-  // 1. Планируем системный локальный пуш
   await notifee.createTriggerNotification(
     {
       id: notificationId,
@@ -115,7 +113,6 @@ export async function scheduleBallotReminderNotification(
     trigger,
   );
 
-  // 2. Элемент для локального списка уведомлений
   const newNotificationItem: NotificationItem = {
     id: notificationId,
     title: `Check Your Ballot for ${params.electionName}`,
@@ -127,7 +124,6 @@ export async function scheduleBallotReminderNotification(
     payload: {},
   };
 
-  // 3. Сохраняем в AsyncStorage
   try {
     const existing = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
     const list = existing ? JSON.parse(existing) : [];
