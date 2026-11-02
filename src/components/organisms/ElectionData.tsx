@@ -185,7 +185,11 @@ export default function ElectionData() {
         />
       </Text>
       <View style={styles.elections}>
-        <Text style={styles.bold}>{getFormattedElectionTitle(elections)}</Text>
+        {elections?.id && (
+          <Text style={styles.bold}>
+            {getFormattedElectionTitle(elections)}
+          </Text>
+        )}
         {ballotData.elections.length === 0 ? (
           <Text style={styles.textGray}>
             {t("native_local.dashboard.ballot_none")}

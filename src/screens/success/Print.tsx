@@ -25,6 +25,7 @@ import { CustomButton } from "@/components/atoms/CustomButton";
 import {
   filterRegistrant,
   ONBOARDING2_COMPLETED_KEY,
+  PDF_URL_KEY,
   VOTER_STATE_STORAGE_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
@@ -35,7 +36,6 @@ import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 import { reportEvent } from "@/utils/api";
 import { mapRegisterFormToUserForm } from "@/utils/register/registerRouting";
 import { UserData } from "@/utils/types";
-import { scheduleMailReminderNotification } from "@/utils/notifications/notificationService";
 
 type PrintScreenProps = NativeStackScreenProps<RootStackParamList, "Print">;
 
@@ -167,16 +167,7 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         JSON.stringify(updatedUser),
       );
 
-      if (updatedUser.lookup_status === "catalist_no_match") {
-        await scheduleMailReminderNotification(
-          t("native_local.notifications.remind_mail_short", {
-            firstname: updatedUser.first_name || "Voter",
-          }),
-          {
-            url: pdfUrl || "",
-          },
-        );
-      }
+      await AsyncStorage.setItem(PDF_URL_KEY, pdfUrl || "");
     }
     fetchData();
   }, [form, state, pdfUrl]);
@@ -294,14 +285,16 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
                 );
                 if (onboarding2CompletedKey === "true") {
                   navigation.navigate("Dashboard", {});
-                } else
+                } else {
+                  const user = await mapRegisterFormToUserForm(form);
                   navigation.navigate("Onboarding2", {
                     form: {
-                      ...mapRegisterFormToUserForm(form),
+                      ...user,
                       opt_in_email: false,
                       opt_in_sms: false,
                     },
                   });
+                }
               }}
             />
           ) : (

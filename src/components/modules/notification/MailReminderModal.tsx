@@ -14,7 +14,7 @@ import {
 } from "@/utils/constants";
 import { UserData, StateData } from "@/utils/types";
 import { cancelMailReminderNotification } from "@/utils/notifications/notificationService";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { COLORS } from "@/styles/colors";
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { Checkbox } from "../../atoms/Checkbox";
@@ -88,25 +88,17 @@ export function MailReminderModal(route: { pdfUrl?: string }) {
     );
   };
 
-  const firstName = voter?.first_name || "Voter";
-  const pdfUrl = route?.pdfUrl || "";
-  const sosPhone = stateData?.sos_phone || "your Secretary of State";
-  const sosUrl = stateData?.sos_url || "";
-
   const handleOpenPdf = () => {
-    if (pdfUrl) {
-      Linking.openURL(pdfUrl).catch(err =>
+    if (route?.pdfUrl) {
+      Linking.openURL(route?.pdfUrl).catch(err =>
         console.error("Could not open PDF URL", err),
       );
     }
   };
 
   const handleOpenSosUrl = () => {
-    if (sosUrl) {
-      const formattedUrl = sosUrl.startsWith("http")
-        ? sosUrl
-        : `https://${sosUrl}`;
-      Linking.openURL(formattedUrl).catch(err =>
+    if (stateData?.sos_url) {
+      Linking.openURL(stateData?.sos_url).catch(err =>
         console.error("Could not open SOS URL", err),
       );
     }
@@ -115,14 +107,12 @@ export function MailReminderModal(route: { pdfUrl?: string }) {
   return (
     <ScrollView contentContainerStyle={styles.modalScrollContent}>
       <Text style={styles.text}>
-        {firstName} Thanks for completing your voter registration application!
-        But you are not registered until you have turned in your form to your
-        election officials. If you haven’t done so already, you must PRINT,
-        SIGN, STAMP, and MAIL your form to the address provided on the form. If
-        you have not already done so, please download your application form.
+        {t("native_local.notifications.remind_mail_full_part1", {
+          fname: voter?.first_name,
+        })}
       </Text>
 
-      {!!pdfUrl && (
+      {!!route?.pdfUrl && (
         <TouchableOpacity onPress={handleOpenPdf} style={styles.linkContainer}>
           <Text style={styles.linkText}>
             Download your application form (PDF)
@@ -138,22 +128,19 @@ export function MailReminderModal(route: { pdfUrl?: string }) {
       </View>
 
       <Text style={styles.text}>
-        After mailing your form, you should receive confirmation of your
-        registration from your election officials. Sometimes processing can take
-        several weeks. If you want to check on the status of your voter
-        registration application, call your Secretary of State at{" "}
-        <Text style={styles.boldText}>{sosPhone}</Text>
-        {sosUrl ? (
-          <>
-            , or check online at{" "}
-            <Text style={styles.linkText} onPress={handleOpenSosUrl}>
-              {sosUrl}
-            </Text>
-            .
-          </>
-        ) : (
-          "."
-        )}
+        <Trans
+          i18nKey="native_local.notifications.remind_mail_full_part2"
+          values={{
+            sosUrl: stateData?.sos_url || "online",
+            sosPhone: stateData?.sos_phone || "your Secretary of State",
+          }}
+          components={{
+            sosLink: (
+              <Text style={styles.linkText} onPress={handleOpenSosUrl} />
+            ),
+            phoneText: <Text style={styles.boldText} />,
+          }}
+        />
       </Text>
 
       <View style={styles.sliderRow}>

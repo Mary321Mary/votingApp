@@ -505,7 +505,7 @@ export const RegisterResult = ({
     setIsSubmitting(true);
     try {
       if (state.vr_lookup_on_nvra_form) {
-        const payload = mapRegisterFormToUserForm(form);
+        const payload = await mapRegisterFormToUserForm(form);
         const responseLookup = await submitLookup(payload);
 
         if (!isMountedRef.current) {

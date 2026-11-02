@@ -136,13 +136,19 @@ export type UserData = {
   registration_status: string;
   registration_status_date: string;
   registration_date: string;
+
   pledge_status: string;
+  pledge_status_date: string;
   pledge_date: string | null;
   ovr_status: string;
   ovr_status_date: string;
+
   ballot_status: string;
+  ballot_status_date: string;
   abr_status: string;
+  abr_status_date: string;
   location_status: string;
+  location_status_date: string;
 };
 
 export type CheckRegistrationStatusError = {

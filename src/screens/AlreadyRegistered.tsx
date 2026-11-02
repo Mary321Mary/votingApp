@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { RegisterFormState, StateData } from "@/utils/types";
 import type { RootStackParamList } from "@/components/Navigation";
@@ -145,7 +146,7 @@ export default function AlreadyRegisteredScreen({
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -174,11 +175,6 @@ const getStyles = (theme: any) =>
       color: theme.textPrimary,
       textTransform: "uppercase",
       fontWeight: "bold",
-    },
-    divider: {
-      height: 1,
-      backgroundColor: theme.gray,
-      marginVertical: 5,
     },
     list: {
       gap: 16,

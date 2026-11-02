@@ -72,86 +72,137 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
       <ScrollView contentContainerStyle={styles.content}>
         {savedUser && (
           <View>
-            <Text style={styles.text}>uid: {savedUser.uid || "No uid"}</Text>
             <Text style={styles.text}>
-              Name: {savedUser.first_name} {savedUser.last_name}
+              <Text style={styles.bold}>uid:</Text> {savedUser.uid || "No uid"}
             </Text>
-            <Text style={styles.text}>Email: {savedUser.email}</Text>
-            <Text style={styles.text}>Phone: {savedUser.phone}</Text>
-            <Text style={styles.text}>DOB: {savedUser.date_of_birth}</Text>
             <Text style={styles.text}>
-              Location: {savedUser.address}, {savedUser.city}
+              <Text style={styles.bold}>Name:</Text> {savedUser.first_name}{" "}
+              {savedUser.last_name}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Email:</Text> {savedUser.email}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Phone:</Text> {savedUser.phone}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>DOB:</Text> {savedUser.date_of_birth}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Location:</Text> {savedUser.address},{" "}
+              {savedUser.city}
               {savedUser.zip && ` ${savedUser.zip}`}
             </Text>
+            <View style={styles.divider} />
             <Text style={styles.text}>
-              opt in email: {savedUser.opt_in_email ? "On" : "Off"}
+              <Text style={styles.bold}>Opt in email:</Text>{" "}
+              {savedUser.opt_in_email ? "On" : "Off"}
             </Text>
             <Text style={styles.text}>
-              opt in sms: {savedUser.opt_in_sms ? "On" : "Off"}
+              <Text style={styles.bold}>Opt in sms:</Text>{" "}
+              {savedUser.opt_in_sms ? "On" : "Off"}
             </Text>
             <Text style={styles.text}>
-              opt in volunteer: {savedUser.opt_in_volunteer ? "On" : "Off"}
+              <Text style={styles.bold}>Opt in volunteer:</Text>{" "}
+              {savedUser.opt_in_volunteer ? "On" : "Off"}
+            </Text>
+            <View style={styles.divider} />
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Survey question 1:</Text>{" "}
+              {savedUser.survey_question_1 || "No data"}
             </Text>
             <Text style={styles.text}>
-              survey question 1: {savedUser.survey_question_1 || "No data"}
+              <Text style={styles.bold}>Survey answer 1:</Text>{" "}
+              {savedUser.survey_answer_1 || "No data"}
             </Text>
             <Text style={styles.text}>
-              survey answer 1: {savedUser.survey_answer_1 || "No data"}
+              <Text style={styles.bold}>Survey question 2:</Text>{" "}
+              {savedUser.survey_question_2 || "No data"}
             </Text>
             <Text style={styles.text}>
-              survey question 2: {savedUser.survey_question_2 || "No data"}
+              <Text style={styles.bold}>Survey answer 2:</Text>{" "}
+              {savedUser.survey_answer_2 || "No data"}
             </Text>
+            <View style={styles.divider} />
             <Text style={styles.text}>
-              survey answer 2: {savedUser.survey_answer_2 || "No data"}
-            </Text>
-            <Text style={styles.text}>
-              partner opt in email:{" "}
+              <Text style={styles.bold}>Partner opt in email:</Text>{" "}
               {savedUser.partner_opt_in_email ? "On" : "Off"}
             </Text>
             <Text style={styles.text}>
-              partner opt in sms: {savedUser.partner_opt_in_sms ? "On" : "Off"}
+              <Text style={styles.bold}>Partner opt in sms:</Text>{" "}
+              {savedUser.partner_opt_in_sms ? "On" : "Off"}
             </Text>
             <Text style={styles.text}>
-              partner opt in volunteer:{" "}
+              <Text style={styles.bold}>Partner opt in volunteer:</Text>{" "}
               {savedUser.partner_opt_in_volunteer ? "On" : "Off"}
             </Text>
+            <View style={styles.divider} />
             <Text style={styles.text}>
-              Registration Status:{" "}
+              <Text style={styles.bold}>Registration Status:</Text>{" "}
               {savedUser.registration_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              Registration Status Date:{" "}
+              <Text style={styles.bold}>Registration Status Date:</Text>{" "}
               {savedUser.registration_status_date || "No date"}
             </Text>
             <Text style={styles.text}>
-              Registration Date: {savedUser.registration_date || "No date"}
+              <Text style={styles.bold}>Registration Date:</Text>{" "}
+              {savedUser.registration_date || "No date"}
+            </Text>
+            <View style={styles.divider} />
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Lookup Status:</Text>{" "}
+              {savedUser.lookup_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              lookup Status: {savedUser.lookup_status || "No status"}
+              <Text style={styles.bold}>Lookup Status Date:</Text>{" "}
+              {savedUser.lookup_status_date || "No date"}
             </Text>
             <Text style={styles.text}>
-              lookup Status Date: {savedUser.lookup_status_date || "No date"}
+              <Text style={styles.bold}>Pledge Status:</Text>{" "}
+              {savedUser.pledge_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              pledge Status: {savedUser.pledge_status || "No status"}
+              <Text style={styles.bold}>Pledge Status Date:</Text>{" "}
+              {savedUser.pledge_status_date || "No date"}
             </Text>
             <Text style={styles.text}>
-              pledge Date: {savedUser.pledge_date || "No date"}
+              <Text style={styles.bold}>Pledge Date:</Text>{" "}
+              {savedUser.pledge_date || "No date"}
+            </Text>
+            <View style={styles.divider} />
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Ovr Status:</Text>{" "}
+              {savedUser.ovr_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              Ovr Status: {savedUser.ovr_status || "No status"}
+              <Text style={styles.bold}>Ovr Status Date:</Text>{" "}
+              {savedUser.ovr_status_date || "No date"}
             </Text>
             <Text style={styles.text}>
-              Ovr Status Date: {savedUser.ovr_status_date || "No date"}
+              <Text style={styles.bold}>Ballot Status:</Text>{" "}
+              {savedUser.ballot_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              ballot Status: {savedUser.ballot_status || "No status"}
+              <Text style={styles.bold}>Ballot Status Date:</Text>{" "}
+              {savedUser.ballot_status_date || "No status"}
+            </Text>
+            <View style={styles.divider} />
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Abr Status:</Text>{" "}
+              {savedUser.abr_status || "No status"}
             </Text>
             <Text style={styles.text}>
-              abr Status: {savedUser.abr_status || "No status"}
+              <Text style={styles.bold}>Abr Status Date:</Text>{" "}
+              {savedUser.abr_status_date || "No status"}
             </Text>
             <Text style={styles.text}>
-              location Status: {savedUser.location_status || "No status"}
+              <Text style={styles.bold}>Location Status:</Text>{" "}
+              {savedUser.location_status || "No status"}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Location Status Date:</Text>{" "}
+              {savedUser.location_status_date || "No status"}
             </Text>
           </View>
         )}
@@ -215,7 +266,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
 
                       formattedAddress: "340 University Ave. Palo Alto 94301",
                       address: "340 University Ave",
-                      aptunit: "",
+                      aptunit: "42",
                       city: "Palo Alto",
                       phone: "8085551212",
 
@@ -224,6 +275,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                       birthYear: "1901",
                       date_of_birth: "1-1-1901",
 
+                      registration_date: "2000-0-01",
                       registration_status: "active",
                       registration_status_date: new Date().toLocaleDateString(
                         "en-US",
@@ -233,7 +285,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                           year: "numeric",
                         },
                       ),
-                      lookup_status: "location_viewed",
+                      lookup_status: "catalist_match",
                       lookup_status_date: new Date().toLocaleDateString(
                         "en-US",
                         {
@@ -243,9 +295,65 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                         },
                       ),
                       pledge_status: "pledged",
+                      pledge_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
                       ballot_status: "ballot_selections_saved",
+                      ballot_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
+
                       abr_status: "abr_begun",
-                      location_status: "",
+                      abr_status_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
+
+                      location_status: "location_viewed",
+                      location_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
+
+                      survey_question_1:
+                        "If you are in school, where do you go?",
+                      survey_answer_1: "school",
+                      survey_question_2: "What issue do you care most about?",
+                      survey_answer_2: "school",
+
+                      opt_in_email: true,
+                      opt_in_sms: false,
+                      partner_opt_in_email: null,
+                      partner_opt_in_sms: null,
+                      opt_in_volunteer: true,
+                      partner_opt_in_volunteer: null,
+
+                      ovr_status: "",
+                      ovr_status_date: "",
+
+                      prefType1: true,
+                      prefType2: true,
+                      prefType3: true,
+
+                      // comm_pref_email: false,
+                      // comm_pref_sms: false,
+                      // create_date: 2026 - 03 - 03,
+                      // modified_date: [today]
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
@@ -316,7 +424,8 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                       birthYear: "1902",
                       date_of_birth: "2-2-1902",
 
-                      registration_status: "pending",
+                      registration_date: "",
+                      registration_status: "",
                       registration_status_date: new Date().toLocaleDateString(
                         "en-US",
                         {
@@ -335,10 +444,57 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                         },
                       ),
                       pledge_status: "",
-                      ballot_status: "ballot_selections_viewed",
+                      pledge_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
+                      ballot_status: "",
+                      ballot_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
                       abr_status: "",
+                      abr_status_date: "",
                       location_status: "",
+                      location_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
+
+                      survey_question_1:
+                        "If you are in school, where do you go?",
+                      survey_answer_1: "no",
+                      survey_question_2: "What issue do you care most about?",
+                      survey_answer_2: "",
+
+                      opt_in_email: false,
+                      opt_in_sms: false,
+                      partner_opt_in_email: null,
+                      partner_opt_in_sms: null,
+                      opt_in_volunteer: false,
+                      partner_opt_in_volunteer: null,
+
                       ovr_status: "used_state_ovr",
+                      ovr_status_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
+                      prefType1: true,
+                      prefType2: true,
+                      prefType3: true,
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
@@ -408,6 +564,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                       birthYear: "1903",
                       date_of_birth: "3-3-1903",
 
+                      registration_date: "",
                       registration_status: "pending",
                       registration_status_date: new Date().toLocaleDateString(
                         "en-US",
@@ -427,10 +584,43 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                         },
                       ),
                       pledge_status: "",
-                      ballot_status: "ballot_selections_viewed",
+                      pledge_status_date: new Date().toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        },
+                      ),
+                      ballot_status: "",
+                      ballot_status_date: "",
                       abr_status: "",
+                      abr_status_date: "",
                       location_status: "",
+                      location_status_date: "",
                       ovr_status: "nvra_form_downloaded",
+                      ovr_status_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
+
+                      survey_question_1:
+                        "If you are in school, where do you go?",
+                      survey_answer_1: "",
+                      survey_question_2: "What issue do you care most about?",
+                      survey_answer_2: "",
+
+                      opt_in_email: false,
+                      opt_in_sms: false,
+                      partner_opt_in_email: null,
+                      partner_opt_in_sms: null,
+                      opt_in_volunteer: false,
+                      partner_opt_in_volunteer: null,
+
+                      prefType1: false,
+                      prefType2: true,
+                      prefType3: false,
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
@@ -476,6 +666,13 @@ const getStyles = (theme: typeof COLORS) =>
       padding: 10,
       alignItems: "center",
     },
+    bold: {
+      fontFamily: "Inter-VariableFont_opsz_wght",
+      fontWeight: "bold",
+      fontSize: 16,
+      lineHeight: 22,
+      color: theme.textPrimary,
+    },
     text: {
       fontFamily: "Inter-VariableFont_opsz_wght",
       fontSize: 16,
@@ -486,5 +683,11 @@ const getStyles = (theme: typeof COLORS) =>
     buttonContainer: {
       width: "100%",
       marginTop: 10,
+    },
+
+    divider: {
+      height: 1,
+      backgroundColor: theme.gray,
+      marginVertical: 5,
     },
   });

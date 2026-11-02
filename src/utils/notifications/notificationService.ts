@@ -3,21 +3,27 @@ import notifee, {
   TimestampTrigger,
   AndroidImportance,
 } from "@notifee/react-native";
-import { NotificationItem } from "../../screens/NotificationsScreen";
+import { NotificationItem } from "@/screens/NotificationsScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const NOTIFICATION_IDS = {
   PRINT_SIGN_MAIL: "remind_print_sign_mail",
+  STATUS: "status",
+  BALLOT: "ballot",
 };
 
 export const NOTIFICATION_DELAY_MINUTES = 5;
 export const NOTIFICATION_STORAGE_KEY = "local_notifications_list";
 
-export async function scheduleMailReminderNotification(
-  notificationText: string,
-  params: { url: string },
-  delayInMinutes = NOTIFICATION_DELAY_MINUTES,
-) {
+export async function scheduleGenericNotification(config: {
+  idPrefix: string;
+  type: NotificationItem["type"];
+  title: string;
+  body: string;
+  delayInMinutes: number;
+  actionTarget: any;
+  payload?: any;
+}) {
   await notifee.requestPermission();
 
   const channelId = await notifee.createChannel({
@@ -28,24 +34,24 @@ export async function scheduleMailReminderNotification(
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
-    timestamp: Date.now() + delayInMinutes * 60 * 1000,
+    timestamp: Date.now() + config.delayInMinutes * 60 * 1000,
   };
 
-  const notificationId = `mail_reminder_${Date.now()}`;
+  const notificationId = `${config.idPrefix}_${Date.now()}`;
 
   await notifee.createTriggerNotification(
     {
       id: notificationId,
-      title: "Action Required: Mail Your Form",
-      body: notificationText,
+      title: config.title,
+      body: config.body,
       android: {
         channelId,
         pressAction: { id: "default", launchActivity: "default" },
       },
       data: {
-        type: "reminder_mail",
+        type: config.type,
         notificationId,
-        url: params.url,
+        ...(config.payload || {}),
       },
     },
     trigger,
@@ -53,15 +59,13 @@ export async function scheduleMailReminderNotification(
 
   const newNotificationItem: NotificationItem = {
     id: notificationId,
-    title: "Action Required: Mail Your Form",
-    previewText: notificationText,
+    title: config.title,
+    previewText: config.body,
     date: new Date().toLocaleString(),
     isRead: false,
-    type: "reminder_mail",
-    actionTarget: "Dashboard",
-    payload: {
-      url: params.url,
-    },
+    type: config.type,
+    actionTarget: config.actionTarget,
+    payload: config.payload || {},
   };
 
   try {
@@ -74,63 +78,23 @@ export async function scheduleMailReminderNotification(
   }
 }
 
-export async function scheduleBallotReminderNotification(
-  notificationText: string,
-  params: {
-    electionName: string;
-  },
-  delayInMinutes = NOTIFICATION_DELAY_MINUTES,
-) {
-  await notifee.requestPermission();
-
-  const channelId = await notifee.createChannel({
-    id: "voter_reminders",
-    name: "Voter Registration Reminders",
-    importance: AndroidImportance.HIGH,
-  });
-
-  const trigger: TimestampTrigger = {
-    type: TriggerType.TIMESTAMP,
-    timestamp: Date.now() + delayInMinutes * 60 * 1000,
-  };
-
-  const notificationId = `ballot_reminder_${Date.now()}`;
-
-  await notifee.createTriggerNotification(
-    {
-      id: notificationId,
-      title: "Check Your Ballot",
-      body: notificationText,
-      android: {
-        channelId,
-        pressAction: { id: "default", launchActivity: "default" },
-      },
-      data: {
-        type: "remind_ballot",
-        notificationId,
-      },
-    },
-    trigger,
-  );
-
-  const newNotificationItem: NotificationItem = {
-    id: notificationId,
-    title: `Check Your Ballot for ${params.electionName}`,
-    previewText: notificationText,
-    date: new Date().toLocaleString(),
-    isRead: false,
-    type: "remind_ballot",
-    actionTarget: "Dashboard",
-    payload: {},
-  };
-
+export async function markNotificationAsReadInStorage(notificationId: string) {
   try {
     const existing = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
-    const list = existing ? JSON.parse(existing) : [];
-    list.unshift(newNotificationItem);
-    await AsyncStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(list));
+    if (!existing) return;
+
+    const list: NotificationItem[] = JSON.parse(existing);
+
+    const updatedList = list.map(item =>
+      item.id === notificationId ? { ...item, isRead: true } : item,
+    );
+
+    await AsyncStorage.setItem(
+      NOTIFICATION_STORAGE_KEY,
+      JSON.stringify(updatedList),
+    );
   } catch (error) {
-    console.error("Failed to save local ballot notification:", error);
+    console.error("Failed to mark notification as read in storage:", error);
   }
 }
 

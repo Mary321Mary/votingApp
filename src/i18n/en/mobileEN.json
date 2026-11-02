@@ -58,8 +58,11 @@
     },
     "notifications": {
       "remind_mail_short": "{{firstname}} Thanks for completing your voter registration application! But you are not registered until you have turned in your form to your election officials. If you haven’t done so already, you must PRINT, SIGN, STAMP, and MAIL your form. More …",
-      "remind_mail_full": "",
+      "remind_mail_full_part1": "{{fname}} Thanks for completing your voter registration application! But you are not registered until you have turned in your form to your election officials. If you haven’t done so already, you must PRINT, SIGN, STAMP, and MAIL your form to the address provided on the form. If you have not already done so, please download your application form.",
+      "remind_mail_full_part2": "After mailing your form, you should receive confirmation of your registration from your election officials. Sometimes processing can take several weeks. If you want to check on the status of your voter registration application, call your Secretary of State at <phoneText>{{sosPhone}}</phoneText> or check online at <sosLink>{{sosUrl}}</sosLink>.",
       "mailed_form": "I have signed and mailed my registration form",
+      "remind_status_full_part1": "{{fname}} It’s time to double check your voter registration for the {{electionName}}. If you need to re-establish your registration, or update it to your current name or address, there is still time to do so before the voter registration deadline in about 2 weeks.",
+      "remind_status_full_part2": "You can check your <profileLink>Voter Profile</profileLink> to check whether you need to update your name or address, but you can’t completely confirm your registration unless you check online at <sosLink>{{sosUrl}}</sosLink> or call <phoneText>{{sosPhone}}</phoneText>.",
       "remind_ballot_full": "{{fname}} It’s time to double check <ballotLink>your ballot</ballotLink> for the {{electionName}}. You can view your sample ballot, see your voting choices on all your ballot items, get info about candidates and ballot questions, and save your choices. Then you can review your sample ballot’s choices when you mark your ballot.",
       "remind_check_ballot_short": "{{fname}} It’s time to double check your ballot for the {{election_name}}. View your sample ballot and save your choices for election day."
     },

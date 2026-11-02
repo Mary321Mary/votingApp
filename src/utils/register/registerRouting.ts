@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { INITIAL_USER_STATE, VOTER_USER_STORAGE_KEY } from "../constants";
 import { OVR_TYPE_MAP, RegisterFormState, StateData, UserData } from "../types";
 
 export function buildPAHomeAddressFromForm(form: RegisterFormState): string {
@@ -53,9 +55,19 @@ export function resolveWorkflowType(
   return explicitWorkflowType !== undefined ? explicitWorkflowType : "ovr";
 }
 
-export function mapRegisterFormToUserForm(form: RegisterFormState): UserData {
+export async function mapRegisterFormToUserForm(
+  form: RegisterFormState,
+): Promise<UserData> {
+  const formData = await AsyncStorage.getItem(VOTER_USER_STORAGE_KEY);
+  let parsedUser: UserData = INITIAL_USER_STATE;
+  if (formData) {
+    parsedUser = JSON.parse(formData);
+  }
+
   return {
-    uid: "",
+    // uid: "",
+    ...(parsedUser || {}),
+
     first_name: form.first_name,
     last_name: form.last_name,
     email: form.email_address,
@@ -81,26 +93,26 @@ export function mapRegisterFormToUserForm(form: RegisterFormState): UserData {
     survey_question_2: form.survey_question_2,
     survey_answer_2: form.survey_answer_2,
 
-    prefType1: true,
-    prefType2: true,
-    prefType3: true,
+    // prefType1: true,
+    // prefType2: true,
+    // prefType3: true,
 
     partner_opt_in_email: false,
     partner_opt_in_sms: false,
     partner_opt_in_volunteer: false,
 
-    lookup_status_date: "",
-    lookup_status: "",
-    registration_status: "",
-    registration_status_date: "",
-    registration_date: "",
-    pledge_status: "",
-    pledge_date: "",
-    ovr_status: "",
-    ovr_status_date: "",
-    ballot_status: "",
-    abr_status: "",
-    location_status: "",
+    // lookup_status_date: "",
+    // lookup_status: "",
+    // registration_status: "",
+    // registration_status_date: "",
+    // registration_date: "",
+    // pledge_status: "",
+    // pledge_date: "",
+    // ovr_status: "",
+    // ovr_status_date: "",
+    // ballot_status: "",
+    // abr_status: "",
+    // location_status: "",
   };
 }
 

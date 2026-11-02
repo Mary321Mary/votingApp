@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -23,10 +24,12 @@ import {
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
-import { CustomButton } from "../components/atoms/CustomButton";
-import { RootStackParamList } from "../components/Navigation";
-import { MailReminderModal } from "../components/modules/notification/MailReminderModal";
-import BallotReminderModal from "../components/modules/notification/BallotReminderModal";
+import { CustomButton } from "@/components/atoms/CustomButton";
+import { RootStackParamList } from "@/components/Navigation";
+import { MailReminderModal } from "@/components/modules/notification/MailReminderModal";
+import BallotReminderModal from "@/components/modules/notification/BallotReminderModal";
+import VoterRegistrationReminderModal from "@/components/modules/notification/VoterRegistrationReminderModal";
+import { markNotificationAsReadInStorage } from "@/utils/notifications/notificationService";
 
 export interface NotificationItem {
   id: string;
@@ -35,7 +38,13 @@ export interface NotificationItem {
   fullBodyText?: string;
   date: string;
   isRead: boolean;
-  type: "status" | "deadline" | "alert" | "reminder_mail" | "remind_ballot";
+  type:
+    | "status"
+    | "deadline"
+    | "alert"
+    | "reminder_mail"
+    | "remind_ballot"
+    | "reminder_status";
   actionTarget?: any;
   payload?: {
     url?: string;
@@ -99,6 +108,7 @@ export default function NotificationsScreen({
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationItem | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -108,7 +118,6 @@ export default function NotificationsScreen({
         const combined = [...localList, ...MOCK_NOTIFICATIONS];
         setNotifications(combined);
 
-        // Если открыли экран по клику из системного пуша
         if (targetNotificationId) {
           const found = combined.find(n => n.id === targetNotificationId);
           if (found) {
@@ -117,17 +126,23 @@ export default function NotificationsScreen({
         }
       } catch (e) {
         console.error("Failed to load notifications", e);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadNotifications();
   }, [targetNotificationId]);
 
-  const handleSelectNotification = (item: NotificationItem) => {
+  const handleSelectNotification = async (item: NotificationItem) => {
     setNotifications(prev =>
       prev.map(n => (n.id === item.id ? { ...n, isRead: true } : n)),
     );
     setSelectedNotification(item);
+
+    if (!item.isRead) {
+      await markNotificationAsReadInStorage(item.id);
+    }
   };
 
   const handleActionClick = () => {
@@ -175,6 +190,14 @@ export default function NotificationsScreen({
       <ChevronRight size={18} color="#9CA3AF" />
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -228,6 +251,8 @@ export default function NotificationsScreen({
               <MailReminderModal pdfUrl={selectedNotification.payload?.url} />
             ) : selectedNotification?.type === "remind_ballot" ? (
               <BallotReminderModal />
+            ) : selectedNotification?.type === "reminder_status" ? (
+              <VoterRegistrationReminderModal />
             ) : (
               <ScrollView>
                 <Text style={styles.modalBody}>
@@ -255,6 +280,11 @@ export default function NotificationsScreen({
 const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: { width: "100%", flex: 1, backgroundColor: theme.white },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
     listContent: { padding: 10, gap: 10 },
     card: {
       flexDirection: "row",

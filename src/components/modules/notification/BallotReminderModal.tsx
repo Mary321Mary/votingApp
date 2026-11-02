@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Text, StyleSheet, ScrollView } from "react-native";
-import { Trans, useTranslation } from "react-i18next";
+import { Trans } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 
+import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import {
   getFormattedElectionTitle,
   INITIAL_USER_STATE,
@@ -13,7 +15,6 @@ import {
 } from "@/utils/constants";
 import { Election, UserData } from "@/utils/types";
 import { submitBallotLookup, submitElectionsLookup } from "@/utils/api";
-import { ThemeContext } from "@/styles/ThemeProvider";
 import { ElectionData, getNextElection } from "../../organisms/ElectionData";
 import { RootStackParamList } from "../../Navigation";
 
@@ -25,7 +26,6 @@ type NotificationsScreenNavigation = NativeStackNavigationProp<
 >;
 
 export default function BallotReminderModal({}: BallotReminderModalProps) {
-  const { t } = useTranslation();
   const theme = useContext(ThemeContext);
   const styles = getStyles(theme);
   const navigation = useNavigation<NotificationsScreenNavigation>();
@@ -89,7 +89,6 @@ export default function BallotReminderModal({}: BallotReminderModalProps) {
       <Text style={styles.text}>
         <Trans
           i18nKey="native_local.notifications.remind_ballot_full"
-          defaults="{{fname}} It’s time to double check <ballotLink>your ballot</ballotLink> for the {{electionName}}. You can view your sample ballot, see your voting choices on all your ballot items, get info about candidates and ballot questions, and save your choices. Then you can review your sample ballot’s choices when you mark your ballot."
           values={{
             fname: voter.first_name,
             electionName: getFormattedElectionTitle(elections),
@@ -105,7 +104,7 @@ export default function BallotReminderModal({}: BallotReminderModalProps) {
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     content: {
       paddingBottom: 20,

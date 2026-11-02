@@ -6,22 +6,27 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import i18n from "i18n";
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { UserData } from "@/utils/types";
 import {
   getFormattedElectionTitle,
   ONBOARDING2_COMPLETED_KEY,
+  PDF_URL_KEY,
   VOTER_USER_STORAGE_KEY,
 } from "@/utils/constants";
 import { getSurveyQuestions, submitElectionsLookup } from "@/utils/api";
+import {
+  NOTIFICATION_IDS,
+  scheduleGenericNotification,
+} from "@/utils/notifications/notificationService";
 
 import { Checkbox } from "@/components/atoms/Checkbox";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import InputField from "@/components/atoms/InputField";
 import { RootStackParamList } from "@/components/Navigation";
 import LanguageSelector from "@/components/atoms/LanguageSelector";
-import { getNextElection } from "../../components/organisms/ElectionData";
-import { scheduleBallotReminderNotification } from "../../utils/notifications/notificationService";
+import { getNextElection } from "@/components/organisms/ElectionData";
 
 type Onboarding2ScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -48,14 +53,53 @@ export default function Onboarding2Screen({
       const apiElectionsResponse = await submitElectionsLookup(form);
       let election = getNextElection(apiElectionsResponse.data.elections);
 
-      await scheduleBallotReminderNotification(
-        t("native_local.notifications.remind_check_ballot_short", {
-          fname: form.first_name || "Voter",
-          election_name: getFormattedElectionTitle(election),
-        }),
-        { electionName: getFormattedElectionTitle(election) },
-        1,
-      );
+      if (
+        form.lookup_status === "catalist_no_match" &&
+        (form.ovr_status === "nvra_form_provided" ||
+          form.ovr_status === "nvra_form_downloaded")
+      ) {
+        const pdfUrl = await AsyncStorage.getItem(PDF_URL_KEY);
+        await AsyncStorage.removeItem(PDF_URL_KEY);
+        await scheduleGenericNotification({
+          idPrefix: NOTIFICATION_IDS.PRINT_SIGN_MAIL,
+          type: "reminder_mail",
+          title: "Action Required: Mail Your Form",
+          body: t("native_local.notifications.remind_mail_short", {
+            firstname: form.first_name || "Voter",
+          }),
+          delayInMinutes: 5,
+          actionTarget: "Dashboard",
+          payload: { url: pdfUrl || "" },
+        });
+      }
+
+      if (election?.id) {
+        await scheduleGenericNotification({
+          idPrefix: NOTIFICATION_IDS.STATUS,
+          type: "reminder_status",
+          title: `Check Voter Registration (${getFormattedElectionTitle(
+            election,
+          )})`,
+          body: t("native_local.notifications.remind_status_full_part1", {
+            fname: form.first_name || "Voter",
+            election_name: getFormattedElectionTitle(election),
+          }),
+          delayInMinutes: 10,
+          actionTarget: "Profile",
+        });
+
+        await scheduleGenericNotification({
+          idPrefix: NOTIFICATION_IDS.BALLOT,
+          type: "remind_ballot",
+          title: "Check Your Ballot",
+          body: t("native_local.notifications.remind_check_ballot_short", {
+            fname: form.first_name || "Voter",
+            election_name: getFormattedElectionTitle(election),
+          }),
+          delayInMinutes: 15,
+          actionTarget: "Dashboard",
+        });
+      }
 
       await AsyncStorage.setItem(ONBOARDING2_COMPLETED_KEY, "true");
 
@@ -80,6 +124,7 @@ export default function Onboarding2Screen({
       }
     };
     saveFormToStorage();
+    console.log(" Onboarding2Screen form updated and saved", form);
   }, [form]);
 
   useEffect(() => {
@@ -223,7 +268,7 @@ export default function Onboarding2Screen({
   );
 }
 
-const getStyles = (theme: any) =>
+const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -22,13 +22,13 @@ import { reportEvent, submitEmailZip } from "@/utils/api";
 import { REPORT_EVENT_STEPS } from "@/utils/report/eventReporting";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
+import { COLORS } from "@/styles/colors";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { CustomButton } from "@/components/atoms/CustomButton";
 import { RootStackParamList } from "@/components/Navigation";
 import i18n from "i18n";
 import ElectionData from "@/components/organisms/ElectionData";
-import { COLORS } from "@/styles/colors";
 import { Checkbox } from "@/components/atoms/Checkbox";
 
 type DashboardScreenProps = NativeStackScreenProps<
@@ -265,29 +265,10 @@ export default function DashboardScreen({
               });
             }}
           />
-          {/* <CustomButton
-            title={t("finish_with_state_page3.copy_button_text")}
-            variant="outline-primary"
-            onPress={handleCopyLink}
-          /> */}
 
           <CustomButton
             title="Reset Test"
-            onPress={() => {
-              navigation.navigate("Reset");
-              // try {
-              //   await AsyncStorage.multiRemove([
-              //     VOTER_USER_STORAGE_KEY,
-              //     FIRST_TIME_COMPLETED_KEY,
-              //     ONBOARDING_COMPLETED_KEY,
-              //     ONBOARDING2_COMPLETED_KEY,
-              //     VOTER_STATE_STORAGE_KEY,
-              //   ]);
-              // } catch (error) {
-              //   console.error("Failed to clear saved data:", error);
-              // }
-              // navigation.replace("Welcome");
-            }}
+            onPress={() => navigation.navigate("Reset")}
           />
         </View>
       </ScrollView>

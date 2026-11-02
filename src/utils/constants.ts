@@ -18,6 +18,7 @@ export const DEFAULT_STATE_REQUIRED_ID =
 
 export const VOTER_USER_STORAGE_KEY = "voter_saved_user";
 export const VOTER_STATE_STORAGE_KEY = "voter_lookup_saved_state";
+export const PDF_URL_KEY = "pdf_link";
 export const ONBOARDING2_COMPLETED_KEY = "onboarding2_completed";
 export const ONBOARDING_COMPLETED_KEY = "onboarding_completed";
 export const FIRST_TIME_COMPLETED_KEY = "first_time_completed";
@@ -62,13 +63,19 @@ export const INITIAL_USER_STATE: UserData = {
   registration_status: "",
   registration_status_date: "",
   registration_date: "",
+
+  pledge_status_date: "",
   pledge_status: "",
   pledge_date: "",
   ovr_status: "",
   ovr_status_date: "",
   ballot_status: "",
+  ballot_status_date: "",
+
   abr_status: "",
+  abr_status_date: "",
   location_status: "",
+  location_status_date: "",
 };
 
 export const getFormattedElectionTitle = (electionObj: any) => {
