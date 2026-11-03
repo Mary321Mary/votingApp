@@ -185,7 +185,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
             </Text>
             <Text style={styles.text}>
               <Text style={styles.bold}>Ballot Status Date:</Text>{" "}
-              {savedUser.ballot_status_date || "No status"}
+              {savedUser.ballot_status_date || "No date"}
             </Text>
             <View style={styles.divider} />
             <Text style={styles.text}>
@@ -194,7 +194,7 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
             </Text>
             <Text style={styles.text}>
               <Text style={styles.bold}>Abr Status Date:</Text>{" "}
-              {savedUser.abr_status_date || "No status"}
+              {savedUser.abr_status_date || "No date"}
             </Text>
             <Text style={styles.text}>
               <Text style={styles.bold}>Location Status:</Text>{" "}
@@ -202,7 +202,15 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
             </Text>
             <Text style={styles.text}>
               <Text style={styles.bold}>Location Status Date:</Text>{" "}
-              {savedUser.location_status_date || "No status"}
+              {savedUser.location_status_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Create Date:</Text>{" "}
+              {savedUser.create_date || "No date"}
+            </Text>
+            <Text style={styles.text}>
+              <Text style={styles.bold}>Modified Date:</Text>{" "}
+              {savedUser.modified_date || "No date"}
             </Text>
           </View>
         )}
@@ -352,8 +360,12 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
 
                       // comm_pref_email: false,
                       // comm_pref_sms: false,
-                      // create_date: 2026 - 03 - 03,
-                      // modified_date: [today]
+                      create_date: "2026-03-03",
+                      modified_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
@@ -492,9 +504,17 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                         day: "2-digit",
                         year: "numeric",
                       }),
+
                       prefType1: true,
                       prefType2: true,
                       prefType3: true,
+
+                      create_date: "2026-03-03",
+                      modified_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),
@@ -621,6 +641,13 @@ export default function ResetScreen({ navigation }: ResetScreenProps) {
                       prefType1: false,
                       prefType2: true,
                       prefType3: false,
+
+                      create_date: "2026-03-03",
+                      modified_date: new Date().toLocaleDateString("en-US", {
+                        month: "2-digit",
+                        day: "2-digit",
+                        year: "numeric",
+                      }),
                     } as UserData),
                   ),
                   AsyncStorage.setItem(FIRST_TIME_COMPLETED_KEY, "true"),

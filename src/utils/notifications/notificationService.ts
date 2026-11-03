@@ -37,7 +37,7 @@ export async function scheduleGenericNotification(config: {
     timestamp: Date.now() + config.delayInMinutes * 60 * 1000,
   };
 
-  const notificationId = `${config.idPrefix}_${Date.now()}`;
+  const notificationId = config.idPrefix;
 
   await notifee.createTriggerNotification(
     {

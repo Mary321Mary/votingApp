@@ -76,6 +76,9 @@ export const INITIAL_USER_STATE: UserData = {
   abr_status_date: "",
   location_status: "",
   location_status_date: "",
+
+  create_date: "",
+  modified_date: "",
 };
 
 export const getFormattedElectionTitle = (electionObj: any) => {

@@ -149,6 +149,9 @@ export type UserData = {
   abr_status_date: string;
   location_status: string;
   location_status_date: string;
+
+  create_date: string;
+  modified_date: string;
 };
 
 export type CheckRegistrationStatusError = {

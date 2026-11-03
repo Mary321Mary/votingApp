@@ -112,9 +112,10 @@ export default function PrintScreen({ route, navigation }: PrintScreenProps) {
         ONBOARDING2_COMPLETED_KEY,
       );
       if (onboarding2CompletedKey === "true") {
+        const user = await mapRegisterFormToUserForm(form);
         await AsyncStorage.setItem(
           VOTER_USER_STORAGE_KEY,
-          JSON.stringify(mapRegisterFormToUserForm(form)),
+          JSON.stringify(user),
         );
       } else {
         await AsyncStorage.setItem(
