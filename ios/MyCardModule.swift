@@ -86,22 +86,25 @@ class MyCardModule: NSObject, CNContactPickerDelegate {
         let day = birthday?.day ?? 0
         let year = birthday?.year ?? 0
 
+        let birthMonth = month > 0
+            ? String(format: "%02d", month)
+            : ""
+
+        let birthDay = day > 0
+            ? String(format: "%02d", day)
+            : ""
+
+        let birthYear = year > 0
+            ? String(format: "%04d", year)
+            : ""
+
         let dateOfBirth: String
 
         if month > 0 && day > 0 {
             if year > 0 {
-                dateOfBirth = String(
-                    format: "%04d-%02d-%02d",
-                    year,
-                    month,
-                    day
-                )
+                dateOfBirth = "\(birthYear)-\(birthMonth)-\(birthDay)"
             } else {
-                dateOfBirth = String(
-                    format: "%02d-%02d",
-                    month,
-                    day
-                )
+                dateOfBirth = "\(birthMonth)-\(birthDay)"
             }
         } else {
             dateOfBirth = ""
