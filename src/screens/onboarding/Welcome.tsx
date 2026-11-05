@@ -114,6 +114,7 @@ const getStyles = (theme: typeof COLORS) =>
       alignItems: "center",
       padding: 20,
       marginTop: 20,
+      backgroundColor: theme.background,
     },
     logo: {
       width: "100%",
