@@ -23,7 +23,7 @@ export const getIOSMyCard = async (): Promise<MyCardData> => {
     throw new Error("Autofill is available only on iOS");
   }
 
-  if (!MyCardModule) {
+  if (!MyCardModule?.getMyCard) {
     throw new Error("MyCardModule is not linked");
   }
 
