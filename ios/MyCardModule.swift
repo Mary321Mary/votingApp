@@ -20,7 +20,6 @@ class MyCardModule: NSObject, CNContactPickerDelegate {
 
         DispatchQueue.main.async {
 
-            // Проверяем, не открыт ли уже Contact Picker
             if self.resolve != nil {
                 reject(
                     "PICKER_IN_PROGRESS",
@@ -121,9 +120,9 @@ class MyCardModule: NSObject, CNContactPickerDelegate {
             "aptunit": "",
             "city": city,
             "phone": phone,
-            "birthMonth": month > 0 ? String(month) : "",
-            "birthDay": day > 0 ? String(day) : "",
-            "birthYear": year > 0 ? String(year) : "",
+            "birthMonth": birthMonth,
+            "birthDay": birthDay,
+            "birthYear": birthYear,
             "date_of_birth": dateOfBirth
         ]
 
