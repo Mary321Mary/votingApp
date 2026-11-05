@@ -38,6 +38,7 @@ import Footer from "@/layout/Footer";
 import Header from "@/layout/Header";
 import { useUIConfig } from "@/contexts/UIConfigContext";
 import { useFormScroll } from "@/contexts/FormScrollContext";
+import { getIOSMyCard } from "../../utils/iosAutofill";
 
 type CheckVoterStatusScreenProps = NativeStackScreenProps<
   RootStackParamList,
@@ -153,114 +154,27 @@ export const CheckVoterStatusScreen = ({
 
   const handleAutofillFromMyCard = async () => {
     try {
-      if (Platform.OS !== "ios") return;
+      setIsLoading(true);
+      const data = await getIOSMyCard();
+      setAutofill(true);
+      setForm((prev: UserData) => ({
+        ...prev,
+        ...data,
+      }));
 
-      // 1. Запрашиваем разрешения
-      const permission = await Contacts.requestPermission();
+      Alert.alert(
+        "Autofill completed",
+        "Your contact information has been filled in.",
+      );
+    } catch (error: any) {
+      console.error("Autofill error:", error);
 
-      if (permission !== "authorized" && permission !== "limited") {
-        Alert.alert(
-          "Permission Denied",
-          "Permission to access contacts was denied.",
-        );
-        return;
-      }
-
-      let myCard: Contact | null = null;
-      const contactsApi = Contacts as any;
-
-      // 2. Способ 1: Проверяем наличие специального метода библиотеки
-      if (typeof contactsApi.getMeCard === "function") {
-        try {
-          myCard = await contactsApi.getMeCard();
-        } catch (e: any) {
-          console.log(
-            "getMeCard failed, falling back to contacts list search",
-            e,
-          );
-        }
-      }
-
-      // 3. Способ 2: Ищем в списке всех контактов по флагу `isMe` (стандарт react-native-contacts)
-      if (!myCard) {
-        const allContacts = await Contacts.getAll();
-        myCard = allContacts.find((c: any) => c.isMe === true) || null;
-      }
-
-      // 4. Если нашли карточку "Me", парсим данные под тип UserData
-      if (myCard) {
-        setAutofill(true);
-
-        const firstName = myCard.givenName || "";
-        const lastName = myCard.familyName || "";
-        const email = myCard.emailAddresses[0]?.email || "";
-
-        // Телефон
-        const rawPhone = myCard.phoneNumbers[0]?.number || "";
-        const phoneDigits = onlyDigits(rawPhone).slice(-10);
-        const formattedPhone = formatPhone(phoneDigits);
-
-        // Адрес
-        const postalAddress = myCard.postalAddresses[0];
-        const address = postalAddress?.street || "";
-        const city = postalAddress?.city || "";
-        const zip = postalAddress?.postCode || "";
-        const state = postalAddress?.state || "";
-
-        const formattedAddress = [address, city, state, zip]
-          .filter(Boolean)
-          .join(", ");
-
-        // День рождения
-        let birthYear = form.birthYear;
-        let birthMonth = form.birthMonth;
-        let birthDay = form.birthDay;
-        let date_of_birth = form.date_of_birth;
-
-        if (myCard.birthday) {
-          if (myCard.birthday.year) {
-            birthYear = String(myCard.birthday.year);
-          }
-          if (myCard.birthday.month !== undefined) {
-            birthMonth = String(myCard.birthday.month + 1).padStart(2, "0"); // В JS месяцы 0-11 или 1-12 в зависимости от пакета
-          }
-          if (myCard.birthday.day) {
-            birthDay = String(myCard.birthday.day).padStart(2, "0");
-          }
-
-          if (birthMonth && birthDay && birthYear) {
-            date_of_birth = `${birthMonth}-${birthDay}-${birthYear}`;
-          }
-        }
-
-        // 5. Обновляем полное состояние UserData
-        setForm(prev => ({
-          ...prev,
-          first_name: firstName || prev.first_name,
-          last_name: lastName || prev.last_name,
-          email: email || prev.email,
-          phone: formattedPhone || prev.phone,
-          address: address || prev.address,
-          city: city || prev.city,
-          zip: zip || prev.zip,
-          formattedAddress: formattedAddress || prev.formattedAddress,
-          birthYear: birthYear || prev.birthYear,
-          birthMonth: birthMonth || prev.birthMonth,
-          birthDay: birthDay || prev.birthDay,
-          date_of_birth: date_of_birth || prev.date_of_birth,
-          modified_date: new Date().toISOString(),
-        }));
-
-        Alert.alert("Success", "Form pre-filled from your iOS contact card!");
-      } else {
-        Alert.alert(
-          "Notice",
-          "No 'My Card' found. Please ensure you have configured 'My Card' in iOS Contacts settings.",
-        );
-      }
-    } catch (error) {
-      console.error("Failed to read My Card:", error);
-      Alert.alert("Error", "An error occurred while fetching contact data.");
+      Alert.alert(
+        "Autofill unavailable",
+        error?.message || "Unable to retrieve your contact information.",
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
