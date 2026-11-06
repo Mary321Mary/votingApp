@@ -135,6 +135,8 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             maxLength={2}
             editable={!disabled}
             value={day.value}
+            textContentType="birthdateDay"
+            autoComplete="birthdate-day"
             onChangeText={handleDayChange}
           />
           {day.errorText && (
@@ -155,6 +157,8 @@ export const DateRow: React.FC<DateOfBirthProps> = ({
             maxLength={4}
             editable={!disabled}
             value={year.value}
+            textContentType="birthdateYear"
+            autoComplete="birthdate-year"
             onChangeText={handleYearChange}
           />
           {year.errorText && (

@@ -9,7 +9,7 @@ import {
 import { Eye, EyeOff } from "lucide-react-native";
 import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { useFormScroll } from "../../contexts/FormScrollContext";
+import { useFormScroll } from "@/contexts/FormScrollContext";
 
 interface InputFieldProp {
   name: string;
@@ -26,6 +26,22 @@ interface InputFieldProp {
   afterLabel?: React.ReactNode;
   helpText?: string;
   showEye?: boolean;
+  textContentType?:
+    | "none"
+    | "givenName"
+    | "familyName"
+    | "emailAddress"
+    | "telephoneNumber"
+    | "addressCity"
+    | "postalCode";
+  autoComplete?:
+    | "off"
+    | "given-name"
+    | "family-name"
+    | "email"
+    | "tel"
+    | "postal-address-locality"
+    | "postal-code";
   onChangeText?: (text: string) => void;
 }
 
@@ -44,6 +60,8 @@ const InputField = ({
   maxLength = undefined,
   helpText = "",
   showEye = false,
+  textContentType = "none",
+  autoComplete = "off",
   onChangeText,
 }: InputFieldProp) => {
   const theme = useContext(ThemeContext);
@@ -86,6 +104,8 @@ const InputField = ({
           }
           autoCapitalize={email ? "none" : "sentences"}
           maxLength={maxLength}
+          textContentType={textContentType}
+          autoComplete={autoComplete}
           onChangeText={onChangeText}
         />
 

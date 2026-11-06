@@ -108,13 +108,13 @@ const getStyles = (theme: typeof COLORS) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: theme.background,
     },
     content: {
       gap: 12,
       alignItems: "center",
       padding: 20,
       marginTop: 20,
-      backgroundColor: theme.background,
     },
     logo: {
       width: "100%",

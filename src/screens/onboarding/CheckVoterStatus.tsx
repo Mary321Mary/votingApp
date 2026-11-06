@@ -4,14 +4,12 @@ import {
   StyleSheet,
   useWindowDimensions,
   Alert,
-  Platform,
   Text,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Contacts, { Contact } from "react-native-contacts";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
@@ -388,6 +386,8 @@ export const CheckVoterStatusScreen = ({
           required
           value={form.first_name}
           errorMessage={errMsg.first_name}
+          textContentType="givenName"
+          autoComplete="given-name"
           onChangeText={(text: string) => updateField("first_name", text)}
         />
         <InputField
@@ -396,6 +396,8 @@ export const CheckVoterStatusScreen = ({
           required
           value={form.last_name}
           errorMessage={errMsg.last_name}
+          textContentType="familyName"
+          autoComplete="family-name"
           onChangeText={(text: string) => updateField("last_name", text)}
         />
         {!isByFields ? (
@@ -452,6 +454,8 @@ export const CheckVoterStatusScreen = ({
               required
               value={form.city}
               errorMessage={errMsg.city}
+              textContentType="addressCity"
+              autoComplete="postal-address-locality"
               onChangeText={(text: string) => updateField("city", text)}
             />
             <InputField
@@ -461,6 +465,8 @@ export const CheckVoterStatusScreen = ({
               required
               value={form.zip}
               errorMessage={errMsg.zip}
+              textContentType="postalCode"
+              autoComplete="postal-code"
               onChangeText={(text: string) => updateField("zip", text)}
             />
           </>
@@ -513,6 +519,8 @@ export const CheckVoterStatusScreen = ({
           value={form.email}
           required
           errorMessage={errMsg.email}
+          textContentType="emailAddress"
+          autoComplete="email"
           onChangeText={(text: string) => updateField("email", text)}
         />
         <InputField
@@ -523,6 +531,8 @@ export const CheckVoterStatusScreen = ({
           value={form.phone}
           required
           errorMessage={errMsg.phone}
+          textContentType="telephoneNumber"
+          autoComplete="tel"
           onChangeText={handlePhoneChange}
         />
 

@@ -6,8 +6,8 @@ import {
 } from "react-native-google-places-autocomplete";
 import HelpTooltip from "./HelpTooltip";
 import { ThemeContext } from "@/styles/ThemeProvider";
-import { useFormScroll } from "@/contexts/FormScrollContext";
 import { COLORS } from "@/styles/colors";
+import { useFormScroll } from "@/contexts/FormScrollContext";
 
 interface AddressAutocompleteProps {
   apiKey: string;
@@ -42,11 +42,89 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
   const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
 
+  const addressTextRef = useRef("");
+  const googleSelectedText = useRef("");
+  const lastProcessedAddress = useRef("");
+  const isGeocoding = useRef(false);
+
   useEffect(() => {
     if (value !== undefined && googleRef.current) {
       googleRef.current.setAddressText(value);
+      addressTextRef.current = value;
     }
   }, [value]);
+
+  const handleAddressEndEditing = async (text: string) => {
+    const rawAddress = text.trim();
+
+    if (
+      !rawAddress ||
+      rawAddress === googleSelectedText.current ||
+      rawAddress === lastProcessedAddress.current ||
+      isGeocoding.current
+    ) {
+      return;
+    }
+
+    isGeocoding.current = true;
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          rawAddress,
+        )}&components=country:US&key=${apiKey}`,
+      );
+
+      const data = await response.json();
+      if (data.status !== "OK" || !data.results?.length) {
+        console.log("ADDRESS GEOCODING ERROR:", data.status);
+        return;
+      }
+
+      if (addressTextRef.current.trim() !== rawAddress) {
+        return;
+      }
+
+      const result = data.results[0];
+      const components = result.address_components;
+      const getComponent = (type: string) =>
+        components.find((item: any) => item.types.includes(type))?.long_name ||
+        "";
+
+      const streetNumber = getComponent("street_number");
+      const route = getComponent("route");
+      const originalStreetNumber =
+        rawAddress.match(/^\s*(\d+[a-zA-Z]?(?:-\d+[a-zA-Z]?)?)/)?.[1] || "";
+
+      const finalStreetNumber = streetNumber || originalStreetNumber;
+      const streetAddress = `${finalStreetNumber} ${route}`.trim();
+      const formattedAddress = result.formatted_address;
+
+      const addressData = {
+        address: streetAddress || rawAddress,
+        aptunit:
+          getComponent("subpremise") ||
+          rawAddress.match(
+            /\b(?:apt|apartment|unit|suite|ste)\.?\s*#?\s*([a-zA-Z0-9-]+)/i,
+          )?.[1] ||
+          "",
+        city:
+          getComponent("locality") ||
+          getComponent("postal_town") ||
+          getComponent("sublocality"),
+        zip: getComponent("postal_code"),
+        formattedAddress,
+      };
+
+      lastProcessedAddress.current = rawAddress;
+
+      onAddressSelect(addressData);
+    } catch (error) {
+      console.log("ADDRESS GEOCODING ERROR:", error);
+    } finally {
+      isGeocoding.current = false;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -63,6 +141,19 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         minLength={2}
         fetchDetails={true}
         keyboardShouldPersistTaps="handled"
+        textInputProps={{
+          textContentType: "fullStreetAddress",
+          autoComplete: "street-address",
+          onChangeText: (text: string) => {
+            addressTextRef.current = text;
+            if (text !== googleSelectedText.current) {
+              googleSelectedText.current = "";
+              lastProcessedAddress.current = "";
+            }
+          },
+          onEndEditing: event =>
+            handleAddressEndEditing(event.nativeEvent.text),
+        }}
         onPress={(data, details = null) => {
           if (!details || !details.address_components) return;
 
@@ -85,6 +176,10 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           const streetAddress = `${streetNumber} ${route}`.trim();
           const formattedAddress =
             details.formatted_address || data.description;
+
+          googleSelectedText.current = data.description;
+          addressTextRef.current = data.description;
+          lastProcessedAddress.current = data.description;
 
           onAddressSelect({
             address: streetAddress || formattedAddress,
