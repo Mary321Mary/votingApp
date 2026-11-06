@@ -115,6 +115,7 @@ const getStyles = (theme: typeof COLORS) =>
       padding: 20,
       marginTop: 20,
       backgroundColor: theme.background,
+      height: "100%",
     },
     logo: {
       width: "100%",

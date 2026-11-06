@@ -17,34 +17,101 @@ class MyCardModule: NSObject, CNContactPickerDelegate {
         _ resolve: @escaping RCTPromiseResolveBlock,
         rejecter reject: @escaping RCTPromiseRejectBlock
     ) {
+        let store = CNContactStore()
+        store.requestAccess(for: .contacts) { granted, error in
 
-        DispatchQueue.main.async {
-
-            if self.resolve != nil {
+            guard granted else {
                 reject(
-                    "PICKER_IN_PROGRESS",
-                    "Contact picker is already open",
-                    nil
+                    "PERMISSION_DENIED",
+                    "Contacts access was denied",
+                    error
                 )
                 return
             }
 
-            guard let viewController = Self.topViewController() else {
-                reject(
-                    "PRESENTATION_ERROR",
-                    "Unable to open contact picker",
-                    nil
-                )
-                return
+            DispatchQueue.global(qos: .userInitiated).async {
+                let keys: [CNKeyDescriptor] = [
+                    CNContactGivenNameKey as CNKeyDescriptor,
+                    CNContactFamilyNameKey as CNKeyDescriptor,
+                    CNContactEmailAddressesKey as CNKeyDescriptor,
+                    CNContactPhoneNumbersKey as CNKeyDescriptor,
+                    CNContactPostalAddressesKey as CNKeyDescriptor,
+                    CNContactBirthdayKey as CNKeyDescriptor
+                ]
+
+                do {
+                    let contact = try store.unifiedMeContactWithKeys(
+                        toFetch: keys
+                    )
+
+                    let email = contact.emailAddresses.first.map {
+                        String($0.value)
+                    } ?? ""
+
+                    let phone = contact.phoneNumbers.first?
+                        .value.stringValue ?? ""
+
+                    let postalAddress = contact.postalAddresses.first?.value
+
+                    let month = contact.birthday?.month ?? 0
+                    let day = contact.birthday?.day ?? 0
+                    let year = contact.birthday?.year ?? 0
+
+                    let dateOfBirth: String
+
+                    if month > 0 && day > 0 {
+                        if year > 0 {
+                            dateOfBirth = String(
+                                format: "%04d-%02d-%02d",
+                                year, month, day
+                            )
+                        } else {
+                            dateOfBirth = String(
+                                format: "%02d-%02d",
+                                month, day
+                            )
+                        }
+                    } else {
+                        dateOfBirth = ""
+                    }
+
+                    let formattedAddress: String
+
+                    if let postalAddress = postalAddress {
+                        formattedAddress = CNPostalAddressFormatter.string(
+                            from: postalAddress,
+                            style: .mailingAddress
+                        )
+                    } else {
+                        formattedAddress = ""
+                    }
+
+                    let result: [String: Any] = [
+                        "first_name": contact.givenName,
+                        "last_name": contact.familyName,
+                        "email": email,
+                        "zip": postalAddress?.postalCode ?? "",
+                        "formattedAddress": formattedAddress,
+                        "address": postalAddress?.street ?? "",
+                        "aptunit": "",
+                        "city": postalAddress?.city ?? "",
+                        "phone": phone,
+                        "birthMonth": month > 0 ? String(month) : "",
+                        "birthDay": day > 0 ? String(day) : "",
+                        "birthYear": year > 0 ? String(year) : "",
+                        "date_of_birth": dateOfBirth
+                    ]
+
+                    resolve(result)
+
+                } catch {
+                    reject(
+                        "MY_CARD_NOT_FOUND",
+                        "Unable to retrieve My Card contact",
+                        error
+                    )
+                }
             }
-
-            self.resolve = resolve
-            self.reject = reject
-
-            let picker = CNContactPickerViewController()
-            picker.delegate = self
-
-            viewController.present(picker, animated: true)
         }
     }
 

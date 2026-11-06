@@ -4,14 +4,12 @@ import {
   StyleSheet,
   useWindowDimensions,
   Alert,
-  Platform,
   Text,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import RenderHTML from "react-native-render-html";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Contacts, { Contact } from "react-native-contacts";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { DateRow } from "@/components/atoms/DateOfBirth/DateRow";
