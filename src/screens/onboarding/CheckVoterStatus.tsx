@@ -375,10 +375,12 @@ export const CheckVoterStatusScreen = ({
             baseStyle={styles.text}
           />
         )}
-        <CustomButton
-          title="Autofill data from you device"
-          onPress={handleAutofillFromMyCard}
-        />
+        {false && (
+          <CustomButton
+            title="Autofill data from you device"
+            onPress={handleAutofillFromMyCard}
+          />
+        )}
 
         <InputField
           name="first_name"

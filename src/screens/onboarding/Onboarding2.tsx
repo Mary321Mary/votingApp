@@ -43,15 +43,27 @@ export default function Onboarding2Screen({
 
   const initialForm: UserData = route.params?.form || {};
   const [form, setForm] = useState<UserData>(initialForm);
+  const [isLoading, setIsLoading] = useState(false);
 
   const updateField = (key: string, fieldValue: any) => {
     setForm({ ...form, [key]: fieldValue });
   };
 
   const handleFinish = async () => {
+    setIsLoading(true);
     try {
       const apiElectionsResponse = await submitElectionsLookup(form);
       let election = getNextElection(apiElectionsResponse.data.elections);
+
+      const safeScheduleNotification = async (
+        notificationConfig: () => Promise<any>,
+      ) => {
+        try {
+          await notificationConfig();
+        } catch (err) {
+          console.warn("Failed or permission denied for notification:", err);
+        }
+      };
 
       if (
         form.lookup_status === "catalist_no_match" &&
@@ -60,45 +72,52 @@ export default function Onboarding2Screen({
       ) {
         const pdfUrl = await AsyncStorage.getItem(PDF_URL_KEY);
         await AsyncStorage.removeItem(PDF_URL_KEY);
-        await scheduleGenericNotification({
-          idPrefix: NOTIFICATION_IDS.PRINT_SIGN_MAIL,
-          type: "reminder_mail",
-          title: "Action Required: Mail Your Form",
-          body: t("native_local.notifications.remind_mail_short", {
-            firstname: form.first_name || "Voter",
+
+        await safeScheduleNotification(() =>
+          scheduleGenericNotification({
+            idPrefix: NOTIFICATION_IDS.PRINT_SIGN_MAIL,
+            type: "reminder_mail",
+            title: "Action Required: Mail Your Form",
+            body: t("native_local.notifications.remind_mail_short", {
+              firstname: form.first_name || "Voter",
+            }),
+            delayInMinutes: 5,
+            actionTarget: "Dashboard",
+            payload: { url: pdfUrl || "" },
           }),
-          delayInMinutes: 5,
-          actionTarget: "Dashboard",
-          payload: { url: pdfUrl || "" },
-        });
+        );
       }
 
       if (election?.id) {
-        await scheduleGenericNotification({
-          idPrefix: NOTIFICATION_IDS.STATUS,
-          type: "reminder_status",
-          title: `Check Voter Registration (${getFormattedElectionTitle(
-            election,
-          )})`,
-          body: t("native_local.notifications.remind_status_full_part1", {
-            fname: form.first_name || "Voter",
-            election_name: getFormattedElectionTitle(election),
+        await safeScheduleNotification(() =>
+          scheduleGenericNotification({
+            idPrefix: NOTIFICATION_IDS.STATUS,
+            type: "reminder_status",
+            title: `Check Voter Registration (${getFormattedElectionTitle(
+              election,
+            )})`,
+            body: t("native_local.notifications.remind_status_full_part1", {
+              fname: form.first_name || "Voter",
+              election_name: getFormattedElectionTitle(election),
+            }),
+            delayInMinutes: 10,
+            actionTarget: "Profile",
           }),
-          delayInMinutes: 10,
-          actionTarget: "Profile",
-        });
+        );
 
-        await scheduleGenericNotification({
-          idPrefix: NOTIFICATION_IDS.BALLOT,
-          type: "remind_ballot",
-          title: "Check Your Ballot",
-          body: t("native_local.notifications.remind_check_ballot_short", {
-            fname: form.first_name || "Voter",
-            election_name: getFormattedElectionTitle(election),
+        await safeScheduleNotification(() =>
+          scheduleGenericNotification({
+            idPrefix: NOTIFICATION_IDS.BALLOT,
+            type: "remind_ballot",
+            title: "Check Your Ballot",
+            body: t("native_local.notifications.remind_check_ballot_short", {
+              fname: form.first_name || "Voter",
+              election_name: getFormattedElectionTitle(election),
+            }),
+            delayInMinutes: 15,
+            actionTarget: "Dashboard",
           }),
-          delayInMinutes: 15,
-          actionTarget: "Dashboard",
-        });
+        );
       }
 
       await AsyncStorage.setItem(ONBOARDING2_COMPLETED_KEY, "true");
@@ -109,6 +128,8 @@ export default function Onboarding2Screen({
       });
     } catch (error) {
       console.error("Failed to save final onboarding data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,7 +145,6 @@ export default function Onboarding2Screen({
       }
     };
     saveFormToStorage();
-    console.log(" Onboarding2Screen form updated and saved", form);
   }, [form]);
 
   useEffect(() => {
@@ -146,6 +166,7 @@ export default function Onboarding2Screen({
     };
 
     fetchQuestions();
+    setIsLoading(false);
   }, []);
 
   return (
@@ -262,7 +283,11 @@ export default function Onboarding2Screen({
           />
         </View>
 
-        <CustomButton title="Finish" onPress={handleFinish} />
+        <CustomButton
+          title="Finish"
+          disabled={isLoading}
+          onPress={handleFinish}
+        />
       </ScrollView>
     </View>
   );
