@@ -13,9 +13,9 @@ import { ThemeContext } from "@/styles/ThemeProvider";
 import Header from "@/layout/Header";
 import { RootStackParamList } from "@/components/Navigation";
 import { LocationItem } from "../utils/types";
-import { LocationCard } from "../components/modules/LocationCard";
+import { LocationCard } from "../components/modules/location/LocationCard";
 import { CustomButton } from "../components/atoms/CustomButton";
-import { LocationMap } from "../components/modules/LocationMap";
+import { LocationMap } from "../components/modules/location/LocationMap";
 
 type LocationScreenProps = NativeStackScreenProps<
   RootStackParamList,

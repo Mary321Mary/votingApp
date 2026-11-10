@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { ThemeContext } from "@/styles/ThemeProvider";
 import { LocationHours } from "./LocationHours";
-import { CustomButton } from "../atoms/CustomButton";
+import { CustomButton } from "../../atoms/CustomButton";
 
 interface LocationCardProps {
   item: {
