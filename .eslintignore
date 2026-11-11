@@ -1,0 +1,6 @@
+node_modules/
+coverage/
+android/build/
+android/app/build/
+ios/build/
+ios/Pods/
