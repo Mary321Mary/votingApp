@@ -34,29 +34,29 @@ yarn android
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+iOS uses **Swift Package Manager** exclusively — CocoaPods was removed, so
+there is no `pod install` step and no `.xcworkspace` to open. The native
+dependencies, codegen and the prebuilt React Native XCFrameworks are all wired
+up as local Swift packages inside `ios/votingApp.xcodeproj`.
 
 ```sh
 # Using npm
+npm install   # applies patches/ and regenerates the .env config file
 npm run ios
 
 # OR using Yarn
+yarn install
 yarn ios
 ```
+
+`npm install` is required before an Xcode build: it applies the committed
+`patches/`, which contain each dependency's SwiftPM manifest, and generates
+`react-native-config`'s `.env` file for iOS. Do not skip install scripts.
+
+You can also open `ios/votingApp.xcodeproj` directly in Xcode. See
+[`ios/SWIFTPM.md`](ios/SWIFTPM.md) for how the Swift Package Manager setup
+works, how to add or upgrade a native dependency, and the per-dependency
+adaptations (TOCropViewController, react-native-maps, react-native-svg, …).
 
 If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 

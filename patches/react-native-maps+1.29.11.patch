@@ -1,0 +1,250 @@
+diff --git a/node_modules/react-native-maps/Package.swift b/node_modules/react-native-maps/Package.swift
+new file mode 100644
+index 0000000..4860c0b
+--- /dev/null
++++ b/node_modules/react-native-maps/Package.swift
+@@ -0,0 +1,143 @@
++// swift-tools-version: 6.0
++// AUTO-SCAFFOLDED by react-native spm scaffold — safe to edit & commit via patch-package.
++// AUTO-SCAFFOLDED-VERSION: 20
++// Cache slot: 0.88.1/dual-flavor
++// Edit the contents below if needed and re-run `npx patch-package <dep-name>`
++// to persist across `npm install`. To regenerate from the podspec, remove
++// this file (or just this marker) and re-run `npx react-native spm scaffold`.
++//
++// Package references are plain relative paths, computed when this file was
++// scaffolded. They stay correct because the file is re-scaffolded per app
++// and cache slot, and any node_modules relayout reinstalls this package
++// (dropping the file) anyway.
++
++import PackageDescription
++
++let package = Package(
++    name: "ReactNativeMaps",
++    platforms: [.iOS("17.6")],
++    products: [
++        .library(name: "ReactNativeMaps", targets: ["ReactNativeMaps"]),
++    ],
++    dependencies: [
++        .package(name: "ReactNative", path: "../../../../xcframeworks"),
++        .package(name: "React-GeneratedCode", path: "../../../ios"),
++    ],
++    targets: [
++        .target(
++            name: "ReactNativeMaps",
++            dependencies: [.product(name: "ReactHeaders", package: "ReactNative"), .product(name: "ReactNativeHeaders", package: "ReactNative"), .product(name: "ReactNativeDependenciesHeaders", package: "ReactNative"), .product(name: "ReactAppHeaders", package: "React-GeneratedCode")],
++            path: ".",
++            exclude: ["ios/AirGoogleMaps"],
++            sources: [
++                "ios/AirMaps/AIRMap.h",
++                "ios/AirMaps/AIRMap.mm",
++                "ios/AirMaps/AIRMapCallout.h",
++                "ios/AirMaps/AIRMapCallout.m",
++                "ios/AirMaps/AIRMapCalloutManager.h",
++                "ios/AirMaps/AIRMapCalloutManager.m",
++                "ios/AirMaps/AIRMapCalloutSubview.h",
++                "ios/AirMaps/AIRMapCalloutSubview.m",
++                "ios/AirMaps/AIRMapCalloutSubviewManager.h",
++                "ios/AirMaps/AIRMapCalloutSubviewManager.m",
++                "ios/AirMaps/AIRMapCircle.h",
++                "ios/AirMaps/AIRMapCircle.m",
++                "ios/AirMaps/AIRMapCircleManager.h",
++                "ios/AirMaps/AIRMapCircleManager.m",
++                "ios/AirMaps/AIRMapCoordinate.h",
++                "ios/AirMaps/AIRMapCoordinate.m",
++                "ios/AirMaps/AIRMapLocalTile.h",
++                "ios/AirMaps/AIRMapLocalTile.m",
++                "ios/AirMaps/AIRMapLocalTileManager.h",
++                "ios/AirMaps/AIRMapLocalTileManager.m",
++                "ios/AirMaps/AIRMapLocalTileOverlay.h",
++                "ios/AirMaps/AIRMapLocalTileOverlay.m",
++                "ios/AirMaps/AIRMapManager.h",
++                "ios/AirMaps/AIRMapManager.m",
++                "ios/AirMaps/AIRMapMarker.h",
++                "ios/AirMaps/AIRMapMarker.m",
++                "ios/AirMaps/AIRMapMarkerManager.h",
++                "ios/AirMaps/AIRMapMarkerManager.m",
++                "ios/AirMaps/AIRMapOverlay.h",
++                "ios/AirMaps/AIRMapOverlay.m",
++                "ios/AirMaps/AIRMapOverlayManager.h",
++                "ios/AirMaps/AIRMapOverlayManager.m",
++                "ios/AirMaps/AIRMapOverlayRenderer.h",
++                "ios/AirMaps/AIRMapOverlayRenderer.m",
++                "ios/AirMaps/AIRMapPolygon.h",
++                "ios/AirMaps/AIRMapPolygon.m",
++                "ios/AirMaps/AIRMapPolygonManager.h",
++                "ios/AirMaps/AIRMapPolygonManager.m",
++                "ios/AirMaps/AIRMapPolyline.h",
++                "ios/AirMaps/AIRMapPolyline.m",
++                "ios/AirMaps/AIRMapPolylineManager.h",
++                "ios/AirMaps/AIRMapPolylineManager.m",
++                "ios/AirMaps/AIRMapPolylineRenderer.h",
++                "ios/AirMaps/AIRMapPolylineRenderer.m",
++                "ios/AirMaps/AIRMapSnapshot.h",
++                "ios/AirMaps/AIRMapUrlTile.h",
++                "ios/AirMaps/AIRMapUrlTile.m",
++                "ios/AirMaps/AIRMapUrlTileCachedOverlay.h",
++                "ios/AirMaps/AIRMapUrlTileCachedOverlay.m",
++                "ios/AirMaps/AIRMapUrlTileManager.h",
++                "ios/AirMaps/AIRMapUrlTileManager.m",
++                "ios/AirMaps/AIRMapWMSTile.h",
++                "ios/AirMaps/AIRMapWMSTile.m",
++                "ios/AirMaps/AIRMapWMSTileManager.h",
++                "ios/AirMaps/AIRMapWMSTileManager.m",
++                "ios/AirMaps/AIRWeakMapReference.h",
++                "ios/AirMaps/AIRWeakMapReference.m",
++                "ios/AirMaps/AIRWeakTimerReference.h",
++                "ios/AirMaps/AIRWeakTimerReference.m",
++                "ios/AirMaps/Callout/SMCalloutView.h",
++                "ios/AirMaps/Callout/SMCalloutView.m",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.h",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.h",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.mm",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.h",
++                "ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm",
++                "ios/AirMaps/RCTComponentData+Maps.h",
++                "ios/AirMaps/RCTComponentData+Maps.m",
++                "ios/AirMaps/RCTConvert+AirMap.h",
++                "ios/AirMaps/RCTConvert+AirMap.m",
++                "ios/AirMaps/RNMapsAirModule.h",
++                "ios/AirMaps/RNMapsAirModule.mm",
++                "ios/AirMaps/RNMapsDefines.h",
++                "ios/AirMaps/RNMapsMapView.h",
++                "ios/AirMaps/RNMapsMapView.mm",
++                "ios/AirMaps/RNMapsMapViewManager.mm",
++                "ios/AirMaps/RNMapsMarkerView.h",
++                "ios/AirMaps/RNMapsMarkerView.mm",
++                "ios/AirMaps/RNMapsMarkerViewManager.mm",
++                "ios/AirMaps/RNMapsPolygonView.h",
++                "ios/AirMaps/RNMapsPolygonView.mm",
++                "ios/AirMaps/UIView+AirMap.h",
++                "ios/AirMaps/UIView+AirMap.m",
++                "ios/generated/RNMapsAirModuleDelegate.h",
++                "ios/generated/RNMapsHostViewDelegate.h",
++                "ios/generated/RNMapsSpecs/ComponentDescriptors.cpp",
++                "ios/generated/RNMapsSpecs/ComponentDescriptors.h",
++                "ios/generated/RNMapsSpecs/EventEmitters.cpp",
++                "ios/generated/RNMapsSpecs/EventEmitters.h",
++                "ios/generated/RNMapsSpecs/Props.cpp",
++                "ios/generated/RNMapsSpecs/Props.h",
++                "ios/generated/RNMapsSpecs/RCTComponentViewHelpers.h",
++                "ios/generated/RNMapsSpecs/RNMapsSpecs-generated.mm",
++                "ios/generated/RNMapsSpecs/RNMapsSpecs.h",
++                "ios/generated/RNMapsSpecs/ShadowNodes.cpp",
++                "ios/generated/RNMapsSpecs/ShadowNodes.h",
++                "ios/generated/RNMapsSpecs/States.cpp",
++                "ios/generated/RNMapsSpecs/States.h",
++                "ios/generated/RNMapsSpecsJSI.h",
++            ],
++            resources: [
++            ],
++            publicHeadersPath: "ios/AirMaps",
++            cSettings: [.define("RCT_NEW_ARCH_ENABLED", to: "1"), .headerSearchPath("ios/AirMaps"), .headerSearchPath("ios/AirMaps/Callout"), .headerSearchPath("ios/AirMaps/FabricPlaceholders"), .headerSearchPath("ios/generated"), .headerSearchPath("ios/generated/RNMapsSpecs"), .headerSearchPath("."), .unsafeFlags(["-include", "react-native-spm-prefix.h"])],
++            cxxSettings: [.define("RCT_NEW_ARCH_ENABLED", to: "1"), .headerSearchPath("ios/AirMaps"), .headerSearchPath("ios/AirMaps/Callout"), .headerSearchPath("ios/AirMaps/FabricPlaceholders"), .headerSearchPath("ios/generated"), .headerSearchPath("ios/generated/RNMapsSpecs"), .headerSearchPath("."), .unsafeFlags(["-include", "react-native-spm-prefix.h"]), .unsafeFlags(["-DFOLLY_MOBILE=1", "-DFOLLY_USE_LIBCPP=1", "-DFOLLY_CFG_NO_COROUTINES=1", "-DFOLLY_HAVE_CLOCK_GETTIME=1", "-Wno-comma", "-Wno-shorten-64-to-32", "-Wno-documentation", "-Wno-nullability-completeness", "-DHAVE_GOOGLE_MAPS=0"]), .define("DEBUG", .when(configuration: .debug)), .define("NDEBUG", .when(configuration: .release))],
++            linkerSettings: [.linkedFramework("UIKit"), .linkedFramework("Foundation"), .linkedFramework("CoreGraphics")]
++        ),
++    ],
++    cxxLanguageStandard: .cxx20
++)
+diff --git a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
+index 481cbfa..76d21d4 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
+@@ -22,7 +22,7 @@
+ #import "../../generated/RNMapsSpecs/RCTComponentViewHelpers.h"
+ #import "../../generated/RNMapsHostViewDelegate.h"
+ #endif
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "PlaceHolderGoogleMapView.h"
+ 
+diff --git a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.mm b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.mm
+index 04e122d..edf28db 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMarkerView.mm
+@@ -23,7 +23,7 @@
+ #import "../../generated/RNMapsSpecs/RCTComponentViewHelpers.h"
+ #endif
+ 
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "PlaceHolderGoogleMarkerView.h"
+ 
+diff --git a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
+index d7a9a33..86083c0 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
+@@ -23,7 +23,7 @@
+ #endif
+ 
+ 
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "PlaceHolderPolygonView.h"
+ 
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsDefines.h b/node_modules/react-native-maps/ios/AirMaps/RNMapsDefines.h
+index e4fc048..91b6de5 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsDefines.h
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsDefines.h
+@@ -1 +1 @@
+-#define HAVE_GOOGLE_MAPS 1
++#define HAVE_GOOGLE_MAPS 0
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm b/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
+index fcee5e2..d121643 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
+@@ -29,7 +29,7 @@
+ #import "../generated/RNMapsSpecs/Props.h"
+ #import "../generated/RNMapsSpecs/RCTComponentViewHelpers.h"
+ #endif
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "UIView+AirMap.h"
+ 
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm b/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
+index be7e91d..68ed12e 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
+@@ -23,7 +23,7 @@
+ #import "../generated/RNMapsSpecs/Props.h"
+ #import "../generated/RNMapsSpecs/RCTComponentViewHelpers.h"
+ #endif
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "UIView+AirMap.h"
+ 
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsPolygonView.mm b/node_modules/react-native-maps/ios/AirMaps/RNMapsPolygonView.mm
+index 7f37a95..0a51044 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsPolygonView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsPolygonView.mm
+@@ -23,7 +23,7 @@
+ #import "../generated/RNMapsSpecs/Props.h"
+ #import "../generated/RNMapsSpecs/RCTComponentViewHelpers.h"
+ #endif
+-#import "RCTFabricComponentsPlugins.h"
++#import <React/RCTFabricComponentsPlugins.h>
+ #import <React/RCTConversions.h>
+ #import "UIView+AirMap.h"
+ 
+diff --git a/node_modules/react-native-maps/react-native-spm-prefix.h b/node_modules/react-native-maps/react-native-spm-prefix.h
+new file mode 100644
+index 0000000..af5cea0
+--- /dev/null
++++ b/node_modules/react-native-maps/react-native-spm-prefix.h
+@@ -0,0 +1,10 @@
++// AUTO-SCAFFOLDED by react-native spm scaffold — mirrors CocoaPods' default
++// prefix header so ObjC sources that rely on an implicit Foundation/UIKit
++// import compile under SPM (which has no prefix-header mechanism). Safe to
++// delete + regenerate via `npx react-native spm scaffold`.
++#ifdef __OBJC__
++#import <Foundation/Foundation.h>
++#if __has_include(<UIKit/UIKit.h>)
++#import <UIKit/UIKit.h>
++#endif
++#endif

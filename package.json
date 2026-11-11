@@ -5,7 +5,11 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "preios": "node scripts/generate-ios-config.js",
     "lint": "eslint .",
+    "postinstall": "patch-package && node scripts/generate-ios-config.js",
+    "spm:scaffold": "react-native spm scaffold",
+    "spm:update": "react-native spm update",
     "start": "react-native start",
     "test": "jest"
   },
@@ -27,7 +31,7 @@
     "react-native-contacts": "^8.0.10",
     "react-native-fs": "^2.20.0",
     "react-native-google-places-autocomplete": "^2.6.5",
-    "react-native-image-crop-picker": "^0.51.1",
+    "react-native-image-crop-picker": "^0.52.0",
     "react-native-inappbrowser-reborn": "^3.7.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keychain": "^10.0.0",
@@ -59,6 +63,7 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
+    "patch-package": "^8.0.1",
     "prettier": "2.8.8",
     "react-test-renderer": "19.3.0",
     "typescript": "^6.0.3"
