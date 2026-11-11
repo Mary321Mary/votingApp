@@ -32,14 +32,17 @@ regenerated, not hand-edited.
 ## Everyday commands
 
 ```sh
-npm install          # applies patches/ and regenerates react-native-config's .env file
+npm install          # patches/, .env file, and the generated SPM packages on a fresh clone
 npm run ios          # build & run on a simulator/device
 npx react-native spm update   # refresh codegen + autolinking + framework slots after dependency changes
 ```
 
-`npm install` runs `patch-package` (see below) and
-`scripts/generate-ios-config.js`. Do not use `npm ci --ignore-scripts`: both
-steps are required before an Xcode build can succeed.
+`npm install` runs three postinstall steps: `patch-package` (see below),
+`scripts/generate-ios-config.js` (`.env`), and `scripts/ensure-ios-spm.js`,
+which runs `npx react-native spm update` once if the generated packages under
+`ios/build/` are missing (fresh clone). Set `SKIP_IOS_SPM_SETUP=1` to skip that
+bootstrap. Do not use `npm ci --ignore-scripts`: the patched manifests are
+required before an Xcode build can succeed.
 
 Xcode builds are also self-healing: a scheme pre-action (and a build phase)
 detects that `package.json`, `react-native.config.js`, `node_modules` or the

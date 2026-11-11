@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "preios": "node scripts/generate-ios-config.js",
     "lint": "eslint .",
-    "postinstall": "patch-package && node scripts/generate-ios-config.js",
+    "postinstall": "patch-package && node scripts/generate-ios-config.js && node scripts/ensure-ios-spm.js",
     "spm:scaffold": "react-native spm scaffold",
     "spm:update": "react-native spm update",
     "start": "react-native start",
